@@ -13,17 +13,17 @@ func main() {
 	// https://docs.google.com/a/pivotal.io/spreadsheets/d/1XHKSrJiQIu5MWGpPYWbMY8M09eqe-GV8MQsl_mqw1RM/edit#gid=0
 
 	app := cli.NewApp()
-	app.Name = "cfdeploy"
-	app.Usage = "Cloud Foundry Deployment tool for IaaS install and deployment automation"
+	app.Name = "cfops"
+	app.Usage = "Cloud Foundry Operations tool for IaaS installation, deployment, and management automation"
 
-	// The `cfdeploy` command default without argument
+	// The `cfops` command default without argument
 	app.Action = func(c *cli.Context) {
 		arg := ""
 		if len(c.Args()) > 0 {
 			arg = c.Args()[0]
-			println("Try using 'cfdeploy help'.  Invalid argument: ", arg)
+			println("Try using 'cfops help'.  Invalid argument: ", arg)
 		} else if len(c.Args()) == 0 {
-			println("To get started, try using 'cfdeploy help'")
+			println("To get started, try using 'cfops help'")
 		}
 	}
 
@@ -44,7 +44,7 @@ func main() {
 		cli.StringFlag{
 			Name:   "lang, l",
 			Value:  "en, es",
-			Usage:  "language for the cfdeploy cli responses",
+			Usage:  "language for the cfops cli responses",
 			EnvVar: "CF_LANG",
 		},
 	}
@@ -53,7 +53,7 @@ func main() {
 	app.Commands = []cli.Command{
 		{
 			Name:        "survey",
-			ShortName:   "s",
+			ShortName:   "sur",
 			Usage:       "analyze and inspect the deployment environment",
 			Description: "Survey the target IaaS environment to determine suitability for deploying a cloud foundry foundation",
 			Subcommands: []cli.Command{
@@ -257,7 +257,7 @@ ALIAS:
 {{end}}
 
 USAGE:
-   cfdeploy {{.Name}}{{if .Flags}} [command options]{{end}} [arguments...]{{if .Description}}
+   cfops {{.Name}}{{if .Flags}} [command options]{{end}} [arguments...]{{if .Description}}
 
 OPTIONS:
 {{range .Flags}}{{.}}
