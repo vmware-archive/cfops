@@ -8,6 +8,10 @@ import (
 
 func main() {
 
+
+	// To get the base foundation configuration see the Pivotal CF Data Collector @
+	// https://docs.google.com/a/pivotal.io/spreadsheets/d/1XHKSrJiQIu5MWGpPYWbMY8M09eqe-GV8MQsl_mqw1RM/edit#gid=0
+
 	app := cli.NewApp()
 	app.Name = "cfdeploy"
 	app.Usage = "Cloud Foundry Deployment tool for IaaS install and deployment automation"
@@ -48,16 +52,52 @@ func main() {
 	// CLI arg functionality
 	app.Commands = []cli.Command{
 		{
+			Name:        "survey",
+			ShortName:   "s",
+			Usage:       "analyze and inspect the deployment environment",
+			Description: "Survey the target IaaS environment to determine suitability for deploying a cloud foundry foundation",
+			Subcommands: []cli.Command{
+				{
+					Name:        "verify",
+					Usage:       "verify that the target IaaS is Cloud Foundry ready",
+					Description: "analyze the readiness of the Cloud Foundry IaaS target",
+					Action: func(c *cli.Context) {
+						println("Verified that the target IaaS is Cloud Foundry: ", c.Args().First())
+					},
+				},
+				{
+					Name:        "report",
+					Usage:       "produce a report on IaaS related to Cloud Foundry",
+					Description: "produce a report against the target IaaS environment in the context of Cloud Foundry deployment",
+					Action: func(c *cli.Context) {
+						println("report produced: ", c.Args().First())
+					},
+				},
+				{
+					Name:        "stats",
+					Usage:       "produce statistics on IaaS",
+					Description: "produce useful statistics against the target IaaS environment",
+					Action: func(c *cli.Context) {
+						println("new jumpbox deployed to IaaS: ", c.Args().First())
+					},
+				},
+
+			},
+		},
+		{
 			Name:        "prepare",
 			ShortName:   "p",
-			Usage:       "prepare the deployment staging environment",
+			Usage:       "prepare the deployment environment",
 			Description: "Build and configure an environment that will be used to run the cloud foundry deployment from",
-			Action: func(c *cli.Context) {
-				var a string
-				if len(c.Args()) > 0 {
-					a = c.Args()[0]
-				}
-				println("prepared deployment env: ", a)
+			Subcommands: []cli.Command{
+				{
+					Name:        "jumpbox",
+					Usage:       "add a new jumpbox on the IaaS",
+					Description: "add a jumpbox to the target IaaS environment which can be used to deploy Cloud Foundry",
+					Action: func(c *cli.Context) {
+						println("new jumpbox deployed to IaaS: ", c.Args().First())
+					},
+				},
 			},
 		},
 		{
@@ -70,6 +110,13 @@ func main() {
 					Name:        "add",
 					Usage:       "add a new deployment",
 					Description: "use the provided deployment template to deploy a new cloud foundry foundation into the iaas",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "release",
+							Value: "latest, <version number>",
+							Usage: "Set the release to use",
+						},
+					},
 					Action: func(c *cli.Context) {
 						println("new deployment with template: ", c.Args().First())
 					},
@@ -156,6 +203,47 @@ func main() {
 			},
 			Action: func(c *cli.Context) {
 				println("shutting down: ", c.Args().First())
+			},
+		},
+		{
+			Name:        "test",
+			ShortName:   "t",
+			Usage:       "test the Cloud Foundry deployment and underlying IaaS environment",
+			Description: "Run various tests against the target IaaS environment",
+			Subcommands: []cli.Command{
+				{
+					Name:        "chaos",
+					Usage:       "run chaos tests against the IaaS and Cloud Foundry foundation",
+					Description: "Chaos testing for the IaaS and Cloud Foundry foundation",
+					Action: func(c *cli.Context) {
+						println("Chaos testing: ", c.Args().First())
+					},
+				},
+				{
+					Name:        "vulnerability",
+					Usage:       "run vulnerability testing against the IaaS and Cloud Foundry foundation",
+					Description: "Chaos testing for the IaaS and Cloud Foundry foundation",
+					Action: func(c *cli.Context) {
+						println("vulnerability testing: ", c.Args().First())
+					},
+				},
+				{
+					Name:        "report",
+					Usage:       "produce a test report on IaaS related to Cloud Foundry",
+					Description: "produce a report against the target IaaS environment in the context of Cloud Foundry deployment",
+					Action: func(c *cli.Context) {
+						println("test report produced: ", c.Args().First())
+					},
+				},
+				{
+					Name:        "stats",
+					Usage:       "produce statistics on IaaS",
+					Description: "produce useful statistics against the target IaaS environment",
+					Action: func(c *cli.Context) {
+						println("test stats: ", c.Args().First())
+					},
+				},
+
 			},
 		},
 	}
