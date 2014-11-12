@@ -3,9 +3,17 @@
 	"GoVersion": "go1.3",
 	"Deps": [
 		{
+			"ImportPath": "github.com/cloudfoundry-incubator/cf-lager",
+			"Rev": "94308c799cf61ac0818667ddcc25046c8c5659d1"
+		},
+		{
 			"ImportPath": "github.com/codegangsta/cli",
 			"Comment": "1.2.0-28-g61f43e7",
 			"Rev": "61f43e76957561f52674f48b7dc9a07f53c8f398"
+		},
+		{
+			"ImportPath": "github.com/pivotal-golang/lager",
+			"Rev": "a106931abed5afe3043eae8851be8b33a4bdfa3f"
 		}
 	]
 }

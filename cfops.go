@@ -1,16 +1,20 @@
 package main
 
 import (
-	"os"
-
 	"github.com/codegangsta/cli"
+	"github.com/pivotalservices/cfops/install"
+	"os"
+)
+
+var (
+	installer *install.Installer
 )
 
 func main() {
 
-
 	// To get the base foundation configuration see the Pivotal CF Data Collector @
 	// https://docs.google.com/a/pivotal.io/spreadsheets/d/1XHKSrJiQIu5MWGpPYWbMY8M09eqe-GV8MQsl_mqw1RM/edit#gid=0
+	installer = install.New()
 
 	app := cli.NewApp()
 	app.Name = "cfops"
@@ -81,7 +85,6 @@ func main() {
 						println("new jumpbox deployed to IaaS: ", c.Args().First())
 					},
 				},
-
 			},
 		},
 		{
@@ -161,7 +164,6 @@ func main() {
 						println("restore deployment: ", c.Args().First())
 					},
 				},
-
 			},
 		},
 		{
@@ -169,9 +171,7 @@ func main() {
 			ShortName:   "s",
 			Usage:       "start up an entire cloud foundry foundation",
 			Description: "start all the VMs in an existing cloud foundry deployment",
-			Action: func(c *cli.Context) {
-				println("starting: ", c.Args().First())
-			},
+			Action:      StartDeployment(),
 		},
 		{
 			Name:        "restart",
@@ -243,7 +243,6 @@ func main() {
 						println("test stats: ", c.Args().First())
 					},
 				},
-
 			},
 		},
 	}
@@ -265,4 +264,10 @@ OPTIONS:
 
 	app.Run(os.Args)
 
+}
+
+func StartDeployment() func(c *cli.Context) {
+	return func(c *cli.Context) {
+		installer.StartDeployment()
+	}
 }
