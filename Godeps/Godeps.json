@@ -1,0 +1,11 @@
+{
+	"ImportPath": "github.com/pivotalservices/cfops",
+	"GoVersion": "go1.3",
+	"Deps": [
+		{
+			"ImportPath": "github.com/codegangsta/cli",
+			"Comment": "1.2.0-28-g61f43e7",
+			"Rev": "61f43e76957561f52674f48b7dc9a07f53c8f398"
+		}
+	]
+}
