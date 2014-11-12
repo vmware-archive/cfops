@@ -5,7 +5,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/pivotal-golang/lager"
+	"github.com/cloudfoundry/gosteno"
 )
 
 type CommandRunner interface {
@@ -13,7 +13,7 @@ type CommandRunner interface {
 }
 
 type OSCommandRunner struct {
-	Logger lager.Logger
+	Logger *gosteno.Logger
 }
 
 func (runner OSCommandRunner) Run(name string, args ...string) error {

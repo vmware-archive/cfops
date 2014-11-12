@@ -1,22 +1,24 @@
 package install
 
 import (
-	"github.com/cloudfoundry-incubator/cf-lager"
+	"github.com/cloudfoundry/gosteno"
 	"github.com/pivotalservices/cfops/system"
 )
 
 type Installer struct {
+	CommandRunner system.CommandRunner
 }
 
-func New() *Installer {
-	return &Installer{}
+func New(logger *gosteno.Logger) *Installer {
+	commandRunner := new(system.OSCommandRunner)
+	commandRunner.Logger = logger
+	return &Installer{
+		CommandRunner: commandRunner,
+	}
 }
 
 func (installer *Installer) StartDeployment() error {
-	commandRunner := new(system.OSCommandRunner)
-	logger := cf_lager.New("ops-broker")
-	commandRunner.Logger = logger
-	err := commandRunner.Run("echo", "WHOOOA", "slow down!")
+	err := installer.CommandRunner.Run("echo", "WHOOOA", "slow down!")
 	if err != nil {
 		return err
 	}
