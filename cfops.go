@@ -3,12 +3,14 @@ package main
 import (
 	"github.com/cloudfoundry/gosteno"
 	"github.com/codegangsta/cli"
+	"github.com/pivotalservices/cfops/backup"
 	"github.com/pivotalservices/cfops/install"
 	"os"
 )
 
 var (
 	installer *install.Installer
+	backuper  *backup.Backuper
 )
 
 func init() {
@@ -30,6 +32,7 @@ func main() {
 
 	logger := gosteno.NewLogger("cfops")
 	installer = install.New(logger)
+	backuper = backup.New(logger)
 
 	app := cli.NewApp()
 	app.Name = "cfops"
@@ -167,9 +170,7 @@ func main() {
 					Name:        "backup",
 					Usage:       "backup an existing deployment",
 					Description: "backup an existing cloud foundry foundation deployment from the iaas",
-					Action: func(c *cli.Context) {
-						println("backup deployment: ", c.Args().First())
-					},
+					Action:      BackupDeployment(),
 				},
 				{
 					Name:        "restore",
@@ -281,8 +282,16 @@ OPTIONS:
 
 }
 
+// Installer Commands
 func StartDeployment() func(c *cli.Context) {
 	return func(c *cli.Context) {
 		installer.StartDeployment(c.Args())
+	}
+}
+
+// Backup Commands
+func BackupDeployment() func(c *cli.Context) {
+	return func(c *cli.Context) {
+		backuper.ValidateSoftware(c.Args())
 	}
 }

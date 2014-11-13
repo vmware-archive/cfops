@@ -18,7 +18,7 @@ func New(logger *gosteno.Logger) *Installer {
 }
 
 func (installer *Installer) StartDeployment(args []string) error {
-	err := installer.CommandRunner.Run("echo", args...)
+	err := installer.CommandRunner.Run("echo", "WHOOOA", "slow down!")
 	if err != nil {
 		return err
 	}
