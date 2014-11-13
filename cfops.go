@@ -18,7 +18,7 @@ func init() {
 			gosteno.NewIOSink(os.Stdout),
 		},
 		Level:     gosteno.LOG_INFO,
-		Codec:     gosteno.NewJsonCodec(),
+		Codec:     gosteno.NewJsonPrettifier(gosteno.EXCLUDE_DATA),
 		EnableLOC: true,
 	}
 	gosteno.Init(c)
@@ -283,6 +283,6 @@ OPTIONS:
 
 func StartDeployment() func(c *cli.Context) {
 	return func(c *cli.Context) {
-		installer.StartDeployment()
+		installer.StartDeployment(c.Args())
 	}
 }
