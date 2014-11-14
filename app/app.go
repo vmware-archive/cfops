@@ -144,12 +144,6 @@ func New(cmdFactory system.CommandFactory) *cli.App {
 					},
 				},
 				{
-					Name:        "backup",
-					Usage:       "backup an existing deployment",
-					Description: "backup an existing cloud foundry foundation deployment from the iaas",
-					//Action:      BackupDeployment(),
-				},
-				{
 					Name:        "restore",
 					Usage:       "restore an deployment from a backup",
 					Description: "restore an existing cloud foundry foundation deployment from a backup",
