@@ -1,4 +1,4 @@
-package install
+package start
 
 import (
 	"github.com/pivotalservices/cfops/system"
@@ -23,4 +23,12 @@ func (cmd StartCommand) Run(args []string) error {
 		return err
 	}
 	return nil
+}
+
+func (cmd StartCommand) HasSubcommands() bool {
+	return false
+}
+
+func (cmd StartCommand) Subcommands() (commands []system.Command) {
+	return
 }

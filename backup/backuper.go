@@ -7,11 +7,13 @@ import (
 type Backuper struct {
 }
 
-func New(f system.CommandFactory, commandRunner system.CommandRunner) *Backuper {
+func New(factory system.CommandFactory, runner system.CommandRunner) Backuper {
 
-	f.Register("backup", BackupCommand{
-		CommandRunner: commandRunner,
+	factory.Register("backup", BackupCommand{
+		CommandRunner: runner,
+	}).Register("restore", RestoreCommand{
+		CommandRunner: runner,
 	})
 
-	return &Backuper{}
+	return Backuper{}
 }

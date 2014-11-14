@@ -6,13 +6,15 @@ import (
 	"github.com/pivotalservices/cfops/app"
 	"github.com/pivotalservices/cfops/backup"
 	"github.com/pivotalservices/cfops/install"
+	"github.com/pivotalservices/cfops/start"
 	"github.com/pivotalservices/cfops/system"
 	"os"
 )
 
 var (
-	installer *install.Installer
-	backuper  *backup.Backuper
+	backuper  backup.Backuper
+	installer install.Installer
+	starter   start.Starter
 )
 
 func init() {
@@ -39,6 +41,7 @@ func main() {
 	commandRunner := system.OSCommandRunner{}
 	commandRunner.Logger = logger
 
+	starter = start.New(commandFactory, commandRunner)
 	installer = install.New(commandFactory, commandRunner)
 	backuper = backup.New(commandFactory, commandRunner)
 
@@ -46,10 +49,7 @@ func main() {
 
 	cli.CommandHelpTemplate = getCommandLineTemplate()
 
-	err := app.Run(os.Args)
-	if err != nil {
-		os.Exit(1)
-	}
+	app.RunAndExitOnError()
 }
 
 func getCommandLineTemplate() string {

@@ -27,3 +27,11 @@ func (cmd BackupCommand) Run(args []string) error {
 	}
 	return nil
 }
+
+func (cmd BackupCommand) HasSubcommands() bool {
+	return false
+}
+
+func (cmd BackupCommand) Subcommands() (commands []system.Command) {
+	return
+}

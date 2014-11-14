@@ -46,7 +46,13 @@ func New(cmdFactory system.CommandFactory) *cli.App {
 
 	// Create all the CLI commands
 	for _, cmd := range cmdFactory.Commands() {
-		app.Commands = append(app.Commands, createCLICommand(cmd))
+		cliCommand := createCLICommand(cmd)
+		if cmd.HasSubcommands() {
+			for _, subCmd := range cmd.Subcommands() {
+				cliCommand.Subcommands = append(cliCommand.Subcommands, createCLICommand(subCmd))
+			}
+		}
+		app.Commands = append(app.Commands, cliCommand)
 	}
 
 	// TODO: Move metadata into each command
@@ -95,61 +101,6 @@ func New(cmdFactory system.CommandFactory) *cli.App {
 					Description: "add a jumpbox to the target IaaS environment which can be used to deploy Cloud Foundry",
 					Action: func(c *cli.Context) {
 						println("new jumpbox deployed to IaaS: ", c.Args().First())
-					},
-				},
-			},
-		},
-		{
-			Name:        "install",
-			ShortName:   "in",
-			Usage:       "install cloud foundry to an iaas",
-			Description: "Begin the installation of Cloud Foundry to a selected iaas",
-			Subcommands: []cli.Command{
-				{
-					Name:        "add",
-					Usage:       "add a new deployment",
-					Description: "use the provided deployment template to deploy a new cloud foundry foundation into the iaas",
-					Flags: []cli.Flag{
-						cli.StringFlag{
-							Name:  "release",
-							Value: "latest, <version number>",
-							Usage: "Set the release to use",
-						},
-					},
-					Action: func(c *cli.Context) {
-						println("new deployment with template: ", c.Args().First())
-					},
-				},
-				{
-					Name:        "destroy",
-					Usage:       "destroy an existing deployment",
-					Description: "destroy an existing cloud foundry foundation deployment from the iaas",
-					Action: func(c *cli.Context) {
-						println("destroyed deployment: ", c.Args().First())
-					},
-				},
-				{
-					Name:        "move",
-					Usage:       "move an existing deployment to another iaas location",
-					Description: "destroy an existing cloud foundry foundation deployment from the iaas",
-					Action: func(c *cli.Context) {
-						println("move deployment: ", c.Args().First())
-					},
-				},
-				{
-					Name:        "dump",
-					Usage:       "dump the configuration information of an existing deployment",
-					Description: "dump an existing cloud foundry foundation deployment configuration from the iaas",
-					Action: func(c *cli.Context) {
-						println("dump deployment: ", c.Args().First())
-					},
-				},
-				{
-					Name:        "restore",
-					Usage:       "restore an deployment from a backup",
-					Description: "restore an existing cloud foundry foundation deployment from a backup",
-					Action: func(c *cli.Context) {
-						println("restore deployment: ", c.Args().First())
 					},
 				},
 			},
@@ -231,18 +182,30 @@ func New(cmdFactory system.CommandFactory) *cli.App {
 	return app
 }
 
-func createCLICommand(cmd system.Command) cli.Command {
-	return cli.Command{
-		Name:        cmd.Metadata().Name,
-		ShortName:   cmd.Metadata().ShortName,
-		Usage:       cmd.Metadata().Usage,
-		Description: cmd.Metadata().Description,
-		Flags:       cmd.Metadata().Flags,
-		Action: func(c *cli.Context) {
-			err := cmd.Run(c.Args())
-			if err != nil {
-				panic(err)
-			}
-		},
+func createCLICommand(cmd system.Command) (cliCommand cli.Command) {
+	if cmd.HasSubcommands() {
+		println("adding subcommand: " + cmd.Metadata().Name)
+		return cli.Command{
+			Name:        cmd.Metadata().Name,
+			ShortName:   cmd.Metadata().ShortName,
+			Usage:       cmd.Metadata().Usage,
+			Description: cmd.Metadata().Description,
+			// Flags:       cmd.Metadata().Flags,
+		}
+	} else {
+		println("adding command: " + cmd.Metadata().Name)
+		return cli.Command{
+			Name:        cmd.Metadata().Name,
+			ShortName:   cmd.Metadata().ShortName,
+			Usage:       cmd.Metadata().Usage,
+			Description: cmd.Metadata().Description,
+			// Flags:       cmd.Metadata().Flags,
+			Action: func(c *cli.Context) {
+				err := cmd.Run(c.Args())
+				if err != nil {
+					panic(err)
+				}
+			},
+		}
 	}
 }
