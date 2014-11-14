@@ -33,7 +33,6 @@ func init() {
 // To get the base foundation configuration see the Pivotal CF Data Collector @
 // https://docs.google.com/a/pivotal.io/spreadsheets/d/1XHKSrJiQIu5MWGpPYWbMY8M09eqe-GV8MQsl_mqw1RM/edit#gid=0
 func main() {
-
 	logger := gosteno.NewLogger("cfops")
 
 	commandFactory := system.NewCommandFactory(logger)

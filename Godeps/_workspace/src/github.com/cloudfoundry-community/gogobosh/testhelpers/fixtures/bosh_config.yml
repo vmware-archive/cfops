@@ -1,0 +1,13 @@
+---
+target: https://192.168.50.4:25555
+target_name: Bosh Lite Director
+target_version: 1.2732.0 (00000000)
+target_uuid: 4e46066f-e59b-493e-b775-accc1a7bc6e2
+aliases:
+  target:
+    lite: https://192.168.50.4:25555
+    4e46066f-e59b-493e-b775-accc1a7bc6e2: https://192.168.50.4:25555
+auth:
+  https://192.168.50.4:25555:
+    username: admin
+    password: password
