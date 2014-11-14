@@ -5,6 +5,7 @@ import (
 )
 
 type Starter struct {
+	Commands []system.Command
 }
 
 func New(factory system.CommandFactory, runner system.CommandRunner) Starter {
@@ -14,4 +15,8 @@ func New(factory system.CommandFactory, runner system.CommandRunner) Starter {
 	})
 
 	return Starter{}
+}
+
+func (cmd Starter) Subcommands() (commands []system.Command) {
+	return
 }

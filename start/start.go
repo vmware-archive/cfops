@@ -6,6 +6,7 @@ import (
 
 type StartCommand struct {
 	CommandRunner system.CommandRunner
+	Starter
 }
 
 func (cmd StartCommand) Metadata() system.CommandMetadata {

@@ -6,6 +6,7 @@ import (
 
 type BackupCommand struct {
 	CommandRunner system.CommandRunner
+	Backuper
 }
 
 func (cmd BackupCommand) Metadata() system.CommandMetadata {
@@ -15,10 +16,6 @@ func (cmd BackupCommand) Metadata() system.CommandMetadata {
 		Usage:       "backup an existing deployment",
 		Description: "backup an existing cloud foundry foundation deployment from the iaas",
 	}
-}
-
-func (cmd BackupCommand) Subcommands() (commands []system.Command) {
-	return
 }
 
 func (cmd BackupCommand) Run(args []string) error {

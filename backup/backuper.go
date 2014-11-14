@@ -5,6 +5,7 @@ import (
 )
 
 type Backuper struct {
+	Commands []system.Command
 }
 
 func New(factory system.CommandFactory, runner system.CommandRunner) Backuper {
@@ -16,4 +17,8 @@ func New(factory system.CommandFactory, runner system.CommandRunner) Backuper {
 	})
 
 	return Backuper{}
+}
+
+func (cmd Backuper) Subcommands() (commands []system.Command) {
+	return
 }
