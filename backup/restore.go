@@ -17,15 +17,11 @@ func (cmd RestoreCommand) Metadata() system.CommandMetadata {
 	}
 }
 
-func (cmd RestoreCommand) Run(args []string) (err error) {
-	println("restoring backup: " + args[0])
+func (cmd RestoreCommand) Subcommands() (commands []system.Command) {
 	return
 }
 
-func (cmd RestoreCommand) HasSubcommands() bool {
-	return false
-}
-
-func (cmd RestoreCommand) Subcommands() (commands []system.Command) {
+func (cmd RestoreCommand) Run(args []string) (err error) {
+	println("restoring backup: " + args[0])
 	return
 }

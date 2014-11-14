@@ -40,10 +40,6 @@ func (cmd Installer) Metadata() system.CommandMetadata {
 	}
 }
 
-func (cmd Installer) HasSubcommands() bool {
-	return true
-}
-
 func (cmd Installer) Subcommands() (commands []system.Command) {
 	return cmd.Commands
 }

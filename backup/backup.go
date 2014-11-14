@@ -17,6 +17,10 @@ func (cmd BackupCommand) Metadata() system.CommandMetadata {
 	}
 }
 
+func (cmd BackupCommand) Subcommands() (commands []system.Command) {
+	return
+}
+
 func (cmd BackupCommand) Run(args []string) error {
 	params := make([]string, len(args)+1)
 	params = append(params, "validate_software")
@@ -26,12 +30,4 @@ func (cmd BackupCommand) Run(args []string) error {
 		return err
 	}
 	return nil
-}
-
-func (cmd BackupCommand) HasSubcommands() bool {
-	return false
-}
-
-func (cmd BackupCommand) Subcommands() (commands []system.Command) {
-	return
 }

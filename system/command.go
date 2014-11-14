@@ -11,7 +11,6 @@ type CommandMetadata struct {
 }
 
 type Command interface {
-	HasSubcommands() bool
 	Subcommands() []Command
 	Metadata() CommandMetadata
 	Run(args []string) error

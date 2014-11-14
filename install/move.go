@@ -17,10 +17,6 @@ func (cmd MoveCommand) Metadata() system.CommandMetadata {
 	}
 }
 
-func (cmd MoveCommand) HasSubcommands() bool {
-	return false
-}
-
 func (cmd MoveCommand) Run(args []string) (err error) {
 	println("move deployment: " + args[0])
 	return

@@ -25,10 +25,6 @@ func (cmd StartCommand) Run(args []string) error {
 	return nil
 }
 
-func (cmd StartCommand) HasSubcommands() bool {
-	return false
-}
-
 func (cmd StartCommand) Subcommands() (commands []system.Command) {
 	return
 }

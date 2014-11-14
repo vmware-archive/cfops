@@ -17,10 +17,6 @@ func (cmd AddCommand) Metadata() system.CommandMetadata {
 	}
 }
 
-func (cmd AddCommand) HasSubcommands() bool {
-	return false
-}
-
 func (cmd AddCommand) Run(args []string) (err error) {
 	println("new deployment with template: " + args[0])
 	return

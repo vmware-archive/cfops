@@ -47,7 +47,7 @@ func New(cmdFactory system.CommandFactory) *cli.App {
 	// Create all the CLI commands
 	for _, cmd := range cmdFactory.Commands() {
 		cliCommand := createCLICommand(cmd)
-		if cmd.HasSubcommands() {
+		if len(cmd.Subcommands()) > 0 {
 			for _, subCmd := range cmd.Subcommands() {
 				cliCommand.Subcommands = append(cliCommand.Subcommands, createCLICommand(subCmd))
 			}
@@ -183,14 +183,14 @@ func New(cmdFactory system.CommandFactory) *cli.App {
 }
 
 func createCLICommand(cmd system.Command) (cliCommand cli.Command) {
-	if cmd.HasSubcommands() {
+	if len(cmd.Subcommands()) > 0 {
 		println("adding subcommand: " + cmd.Metadata().Name)
 		return cli.Command{
 			Name:        cmd.Metadata().Name,
 			ShortName:   cmd.Metadata().ShortName,
 			Usage:       cmd.Metadata().Usage,
 			Description: cmd.Metadata().Description,
-			// Flags:       cmd.Metadata().Flags,
+			Flags:       cmd.Metadata().Flags,
 		}
 	} else {
 		println("adding command: " + cmd.Metadata().Name)
@@ -199,7 +199,7 @@ func createCLICommand(cmd system.Command) (cliCommand cli.Command) {
 			ShortName:   cmd.Metadata().ShortName,
 			Usage:       cmd.Metadata().Usage,
 			Description: cmd.Metadata().Description,
-			// Flags:       cmd.Metadata().Flags,
+			Flags:       cmd.Metadata().Flags,
 			Action: func(c *cli.Context) {
 				err := cmd.Run(c.Args())
 				if err != nil {

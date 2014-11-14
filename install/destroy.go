@@ -17,10 +17,6 @@ func (cmd DestroyCommand) Metadata() system.CommandMetadata {
 	}
 }
 
-func (cmd DestroyCommand) HasSubcommands() bool {
-	return false
-}
-
 func (cmd DestroyCommand) Run(args []string) (err error) {
 	println("destroyed deployment: " + args[0])
 	return
