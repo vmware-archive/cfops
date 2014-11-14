@@ -6,7 +6,7 @@ A Cloud Foundry Operations tool for IaaS installation, deployment, and managemen
 
 ### Background
 
-CF Ops (cfops) is a command line interface (cli) tool to enable targeting a given IaaS (initially AWS) and automate the installation and deployment of Cloud Foundry.  The purpose is to reduce the complexity associated with standing up and managing a typical Cloud Foundry foundation from the command line.  The goal is to enable Cloud Foundry installations to be more easily repeatable and manageable at the IaaS level such that they are not unique "puppies" and instead reflect the principles behind Infrastructure as Code.
+CF Ops (cfops) is a command line interface (cli) tool to enable targeting a given IaaS (initially AWS) and automate the installation and deployment of Cloud Foundry.  The purpose is to reduce the complexity associated with standing up and managing a typical Cloud Foundry foundation from the command line.  The goal is to enable Cloud Foundry installations to be more easily repeatable and manageable at the IaaS level such that they are not treated as unique "snowflakes" and instead reflect the principles behind Infrastructure as Code.
 
 
 ### Current

@@ -1,26 +1,49 @@
 package install
 
 import (
-	"github.com/cloudfoundry/gosteno"
 	"github.com/pivotalservices/cfops/system"
 )
 
 type Installer struct {
-	CommandRunner system.CommandRunner
+	Commands []system.Command
 }
 
-func New(logger *gosteno.Logger) *Installer {
-	commandRunner := new(system.OSCommandRunner)
-	commandRunner.Logger = logger
-	return &Installer{
-		CommandRunner: commandRunner,
+func New(factory system.CommandFactory, runner system.CommandRunner) Installer {
+
+	installer := Installer{
+		Commands: []system.Command{
+			AddCommand{
+				CommandRunner: runner,
+			},
+			DestroyCommand{
+				CommandRunner: runner,
+			},
+			DumpCommand{
+				CommandRunner: runner,
+			},
+			MoveCommand{
+				CommandRunner: runner,
+			},
+		},
+	}
+
+	factory.Register("install", installer)
+	return installer
+}
+
+func (cmd Installer) Metadata() system.CommandMetadata {
+	return system.CommandMetadata{
+		Name:        "install",
+		ShortName:   "in",
+		Usage:       "install cloud foundry to an iaas",
+		Description: "Begin the installation of Cloud Foundry to a selected iaas",
 	}
 }
 
-func (installer *Installer) StartDeployment(args []string) error {
-	err := installer.CommandRunner.Run("echo", "WHOOOA", "slow down!")
-	if err != nil {
-		return err
-	}
-	return nil
+func (cmd Installer) Subcommands() (commands []system.Command) {
+	return cmd.Commands
+}
+
+func (cmd Installer) Run(args []string) (err error) {
+	return
 }

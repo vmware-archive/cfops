@@ -3,8 +3,13 @@
 	"GoVersion": "go1.3",
 	"Deps": [
 		{
-			"ImportPath": "github.com/cloudfoundry-incubator/cf-lager",
-			"Rev": "94308c799cf61ac0818667ddcc25046c8c5659d1"
+			"ImportPath": "github.com/cloudfoundry-community/gogobosh",
+			"Rev": "0f1d0aabf4902af10344c50df9237bfd59376871"
+		},
+		{
+			"ImportPath": "github.com/cloudfoundry/gosteno",
+			"Comment": "scotty_09012012-41-g5c1406e",
+			"Rev": "5c1406e9ea0ab919f92e1b194169565def41147b"
 		},
 		{
 			"ImportPath": "github.com/codegangsta/cli",
@@ -12,8 +17,9 @@
 			"Rev": "61f43e76957561f52674f48b7dc9a07f53c8f398"
 		},
 		{
-			"ImportPath": "github.com/pivotal-golang/lager",
-			"Rev": "a106931abed5afe3043eae8851be8b33a4bdfa3f"
+			"ImportPath": "launchpad.net/goyaml",
+			"Comment": "50",
+			"Rev": "gustavo@niemeyer.net-20131114120802-abe042syx64z2m7s"
 		}
 	]
 }
