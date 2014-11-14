@@ -183,29 +183,17 @@ func New(cmdFactory system.CommandFactory) *cli.App {
 }
 
 func createCLICommand(cmd system.Command) (cliCommand cli.Command) {
-	if len(cmd.Subcommands()) > 0 {
-		println("adding subcommand: " + cmd.Metadata().Name)
-		return cli.Command{
-			Name:        cmd.Metadata().Name,
-			ShortName:   cmd.Metadata().ShortName,
-			Usage:       cmd.Metadata().Usage,
-			Description: cmd.Metadata().Description,
-			Flags:       cmd.Metadata().Flags,
-		}
-	} else {
-		println("adding command: " + cmd.Metadata().Name)
-		return cli.Command{
-			Name:        cmd.Metadata().Name,
-			ShortName:   cmd.Metadata().ShortName,
-			Usage:       cmd.Metadata().Usage,
-			Description: cmd.Metadata().Description,
-			Flags:       cmd.Metadata().Flags,
-			Action: func(c *cli.Context) {
-				err := cmd.Run(c.Args())
-				if err != nil {
-					panic(err)
-				}
-			},
-		}
+	return cli.Command{
+		Name:        cmd.Metadata().Name,
+		ShortName:   cmd.Metadata().ShortName,
+		Usage:       cmd.Metadata().Usage,
+		Description: cmd.Metadata().Description,
+		Flags:       cmd.Metadata().Flags,
+		Action: func(c *cli.Context) {
+			err := cmd.Run(c.Args())
+			if err != nil {
+				panic(err)
+			}
+		},
 	}
 }
