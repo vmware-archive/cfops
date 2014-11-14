@@ -292,6 +292,6 @@ func StartDeployment() func(c *cli.Context) {
 // Backup Commands
 func BackupDeployment() func(c *cli.Context) {
 	return func(c *cli.Context) {
-		backuper.ValidateSoftware(c.Args())
+		backuper.Backup(c.Args())
 	}
 }
