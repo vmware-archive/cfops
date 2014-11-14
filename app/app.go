@@ -2,9 +2,10 @@ package app
 
 import (
 	"github.com/codegangsta/cli"
+	"github.com/pivotalservices/cfops/system"
 )
 
-func New() *cli.App {
+func New(cmdFactory system.CommandFactory) *cli.App {
 
 	app := cli.NewApp()
 	app.Name = "cfops"
@@ -43,8 +44,12 @@ func New() *cli.App {
 		},
 	}
 
+	for _, cmd := range cmdFactory.Commands() {
+		app.Commands = append(app.Commands, createCLICommand(cmd))
+	}
+
 	// CLI arg functionality
-	app.Commands = []cli.Command{
+	app.Commands = append(app.Commands, []cli.Command{
 		{
 			Name:        "survey",
 			ShortName:   "sur",
@@ -142,7 +147,7 @@ func New() *cli.App {
 					Name:        "backup",
 					Usage:       "backup an existing deployment",
 					Description: "backup an existing cloud foundry foundation deployment from the iaas",
-					Action:      BackupDeployment(),
+					//Action:      BackupDeployment(),
 				},
 				{
 					Name:        "restore",
@@ -153,13 +158,6 @@ func New() *cli.App {
 					},
 				},
 			},
-		},
-		{
-			Name:        "start",
-			ShortName:   "s",
-			Usage:       "start up an entire cloud foundry foundation",
-			Description: "start all the VMs in an existing cloud foundry deployment",
-			Action:      StartDeployment(),
 		},
 		{
 			Name:        "restart",
@@ -233,24 +231,23 @@ func New() *cli.App {
 				},
 			},
 		},
-	}
-
-	cli.CommandHelpTemplate = `NAME:
-   {{.Name}} - {{.Description}}
-{{with .ShortName}}
-
-ALIAS:
-   {{.}}
-{{end}}
-
-USAGE:
-   cfops {{.Name}}{{if .Flags}} [command options]{{end}} [arguments...]{{if .Description}}
-
-OPTIONS:
-{{range .Flags}}{{.}}
-{{end}}{{ end }}`
-
-	app.Run(os.Args)
+	}...)
 
 	return app
+}
+
+func createCLICommand(cmd system.Command) cli.Command {
+	return cli.Command{
+		Name:        cmd.Metadata().Name,
+		ShortName:   cmd.Metadata().ShortName,
+		Usage:       cmd.Metadata().Usage,
+		Description: cmd.Metadata().Description,
+		Flags:       cmd.Metadata().Flags,
+		Action: func(c *cli.Context) {
+			err := cmd.Run(c.Args())
+			if err != nil {
+				panic(err)
+			}
+		},
+	}
 }

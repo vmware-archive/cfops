@@ -6,6 +6,7 @@ import (
 	"github.com/pivotalservices/cfops/app"
 	"github.com/pivotalservices/cfops/backup"
 	"github.com/pivotalservices/cfops/install"
+	"github.com/pivotalservices/cfops/system"
 	"os"
 )
 
@@ -32,23 +33,38 @@ func init() {
 func main() {
 
 	logger := gosteno.NewLogger("cfops")
-	installer = install.New(logger)
-	backuper = backup.New(logger)
-	app := app.New(logger)
 
-	app.Run(os.Args)
-}
+	commandFactory := system.NewCommandFactory(logger)
 
-// Installer Commands
-func StartDeployment() func(c *cli.Context) {
-	return func(c *cli.Context) {
-		installer.StartDeployment(c.Args())
+	commandRunner := system.OSCommandRunner{}
+	commandRunner.Logger = logger
+
+	installer = install.New(commandFactory, commandRunner)
+	backuper = backup.New(commandFactory, commandRunner)
+
+	app := app.New(commandFactory)
+
+	cli.CommandHelpTemplate = getCommandLineTemplate()
+
+	err := app.Run(os.Args)
+	if err != nil {
+		os.Exit(1)
 	}
 }
 
-// Backup Commands
-func BackupDeployment() func(c *cli.Context) {
-	return func(c *cli.Context) {
-		backuper.ValidateSoftware(c.Args())
-	}
+func getCommandLineTemplate() string {
+	return `NAME:
+   {{.Name}} - {{.Description}}
+{{with .ShortName}}
+
+ALIAS:
+   {{.}}
+{{end}}
+
+USAGE:
+   cfops {{.Name}}{{if .Flags}} [command options]{{end}} [arguments...]{{if .Description}}
+
+OPTIONS:
+{{range .Flags}}{{.}}
+{{end}}{{ end }}`
 }

@@ -1,7 +1,6 @@
 package backup
 
 import (
-	"github.com/cloudfoundry/gosteno"
 	"github.com/pivotalservices/cfops/system"
 )
 
@@ -9,9 +8,7 @@ type Backuper struct {
 	CommandRunner system.CommandRunner
 }
 
-func New(logger *gosteno.Logger) *Backuper {
-	commandRunner := new(system.OSCommandRunner)
-	commandRunner.Logger = logger
+func New(f system.CommandFactory, commandRunner system.CommandRunner) *Backuper {
 	return &Backuper{
 		CommandRunner: commandRunner,
 	}
@@ -27,3 +24,15 @@ func (installer *Backuper) ValidateSoftware(args []string) error {
 	}
 	return nil
 }
+
+// type Backuper struct {
+// }
+
+// func New(f system.CommandFactory, commandRunner *system.CommandRunner) *Backuper {
+
+// 	f.Register("start", StartCommand{
+// 		CommandRunner: commandRunner,
+// 	})
+
+// 	return &Backuper{}
+// }
