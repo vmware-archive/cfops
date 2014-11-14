@@ -63,7 +63,6 @@ func getPassword(args []string) string {
   if err != nil {
 		fmt.Println("error:", err)
 	}
-	fmt.Printf("%+v", jsonObject)
 
   for _, product := range jsonObject.Products {
     if(product.Type == args[1]) {

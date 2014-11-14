@@ -23,15 +23,15 @@ func (cmd BackupCommand) Metadata() system.CommandMetadata {
 func (cmd BackupCommand) Run(args []string) error {
 	backupscript := "./backup/scripts/backup.sh"
 	params := []string {"usage"}
-	if(len(os.Args) < 8) {
+	if(len(os.Args) < 7) {
 		cmd.CommandRunner.Run(backupscript, params...)
 		return nil
 	}
-	ops_manager_host := os.Args[3]
-	tempest_passwd := os.Args[4]
-	ops_manager_admin := os.Args[5]
-	ops_manager_admin_passwd := os.Args[6]
-	backup_location := os.Args[7]
+	ops_manager_host := os.Args[2]
+	tempest_passwd := os.Args[3]
+	ops_manager_admin := os.Args[4]
+	ops_manager_admin_passwd := os.Args[5]
+	backup_location := os.Args[6]
 
 	currenttime := time.Now().Local()
 	formattedtime := currenttime.Format("2006_01_02")
