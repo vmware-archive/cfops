@@ -100,7 +100,7 @@ export_installation_settings() {
 
 	echo "EXPORT INSTALLATION FILES FROM " $CONNECTION_URL
 
-	curl "$CONNECTION_URL" -X GET -u $OPS_MGR_ADMIN_USERNAME:$OPS_MGR_ADMIN_PASSWORD --insecure -k -o $BACKUP_DIR/installation.yml
+	curl "$CONNECTION_URL" -X GET -u $OPS_MGR_ADMIN_USERNAME:$OPS_MGR_ADMIN_PASSWORD --insecure -k -o $BACKUP_DIR/installation.json
 }
 
 fetch_bosh_connection_parameters() {

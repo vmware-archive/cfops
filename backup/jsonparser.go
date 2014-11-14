@@ -38,7 +38,14 @@ type Properties struct {
   Value Value `json:"value"`
 }
 
-type Value struct {
+type Value interface {
+}
+
+type IntValue struct {
+  value int
+}
+
+type ObjectValue struct {
   Identity string `json:"identity"`
   Password string `json:"password"`
 }
@@ -70,15 +77,16 @@ func getPassword(args []string) string {
         fmt.Println(job.Type)
         if(job.Type == args[2]) {
           for _, property := range job.Properties {
-            if(property.Value.Identity == args[3]) {
-              password = property.Value.Password
-              break
+            switch val := property.Value.(type) {
+              case *ObjectValue:
+                fmt.Println("Hey dude I'm here")
+                fmt.Println(val)
+              }
             }
           }
         }
       }
     }
-  }
 
   fmt.Println(password)
   return password
