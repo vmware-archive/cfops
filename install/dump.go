@@ -26,10 +26,6 @@ func (cmd DumpCommand) Metadata() system.CommandMetadata {
 	}
 }
 
-func (cmd DumpCommand) HasSubcommands() bool {
-	return false
-}
-
 func (cmd DumpCommand) Run(args []string) (err error) {
 	utils.Logger = utils.NewLogger()
 
