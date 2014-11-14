@@ -44,11 +44,12 @@ func New(cmdFactory system.CommandFactory) *cli.App {
 		},
 	}
 
+	// Create all the CLI commands
 	for _, cmd := range cmdFactory.Commands() {
 		app.Commands = append(app.Commands, createCLICommand(cmd))
 	}
 
-	// CLI arg functionality
+	// TODO: Move metadata into each command
 	app.Commands = append(app.Commands, []cli.Command{
 		{
 			Name:        "survey",
