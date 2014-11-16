@@ -28,7 +28,7 @@ func main() {
 	// Send api_version request to server
 	//
 	gateway := api.NewOpsManagerGateway(url, username, password)
-	_, apiResponse := gateway.GetAPIVersion(res)
+	apiResponse := gateway.GetAPIVersion(res)
 
 	if apiResponse.IsError() {
 		println(apiResponse.ErrorCode)
@@ -48,7 +48,7 @@ func main() {
 	// Send installation_settings request to server
 	//
 	var jsonObject *models.JsonObject
-	_, apiResponse = gateway.GetInstallation(&jsonObject)
+	apiResponse = gateway.GetInstallation(&jsonObject)
 
 	if apiResponse.IsError() {
 		println(apiResponse.ErrorCode)

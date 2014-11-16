@@ -1,17 +1,23 @@
 package api
 
 import (
-	"net/http"
+	// "fmt"
+	// "net/http"
 
 	"github.com/cloudfoundry-community/gogobosh/net"
 )
 
-type Gateway struct {
+type Gateway interface {
+	GetAPIVersion(resp interface{}) net.ApiResponse
+	GetInstallation(resp interface{}) net.ApiResponse
+}
+
+type gatewayImpl struct {
 	baseUrl, username, password string
 	net.Gateway
 }
 
-func NewOpsManagerGateway(url, username, password string) (gateway Gateway) {
+func NewOpsManagerGateway(url, username, password string) (gateway gatewayImpl) {
 	gateway.baseUrl = url
 	gateway.username = username
 	gateway.password = password
@@ -19,12 +25,20 @@ func NewOpsManagerGateway(url, username, password string) (gateway Gateway) {
 	return
 }
 
-func (gateway Gateway) GetAPIVersion(resp interface{}) (http.Header, net.ApiResponse) {
+func (gateway gatewayImpl) GetAPIVersion(resp interface{}) net.ApiResponse {
 	request, _ := gateway.NewRequest("GET", gateway.baseUrl+"api_version", gateway.username, gateway.password, nil)
-	return gateway.PerformRequestForJSONResponse(request, &resp)
+	// fmt.Println("--------------------------------------------------------------------------------")
+	// fmt.Println("HTTP Request Headers")
+	// fmt.Println(request.HttpReq.Header)
+	_, apiResponse := gateway.PerformRequestForJSONResponse(request, &resp)
+	// fmt.Println("HTTP Response Headers")
+	// fmt.Println(headers)
+	// fmt.Println("--------------------------------------------------------------------------------")
+	return apiResponse
 }
 
-func (gateway Gateway) GetInstallation(resp interface{}) (http.Header, net.ApiResponse) {
+func (gateway gatewayImpl) GetInstallation(resp interface{}) net.ApiResponse {
 	request, _ := gateway.NewRequest("GET", gateway.baseUrl+"installation_settings", gateway.username, gateway.password, nil)
-	return gateway.PerformRequestForJSONResponse(request, &resp)
+	_, apiResponse := gateway.PerformRequestForJSONResponse(request, &resp)
+	return apiResponse
 }
