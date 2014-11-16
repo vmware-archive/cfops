@@ -9,7 +9,7 @@ import (
 
 type Gateway interface {
 	GetAPIVersion(resp interface{}) net.ApiResponse
-	GetInstallation(resp interface{}) net.ApiResponse
+	GetInstallationSettings(resp interface{}) net.ApiResponse
 }
 
 type gatewayImpl struct {
@@ -37,7 +37,7 @@ func (gateway gatewayImpl) GetAPIVersion(resp interface{}) net.ApiResponse {
 	return apiResponse
 }
 
-func (gateway gatewayImpl) GetInstallation(resp interface{}) net.ApiResponse {
+func (gateway gatewayImpl) GetInstallationSettings(resp interface{}) net.ApiResponse {
 	request, _ := gateway.NewRequest("GET", gateway.baseUrl+"installation_settings", gateway.username, gateway.password, nil)
 	_, apiResponse := gateway.PerformRequestForJSONResponse(request, &resp)
 	return apiResponse

@@ -2,7 +2,7 @@ package models
 
 // Ops Manager installation json types
 type (
-	JsonObject struct {
+	InstallationSettings struct {
 		Infrastructure Infrastructure `json:"infrastructure"`
 		Products       []Products     `json:"products"`
 	}

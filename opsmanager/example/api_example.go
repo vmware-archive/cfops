@@ -47,8 +47,8 @@ func main() {
 	//
 	// Send installation_settings request to server
 	//
-	var jsonObject *models.JsonObject
-	apiResponse = gateway.GetInstallation(&jsonObject)
+	var installation *models.InstallationSettings
+	apiResponse = gateway.GetInstallationSettings(&installation)
 
 	if apiResponse.IsError() {
 		println(apiResponse.ErrorCode)
@@ -61,21 +61,21 @@ func main() {
 	fmt.Println("API Response Status:", apiResponse.StatusCode)
 	fmt.Println("--------------------------------------------------------------------------------")
 	fmt.Println("Ops Manager Installation:")
-	fmt.Println(jsonObject)
+	fmt.Println(installation)
 	println("")
 	fmt.Println("Ops Manager Director:")
-	fmt.Println("IP Address:", getIPAddress(jsonObject, "microbosh", "director"))
-	fmt.Println("Password:", getPassword(jsonObject, "microbosh", "director", "director"))
+	fmt.Println("IP Address:", getIPAddress(installation, "microbosh", "director"))
+	fmt.Println("Password:", getPassword(installation, "microbosh", "director", "director"))
 	println("")
 	fmt.Println("Ops Manager DEA:")
-	fmt.Println("IP Address:", getIPAddress(jsonObject, "cf", "cf"))
+	fmt.Println("IP Address:", getIPAddress(installation, "cf", "cf"))
 	println("")
 	fmt.Println("Ops Manager CCDB:")
-	fmt.Println("Password:", getPassword(jsonObject, "cf", "ccdb", "admin"))
+	fmt.Println("Password:", getPassword(installation, "cf", "ccdb", "admin"))
 }
 
-func getIPAddress(jsonObject *models.JsonObject, productType, productName string) (ip string) {
-	for _, product := range jsonObject.Products {
+func getIPAddress(installation *models.InstallationSettings, productType, productName string) (ip string) {
+	for _, product := range installation.Products {
 		if product.Type == productType {
 			for k, vals := range product.IPS {
 				if strings.Contains(k, productName) {
@@ -87,8 +87,8 @@ func getIPAddress(jsonObject *models.JsonObject, productType, productName string
 	return
 }
 
-func getPassword(jsonObject *models.JsonObject, productType, jobType, identity string) (password string) {
-	for _, product := range jsonObject.Products {
+func getPassword(installation *models.InstallationSettings, productType, jobType, identity string) (password string) {
+	for _, product := range installation.Products {
 		if product.Type == productType {
 			for _, job := range product.Jobs {
 				if job.Type == jobType {
