@@ -2,20 +2,11 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"strings"
 
-	"github.com/cloudfoundry-community/gogobosh/net"
+	"github.com/pivotalservices/cfops/opsmanager/api"
 	"github.com/pivotalservices/cfops/opsmanager/models"
 )
-
-func init() {
-	log.SetFlags(log.Ltime | log.Lshortfile)
-}
-
-type ResponseUserAgent struct {
-	Useragent string `json:"user-agent"`
-}
 
 func main() {
 
@@ -34,14 +25,13 @@ func main() {
 	}{}
 
 	//
-	// Send request to server
+	// Send api_version request to server
 	//
-	gateway := net.NewDirectorGateway()
-	request, _ := gateway.NewRequest("GET", url+"api_version", username, password, nil)
-	headers, apiResponse := gateway.PerformRequestForJSONResponse(request, &res)
+	gateway := api.NewOpsManagerGateway(url, username, password)
+	_, apiResponse := gateway.GetAPIVersion(res)
 
 	if apiResponse.IsError() {
-		log.Fatal(apiResponse.ErrorCode)
+		println(apiResponse.ErrorCode)
 	}
 
 	//
@@ -50,43 +40,45 @@ func main() {
 	println("")
 	fmt.Println("API Response Status:", apiResponse.StatusCode)
 	fmt.Println("--------------------------------------------------------------------------------")
-	fmt.Println("HTTP Request Header")
-	fmt.Println(request.HttpReq.Header)
-	fmt.Println("HTTP Response Headers")
-	fmt.Println(headers)
-	fmt.Println("--------------------------------------------------------------------------------")
 	fmt.Println("Ops Manager API Version:")
 	fmt.Println(res.Version)
 	println("")
 
+	//
+	// Send installation_settings request to server
+	//
 	var jsonObject *models.JsonObject
-	request, _ = gateway.NewRequest("GET", url+"installation_settings", username, password, nil)
-	headers, apiResponse = gateway.PerformRequestForJSONResponse(request, &jsonObject)
+	_, apiResponse = gateway.GetInstallation(&jsonObject)
+
+	if apiResponse.IsError() {
+		println(apiResponse.ErrorCode)
+	}
+
 	//
 	// Process response
 	//
 	println("")
 	fmt.Println("API Response Status:", apiResponse.StatusCode)
 	fmt.Println("--------------------------------------------------------------------------------")
-	fmt.Println("HTTP Request Header")
-	fmt.Println(request.HttpReq.Header)
-	fmt.Println("HTTP Response Headers")
-	fmt.Println(headers)
-	fmt.Println("--------------------------------------------------------------------------------")
 	fmt.Println("Ops Manager Installation:")
 	fmt.Println(jsonObject)
 	println("")
 	fmt.Println("Ops Manager Director:")
-	fmt.Println("IP Address:", getDirectorIPAddress(jsonObject))
-	fmt.Println("Password:", getPassword(jsonObject, "director", "director"))
+	fmt.Println("IP Address:", getIPAddress(jsonObject, "microbosh", "director"))
+	fmt.Println("Password:", getPassword(jsonObject, "microbosh", "director", "director"))
 	println("")
+	fmt.Println("Ops Manager DEA:")
+	fmt.Println("IP Address:", getIPAddress(jsonObject, "cf", "cf"))
+	println("")
+	fmt.Println("Ops Manager CCDB:")
+	fmt.Println("Password:", getPassword(jsonObject, "cf", "ccdb", "admin"))
 }
 
-func getDirectorIPAddress(jsonObject *models.JsonObject) (ip string) {
+func getIPAddress(jsonObject *models.JsonObject, productType, productName string) (ip string) {
 	for _, product := range jsonObject.Products {
-		if product.Type == "microbosh" {
+		if product.Type == productType {
 			for k, vals := range product.IPS {
-				if strings.Contains(k, "director") {
+				if strings.Contains(k, productName) {
 					return vals[0]
 				}
 			}
@@ -95,9 +87,9 @@ func getDirectorIPAddress(jsonObject *models.JsonObject) (ip string) {
 	return
 }
 
-func getPassword(jsonObject *models.JsonObject, jobType, identity string) (password string) {
+func getPassword(jsonObject *models.JsonObject, productType, jobType, identity string) (password string) {
 	for _, product := range jsonObject.Products {
-		if product.Type == "microbosh" {
+		if product.Type == productType {
 			for _, job := range product.Jobs {
 				if job.Type == jobType {
 					for _, property := range job.Properties {
