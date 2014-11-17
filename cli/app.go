@@ -51,10 +51,10 @@ func New(cmdFactory CommandFactory) *cli.App {
 			for _, subCmd := range subcommands {
 				subCliCommand := createCLICommand(subCmd)
 				cliCommand.Subcommands = append(cliCommand.Subcommands, subCliCommand)
-				setAction(subCmd, subCliCommand)
+				setAction(subCmd, &subCliCommand)
 			}
 		} else {
-			setAction(cmd, cliCommand)
+			setAction(cmd, &cliCommand)
 		}
 		app.Commands = append(app.Commands, cliCommand)
 	}
@@ -196,7 +196,7 @@ func createCLICommand(cmd Command) (cliCommand cli.Command) {
 	}
 }
 
-func setAction(cmd Command, cliCommand cli.Command) {
+func setAction(cmd Command, cliCommand *cli.Command) {
 	cliCommand.Action = func(c *cli.Context) {
 		err := cmd.Run(c.Args())
 		if err != nil {
