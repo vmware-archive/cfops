@@ -2,14 +2,13 @@ package install
 
 import (
 	"github.com/pivotalservices/cfops/cli"
-	"github.com/pivotalservices/cfops/system"
 )
 
 type Installer struct {
 	Commands []cli.Command
 }
 
-func New(factory cli.CommandFactory, runner system.CommandRunner) Installer {
+func New(factory cli.CommandFactory) Installer {
 
 	installer := Installer{
 		Commands: []cli.Command{

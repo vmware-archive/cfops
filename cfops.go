@@ -40,8 +40,8 @@ func main() {
 	commandRunner := system.OSCommandRunner{}
 	commandRunner.Logger = logger
 
-	starter = start.New(commandFactory, commandRunner)
-	installer = install.New(commandFactory, commandRunner)
+	starter = start.New(commandFactory)
+	installer = install.New(commandFactory)
 	backuper = backup.New(commandFactory, commandRunner)
 
 	app := app.New(commandFactory)
