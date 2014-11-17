@@ -4,7 +4,7 @@ import (
 	"github.com/codegangsta/cli"
 )
 
-func New(cmdFactory CommandFactory) *cli.App {
+func NewApp(cmdFactory CommandFactory) *cli.App {
 
 	app := cli.NewApp()
 	app.Name = "cfops"
@@ -50,8 +50,8 @@ func New(cmdFactory CommandFactory) *cli.App {
 		if subcommands != nil {
 			for _, subCmd := range subcommands {
 				subCliCommand := createCLICommand(subCmd)
-				cliCommand.Subcommands = append(cliCommand.Subcommands, subCliCommand)
 				setAction(subCmd, &subCliCommand)
+				cliCommand.Subcommands = append(cliCommand.Subcommands, subCliCommand)
 			}
 		} else {
 			setAction(cmd, &cliCommand)
@@ -183,7 +183,26 @@ func New(cmdFactory CommandFactory) *cli.App {
 		},
 	}...)
 
+	cli.CommandHelpTemplate = getCommandLineTemplate()
+
 	return app
+}
+
+func getCommandLineTemplate() string {
+	return `NAME:
+   {{.Name}} - {{.Description}}
+{{with .ShortName}}
+
+ALIAS:
+   {{.}}
+{{end}}
+
+USAGE:
+   cfops {{.Name}}{{if .Flags}} [command options]{{end}} [arguments...]{{if .Description}}
+
+OPTIONS:
+{{range .Flags}}{{.}}
+{{end}}{{ end }}`
 }
 
 func createCLICommand(cmd Command) (cliCommand cli.Command) {
