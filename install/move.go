@@ -1,16 +1,13 @@
 package install
 
 import (
-	"github.com/pivotalservices/cfops/system"
+	"github.com/pivotalservices/cfops/cli"
 )
 
-type MoveCommand struct {
-	CommandRunner system.CommandRunner
-	Installer
-}
+type MoveCommand struct{}
 
-func (cmd MoveCommand) Metadata() system.CommandMetadata {
-	return system.CommandMetadata{
+func (cmd MoveCommand) Metadata() cli.CommandMetadata {
+	return cli.CommandMetadata{
 		Name:        "move",
 		Usage:       "move an existing deployment to another iaas location",
 		Description: "destroy an existing cloud foundry foundation deployment from the iaas",

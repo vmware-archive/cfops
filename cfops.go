@@ -3,8 +3,8 @@ package main
 import (
 	"github.com/cloudfoundry/gosteno"
 	"github.com/codegangsta/cli"
-	"github.com/pivotalservices/cfops/app"
 	"github.com/pivotalservices/cfops/backup"
+	app "github.com/pivotalservices/cfops/cli"
 	"github.com/pivotalservices/cfops/install"
 	"github.com/pivotalservices/cfops/start"
 	"github.com/pivotalservices/cfops/system"
@@ -35,7 +35,7 @@ func init() {
 func main() {
 	logger := gosteno.NewLogger("cfops")
 
-	commandFactory := system.NewCommandFactory(logger)
+	commandFactory := app.NewCommandFactory(logger)
 
 	commandRunner := system.OSCommandRunner{}
 	commandRunner.Logger = logger

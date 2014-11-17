@@ -9,16 +9,13 @@ import (
 	"github.com/cloudfoundry-community/gogobosh/net"
 	"github.com/cloudfoundry-community/gogobosh/utils"
 
-	"github.com/pivotalservices/cfops/system"
+	"github.com/pivotalservices/cfops/cli"
 )
 
-type DumpCommand struct {
-	CommandRunner system.CommandRunner
-	Installer
-}
+type DumpCommand struct{}
 
-func (cmd DumpCommand) Metadata() system.CommandMetadata {
-	return system.CommandMetadata{
+func (cmd DumpCommand) Metadata() cli.CommandMetadata {
+	return cli.CommandMetadata{
 		Name:        "dump",
 		ShortName:   "d",
 		Usage:       "dump the configuration information of an existing deployment",

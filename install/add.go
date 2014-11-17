@@ -1,16 +1,13 @@
 package install
 
 import (
-	"github.com/pivotalservices/cfops/system"
+	"github.com/pivotalservices/cfops/cli"
 )
 
-type AddCommand struct {
-	CommandRunner system.CommandRunner
-	Installer
-}
+type AddCommand struct{}
 
-func (cmd AddCommand) Metadata() system.CommandMetadata {
-	return system.CommandMetadata{
+func (cmd AddCommand) Metadata() cli.CommandMetadata {
+	return cli.CommandMetadata{
 		Name:        "add",
 		Usage:       "add a new deployment",
 		Description: "use the provided deployment template to deploy a new cloud foundry foundation into the iaas",

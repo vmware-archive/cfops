@@ -3,16 +3,17 @@ package backup
 import (
 	"os"
 	"time"
+
+	"github.com/pivotalservices/cfops/cli"
 	"github.com/pivotalservices/cfops/system"
 )
 
 type BackupCommand struct {
 	CommandRunner system.CommandRunner
-	Backuper
 }
 
-func (cmd BackupCommand) Metadata() system.CommandMetadata {
-	return system.CommandMetadata{
+func (cmd BackupCommand) Metadata() cli.CommandMetadata {
+	return cli.CommandMetadata{
 		Name:        "backup",
 		ShortName:   "b",
 		Usage:       "backup an existing deployment",
@@ -22,8 +23,8 @@ func (cmd BackupCommand) Metadata() system.CommandMetadata {
 
 func (cmd BackupCommand) Run(args []string) error {
 	backupscript := "./backup/scripts/backup.sh"
-	params := []string {"usage"}
-	if(len(os.Args) < 7) {
+	params := []string{"usage"}
+	if len(os.Args) < 7 {
 		cmd.CommandRunner.Run(backupscript, params...)
 		return nil
 	}
@@ -46,7 +47,7 @@ func (cmd BackupCommand) Run(args []string) error {
 	os.MkdirAll(database_dir, 0777)
 	os.MkdirAll(nfs_dir, 0777)
 
-	params = []string {"copy_deployment_files", ops_manager_host, tempest_passwd, ops_manager_admin, ops_manager_admin_passwd, backup_dir, deployment_dir, database_dir, nfs_dir}
+	params = []string{"copy_deployment_files", ops_manager_host, tempest_passwd, ops_manager_admin, ops_manager_admin_passwd, backup_dir, deployment_dir, database_dir, nfs_dir}
 	cmd.CommandRunner.Run(backupscript, params...)
 
 	params[0] = "export_Encryption_key"
@@ -57,11 +58,11 @@ func (cmd BackupCommand) Run(args []string) error {
 
 	jsonfile := backup_dir + "/installation.yml"
 
-	arguments := []string {jsonfile, "microbosh", "director", "director"}
+	arguments := []string{jsonfile, "microbosh", "director", "director"}
 	password := getPassword(arguments)
 	ip := getIP(arguments)
 
-	boshparams := []string {"bosh_login", ip, "director", password}
+	boshparams := []string{"bosh_login", ip, "director", password}
 	cmd.CommandRunner.Run(backupscript, boshparams...)
 
 	params[0] = "verify_deployment_backedUp"
@@ -79,42 +80,37 @@ func (cmd BackupCommand) Run(args []string) error {
 	// params[0] = "stop_cloud_controller"
 	// cmd.CommandRunner.Run(backupscript, params...)
 
-	arguments = []string {jsonfile, "cf", "ccdb", "admin"}
+	arguments = []string{jsonfile, "cf", "ccdb", "admin"}
 	password = getPassword(arguments)
 	ip = getIP(arguments)
 
-	dbparams := []string {"export_db", ip, "admin", password, "2544", "ccdb", database_dir + "/ccdb.sql"}
+	dbparams := []string{"export_db", ip, "admin", password, "2544", "ccdb", database_dir + "/ccdb.sql"}
 
 	cmd.CommandRunner.Run(backupscript, dbparams...)
 
-	arguments = []string {jsonfile, "cf", "uaadb", "root"}
+	arguments = []string{jsonfile, "cf", "uaadb", "root"}
 	password = getPassword(arguments)
 	ip = getIP(arguments)
 
-	dbparams = []string {"export_db", ip, "root", password, "2544", "uaa", database_dir + "/uaa.sql"}
+	dbparams = []string{"export_db", ip, "root", password, "2544", "uaa", database_dir + "/uaa.sql"}
 	cmd.CommandRunner.Run(backupscript, dbparams...)
 
-
-	arguments = []string {jsonfile, "cf", "consoledb", "root"}
+	arguments = []string{jsonfile, "cf", "consoledb", "root"}
 	password = getPassword(arguments)
 	ip = getIP(arguments)
 
-	dbparams = []string {"export_db", ip, "root", password, "2544", "console", database_dir + "/console.sql"}
+	dbparams = []string{"export_db", ip, "root", password, "2544", "console", database_dir + "/console.sql"}
 	cmd.CommandRunner.Run(backupscript, dbparams...)
 
-	arguments = []string {jsonfile, "cf", "nfs_server", "vcap"}
+	arguments = []string{jsonfile, "cf", "nfs_server", "vcap"}
 	password = getPassword(arguments)
 	ip = getIP(arguments)
 
-	dbparams = []string {"export_nfs_server", ip, "vcap", nfs_dir}
+	dbparams = []string{"export_nfs_server", ip, "vcap", nfs_dir}
 	cmd.CommandRunner.Run(backupscript, params...)
 
 	// params[0] = "start_cloud_controller"
 	// cmd.CommandRunner.Run(backupscript, params...)
 
 	return nil
-}
-
-func (cmd BackupCommand) Subcommands() (commands []system.Command) {
-	return
 }

@@ -1,12 +1,17 @@
-package system
+package cli
 
 import (
 	"github.com/cloudfoundry/gosteno"
 )
 
+type SubcommandProvider interface {
+	Subcommands() []Command
+}
+
 type CommandFactory interface {
 	Register(commandName string, cmd Command) CommandFactory
 	Commands() []Command
+	Subcommands(command Command) []Command
 }
 
 type factory struct {
@@ -31,4 +36,12 @@ func (f factory) Commands() (commands []Command) {
 		commands = append(commands, command)
 	}
 	return
+}
+
+func (f factory) Subcommands(cmd Command) (subcommands []Command) {
+	switch cmd.(type) {
+	case SubcommandProvider:
+		return cmd.(SubcommandProvider).Subcommands()
+	}
+	return nil
 }

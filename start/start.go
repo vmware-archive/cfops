@@ -1,16 +1,13 @@
 package start
 
 import (
-	"github.com/pivotalservices/cfops/system"
+	"github.com/pivotalservices/cfops/cli"
 )
 
-type StartCommand struct {
-	CommandRunner system.CommandRunner
-	Starter
-}
+type StartCommand struct{}
 
-func (cmd StartCommand) Metadata() system.CommandMetadata {
-	return system.CommandMetadata{
+func (cmd StartCommand) Metadata() cli.CommandMetadata {
+	return cli.CommandMetadata{
 		Name:        "start",
 		ShortName:   "s",
 		Usage:       "start up an entire cloud foundry foundation",
@@ -19,13 +16,5 @@ func (cmd StartCommand) Metadata() system.CommandMetadata {
 }
 
 func (cmd StartCommand) Run(args []string) error {
-	err := cmd.CommandRunner.Run("echo", "WHOOOA", "slow down!")
-	if err != nil {
-		return err
-	}
 	return nil
-}
-
-func (cmd StartCommand) Subcommands() (commands []system.Command) {
-	return
 }

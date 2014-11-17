@@ -1,4 +1,4 @@
-package system
+package cli
 
 import "github.com/codegangsta/cli"
 
@@ -11,7 +11,6 @@ type CommandMetadata struct {
 }
 
 type Command interface {
-	Subcommands() []Command
 	Metadata() CommandMetadata
 	Run(args []string) error
 }

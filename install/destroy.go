@@ -1,16 +1,13 @@
 package install
 
 import (
-	"github.com/pivotalservices/cfops/system"
+	"github.com/pivotalservices/cfops/cli"
 )
 
-type DestroyCommand struct {
-	CommandRunner system.CommandRunner
-	Installer
-}
+type DestroyCommand struct{}
 
-func (cmd DestroyCommand) Metadata() system.CommandMetadata {
-	return system.CommandMetadata{
+func (cmd DestroyCommand) Metadata() cli.CommandMetadata {
+	return cli.CommandMetadata{
 		Name:        "destroy",
 		Usage:       "destroy an existing deployment",
 		Description: "destroy an existing cloud foundry foundation deployment from the iaas",

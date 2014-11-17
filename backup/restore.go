@@ -1,16 +1,16 @@
 package backup
 
 import (
+	"github.com/pivotalservices/cfops/cli"
 	"github.com/pivotalservices/cfops/system"
 )
 
 type RestoreCommand struct {
 	CommandRunner system.CommandRunner
-	Backuper
 }
 
-func (cmd RestoreCommand) Metadata() system.CommandMetadata {
-	return system.CommandMetadata{
+func (cmd RestoreCommand) Metadata() cli.CommandMetadata {
+	return cli.CommandMetadata{
 		Name:        "restore",
 		ShortName:   "r",
 		Usage:       "restore an deployment from a backup",

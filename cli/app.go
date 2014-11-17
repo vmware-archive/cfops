@@ -1,11 +1,10 @@
-package app
+package cli
 
 import (
 	"github.com/codegangsta/cli"
-	"github.com/pivotalservices/cfops/system"
 )
 
-func New(cmdFactory system.CommandFactory) *cli.App {
+func New(cmdFactory CommandFactory) *cli.App {
 
 	app := cli.NewApp()
 	app.Name = "cfops"
@@ -47,10 +46,15 @@ func New(cmdFactory system.CommandFactory) *cli.App {
 	// Create all the CLI commands
 	for _, cmd := range cmdFactory.Commands() {
 		cliCommand := createCLICommand(cmd)
-		if len(cmd.Subcommands()) > 0 {
-			for _, subCmd := range cmd.Subcommands() {
-				cliCommand.Subcommands = append(cliCommand.Subcommands, createCLICommand(subCmd))
+		subcommands := cmdFactory.Subcommands(cmd)
+		if subcommands != nil {
+			for _, subCmd := range subcommands {
+				subCliCommand := createCLICommand(subCmd)
+				cliCommand.Subcommands = append(cliCommand.Subcommands, subCliCommand)
+				setAction(subCmd, subCliCommand)
 			}
+		} else {
+			setAction(cmd, cliCommand)
 		}
 		app.Commands = append(app.Commands, cliCommand)
 	}
@@ -182,18 +186,21 @@ func New(cmdFactory system.CommandFactory) *cli.App {
 	return app
 }
 
-func createCLICommand(cmd system.Command) (cliCommand cli.Command) {
+func createCLICommand(cmd Command) (cliCommand cli.Command) {
 	return cli.Command{
 		Name:        cmd.Metadata().Name,
 		ShortName:   cmd.Metadata().ShortName,
 		Usage:       cmd.Metadata().Usage,
 		Description: cmd.Metadata().Description,
 		Flags:       cmd.Metadata().Flags,
-		Action: func(c *cli.Context) {
-			err := cmd.Run(c.Args())
-			if err != nil {
-				panic(err)
-			}
-		},
+	}
+}
+
+func setAction(cmd Command, cliCommand cli.Command) {
+	cliCommand.Action = func(c *cli.Context) {
+		err := cmd.Run(c.Args())
+		if err != nil {
+			panic(err)
+		}
 	}
 }
