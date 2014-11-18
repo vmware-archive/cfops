@@ -1,10 +1,13 @@
 package install
 
 import (
+	"github.com/cloudfoundry/gosteno"
 	"github.com/pivotalservices/cfops/cli"
 )
 
-type DestroyCommand struct{}
+type DestroyCommand struct {
+	Logger *gosteno.Logger
+}
 
 func (cmd DestroyCommand) Metadata() cli.CommandMetadata {
 	return cli.CommandMetadata{

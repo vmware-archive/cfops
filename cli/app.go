@@ -4,7 +4,51 @@ import (
 	"github.com/codegangsta/cli"
 )
 
-func NewApp(cmdFactory CommandFactory) *cli.App {
+type Flag struct {
+	Name       string
+	Value      interface{}
+	Type       string
+	StringFlag cli.StringFlag
+	BoolFlag   cli.BoolFlag
+}
+
+func NewFlag(name string, value interface{}, usage string, envVar string) (f *Flag) {
+	f = &Flag{
+		Name: name,
+	}
+	switch value.(type) {
+	case bool:
+		f.Type = "bool"
+		f.BoolFlag = cli.BoolFlag{
+			Name:   f.Name,
+			Usage:  usage,
+			EnvVar: envVar,
+		}
+		return
+	case string:
+		f.Type = "string"
+		f.StringFlag = cli.StringFlag{
+			Name:   f.Name,
+			Value:  value.(string),
+			Usage:  usage,
+			EnvVar: envVar,
+		}
+		return
+	}
+	return
+}
+
+func (flag *Flag) ParseString() string {
+	// fmt.Printf("string flag %s has value %s\n", flag.Name, flag.Value)
+	return flag.Value.(string)
+}
+
+func (flag *Flag) ParseBool() bool {
+	// fmt.Printf("bool flag %s has value %v\n", flag.Name, flag.Value)
+	return flag.Value.(bool)
+}
+
+func NewApp(cmdFactory CommandFactory, globalFlags []*Flag) *cli.App {
 
 	app := cli.NewApp()
 	app.Name = "cfops"
@@ -22,25 +66,12 @@ func NewApp(cmdFactory CommandFactory) *cli.App {
 	}
 
 	// Global application flags
-	app.Flags = []cli.Flag{
-		cli.StringFlag{
-			Name:   "iaas, i",
-			Value:  "aws, vsphere, vcloud, openstack",
-			Usage:  "set the IaaS type to target for deployment",
-			EnvVar: "CF_IAAS",
-		},
-		cli.StringFlag{
-			Name:   "debug, d",
-			Value:  "true, false",
-			Usage:  "enable/disable debug output",
-			EnvVar: "CF_TRACE",
-		},
-		cli.StringFlag{
-			Name:   "lang, l",
-			Value:  "en, es",
-			Usage:  "language for the cfops cli responses",
-			EnvVar: "CF_LANG",
-		},
+	for _, flag := range globalFlags {
+		if flag.Type == "bool" {
+			app.Flags = append(app.Flags, flag.BoolFlag)
+		} else {
+			app.Flags = append(app.Flags, flag.StringFlag)
+		}
 	}
 
 	// Create all the CLI commands

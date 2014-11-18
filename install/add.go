@@ -1,10 +1,13 @@
 package install
 
 import (
+	"github.com/cloudfoundry/gosteno"
 	"github.com/pivotalservices/cfops/cli"
 )
 
-type AddCommand struct{}
+type AddCommand struct {
+	Logger *gosteno.Logger
+}
 
 func (cmd AddCommand) Metadata() cli.CommandMetadata {
 	return cli.CommandMetadata{

@@ -11,13 +11,14 @@ import (
 
 type CommandRunner interface {
 	Run(name string, args ...string) error
+	SetLogger(logger *gosteno.Logger)
 }
 
 type OSCommandRunner struct {
 	Logger *gosteno.Logger
 }
 
-func (runner OSCommandRunner) Run(name string, args ...string) error {
+func (runner *OSCommandRunner) Run(name string, args ...string) error {
 	cmd := exec.Command(name, args...)
 	var out bytes.Buffer
 	cmd.Stdout = &out
@@ -25,4 +26,8 @@ func (runner OSCommandRunner) Run(name string, args ...string) error {
 	err := cmd.Run()
 	runner.Logger.Info(fmt.Sprintf("result: %s", out.String()))
 	return err
+}
+
+func (runner *OSCommandRunner) SetLogger(logger *gosteno.Logger) {
+	runner.Logger = logger
 }

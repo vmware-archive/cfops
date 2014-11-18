@@ -8,11 +8,14 @@ import (
 	"github.com/cloudfoundry-community/gogobosh/local"
 	"github.com/cloudfoundry-community/gogobosh/net"
 	"github.com/cloudfoundry-community/gogobosh/utils"
+	"github.com/cloudfoundry/gosteno"
 
 	"github.com/pivotalservices/cfops/cli"
 )
 
-type DumpCommand struct{}
+type DumpCommand struct {
+	Logger *gosteno.Logger
+}
 
 func (cmd DumpCommand) Metadata() cli.CommandMetadata {
 	return cli.CommandMetadata{

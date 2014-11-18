@@ -1,22 +1,33 @@
 package install
 
 import (
+	"github.com/cloudfoundry/gosteno"
 	"github.com/pivotalservices/cfops/cli"
 )
 
 type Installer struct {
 	Commands []cli.Command
+	Logger   *gosteno.Logger
 }
 
 func New(factory cli.CommandFactory) Installer {
 
 	installer := Installer{
 		Commands: []cli.Command{
-			AddCommand{},
-			DestroyCommand{},
-			DumpCommand{},
-			MoveCommand{},
+			AddCommand{
+				Logger: factory.GetLogger(),
+			},
+			DestroyCommand{
+				Logger: factory.GetLogger(),
+			},
+			DumpCommand{
+			// Logger: factory.GetLogger(),
+			},
+			MoveCommand{
+				Logger: factory.GetLogger(),
+			},
 		},
+		Logger: factory.GetLogger(),
 	}
 
 	factory.Register("install", installer)

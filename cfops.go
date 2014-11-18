@@ -1,10 +1,11 @@
 package main
 
 import (
-	"flag"
+	// "fmt"
 	"github.com/cloudfoundry/gosteno"
+	"github.com/codegangsta/cli"
 	"github.com/pivotalservices/cfops/backup"
-	"github.com/pivotalservices/cfops/cli"
+	. "github.com/pivotalservices/cfops/cli"
 	"github.com/pivotalservices/cfops/install"
 	"github.com/pivotalservices/cfops/start"
 	"github.com/pivotalservices/cfops/system"
@@ -13,62 +14,78 @@ import (
 )
 
 var (
-	logFilePath    = flag.String("logFile", "", "The CFOPS log file, defaults to STDOUT")
-	configFilePath = flag.String("configFile", "config/cfops.json", "Location of the CFOPS config json file")
-	debug          = flag.Bool("debug", false, "Debug logging")
+	// cli.StringFlag{
+	// 	Name:   "iaas, i",
+	// 	Value:  "aws, vsphere, vcloud, openstack",
+	// 	Usage:  "set the IaaS type to target for deployment",
+	// 	EnvVar: "CF_IAAS",
+	// },
+	// cli.StringFlag{
+	// 	Name:   "debug, d",
+	// 	Value:  "true, false",
+	// 	Usage:  "enable/disable debug output",
+	// 	EnvVar: "CF_TRACE",
+	// },
+	// cli.StringFlag{
+	// 	Name:   "lang, l",
+	// 	Value:  "en, es",
+	// 	Usage:  "language for the cfops cli responses",
+	// 	EnvVar: "CF_LANG",
+	// },
+	logFilePath    = NewFlag("logFile", "", "The CFOPS log file, defaults to STDOUT", "CFOPS_LOG")
+	configFilePath = NewFlag("configFile", "config/cfops.json", "Location of the CFOPS config json file", "CFOPS_CONFIG")
+	debug          = NewFlag("debug", false, "Debug logging", "CFOPS_TRACE")
 )
-
-var Logger *gosteno.Logger
-
-func init() {
-	// c := &gosteno.Config{
-	// 	Sinks: []gosteno.Sink{
-	// 		gosteno.NewIOSink(os.Stdout),
-	// 	},
-	// 	Level:     gosteno.LOG_INFO,
-	// 	Codec:     gosteno.NewJsonPrettifier(gosteno.EXCLUDE_DATA),
-	// 	EnableLOC: true,
-	// }
-	// if len(*logFilePath) > 0 {
-	// 	c.Sinks = append(c.Sinks, gosteno.NewFileSink(*logFilePath))
-	// }
-
-	// gosteno.Init(c)
-}
-
-// To get the base foundation configuration see the Pivotal CF Data Collector @
-// https://docs.google.com/a/pivotal.io/spreadsheets/d/1XHKSrJiQIu5MWGpPYWbMY8M09eqe-GV8MQsl_mqw1RM/edit#gid=0
-func main() {
-	_, logger := parseConfig(*debug, *configFilePath, *logFilePath)
-	flag.Parse()
-
-	commandFactory := cli.NewCommandFactory(logger)
-
-	commandRunner := system.OSCommandRunner{}
-	commandRunner.Logger = logger
-
-	start.New(commandFactory)
-	install.New(commandFactory)
-	backup.New(commandFactory, commandRunner)
-
-	app := cli.NewApp(commandFactory)
-
-	app.RunAndExitOnError()
-}
 
 type Config struct {
 	Index uint
 }
 
+// To get the base foundation configuration see the Pivotal CF Data Collector @
+// https://docs.google.com/a/pivotal.io/spreadsheets/d/1XHKSrJiQIu5MWGpPYWbMY8M09eqe-GV8MQsl_mqw1RM/edit#gid=0
+func main() {
+
+	commandFactory := NewCommandFactory()
+
+	commandRunner := &system.OSCommandRunner{}
+
+	start.New(commandFactory)
+	install.New(commandFactory)
+	backup.New(commandFactory, commandRunner)
+
+	globalFlags := []*Flag{logFilePath, configFilePath, debug}
+
+	app := NewApp(commandFactory, globalFlags)
+
+	app.Before = func(c *cli.Context) error {
+		for _, flag := range globalFlags {
+			if flag.Type == "bool" {
+				flag.Value = c.Bool(flag.Name)
+				// fmt.Printf("BEFORE flag %s has value %v\n", flag.Name, flag.Value)
+			} else {
+				flag.Value = c.String(flag.Name)
+				// fmt.Printf("BEFORE flag %s has value %s\n", flag.Name, flag.Value)
+			}
+		}
+		_, logger := parseConfig(debug.ParseBool(), configFilePath.ParseString(), logFilePath.ParseString())
+
+		commandRunner.SetLogger(logger)
+		commandFactory.SetLogger(logger)
+		return nil
+	}
+
+	app.RunAndExitOnError()
+}
+
 func parseConfig(debug bool, configFile, logFilePath string) (Config, *gosteno.Logger) {
 	config := Config{}
-	// err := config.ReadConfigInto(&config, configFile)
+	// err := config.LoadConfig(&config, configFile)
 	// if err != nil {
 	// 	panic(err)
 	// }
 
 	logger := NewLogger(debug, logFilePath, "cfops", config)
-	logger.Info("Startup: Setting up the CFOPS profiler")
+	logger.Info("Setting up CFOPS profiler")
 
 	return config, logger
 }
@@ -83,7 +100,7 @@ func NewLogger(verbose bool, logFilePath, name string, config Config) *gosteno.L
 	loggingConfig := &gosteno.Config{
 		Sinks:     make([]gosteno.Sink, 1),
 		Level:     level,
-		Codec:     gosteno.NewJsonCodec(),
+		Codec:     gosteno.NewJsonPrettifier(gosteno.EXCLUDE_DATA),
 		EnableLOC: true}
 
 	if strings.TrimSpace(logFilePath) == "" {
@@ -95,10 +112,5 @@ func NewLogger(verbose bool, logFilePath, name string, config Config) *gosteno.L
 	gosteno.Init(loggingConfig)
 	logger := gosteno.NewLogger(name)
 	logger.Debugf("Component %s in debug mode!", name)
-	setGlobalLogger(logger)
 	return logger
-}
-
-func setGlobalLogger(logger *gosteno.Logger) {
-	Logger = logger
 }

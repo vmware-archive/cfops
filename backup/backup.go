@@ -4,12 +4,14 @@ import (
 	"os"
 	"time"
 
+	"github.com/cloudfoundry/gosteno"
 	"github.com/pivotalservices/cfops/cli"
 	"github.com/pivotalservices/cfops/system"
 )
 
 type BackupCommand struct {
 	CommandRunner system.CommandRunner
+	Logger        *gosteno.Logger
 }
 
 func (cmd BackupCommand) Metadata() cli.CommandMetadata {

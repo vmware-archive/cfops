@@ -12,6 +12,8 @@ type CommandFactory interface {
 	Register(commandName string, cmd Command) CommandFactory
 	Commands() []Command
 	Subcommands(command Command) []Command
+	SetLogger(logger *gosteno.Logger)
+	GetLogger() *gosteno.Logger
 }
 
 type factory struct {
@@ -19,10 +21,9 @@ type factory struct {
 	logger   *gosteno.Logger
 }
 
-func NewCommandFactory(logger *gosteno.Logger) *factory {
+func NewCommandFactory() *factory {
 	return &factory{
 		commands: make(map[string]Command),
-		logger:   logger,
 	}
 }
 
@@ -44,4 +45,12 @@ func (f factory) Subcommands(cmd Command) (subcommands []Command) {
 		return cmd.(SubcommandProvider).Subcommands()
 	}
 	return nil
+}
+
+func (f factory) SetLogger(logger *gosteno.Logger) {
+	f.logger = logger
+}
+
+func (f factory) GetLogger() *gosteno.Logger {
+	return f.logger
 }
