@@ -49,8 +49,20 @@ func (cmd BackupCommand) Run(args []string) error {
 	os.MkdirAll(database_dir, 0777)
 	os.MkdirAll(nfs_dir, 0777)
 
+	src_url := "tempest@" + ops_manager_host + ":/var/tempest/workspaces/default/deployments/*.yml"
+	dest_url := deployment_dir
+	options := "-P 22 -r"
+
+	ScpCli([]string{options, src_url, dest_url, tempest_passwd})
+
+	src_url = "tempest@" + ops_manager_host + ":/var/tempest/workspaces/default/deployments/micro/*.yml"
+	dest_url = deployment_dir
+	options = "-P 22 -r"
+
+	ScpCli([]string{options, src_url, dest_url, tempest_passwd})
+
 	params = []string{"copy_deployment_files", ops_manager_host, tempest_passwd, ops_manager_admin, ops_manager_admin_passwd, backup_dir, deployment_dir, database_dir, nfs_dir}
-	cmd.CommandRunner.Run(backupscript, params...)
+	// cmd.CommandRunner.Run(backupscript, params...)
 
 	params[0] = "export_Encryption_key"
 	cmd.CommandRunner.Run(backupscript, params...)
@@ -58,58 +70,60 @@ func (cmd BackupCommand) Run(args []string) error {
 	params[0] = "export_installation_settings"
 	cmd.CommandRunner.Run(backupscript, params...)
 
-	jsonfile := backup_dir + "/installation.yml"
+	jsonfile := backup_dir + "/installation.json"
 
 	arguments := []string{jsonfile, "microbosh", "director", "director"}
 	password := getPassword(arguments)
 	ip := getIP(arguments)
 
-	boshparams := []string{"bosh_login", ip, "director", password}
-	cmd.CommandRunner.Run(backupscript, boshparams...)
+	// boshparams := []string{"bosh_login", ip, "director", password}
+	// cmd.CommandRunner.Run(backupscript, boshparams...)
 
-	params[0] = "verify_deployment_backedUp"
-	cmd.CommandRunner.Run(backupscript, params...)
-
-	params[0] = "bosh_status"
-	cmd.CommandRunner.Run(backupscript, params...)
-
-	params[0] = "set_bosh_deployment"
-	cmd.CommandRunner.Run(backupscript, params...)
-
-	params[0] = "export_cloud_controller_bosh_vms"
-	cmd.CommandRunner.Run(backupscript, params...)
-
-	// params[0] = "stop_cloud_controller"
+	// params[0] = "verify_deployment_backedUp"
 	// cmd.CommandRunner.Run(backupscript, params...)
-
-	arguments = []string{jsonfile, "cf", "ccdb", "admin"}
-	password = getPassword(arguments)
-	ip = getIP(arguments)
-
-	dbparams := []string{"export_db", ip, "admin", password, "2544", "ccdb", database_dir + "/ccdb.sql"}
-
-	cmd.CommandRunner.Run(backupscript, dbparams...)
-
-	arguments = []string{jsonfile, "cf", "uaadb", "root"}
-	password = getPassword(arguments)
-	ip = getIP(arguments)
-
-	dbparams = []string{"export_db", ip, "root", password, "2544", "uaa", database_dir + "/uaa.sql"}
-	cmd.CommandRunner.Run(backupscript, dbparams...)
-
-	arguments = []string{jsonfile, "cf", "consoledb", "root"}
-	password = getPassword(arguments)
-	ip = getIP(arguments)
-
-	dbparams = []string{"export_db", ip, "root", password, "2544", "console", database_dir + "/console.sql"}
-	cmd.CommandRunner.Run(backupscript, dbparams...)
+	//
+	// params[0] = "bosh_status"
+	// cmd.CommandRunner.Run(backupscript, params...)
+	//
+	// params[0] = "set_bosh_deployment"
+	// cmd.CommandRunner.Run(backupscript, params...)
+	//
+	// params[0] = "export_cloud_controller_bosh_vms"
+	// cmd.CommandRunner.Run(backupscript, params...)
+	//
+	// // params[0] = "stop_cloud_controller"
+	// // cmd.CommandRunner.Run(backupscript, params...)
+	//
+	// arguments = []string{jsonfile, "cf", "ccdb", "admin"}
+	// password = getPassword(arguments)
+	// ip = getIP(arguments)
+	//
+	// dbparams := []string{"export_db", ip, "admin", password, "2544", "ccdb", database_dir + "/ccdb.sql"}
+	//
+	// cmd.CommandRunner.Run(backupscript, dbparams...)
+	//
+	// arguments = []string{jsonfile, "cf", "uaadb", "root"}
+	// password = getPassword(arguments)
+	// ip = getIP(arguments)
+	//
+	// dbparams = []string{"export_db", ip, "root", password, "2544", "uaa", database_dir + "/uaa.sql"}
+	// cmd.CommandRunner.Run(backupscript, dbparams...)
+	//
+	// arguments = []string{jsonfile, "cf", "consoledb", "root"}
+	// password = getPassword(arguments)
+	// ip = getIP(arguments)
+	//
+	// dbparams = []string{"export_db", ip, "root", password, "2544", "console", database_dir + "/console.sql"}
+	// cmd.CommandRunner.Run(backupscript, dbparams...)
 
 	arguments = []string{jsonfile, "cf", "nfs_server", "vcap"}
 	password = getPassword(arguments)
 	ip = getIP(arguments)
 
-	dbparams = []string{"export_nfs_server", ip, "vcap", nfs_dir}
-	cmd.CommandRunner.Run(backupscript, params...)
+	src_url = "vcap@" + ip + ":/var/vcap/store/shared"
+	dest_url = nfs_dir + "/"
+	options = "-P 22 -rp"
+	ScpCli([]string{options, src_url, dest_url, password})
 
 	// params[0] = "start_cloud_controller"
 	// cmd.CommandRunner.Run(backupscript, params...)
