@@ -1,6 +1,6 @@
 {
 	"ImportPath": "github.com/pivotalservices/cfops",
-	"GoVersion": "go1.3",
+	"GoVersion": "go1.3.3",
 	"Deps": [
 		{
 			"ImportPath": "github.com/cloudfoundry-community/gogobosh",
@@ -15,6 +15,15 @@
 			"ImportPath": "github.com/codegangsta/cli",
 			"Comment": "1.2.0-28-g61f43e7",
 			"Rev": "61f43e76957561f52674f48b7dc9a07f53c8f398"
+		},
+		{
+			"ImportPath": "github.com/laher/uggo",
+			"Rev": "0ad25fe11c5bc3f5dd3201208ee3785f7599300f"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/ssh",
+			"Comment": "null-234",
+			"Rev": "60a80aaa50ff0e8506f61b1fa35078a24941be50"
 		},
 		{
 			"ImportPath": "launchpad.net/goyaml",
