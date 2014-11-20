@@ -14,27 +14,11 @@ import (
 )
 
 var (
-	// cli.StringFlag{
-	// 	Name:   "iaas, i",
-	// 	Value:  "aws, vsphere, vcloud, openstack",
-	// 	Usage:  "set the IaaS type to target for deployment",
-	// 	EnvVar: "CF_IAAS",
-	// },
-	// cli.StringFlag{
-	// 	Name:   "debug, d",
-	// 	Value:  "true, false",
-	// 	Usage:  "enable/disable debug output",
-	// 	EnvVar: "CF_TRACE",
-	// },
-	// cli.StringFlag{
-	// 	Name:   "lang, l",
-	// 	Value:  "en, es",
-	// 	Usage:  "language for the cfops cli responses",
-	// 	EnvVar: "CF_LANG",
-	// },
 	logFilePath    = NewFlag("logFile", "", "The CFOPS log file, defaults to STDOUT", "CFOPS_LOG")
 	configFilePath = NewFlag("configFile", "config/cfops.json", "Location of the CFOPS config json file", "CFOPS_CONFIG")
 	debug          = NewFlag("debug", false, "Debug logging", "CFOPS_TRACE")
+	iaas           = NewFlag("iaas, i", "aws, vsphere, vcloud, openstack", "Sets the IaaS type to target for deployment", "CFOPS_IAAS")
+	lang           = NewFlag("lang, l", "en, es", "Language for the cfops cli responses", "CFOPS_LANG")
 )
 
 type Config struct {
@@ -53,7 +37,7 @@ func main() {
 	install.New(commandFactory)
 	backup.New(commandFactory, commandRunner)
 
-	globalFlags := []*Flag{logFilePath, configFilePath, debug}
+	globalFlags := []*Flag{logFilePath, configFilePath, debug, iaas, lang}
 
 	app := NewApp(commandFactory, globalFlags)
 
