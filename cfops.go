@@ -6,6 +6,7 @@ import (
 	"github.com/codegangsta/cli"
 	"github.com/pivotalservices/cfops/backup"
 	. "github.com/pivotalservices/cfops/cli"
+	"github.com/pivotalservices/cfops/config"
 	"github.com/pivotalservices/cfops/install"
 	"github.com/pivotalservices/cfops/start"
 	"github.com/pivotalservices/cfops/system"
@@ -15,14 +16,14 @@ import (
 
 var (
 	logFilePath    = NewFlag("logFile", "", "The CFOPS log file, defaults to STDOUT", "CFOPS_LOG")
-	configFilePath = NewFlag("configFile", "config/cfops.json", "Location of the CFOPS config json file", "CFOPS_CONFIG")
+	configFilePath = NewFlag("configFile", "config/assets/cfops.json", "Location of the CFOPS config json file", "CFOPS_CONFIG")
 	debug          = NewFlag("debug", false, "Debug logging", "CFOPS_TRACE")
 	iaas           = NewFlag("iaas, i", "aws, vsphere, vcloud, openstack", "Sets the IaaS type to target for deployment", "CFOPS_IAAS")
 	lang           = NewFlag("lang, l", "en, es", "Language for the cfops cli responses", "CFOPS_LANG")
 )
 
 type Config struct {
-	Index uint
+	Name string
 }
 
 // To get the base foundation configuration see the Pivotal CF Data Collector @
@@ -62,16 +63,16 @@ func main() {
 }
 
 func parseConfig(debug bool, configFile, logFilePath string) (Config, *gosteno.Logger) {
-	config := Config{}
-	// err := config.LoadConfig(&config, configFile)
-	// if err != nil {
-	// 	panic(err)
-	// }
+	configuration := Config{}
+	err := config.LoadConfig(&configuration, configFile)
+	if err != nil {
+		panic(err)
+	}
 
-	logger := NewLogger(debug, logFilePath, "cfops", config)
+	logger := NewLogger(debug, logFilePath, "cfops", configuration)
 	logger.Info("Setting up CFOPS profiler")
 
-	return config, logger
+	return configuration, logger
 }
 
 func NewLogger(verbose bool, logFilePath, name string, config Config) *gosteno.Logger {
