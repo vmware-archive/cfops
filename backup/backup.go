@@ -6,7 +6,6 @@ import (
 
 	"github.com/cloudfoundry/gosteno"
 	"github.com/pivotalservices/cfops/cli"
-	"github.com/pivotalservices/cfops/config"
 	"github.com/pivotalservices/cfops/system"
 )
 
@@ -132,14 +131,4 @@ func (cmd BackupCommand) Run(args []string) error {
 	// cmd.CommandRunner.Run(backupscript, params...)
 
 	return nil
-}
-
-func parseConfig(configFile string) BackupConfig {
-	backupConfig := BackupConfig{}
-	err := config.LoadConfig(&backupConfig, configFile)
-	if err != nil {
-		panic(err)
-	}
-
-	return backupConfig
 }
