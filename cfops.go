@@ -1,13 +1,11 @@
 package main
 
 import (
-	// "fmt"
 	"github.com/cloudfoundry/gosteno"
 	"github.com/codegangsta/cli"
 	"github.com/pivotalservices/cfops/backup"
 	. "github.com/pivotalservices/cfops/cli"
 	"github.com/pivotalservices/cfops/config"
-	// "github.com/pivotalservices/cfops/configuration"
 	"github.com/pivotalservices/cfops/install"
 	"github.com/pivotalservices/cfops/start"
 	"github.com/pivotalservices/cfops/system"
