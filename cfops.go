@@ -70,9 +70,7 @@ func main() {
 }
 
 func parseConfig(debug bool, configFile string) Config {
-	configuration := Config{"",
-		&backup.BackupConfig{},
-	}
+	configuration := Config{}
 	err := config.LoadConfig(&configuration, configFile)
 	if err != nil {
 		panic(err)
