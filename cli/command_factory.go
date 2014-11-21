@@ -39,6 +39,10 @@ func (f factory) Commands() (commands []Command) {
 	return
 }
 
+func (f factory) FindCommand(name string) (command Command) {
+	return f.commands[name]
+}
+
 func (f factory) Subcommands(cmd Command) (subcommands []Command) {
 	switch cmd.(type) {
 	case SubcommandProvider:

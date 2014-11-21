@@ -66,5 +66,8 @@ Sample help output:
        --help, -h					show help
        --version, -v				print the version
 
+### Install
 
+Run `./bin/build.sh` to build the binary. The binary will be built into the `./out` directory.
+This will also copy the `config/assets/config.json` to your `~/.cfops` directory unless it exists.
 

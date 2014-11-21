@@ -6,12 +6,14 @@ import (
 
 	"github.com/cloudfoundry/gosteno"
 	"github.com/pivotalservices/cfops/cli"
+	"github.com/pivotalservices/cfops/config"
 	"github.com/pivotalservices/cfops/system"
 )
 
 type BackupCommand struct {
 	CommandRunner system.CommandRunner
 	Logger        *gosteno.Logger
+	Config        *BackupConfig
 }
 
 func (cmd BackupCommand) Metadata() cli.CommandMetadata {
@@ -26,15 +28,16 @@ func (cmd BackupCommand) Metadata() cli.CommandMetadata {
 func (cmd BackupCommand) Run(args []string) error {
 	backupscript := "./backup/scripts/backup.sh"
 	params := []string{"usage"}
-	if len(os.Args) < 7 {
+	if len(args) > 0 {
 		cmd.CommandRunner.Run(backupscript, params...)
 		return nil
 	}
-	ops_manager_host := os.Args[2]
-	tempest_passwd := os.Args[3]
-	ops_manager_admin := os.Args[4]
-	ops_manager_admin_passwd := os.Args[5]
-	backup_location := os.Args[6]
+
+	ops_manager_host := cmd.Config.OpsManagerHost
+	tempest_passwd := cmd.Config.TempestPassword
+	ops_manager_admin := cmd.Config.OpsManagerAdminUser
+	ops_manager_admin_passwd := cmd.Config.OpsManagerAdminPassword
+	backup_location := cmd.Config.BackupFileLocation
 
 	currenttime := time.Now().Local()
 	formattedtime := currenttime.Format("2006_01_02")
@@ -120,7 +123,7 @@ func (cmd BackupCommand) Run(args []string) error {
 	password = getPassword(arguments)
 	ip = getIP(arguments)
 
-	src_url = "vcap@" + ip + ":/var/vcap/store/shared"
+	src_url = "vcap@" + ip + ":/var/vcap/store/shared/**/*"
 	dest_url = nfs_dir + "/"
 	options = "-P 22 -rp"
 	ScpCli([]string{options, src_url, dest_url, password})
@@ -129,4 +132,14 @@ func (cmd BackupCommand) Run(args []string) error {
 	// cmd.CommandRunner.Run(backupscript, params...)
 
 	return nil
+}
+
+func parseConfig(configFile string) BackupConfig {
+	backupConfig := BackupConfig{}
+	err := config.LoadConfig(&backupConfig, configFile)
+	if err != nil {
+		panic(err)
+	}
+
+	return backupConfig
 }

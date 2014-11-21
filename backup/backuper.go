@@ -10,10 +10,11 @@ type Backuper struct {
 
 func New(factory cli.CommandFactory, runner system.CommandRunner) Backuper {
 
-	factory.Register("backup", BackupCommand{
+	factory.Register("backup", &BackupCommand{
 		CommandRunner: runner,
 		Logger:        factory.GetLogger(),
-	}).Register("restore", RestoreCommand{
+		Config:        &BackupConfig{},
+	}).Register("restore", &RestoreCommand{
 		CommandRunner: runner,
 	})
 

@@ -7,6 +7,7 @@ import (
 	"github.com/pivotalservices/cfops/backup"
 	. "github.com/pivotalservices/cfops/cli"
 	"github.com/pivotalservices/cfops/config"
+	// "github.com/pivotalservices/cfops/configuration"
 	"github.com/pivotalservices/cfops/install"
 	"github.com/pivotalservices/cfops/start"
 	"github.com/pivotalservices/cfops/system"
@@ -16,7 +17,7 @@ import (
 
 var (
 	logFilePath    = NewFlag("logFile", "", "The CFOPS log file, defaults to STDOUT", "CFOPS_LOG")
-	configFilePath = NewFlag("configFile", "config/assets/cfops.json", "Location of the CFOPS config json file", "CFOPS_CONFIG")
+	configFilePath = NewFlag("configFile", config.DefaultFilePath(), "Location of the CFOPS config json file", "CFOPS_CONFIG")
 	debug          = NewFlag("debug", false, "Debug logging", "CFOPS_TRACE")
 	iaas           = NewFlag("iaas, i", "aws, vsphere, vcloud, openstack", "Sets the IaaS type to target for deployment", "CFOPS_IAAS")
 	lang           = NewFlag("lang, l", "en, es", "Language for the cfops cli responses", "CFOPS_LANG")
@@ -24,6 +25,7 @@ var (
 
 type Config struct {
 	Name string
+	*backup.BackupConfig
 }
 
 // To get the base foundation configuration see the Pivotal CF Data Collector @
@@ -52,7 +54,12 @@ func main() {
 				// fmt.Printf("BEFORE flag %s has value %s\n", flag.Name, flag.Value)
 			}
 		}
-		_, logger := parseConfig(debug.ParseBool(), configFilePath.ParseString(), logFilePath.ParseString())
+		config := parseConfig(debug.ParseBool(), configFilePath.ParseString())
+		backupCommand := commandFactory.FindCommand("backup").(*backup.BackupCommand)
+		backupCommand.Config = config.BackupConfig
+
+		logger := NewLogger(debug.ParseBool(), logFilePath.ParseString(), "cfops")
+		logger.Info("Setting up CFOPS")
 
 		commandRunner.SetLogger(logger)
 		commandFactory.SetLogger(logger)
@@ -62,20 +69,18 @@ func main() {
 	app.RunAndExitOnError()
 }
 
-func parseConfig(debug bool, configFile, logFilePath string) (Config, *gosteno.Logger) {
-	configuration := Config{}
+func parseConfig(debug bool, configFile string) Config {
+	configuration := Config{"",
+		&backup.BackupConfig{},
+	}
 	err := config.LoadConfig(&configuration, configFile)
 	if err != nil {
 		panic(err)
 	}
-
-	logger := NewLogger(debug, logFilePath, "cfops", configuration)
-	logger.Info("Setting up CFOPS profiler")
-
-	return configuration, logger
+	return configuration
 }
 
-func NewLogger(verbose bool, logFilePath, name string, config Config) *gosteno.Logger {
+func NewLogger(verbose bool, logFilePath, name string) *gosteno.Logger {
 	level := gosteno.LOG_INFO
 
 	if verbose {
