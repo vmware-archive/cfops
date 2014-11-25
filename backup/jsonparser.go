@@ -27,6 +27,14 @@ func getPassword(args []string) string {
 		fmt.Println("error:", err)
 	}
 
+	if jsonObject.Infrastructure.Type == "vsphere" {
+
+	} else if jsonObject.Infrastructure.Type == "vcloud" {
+		if args[1] == "microbosh" {
+			args[1] = "microbosh-vcloud"
+		}
+	}
+
 	for _, product := range jsonObject.Products {
 		if product.Type == args[1] {
 			for _, job := range product.Jobs {
@@ -100,4 +108,14 @@ func getVMSObject(contents []byte) []VMObject {
 	}
 
 	return vmObjects
+}
+
+func getEventsObject(contents []byte) EventObject {
+	var eventObject EventObject
+	err := json.Unmarshal(contents, &eventObject)
+	if err != nil {
+		fmt.Println("error", err)
+	}
+
+	return eventObject
 }

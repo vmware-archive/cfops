@@ -1,11 +1,13 @@
 package backup
 
 import (
+	"bytes"
 	"crypto/tls"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
+	"os/exec"
 	"strconv"
 	"strings"
 	"time"
@@ -48,9 +50,9 @@ func (cmd BackupCommand) Run(args []string) error {
 	formattedtime := currenttime.Format("2006_01_02")
 	backup_dir := backup_location + "/Backup_" + formattedtime
 
-	deployment_dir := backup_location + "/" + formattedtime + "/deployments"
-	database_dir := backup_location + "/" + formattedtime + "/database"
-	nfs_dir := backup_location + "/" + formattedtime + "/nfs_share"
+	deployment_dir := backup_dir + "/deployments"
+	database_dir := backup_dir + "/database"
+	nfs_dir := backup_dir + "/nfs_share"
 	jsonfile := backup_dir + "/installation.json"
 
 	createDirectories(backup_dir, deployment_dir, database_dir, nfs_dir)
@@ -67,13 +69,13 @@ func (cmd BackupCommand) Run(args []string) error {
 
 	ccJobs := getAllCloudControllerVMs(ip, username, password, deploymentName, backup_dir)
 
-	toggleCCJobs(ip, username, password, deploymentName, ccJobs, "stopped")
+	toggleCCJobs(cmd, backupscript, ip, username, password, deploymentName, ccJobs, "stopped")
 
-	exportCCDB(cmd, backupscript, jsonfile, database_dir)
+	backupCCDB(cmd, backupscript, jsonfile, database_dir)
 
-	exportUAADB(cmd, backupscript, jsonfile, database_dir)
+	backupUAADB(cmd, backupscript, jsonfile, database_dir)
 
-	exportConsoleDB(cmd, backupscript, jsonfile, database_dir)
+	backupConsoleDB(cmd, backupscript, jsonfile, database_dir)
 
 	// arguments = []string{jsonfile, "cf", "nfs_server", "vcap"}
 	// password = getPassword(arguments)
@@ -84,7 +86,9 @@ func (cmd BackupCommand) Run(args []string) error {
 	// options := "-P 22 -rp"
 	// ScpCli([]string{options, src_url, dest_url, password})
 
-	toggleCCJobs(ip, username, password, deploymentName, ccJobs, "started")
+	toggleCCJobs(cmd, backupscript, ip, username, password, deploymentName, ccJobs, "started")
+
+	backupMySqlDB(cmd, backupscript, jsonfile, database_dir)
 
 	return nil
 }
@@ -198,7 +202,7 @@ func downloadElasticRuntimeDeploymentFile(ip string, username string, password s
 		}
 	}
 
-	fmt.Println(cfDeploymentName)
+	fmt.Println(fmt.Sprintf("CF deployment Name : %s", cfDeploymentName))
 
 	connectionUrl = "https://" + ip + ":25555/deployments/" + cfDeploymentName
 
@@ -270,45 +274,83 @@ func getAllCloudControllerVMs(ip string, username string, password string, deplo
 		}
 	}
 
-	fmt.Println(ccjobs)
+	fmt.Println(fmt.Sprintf("List of Cloud Controller Jobs: %s ", ccjobs))
 
 	return ccjobs
 }
 
-func toggleCCJobs(ip string, username string, password string, deploymentName string, ccjobs []string, state string) {
+func toggleCCJobs(cmd BackupCommand, backupscript string, ip string, username string, password string, deploymentName string, ccjobs []string, state string) {
+	serverURL := "https://" + ip + ":25555/"
 	for i, ccjob := range ccjobs {
-		connectionUrl := "https://" + ip + ":25555/deployments/" + deploymentName + "/jobs/" + ccjob + "/" + strconv.Itoa(i) + "?state=" + state
+		connectionUrl := serverURL + "deployments/" + deploymentName + "/jobs/" + ccjob + "/" + strconv.Itoa(i) + "?state=" + state
 
-		resp, err := invoke("PUT", connectionUrl, username, password, true)
-		if err != nil {
-			fmt.Printf("%s", err)
+		params := []string{"toggle_cc_job", connectionUrl, username, password}
+
+		output, cmderr := executeCommand(backupscript, params...)
+		if cmderr != nil {
+			fmt.Println(fmt.Sprintf("%s", cmderr))
 			os.Exit(1)
 		}
 
-		if resp.StatusCode == 302 {
-			fmt.Println("response %s", resp)
-		} else if resp.StatusCode != 200 {
-			fmt.Println("Invalid Bosh Director Credentials")
+		updatedURL := strings.Replace(output, "https://"+ip+"/", serverURL, 1)
+		fmt.Println(fmt.Sprintf("Fetching task status from %s", updatedURL))
+
+		contents, taskerr := getTaskEvents("GET", updatedURL, username, password, false)
+		if taskerr != nil {
+			fmt.Printf("%s", taskerr)
 			os.Exit(1)
 		}
+
+		eventObject := getEventsObject(contents)
+		if eventObject.State != "done" {
+			fmt.Println(fmt.Sprintf("Attempting to %s cloud controller %s instance %s", state, ccjob, i))
+		}
+
+		for eventObject.State != "done" {
+			fmt.Printf(".")
+			contents, taskerr := getTaskEvents("GET", updatedURL, username, password, false)
+			if taskerr != nil {
+				fmt.Printf("%s", taskerr)
+				os.Exit(1)
+			}
+
+			eventObject = getEventsObject(contents)
+		}
+		fmt.Println(fmt.Sprintf("%s cloud controller %s instance %s", state, ccjob, i))
 	}
+}
+
+func getTaskEvents(method string, url string, username string, password string, isYaml bool) ([]byte, error) {
+	resp, err := invoke(method, url, username, password, false)
+	if err != nil {
+		fmt.Printf("%s", err)
+		os.Exit(1)
+	}
+
+	if resp.StatusCode != 200 {
+		fmt.Println("Invalid Bosh Director Credentials")
+		os.Exit(1)
+	}
+
+	defer resp.Body.Close()
+	contents, err := ioutil.ReadAll(resp.Body)
+
+	return contents, err
 }
 
 func invoke(method string, connectionUrl string, username string, password string, isYaml bool) (*http.Response, error) {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
-	client := &http.Client{Transport: tr}
 
-	req, err := http.NewRequest(method, string(connectionUrl), nil)
+	req, err := http.NewRequest(method, connectionUrl, nil)
 	req.SetBasicAuth(username, password)
 
 	if isYaml {
 		req.Header.Set("Content-Type", "text/yaml")
 	}
 
-	fmt.Println("Request : %s", req)
-	resp, err := client.Do(req)
+	resp, err := tr.RoundTrip(req)
 	if err != nil {
 		fmt.Printf("Error : %s", err)
 	}
@@ -316,7 +358,7 @@ func invoke(method string, connectionUrl string, username string, password strin
 	return resp, err
 }
 
-func exportCCDB(cmd BackupCommand, backupscript string, jsonfile string, database_dir string) {
+func backupCCDB(cmd BackupCommand, backupscript string, jsonfile string, database_dir string) {
 	ip, password := getConnectionDetails(jsonfile, "cf", "ccdb", "admin")
 
 	dbparams := []string{"export_db", ip, "admin", password, "2544", "ccdb", database_dir + "/ccdb.sql"}
@@ -324,7 +366,7 @@ func exportCCDB(cmd BackupCommand, backupscript string, jsonfile string, databas
 	cmd.CommandRunner.Run(backupscript, dbparams...)
 }
 
-func exportUAADB(cmd BackupCommand, backupscript string, jsonfile string, database_dir string) {
+func backupUAADB(cmd BackupCommand, backupscript string, jsonfile string, database_dir string) {
 	ip, password := getConnectionDetails(jsonfile, "cf", "uaadb", "root")
 
 	dbparams := []string{"export_db", ip, "root", password, "2544", "uaa", database_dir + "/uaa.sql"}
@@ -332,10 +374,31 @@ func exportUAADB(cmd BackupCommand, backupscript string, jsonfile string, databa
 	cmd.CommandRunner.Run(backupscript, dbparams...)
 }
 
-func exportConsoleDB(cmd BackupCommand, backupscript string, jsonfile string, database_dir string) {
+func backupConsoleDB(cmd BackupCommand, backupscript string, jsonfile string, database_dir string) {
 	ip, password := getConnectionDetails(jsonfile, "cf", "consoledb", "root")
 
 	dbparams := []string{"export_db", ip, "root", password, "2544", "console", database_dir + "/console.sql"}
 
 	cmd.CommandRunner.Run(backupscript, dbparams...)
+}
+
+func backupMySqlDB(cmd BackupCommand, backupscript string, jsonfile string, database_dir string) {
+	ip, password := getConnectionDetails(jsonfile, "cf", "mysql", "root")
+
+	dbparams := []string{"export_mysqldb", ip, "root", password, database_dir + "/user_databases.sql"}
+
+	cmd.CommandRunner.Run(backupscript, dbparams...)
+}
+
+func executeCommand(name string, args ...string) (string, error) {
+	cmd := exec.Command(name, args...)
+	var out bytes.Buffer
+	cmd.Stdout = &out
+
+	err := cmd.Run()
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return out.String(), err
 }

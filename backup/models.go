@@ -13,7 +13,7 @@ type VMObject struct {
 
 type InstallationObject struct {
 	Infrastructure Infrastructure `json:"infrastructure"`
-	Products       []Products     `json:"products"`
+	Products       []Products     `json:"products,components"`
 }
 
 type Infrastructure struct {
@@ -42,4 +42,11 @@ type Properties struct {
 }
 
 type Value interface {
+}
+
+type EventObject struct {
+	Id          int    `json:"id"`
+	State       string `json:"state"`
+	Description string `json:"description"`
+	Result      string `json:"result"`
 }
