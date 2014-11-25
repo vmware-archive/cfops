@@ -3,134 +3,19 @@
 validate_software() {
 	echo "VALIDATE MANDATORY TOOLS"
 
-	INSTALLED_BOSH=`which bosh`
-	if [ -z "$INSTALLED_BOSH" ]; then
-		echo "BOSH CLI not installed"
-		exit 1
-	fi
-
 	INSTALLED_PG_DUMP=`which pg_dump`
 	if [ -z "$INSTALLED_PG_DUMP" ]; then
 		echo "pg_dump utility not installed"
 		exit 1
 	fi
-
-	INSTALLED_JAVA=`which java`
-	if [ -z "$INSTALLED_JAVA" ]; then
-		echo "Java JRE is missing"
-		exit 1
-	fi
-}
-
-copy_deployment_files() {
-
-  export OPS_MANAGER_HOST=$1
-  export OPS_MGR_SSH_PASSWORD=$2
-  export DEPLOYMENT_DIR=$6
-
-	echo "COPY DEPLOYMENT MANIFEST"
-
-	/usr/bin/expect -c "
-		set timeout -1
-
-		spawn scp tempest@$OPS_MANAGER_HOST:/var/tempest/workspaces/default/deployments/*.yml $DEPLOYMENT_DIR
-
-		expect {
-			-re ".*Are.*.*yes.*no.*" {
-				send yes\r ;
-				exp_continue
-			}
-
-			"*?assword:*" {
-				send $OPS_MGR_SSH_PASSWORD\r
-			}
-		}
-		expect {
-			"*?assword:*" {
-				send $OPS_MGR_SSH_PASSWORD\r
-				interact
-			}
-		}
-
-		exit
-	"
-
-	echo "COPY MICRO-BOSH DEPLOYMENT MANIFEST"
-	/usr/bin/expect -c "
-		set timeout -1
-
-		spawn scp tempest@$OPS_MANAGER_HOST:/var/tempest/workspaces/default/deployments/micro/*.yml $DEPLOYMENT_DIR
-
-		expect {
-			-re ".*Are.*.*yes.*no.*" {
-				send yes\r ;
-				exp_continue
-			}
-
-			"*?assword:*" {
-				send $OPS_MGR_SSH_PASSWORD\r
-			}
-		}
-		expect {
-			"*?assword:*" {
-				send $OPS_MGR_SSH_PASSWORD\r
-				interact
-			}
-		}
-
-		exit
-	"
 }
 
 export_Encryption_key() {
-  export BACKUP_DIR=$5
-  export DEPLOYMENT_DIR=$6
+  export BACKUP_DIR=$2
+  export DEPLOYMENT_DIR=$3
 
 	echo "EXPORT DB ENCRYPTION KEY"
 	grep -E 'db_encryption_key' $DEPLOYMENT_DIR/cf-*.yml | cut -d ':' -f 2 | sort -u | tr -d ' ' > $BACKUP_DIR/cc_db_encryption_key.txt
-}
-
-export_installation_settings() {
-  export OPS_MANAGER_HOST=$1
-  export OPS_MGR_ADMIN_USERNAME=$3
-  export OPS_MGR_ADMIN_PASSWORD=$4
-  export BACKUP_DIR=$5
-
-	CONNECTION_URL=https://$OPS_MANAGER_HOST/api/installation_settings
-
-	echo "EXPORT INSTALLATION FILES FROM " $CONNECTION_URL
-
-	curl "$CONNECTION_URL" -X GET -u $OPS_MGR_ADMIN_USERNAME:$OPS_MGR_ADMIN_PASSWORD --insecure -k -o $BACKUP_DIR/installation.json
-}
-
-fetch_bosh_connection_parameters() {
-  export BACKUP_DIR=$5
-	echo "GATHER BOSH DIRECTOR CONNECTION PARAMETERS"
-
-	output=`sh appassembler/bin/app $BACKUP_DIR/installation.yml microbosh director director`
-
-	export DIRECTOR_USERNAME=`echo $output | cut -d '|' -f 1`
-	export DIRECTOR_PASSWORD=`echo $output | cut -d '|' -f 2`
-	export BOSH_DIRECTOR_IP=`echo $output | cut -d '|' -f 3`
-
-}
-
-bosh_login() {
-  echo "GATHER BOSH DIRECTOR CONNECTION PARAMETERS"
-
-  export BOSH_DIRECTOR_IP=$1
-  export DIRECTOR_USERNAME=$2
-  export DIRECTOR_PASSWORD=$3
-
-	echo "BOSH LOGIN $DIRECTOR_USERNAME $DIRECTOR_PASSWORD "
-	rm -rf ~/.bosh_config
-
-	bosh target $BOSH_DIRECTOR_IP << EOF
-	$DIRECTOR_USERNAME
-	$DIRECTOR_PASSWORD
-EOF
-
-	bosh login $DIRECTOR_USERNAME $DIRECTOR_PASSWORD
 }
 
 verify_deployment_backedUp() {
@@ -327,4 +212,4 @@ usage() {
 	printf "\t %s \t\t\t\t %s \n" "OUTPUT DIR:" "Backup Directory"
 }
 
-$1 $2 $3 $4 $5 $6 $7 $8 $9
+$1 "$@"

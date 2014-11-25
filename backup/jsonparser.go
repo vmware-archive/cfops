@@ -21,7 +21,7 @@ func getPassword(args []string) string {
 		os.Exit(1)
 	}
 
-	var jsonObject JsonObject
+	var jsonObject InstallationObject
 	err := json.Unmarshal(file, &jsonObject)
 	if err != nil {
 		fmt.Println("error:", err)
@@ -65,7 +65,7 @@ func getIP(args []string) string {
 		os.Exit(1)
 	}
 
-	var jsonObject JsonObject
+	var jsonObject InstallationObject
 	json.Unmarshal(file, &jsonObject)
 
 	for _, product := range jsonObject.Products {
@@ -80,4 +80,24 @@ func getIP(args []string) string {
 	}
 
 	return ip
+}
+
+func getDeploymentObject(contents []byte) []DeploymentObject {
+	var jsonObject []DeploymentObject
+	err := json.Unmarshal(contents, &jsonObject)
+	if err != nil {
+		fmt.Println("error", err)
+	}
+
+	return jsonObject
+}
+
+func getVMSObject(contents []byte) []VMObject {
+	var vmObjects []VMObject
+	err := json.Unmarshal(contents, &vmObjects)
+	if err != nil {
+		fmt.Println("error", err)
+	}
+
+	return vmObjects
 }
