@@ -2,12 +2,11 @@ package ssh
 
 import (
 	"bytes"
+	"errors"
 	"golang.org/x/crypto/ssh"
 	"io"
 	"os"
 )
-
-type executeCmd func(*ssh.Session) (err error)
 
 type SshConfig struct {
 	Username string
@@ -16,7 +15,11 @@ type SshConfig struct {
 	Port     string
 }
 
-func dialSsh(sshConfig *SshConfig, fn executeCmd) (err error) {
+type SshCommand interface {
+	execute(*ssh.Session) (err error)
+}
+
+func DialSsh(sshConfig *SshConfig, command SshCommand) (err error) {
 	config := &ssh.ClientConfig{
 		User: sshConfig.Username,
 		Auth: []ssh.AuthMethod{
@@ -25,53 +28,55 @@ func dialSsh(sshConfig *SshConfig, fn executeCmd) (err error) {
 	}
 	client, err := ssh.Dial("tcp", sshConfig.Host+":"+sshConfig.Port, config)
 	if err != nil {
-		panic("Failed to dial: " + err.Error())
+		err = errors.New("Failed to dial: " + err.Error())
+		return
 	}
 	session, err := client.NewSession()
 	if err != nil {
-		panic("Failed to create session: " + err.Error())
+		err = errors.New("Failed to create session: " + err.Error())
+		return
 	}
 
 	defer session.Close()
 
-	err = fn(session)
+	err = command.execute(session)
 	if err != nil {
-		panic("Failed to execute ssh command" + err.Error())
+		err = errors.New("Failed to execute ssh command" + err.Error())
+		return
 	}
 	return
 }
 
 type SshRemoteCopy struct {
-	SshConfig SshConfig
-	Command   string
-	Filepath  string
+	Command  string
+	Filepath string
 }
 
-func (sshRemoteCopy *SshRemoteCopy) SshCmdCopy() (err error) {
-	err = dialSsh(&sshRemoteCopy.SshConfig, func(session *ssh.Session) (err error) {
-		f, err := os.Create(sshRemoteCopy.Filepath)
-		defer f.Close()
-		if err != nil {
-			panic("Failed to create file" + err.Error())
-		}
-		var b bytes.Buffer
-		buf := make([]byte, 1024)
-		session.Stdout = &b
-		if err := session.Run(sshRemoteCopy.Command); err != nil {
-			panic("Failed to run: " + err.Error())
-		}
-		for {
-			n, err := b.Read(buf)
-			if err == io.EOF {
-				break
-			}
-			_, err = f.Write(buf[:n])
-			if err != nil {
-				panic("Failed to wrtie to file" + err.Error())
-			}
+func (command *SshRemoteCopy) execute(session *ssh.Session) (err error) {
 
-		}
+	f, err := os.Create(command.Filepath)
+	defer f.Close()
+	if err != nil {
+		err = errors.New("Failed to create file" + err.Error())
 		return
-	})
+	}
+	var b bytes.Buffer
+	buf := make([]byte, 1024)
+	session.Stdout = &b
+	if err := session.Run(command.Command); err != nil {
+		err = errors.New("Failed to run command: " + err.Error())
+		return err
+	}
+	for {
+		n, err := b.Read(buf)
+		if err == io.EOF {
+			break
+		}
+		_, err = f.Write(buf[:n])
+		if err != nil {
+			err = errors.New("Failed to wrtie to file" + err.Error())
+			return err
+		}
+	}
 	return
 }
