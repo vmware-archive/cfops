@@ -14,6 +14,7 @@ import (
 
 	"github.com/cloudfoundry/gosteno"
 	"github.com/pivotalservices/cfops/cli"
+	"github.com/pivotalservices/cfops/ssh"
 	"github.com/pivotalservices/cfops/system"
 )
 
@@ -89,6 +90,8 @@ func (cmd BackupCommand) Run(args []string) error {
 	toggleCCJobs(cmd, backupscript, ip, username, password, deploymentName, ccJobs, "started")
 
 	backupMySqlDB(cmd, backupscript, jsonfile, database_dir)
+
+	backupNfs(jsonfile, nfs_dir+"/nfs.tar.gz")
 
 	return nil
 }
@@ -356,6 +359,23 @@ func invoke(method string, connectionUrl string, username string, password strin
 	}
 
 	return resp, err
+}
+
+func backupNfs(jsonfile, dest_dir string) {
+	arguments := []string{jsonfile, "cf", "nfs_server", "vcap"}
+	password := getPassword(arguments)
+	ip := getIP(arguments)
+	sshCfg := &ssh.SshConfig{
+		Username: "vcap",
+		Password: password,
+		Host:     ip,
+		Port:     "22",
+	}
+	command := &ssh.SshRemoteCopy{
+		Command:  "cd /var/vcap/store && tar cz shared",
+		Filepath: dest_dir,
+	}
+	ssh.DialSsh(sshCfg, command)
 }
 
 func backupCCDB(cmd BackupCommand, backupscript string, jsonfile string, database_dir string) {
