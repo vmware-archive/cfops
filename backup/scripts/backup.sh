@@ -8,6 +8,12 @@ validate_software() {
 		echo "pg_dump utility not installed"
 		exit 1
 	fi
+
+	INSTALLED_MYSQL=`which mysqldump`
+	if [ -z "$INSTALLED_MYSQL" ]; then
+		echo "mysqldump utility is missing"
+		exit 1
+	fi
 }
 
 export_Encryption_key() {
@@ -54,39 +60,6 @@ toggle_cc_job() {
 	PASSWORD=$4
 	output=`curl -v -XPUT -u "$USERNAME:$PASSWORD" $SERVER_URL --insecure -H "Content-Type:text/yaml" -i -s | grep Location: | grep Location: | cut -d ' ' -f 2`
 	echo $output
-}
-
-export_nfs_server() {
-	NFS_IP=$2
-	NFS_SERVER_USER=$3
-	NFS_SERVER_PASSWORD=$4
-	NFS_DIR=$5
-	echo "EXPORT NFS-SERVER"
-
-	/usr/bin/expect -c "
-		set timeout -1
-
-		spawn scp -rp $NFS_SERVER_USER@$NFS_IP:/var/vcap/store/shared $NFS_DIR
-
-		expect {
-			-re ".*Are.*.*yes.*no.*" {
-				send yes\r ;
-				exp_continue
-			}
-
-			"*?assword:*" {
-				send $NFS_SERVER_PASSWORD\r
-			}
-		}
-		expect {
-			"*?assword:*" {
-				send $NFS_SERVER_PASSWORD\r
-				interact
-			}
-		}
-
-		exit
-	"
 }
 
 usage() {
