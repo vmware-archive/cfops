@@ -61,7 +61,7 @@ func (cmd BackupCommand) Run(args []string) error {
 
 	backupDeploymentFiles(opsManagerHost, tempestPasswd, deploymentDir)
 
-	extractEncryptionKey(cmd, backupscript, backupDir, deploymentDir)
+	extractEncryptionKey(backupscript, backupDir, deploymentDir)
 
 	exportInstallationSettings(opsManagerHost, opsManagerAdmin, opsManagerAdminPasswd, jsonfile)
 
@@ -71,19 +71,19 @@ func (cmd BackupCommand) Run(args []string) error {
 
 	ccJobs := getAllCloudControllerVMs(ip, username, password, deploymentName, backupDir)
 
-	toggleCCJobs(cmd, backupscript, ip, username, password, deploymentName, ccJobs, "stopped")
+	toggleCCJobs(backupscript, ip, username, password, deploymentName, ccJobs, "stopped")
 
-	backupCCDB(cmd, backupscript, jsonfile, databaseDir)
+	backupCCDB(backupscript, jsonfile, databaseDir)
 
-	backupUAADB(cmd, backupscript, jsonfile, databaseDir)
+	backupUAADB(backupscript, jsonfile, databaseDir)
 
-	backupConsoleDB(cmd, backupscript, jsonfile, databaseDir)
-
-	toggleCCJobs(cmd, backupscript, ip, username, password, deploymentName, ccJobs, "started")
-
-	backupMySqlDB(cmd, backupscript, jsonfile, databaseDir)
+	backupConsoleDB(backupscript, jsonfile, databaseDir)
 
 	backupNfs(jsonfile, nfsDir)
+
+	toggleCCJobs(backupscript, ip, username, password, deploymentName, ccJobs, "started")
+
+	backupMySqlDB(backupscript, jsonfile, databaseDir)
 
 	return nil
 }
@@ -93,6 +93,7 @@ func createDirectories(backupDir string, deploymentDir string, databaseDir strin
 	os.MkdirAll(deploymentDir, 0777)
 	os.MkdirAll(databaseDir, 0777)
 	os.MkdirAll(nfsDir, 0777)
+	fmt.Println("Created all required directories")
 }
 
 func backupDeploymentFiles(opsManagerHost string, tempestPasswd string, deploymentDir string) {
@@ -110,11 +111,13 @@ func backupDeploymentFiles(opsManagerHost string, tempestPasswd string, deployme
 	}
 
 	ssh.DialSsh(sshCfg, command)
+	fmt.Println("Backup of Deployment files completed")
 }
 
-func extractEncryptionKey(cmd BackupCommand, backupscript string, backupDir string, deploymentDir string) {
+func extractEncryptionKey(backupscript string, backupDir string, deploymentDir string) {
 	params := []string{"export_Encryption_key", backupDir, deploymentDir}
-	cmd.CommandRunner.Run(backupscript, params...)
+	executeCommand(backupscript, params...)
+	fmt.Println("Backup of cloud controller db encryption key completed")
 }
 
 func exportInstallationSettings(opsManagerHost string, opsManagerAdmin string, opsManagerAdminPasswd string, jsonfile string) {
@@ -138,7 +141,7 @@ func exportInstallationSettings(opsManagerHost string, opsManagerAdmin string, o
 		fmt.Printf("%s", err)
 		os.Exit(1)
 	}
-
+	fmt.Println("Backup of Installation settings completed")
 }
 
 func verifyBoshLogin(jsonfile string) (directorIP string, directorUser string, directorPassword string) {
@@ -267,7 +270,7 @@ func getAllCloudControllerVMs(ip string, username string, password string, deplo
 	return ccjobs
 }
 
-func toggleCCJobs(cmd BackupCommand, backupscript string, ip string, username string, password string, deploymentName string, ccjobs []string, state string) {
+func toggleCCJobs(backupscript string, ip string, username string, password string, deploymentName string, ccjobs []string, state string) {
 	serverURL := "https://" + ip + ":25555/"
 	for i, ccjob := range ccjobs {
 		connectionURL := serverURL + "deployments/" + deploymentName + "/jobs/" + ccjob + "/" + strconv.Itoa(i) + "?state=" + state
@@ -292,7 +295,7 @@ func toggleCCJobs(cmd BackupCommand, backupscript string, ip string, username st
 		var eventObject utils.EventObject
 		utils.GetJSONObject(contents, &eventObject)
 		if eventObject.State != "done" {
-			fmt.Println(fmt.Sprintf("Attempting to %s cloud controller %s instance %s", state, ccjob, i))
+			fmt.Println(fmt.Sprintf("Attempting to change state to %s for cloud controller %s instance %v", state, ccjob, i))
 		}
 
 		for eventObject.State != "done" {
@@ -306,7 +309,7 @@ func toggleCCJobs(cmd BackupCommand, backupscript string, ip string, username st
 
 			utils.GetJSONObject(contents, &eventObject)
 		}
-		fmt.Println(fmt.Sprintf("%s cloud controller %s instance %s", state, ccjob, i))
+		fmt.Println(fmt.Sprintf("Changed state to %s for cloud controller %s instance %v", state, ccjob, i))
 	}
 }
 
@@ -349,6 +352,7 @@ func invoke(method string, connectionURL string, username string, password strin
 }
 
 func backupNfs(jsonfile, destDir string) {
+	fmt.Println("Backup NFS Server")
 	arguments := []string{jsonfile, "cf", "nfs_server", "vcap"}
 	password := utils.GetPassword(arguments)
 	ip := utils.GetIP(arguments)
@@ -366,38 +370,47 @@ func backupNfs(jsonfile, destDir string) {
 	}
 
 	ssh.DialSsh(sshCfg, command)
+	fmt.Println("Completed Backup of NFS Server")
 }
 
-func backupCCDB(cmd BackupCommand, backupscript string, jsonfile string, databaseDir string) {
+func backupCCDB(backupscript string, jsonfile string, databaseDir string) {
+	fmt.Println("Backup Cloud Controller Database")
 	ip, password := getConnectionDetails(jsonfile, "cf", "ccdb", "admin")
 
 	dbparams := []string{"export_db", ip, "admin", password, "2544", "ccdb", databaseDir + "/ccdb.sql"}
 
-	cmd.CommandRunner.Run(backupscript, dbparams...)
+	executeCommand(backupscript, dbparams...)
+	fmt.Println("Completed Backup of Cloud Controller Database")
 }
 
-func backupUAADB(cmd BackupCommand, backupscript string, jsonfile string, databaseDir string) {
+func backupUAADB(backupscript string, jsonfile string, databaseDir string) {
+	fmt.Println("Backup UAA Database")
 	ip, password := getConnectionDetails(jsonfile, "cf", "uaadb", "root")
 
 	dbparams := []string{"export_db", ip, "root", password, "2544", "uaa", databaseDir + "/uaa.sql"}
 
-	cmd.CommandRunner.Run(backupscript, dbparams...)
+	executeCommand(backupscript, dbparams...)
+	fmt.Println("Completed Backup of UAA Database")
 }
 
-func backupConsoleDB(cmd BackupCommand, backupscript string, jsonfile string, databaseDir string) {
+func backupConsoleDB(backupscript string, jsonfile string, databaseDir string) {
+	fmt.Println("Backup Console Database")
 	ip, password := getConnectionDetails(jsonfile, "cf", "consoledb", "root")
 
 	dbparams := []string{"export_db", ip, "root", password, "2544", "console", databaseDir + "/console.sql"}
 
-	cmd.CommandRunner.Run(backupscript, dbparams...)
+	executeCommand(backupscript, dbparams...)
+	fmt.Println("Completed Backup of Console Database")
 }
 
-func backupMySqlDB(cmd BackupCommand, backupscript string, jsonfile string, databaseDir string) {
+func backupMySqlDB(backupscript string, jsonfile string, databaseDir string) {
+	fmt.Println("Backup MySQL Database")
 	ip, password := getConnectionDetails(jsonfile, "cf", "mysql", "root")
 
 	dbparams := []string{"export_mysqldb", ip, "root", password, databaseDir + "/user_databases.sql"}
 
-	cmd.CommandRunner.Run(backupscript, dbparams...)
+	executeCommand(backupscript, dbparams...)
+	fmt.Println("Completed Backup of MySQL Database")
 }
 
 func executeCommand(name string, args ...string) (string, error) {
