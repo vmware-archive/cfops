@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func getPassword(args []string) string {
+func GetPassword(args []string) string {
 
 	var password string
 
@@ -17,7 +17,7 @@ func getPassword(args []string) string {
 	contents := getFileContents(jsonfile)
 
 	var jsonObject InstallationObject
-	getJsonObject(contents, &jsonObject)
+	GetJSONObject(contents, &jsonObject)
 
 	if jsonObject.Infrastructure.Type == "vcloud" {
 		if args[1] == "microbosh" {
@@ -51,7 +51,7 @@ func getPassword(args []string) string {
 	return password
 }
 
-func getIP(args []string) string {
+func GetIP(args []string) string {
 	var ip string
 
 	jsonfile := args[0]
@@ -59,7 +59,7 @@ func getIP(args []string) string {
 	contents := getFileContents(jsonfile)
 
 	var jsonObject InstallationObject
-	getJsonObject(contents, &jsonObject)
+	GetJSONObject(contents, &jsonObject)
 
 	for _, product := range jsonObject.Products {
 		if product.Type == args[1] {
@@ -86,7 +86,7 @@ func getFileContents(jsonfile string) (contents []byte) {
 	return contents
 }
 
-func getJsonObject(contents []byte, response interface{}) {
+func GetJSONObject(contents []byte, response interface{}) {
 	err := json.Unmarshal(contents, &response)
 	if err != nil {
 		fmt.Println("error", err)
