@@ -105,12 +105,13 @@ func backupDeploymentFiles(opsManagerHost string, tempestPasswd string, deployme
 		Port:     "22",
 	}
 
-	command := &ssh.SshRemoteCopy{
-		Command:  "cd /var/tempest/workspaces/default && tar cz deployments",
-		Filepath: deploymentDir + "/deployments.tar.gz",
+	file, _ := os.Create(deploymentDir + "/deployments.tar.gz")
+	dump := &ssh.DumpToWriter{
+		Writer: file,
 	}
+	command := "cd /var/tempest/workspaces/default && tar cz deployments"
 
-	ssh.DialSsh(sshCfg, command)
+	ssh.DialSsh(sshCfg, command, dump)
 	fmt.Println("Backup of Deployment files completed")
 }
 
@@ -363,13 +364,13 @@ func backupNfs(jsonfile, destDir string) {
 		Host:     ip,
 		Port:     "22",
 	}
-
-	command := &ssh.SshRemoteCopy{
-		Command:  "cd /var/vcap/store && tar cz shared",
-		Filepath: destDir + "/nfs.tar.gz",
+	file, _ := os.Create(destDir + "/nfs.tar.gz")
+	dump := &ssh.DumpToWriter{
+		Writer: file,
 	}
+	command := "cd /var/vcap/store && tar cz shared"
 
-	ssh.DialSsh(sshCfg, command)
+	ssh.DialSsh(sshCfg, command, dump)
 	fmt.Println("Completed Backup of NFS Server")
 }
 
