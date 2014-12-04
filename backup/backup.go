@@ -106,6 +106,7 @@ func backupDeploymentFiles(opsManagerHost string, tempestPasswd string, deployme
 	}
 
 	file, _ := os.Create(deploymentDir + "/deployments.tar.gz")
+	defer file.Close()
 	dump := &ssh.DumpToWriter{
 		Writer: file,
 	}
@@ -365,6 +366,7 @@ func backupNfs(jsonfile, destDir string) {
 		Port:     "22",
 	}
 	file, _ := os.Create(destDir + "/nfs.tar.gz")
+	defer file.Close()
 	dump := &ssh.DumpToWriter{
 		Writer: file,
 	}
