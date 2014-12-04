@@ -1,0 +1,55 @@
+package unpack_test
+
+import (
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
+	"github.com/xchapter7x/goutil/unpack"
+)
+
+var _ = Describe("unpack package", func() {
+	controlANew := "hi"
+	controlAOld := "good"
+	controlBNew := "there"
+	controlBOld := "bye"
+
+	Describe("unpack args function", func() {
+		It("Should assign the value in the array to the associated pointer given", func() {
+			internalA := controlAOld
+			internalB := controlBOld
+			arr := []interface{}{controlANew, controlBNew}
+			err := unpack.Unpack(arr, &internalA, &internalB)
+			Ω(err).Should(BeNil())
+			Expect(internalA).NotTo(Equal(controlAOld))
+			Expect(internalA).To(Equal(controlANew))
+			Expect(internalB).NotTo(Equal(controlBOld))
+			Expect(internalB).To(Equal(controlBNew))
+		})
+
+		It("Should return error if there the argument lengths dont match", func() {
+			internalA := controlAOld
+			arr := []interface{}{controlANew, controlBNew}
+			err := unpack.Unpack(arr, &internalA)
+			Ω(err).ShouldNot(BeNil())
+		})
+
+		It("Should return error if there the arguments of non matching types", func() {
+			internalA := []string{"hi there"}
+			arr := []interface{}{controlANew}
+			err := unpack.Unpack(arr, &internalA)
+			Ω(err).ShouldNot(BeNil())
+		})
+
+		It("Should not panic if called with incorrect arg count", func() {
+			internalA := controlAOld
+			arr := []interface{}{controlANew, controlBNew}
+			Ω(func() { unpack.Unpack(arr, &internalA) }).ShouldNot(Panic())
+		})
+
+		It("Should not panic if called with invalid arg types", func() {
+			internalA := []string{"hi there"}
+			arr := []interface{}{controlANew}
+			Ω(func() { unpack.Unpack(arr, &internalA) }).ShouldNot(Panic())
+		})
+
+	})
+})

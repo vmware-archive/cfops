@@ -1,11 +1,10 @@
 {
 	"ImportPath": "github.com/pivotalservices/cfops",
-	"GoVersion": "go1.3.3",
+	"GoVersion": "go1.3",
+	"Packages": [
+		"./backup/"
+	],
 	"Deps": [
-		{
-			"ImportPath": "github.com/cloudfoundry-community/gogobosh",
-			"Rev": "0f1d0aabf4902af10344c50df9237bfd59376871"
-		},
 		{
 			"ImportPath": "github.com/cloudfoundry/gosteno",
 			"Comment": "scotty_09012012-41-g5c1406e",
@@ -17,18 +16,27 @@
 			"Rev": "61f43e76957561f52674f48b7dc9a07f53c8f398"
 		},
 		{
-			"ImportPath": "github.com/laher/uggo",
-			"Rev": "0ad25fe11c5bc3f5dd3201208ee3785f7599300f"
+			"ImportPath": "github.com/onsi/ginkgo",
+			"Comment": "v1.0.0-28-g6481765",
+			"Rev": "6481765dda39cbaae281109e6945449642329197"
+		},
+		{
+			"ImportPath": "github.com/onsi/gomega",
+			"Rev": "4699d5a664396173c7d9fcef9e88be297c7bae13"
+		},
+		{
+			"ImportPath": "github.com/xchapter7x/goutil/unpack",
+			"Rev": "1037b61ec7ca2051f174fcabf0999a665b412b45"
+		},
+		{
+			"ImportPath": "github.com/xchapter7x/toggle",
+			"Comment": "v1.0.0-2-g8ec4367",
+			"Rev": "8ec436717a1a43201caac19dcbbf4f53ecd65814"
 		},
 		{
 			"ImportPath": "golang.org/x/crypto/ssh",
 			"Comment": "null-234",
 			"Rev": "60a80aaa50ff0e8506f61b1fa35078a24941be50"
-		},
-		{
-			"ImportPath": "launchpad.net/goyaml",
-			"Comment": "50",
-			"Rev": "gustavo@niemeyer.net-20131114120802-abe042syx64z2m7s"
 		}
 	]
 }
