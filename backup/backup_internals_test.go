@@ -1,7 +1,6 @@
 package backup
 
 import (
-	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -26,11 +25,10 @@ var _ = Describe("Backup", func() {
 		//os.RemoveAll(dir)
 	})
 
-	FDescribe("Prepare Filesystem", func() {
+	Describe("Prepare Filesystem", func() {
 		Context("With an empty target", func() {
 			It("should create the parent directory", func() {
 				Ω(context.Target).NotTo(BeEquivalentTo(""))
-				fmt.Println(context.Target)
 				Ω(FileExists(context.Target)).To(BeFalse())
 				context.initPaths()
 				context.prepareFilesystem()
