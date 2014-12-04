@@ -1,7 +1,6 @@
 package backup
 
 import (
-	"fmt"
 	"os"
 	"path"
 	"strings"
@@ -39,8 +38,6 @@ func New(hostname string, username string, password string, tempestpassword stri
 
 // Backup performs a backup of a target Cloud Foundry deployment
 func (context *BackupContext) Run() {
-	fmt.Println("Starting backup...")
-
 	// Prepare Filesystem
 	context.prepareFilesystem()
 
