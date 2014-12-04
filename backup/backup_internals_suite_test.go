@@ -1,12 +1,13 @@
-package net_test
+package backup
 
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
 	"testing"
 )
 
-func TestNet(t *testing.T) {
+func TestBackupInternals(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "GoGoBOSH Net suite")
+	RunSpecs(t, "Backup Suite (Internal)")
 }

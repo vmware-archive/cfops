@@ -1,66 +1,73 @@
 package ssh
 
 import (
-	"bufio"
-	"bytes"
-	"errors"
+	"fmt"
 	"io"
+	"io/ioutil"
 
 	"golang.org/x/crypto/ssh"
 )
 
-type SshConfig struct {
+// Config for the SSH connection
+type Config struct {
 	Username string
 	Password string
 	Host     string
-	Port     string
+	Port     int
 }
 
-type DumpOutput interface {
-	Execute(io.Reader) (err error)
+// Copier copies from an io.Reader to an io.Writer
+type Copier interface {
+	Copy(dest io.Writer, src io.Reader) error
 }
 
-func DialSsh(sshConfig *SshConfig, command string, output DumpOutput) (err error) {
-	config := &ssh.ClientConfig{
-		User: sshConfig.Username,
-		Auth: []ssh.AuthMethod{
-			ssh.Password(sshConfig.Password),
+// DefaultCopier is an SSH copier
+type DefaultCopier struct {
+	config *Config
+}
+
+// New ssh copier
+func New(username string, password string, host string, port int) *DefaultCopier {
+	copier := &DefaultCopier{
+		config: &Config{
+			Username: username,
+			Password: password,
+			Host:     host,
+			Port:     port,
 		},
 	}
-	client, err := ssh.Dial("tcp", sshConfig.Host+":"+sshConfig.Port, config)
+	return copier
+}
+
+// Copy the output from a command to the specified io.Writer
+func (copier *DefaultCopier) Copy(dest io.Writer, src io.Reader) error {
+	// TODO: error if port <= 0
+	clientconfig := &ssh.ClientConfig{
+		User: copier.config.Username,
+		Auth: []ssh.AuthMethod{
+			ssh.Password(copier.config.Password),
+		},
+	}
+	client, err := ssh.Dial("tcp", fmt.Sprintf("%s:%d", copier.config.Host, copier.config.Port), clientconfig)
 	if err != nil {
-		err = errors.New("Failed to dial: " + err.Error())
-		return
+		return err
 	}
 	session, err := client.NewSession()
 	if err != nil {
-		err = errors.New("Failed to create session: " + err.Error())
-		return
+		return err
 	}
 
 	defer session.Close()
 
-	var b bytes.Buffer
-	session.Stdout = &b
-	if err := session.Run(command); err != nil {
-		err = errors.New("Failed to run command: " + err.Error())
+	session.Stdout = dest
+	command, err := ioutil.ReadAll(src)
+	if err != nil {
 		return err
 	}
 
-	err = output.Execute(&b)
-	if err != nil {
-		err = errors.New("Failed to execute ssh command" + err.Error())
-		return
+	if err := session.Run(string(command[:])); err != nil {
+		return err
 	}
-	return
-}
 
-type DumpToWriter struct {
-	Writer io.Writer
-}
-
-func (w *DumpToWriter) Execute(r io.Reader) (err error) {
-	reader := bufio.NewReader(r)
-	_, err = (&reader).WriteTo(w.Writer)
-	return
+	return nil
 }
