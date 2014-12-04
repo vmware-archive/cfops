@@ -31,26 +31,40 @@ type BackupContext struct {
 	json          string
 }
 
+func New(hostname string, username string, password string, tempestpassword string, target string) *BackupContext {
+	context := &BackupContext{
+		Hostname:  hostname,
+		Username:  username,
+		Password:  password,
+		TPassword: tempestpassword,
+		Target:    target,
+	}
+
+	context.initPaths()
+	return context
+}
+
 // Backup performs a backup of a target Cloud Foundry deployment
 func (context *BackupContext) Run() {
 	fmt.Println("Starting backup...")
-	// Step 1 - Prepare Filesystem
-	// backupscript := path.Join(".", "backup", "scripts", "backup.sh")
-	context.backupDir = path.Join(context.Target, time.Now().Local().Format("2006_01_02"))
-	context.deploymentDir = path.Join(context.backupDir, "deployments")
-	context.databaseDir = path.Join(context.backupDir, "database")
-	context.nfsDir = path.Join(context.backupDir, "nfs")
-	context.json = path.Join(context.backupDir, "installation.json")
 
-	// Step 2
-	context.createDirectories()
+	// Prepare Filesystem
+	context.prepareFilesystem()
 
 	// Step 3
 	context.backupDeployment()
 }
 
+func (context *BackupContext) initPaths() {
+	context.backupDir = path.Join(context.Target, time.Now().Local().Format("2006_01_02"))
+	context.deploymentDir = path.Join(context.backupDir, "deployments")
+	context.databaseDir = path.Join(context.backupDir, "database")
+	context.nfsDir = path.Join(context.backupDir, "nfs")
+	context.json = path.Join(context.backupDir, "installation.json")
+}
+
 // CreateDirectories ensures directories required for a backup job exist
-func (context *BackupContext) createDirectories() {
+func (context *BackupContext) prepareFilesystem() {
 	os.MkdirAll(context.backupDir, 0777)
 	os.MkdirAll(context.deploymentDir, 0777)
 	os.MkdirAll(context.databaseDir, 0777)

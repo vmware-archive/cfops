@@ -3,6 +3,7 @@ package ssh
 import (
 	"fmt"
 	"io"
+	"io/ioutil"
 
 	"golang.org/x/crypto/ssh"
 )
@@ -16,7 +17,7 @@ type Config struct {
 }
 
 // Copy the output from a command to the specified io.Writer
-func (config *Config) Copy(dest io.Writer, command string) error {
+func (config *Config) Copy(dest io.Writer, src io.Reader) error {
 	// TODO: error if port <= 0
 	clientconfig := &ssh.ClientConfig{
 		User: config.Username,
@@ -36,7 +37,12 @@ func (config *Config) Copy(dest io.Writer, command string) error {
 	defer session.Close()
 
 	session.Stdout = dest
-	if err := session.Run(command); err != nil {
+	command, err := ioutil.ReadAll(src)
+	if err != nil {
+		return err
+	}
+
+	if err := session.Run(string(command[:])); err != nil {
 		return err
 	}
 
