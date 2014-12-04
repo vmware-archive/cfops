@@ -1,12 +1,15 @@
 package main
 
 import (
+	"os"
+
 	"github.com/codegangsta/cli"
 	"github.com/pivotalservices/cfops/backup"
 )
 
 func main() {
-	// Call NewApp!
+	app := NewApp()
+	app.Run(os.Args)
 }
 
 func NewApp() *cli.App {
@@ -22,19 +25,46 @@ func NewApp() *cli.App {
 			Description: "Backup a Cloud Foundry deployment, including Ops Manager configuration, databases, and blob store",
 			Flags: []cli.Flag{
 				cli.StringFlag{
-					Name:   "hostname, h",
+					Name:   "hostname, host",
 					Value:  "",
 					Usage:  "hostname for Ops Manager",
 					EnvVar: "",
 				},
+				cli.StringFlag{
+					Name:   "username, u",
+					Value:  "",
+					Usage:  "username for Ops Manager",
+					EnvVar: "",
+				},
+				cli.StringFlag{
+					Name:   "password, p",
+					Value:  "",
+					Usage:  "password for Ops Manager",
+					EnvVar: "",
+				},
+				cli.StringFlag{
+					Name:   "tempestpassword, tp",
+					Value:  "",
+					Usage:  "password for the Ops Manager tempest user",
+					EnvVar: "",
+				},
+				cli.StringFlag{
+					Name:   "destination, d",
+					Value:  "",
+					Usage:  "directory where the Cloud Foundry backup should be stored",
+					EnvVar: "",
+				},
 			},
-			// Hostname      string
-			// Username      string
-			// Password      string
-			// TPassword     string
-			// Target        string
 			Action: func(c *cli.Context) {
+				if c.String("hostname") == "" || c.String("username") == "" || c.String("password") == "" || c.String("tempestpassword") == "" || c.String("destination") == "" {
+					cli.ShowCommandHelp(c, "backup")
+				}
 				context := &backup.BackupContext{}
+				context.Hostname = c.String("hostname")
+				context.Username = c.String("username")
+				context.Password = c.String("password")
+				context.TPassword = c.String("tempestpassword")
+				context.Target = c.String("destination")
 				context.Run()
 			},
 		},
