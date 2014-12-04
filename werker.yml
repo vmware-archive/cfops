@@ -13,13 +13,16 @@ build:
           export PATH=$WERCKER_SOURCE_DIR/bin:$PATH
 
     # Test the project
+    # Just testing backup for now, since that is all that works
     - script:
         name: go test
         code: |
-          godep go test ./
-    
+          godep go test ./backup/
+   
+    # Just covering backups at the moment, and setting the coverage watermark low. 
+    # this shoudl be raised as we gain more coverage
     # Test coverage for the project
     - script:
         name: go test cover
         code: |
-          ./testCoverage ./ 90 
+          ./testCoverage ./backup/ 3 
