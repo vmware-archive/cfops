@@ -2,10 +2,11 @@ package ssh_test
 
 import (
 	"bytes"
+	"strings"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	. "github.com/pivotalservices/cfops/ssh"
-	"strings"
 )
 
 var _ = Describe("Ssh", func() {

@@ -1,9 +1,10 @@
 package config_test
 
 import (
-	. "github.com/pivotalservices/cfops/config"
 	"io/ioutil"
 	"os"
+
+	. "github.com/pivotalservices/cfops/config"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

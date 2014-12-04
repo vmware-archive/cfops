@@ -1,6 +1,9 @@
 package main
 
 import (
+	"os"
+	"strings"
+
 	"github.com/cloudfoundry/gosteno"
 	"github.com/codegangsta/cli"
 	"github.com/pivotalservices/cfops/backup"
@@ -9,8 +12,6 @@ import (
 	"github.com/pivotalservices/cfops/install"
 	"github.com/pivotalservices/cfops/start"
 	"github.com/pivotalservices/cfops/system"
-	"os"
-	"strings"
 )
 
 var (

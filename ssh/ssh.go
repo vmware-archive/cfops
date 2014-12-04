@@ -4,8 +4,9 @@ import (
 	"bufio"
 	"bytes"
 	"errors"
-	"golang.org/x/crypto/ssh"
 	"io"
+
+	"golang.org/x/crypto/ssh"
 )
 
 type SshConfig struct {
