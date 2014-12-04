@@ -17,6 +17,9 @@ import (
 	"github.com/pivotalservices/cfops/ssh"
 	"github.com/pivotalservices/cfops/system"
 	"github.com/pivotalservices/cfops/utils"
+	"github.com/xchapter7x/goutil/unpack"
+	"github.com/xchapter7x/toggle"
+	"github.com/xchapter7x/toggle/engines/localengine"
 )
 
 type BackupCommand struct {
@@ -35,6 +38,9 @@ func (cmd BackupCommand) Metadata() cli.CommandMetadata {
 }
 
 func (cmd BackupCommand) Run(args []string) error {
+	toggle.Init("CFOPS_BACKUP", localengine.NewLocalEngine())
+	toggle.RegisterFeature("CREATE_DIR")
+
 	backupscript := "./backup/scripts/backup.sh"
 	params := []string{"usage"}
 	if len(args) > 0 {
@@ -57,7 +63,13 @@ func (cmd BackupCommand) Run(args []string) error {
 	nfsDir := backupDir + "/nfs_share"
 	jsonfile := backupDir + "/installation.json"
 
-	createDirectories(backupDir, deploymentDir, databaseDir, nfsDir)
+	responseArray := toggle.Flip("CREATE_DIR", createDirectories, CreateDirectoriesAdaptor, backupDir, deploymentDir, databaseDir, nfsDir)
+	var err error
+	unpack.Unpack(responseArray, &err)
+
+	if err != nil {
+		fmt.Println("Something went terribly wrong")
+	}
 
 	backupDeploymentFiles(opsManagerHost, tempestPasswd, deploymentDir)
 
@@ -88,12 +100,13 @@ func (cmd BackupCommand) Run(args []string) error {
 	return nil
 }
 
-func createDirectories(backupDir string, deploymentDir string, databaseDir string, nfsDir string) {
+func createDirectories(backupDir string, deploymentDir string, databaseDir string, nfsDir string) (err error) {
 	os.MkdirAll(backupDir, 0777)
 	os.MkdirAll(deploymentDir, 0777)
 	os.MkdirAll(databaseDir, 0777)
 	os.MkdirAll(nfsDir, 0777)
 	fmt.Println("Created all required directories")
+	return
 }
 
 func backupDeploymentFiles(opsManagerHost string, tempestPasswd string, deploymentDir string) {
