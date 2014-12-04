@@ -2,8 +2,7 @@
 
 EXITCODE=0;
 WATERMARK=$2;
-TESTDIR=$1
-godep go test -cover ${TESTDIR} | {
+godep go test -cover ./... | {
   while read -r COVEROUTPUT;do 
     echo ${COVEROUTPUT};
 
@@ -19,5 +18,4 @@ godep go test -cover ${TESTDIR} | {
   done
   exit ${EXITCODE}
 }
-
 
