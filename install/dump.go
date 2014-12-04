@@ -8,25 +8,9 @@ import (
 	"github.com/cloudfoundry-community/gogobosh/local"
 	"github.com/cloudfoundry-community/gogobosh/net"
 	"github.com/cloudfoundry-community/gogobosh/utils"
-	"github.com/cloudfoundry/gosteno"
-
-	"github.com/pivotalservices/cfops/cli"
 )
 
-type DumpCommand struct {
-	Logger *gosteno.Logger
-}
-
-func (cmd DumpCommand) Metadata() cli.CommandMetadata {
-	return cli.CommandMetadata{
-		Name:        "dump",
-		ShortName:   "d",
-		Usage:       "dump the configuration information of an existing deployment",
-		Description: "dump an existing cloud foundry foundation deployment configuration from the iaas",
-	}
-}
-
-func (cmd DumpCommand) Run(args []string) (err error) {
+func Run(args []string) (err error) {
 	utils.Logger = utils.NewLogger()
 
 	// target := flag.String("target", "https://192.168.50.4:25555", "BOSH director host")
