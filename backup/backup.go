@@ -33,6 +33,7 @@ type BackupContext struct {
 
 // Backup performs a backup of a target Cloud Foundry deployment
 func (context *BackupContext) Run() {
+	fmt.Println("Starting backup...")
 	// Step 1 - Prepare Filesystem
 	// backupscript := path.Join(".", "backup", "scripts", "backup.sh")
 	context.backupDir = path.Join(context.Target, time.Now().Local().Format("2006_01_02"))
