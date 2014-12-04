@@ -16,16 +16,36 @@ type Config struct {
 	Port     int
 }
 
-// Copy the output from a command to the specified io.Writer
-func (config *Config) Copy(dest io.Writer, src io.Reader) error {
-	// TODO: error if port <= 0
-	clientconfig := &ssh.ClientConfig{
-		User: config.Username,
-		Auth: []ssh.AuthMethod{
-			ssh.Password(config.Password),
+type Copier interface {
+	Copy(dest io.Writer, src io.Reader) error
+}
+
+type sshCopier struct {
+	config *Config
+}
+
+func New(username string, password string, host string, port int) *sshCopier {
+	copier := &sshCopier{
+		config: &Config{
+			Username: username,
+			Password: password,
+			Host:     host,
+			Port:     port,
 		},
 	}
-	client, err := ssh.Dial("tcp", fmt.Sprintf("%s:%d", config.Host, config.Port), clientconfig)
+	return copier
+}
+
+// Copy the output from a command to the specified io.Writer
+func (copier *sshCopier) Copy(dest io.Writer, src io.Reader) error {
+	// TODO: error if port <= 0
+	clientconfig := &ssh.ClientConfig{
+		User: copier.config.Username,
+		Auth: []ssh.AuthMethod{
+			ssh.Password(copier.config.Password),
+		},
+	}
+	client, err := ssh.Dial("tcp", fmt.Sprintf("%s:%d", copier.config.Host, copier.config.Port), clientconfig)
 	if err != nil {
 		return err
 	}
