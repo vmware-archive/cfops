@@ -1,7 +1,7 @@
 package system_test
 
 import (
-	"github.com/malston/cf-logsearch-service-broker/system"
+	"github.com/malston/cf-logsearch-broker/system"
 	"github.com/pivotal-golang/lager/lagertest"
 
 	. "github.com/onsi/ginkgo"
