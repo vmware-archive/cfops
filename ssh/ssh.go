@@ -16,16 +16,19 @@ type Config struct {
 	Port     int
 }
 
+// Copier copies from an io.Reader to an io.Writer
 type Copier interface {
 	Copy(dest io.Writer, src io.Reader) error
 }
 
-type sshCopier struct {
+// DefaultCopier is an SSH copier
+type DefaultCopier struct {
 	config *Config
 }
 
-func New(username string, password string, host string, port int) *sshCopier {
-	copier := &sshCopier{
+// New ssh copier
+func New(username string, password string, host string, port int) *DefaultCopier {
+	copier := &DefaultCopier{
 		config: &Config{
 			Username: username,
 			Password: password,
@@ -37,7 +40,7 @@ func New(username string, password string, host string, port int) *sshCopier {
 }
 
 // Copy the output from a command to the specified io.Writer
-func (copier *sshCopier) Copy(dest io.Writer, src io.Reader) error {
+func (copier *DefaultCopier) Copy(dest io.Writer, src io.Reader) error {
 	// TODO: error if port <= 0
 	clientconfig := &ssh.ClientConfig{
 		User: copier.config.Username,
