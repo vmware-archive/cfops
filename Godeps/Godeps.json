@@ -1,6 +1,6 @@
 {
 	"ImportPath": "github.com/pivotalservices/cfops",
-	"GoVersion": "go1.3",
+	"GoVersion": "go1.3.3",
 	"Packages": [
 		"./..."
 	],
@@ -10,18 +10,9 @@
 			"Rev": "0f1d0aabf4902af10344c50df9237bfd59376871"
 		},
 		{
-			"ImportPath": "github.com/cloudfoundry/gosteno",
-			"Comment": "scotty_09012012-41-g5c1406e",
-			"Rev": "5c1406e9ea0ab919f92e1b194169565def41147b"
-		},
-		{
 			"ImportPath": "github.com/codegangsta/cli",
 			"Comment": "1.2.0-28-g61f43e7",
 			"Rev": "61f43e76957561f52674f48b7dc9a07f53c8f398"
-		},
-		{
-			"ImportPath": "github.com/malston/cf-logsearch-service-broker/system",
-			"Rev": "3994dec7a5d19a46186b8321361b058791ca6f7b"
 		},
 		{
 			"ImportPath": "github.com/onsi/ginkgo",
@@ -31,19 +22,6 @@
 		{
 			"ImportPath": "github.com/onsi/gomega",
 			"Rev": "4699d5a664396173c7d9fcef9e88be297c7bae13"
-		},
-		{
-			"ImportPath": "github.com/pivotal-golang/lager",
-			"Rev": "1baba58607e680b5659dddcad70d53abe5af039e"
-		},
-		{
-			"ImportPath": "github.com/xchapter7x/goutil/unpack",
-			"Rev": "1037b61ec7ca2051f174fcabf0999a665b412b45"
-		},
-		{
-			"ImportPath": "github.com/xchapter7x/toggle",
-			"Comment": "v1.0.0-2-g8ec4367",
-			"Rev": "8ec436717a1a43201caac19dcbbf4f53ecd65814"
 		},
 		{
 			"ImportPath": "golang.org/x/crypto/ssh",
