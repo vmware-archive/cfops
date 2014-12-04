@@ -13,8 +13,6 @@ build:
           cd $WERCKER_SOURCE_DIR
           go version
           go get -u github.com/tools/godep
-          go get -u github.com/onsi/ginkgo/ginkgo
-          go get -u github.com/onsi/gomega
           export PATH=$WERCKER_SOURCE_DIR/bin:$PATH
 
     # Test the project
@@ -22,7 +20,6 @@ build:
         name: go test
         code: |
           godep go test ./... -v -race
-          godep ginkgo -r
 
     # Setting the coverage watermark low.
     # This should be raised as we gain more coverage...
