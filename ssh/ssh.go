@@ -1,66 +1,44 @@
 package ssh
 
 import (
-	"bufio"
-	"bytes"
-	"errors"
+	"fmt"
 	"io"
 
 	"golang.org/x/crypto/ssh"
 )
 
-type SshConfig struct {
+// Config for the SSH connection
+type Config struct {
 	Username string
 	Password string
 	Host     string
-	Port     string
+	Port     int
 }
 
-type DumpOutput interface {
-	Execute(io.Reader) (err error)
-}
-
-func DialSsh(sshConfig *SshConfig, command string, output DumpOutput) (err error) {
-	config := &ssh.ClientConfig{
-		User: sshConfig.Username,
+// Copy the output from a command to the specified io.Writer
+func (config *Config) Copy(dest io.Writer, command string) error {
+	// TODO: error if port <= 0
+	clientconfig := &ssh.ClientConfig{
+		User: config.Username,
 		Auth: []ssh.AuthMethod{
-			ssh.Password(sshConfig.Password),
+			ssh.Password(config.Password),
 		},
 	}
-	client, err := ssh.Dial("tcp", sshConfig.Host+":"+sshConfig.Port, config)
+	client, err := ssh.Dial("tcp", fmt.Sprintf("%s:%d", config.Host, config.Port), clientconfig)
 	if err != nil {
-		err = errors.New("Failed to dial: " + err.Error())
-		return
+		return err
 	}
 	session, err := client.NewSession()
 	if err != nil {
-		err = errors.New("Failed to create session: " + err.Error())
-		return
+		return err
 	}
 
 	defer session.Close()
 
-	var b bytes.Buffer
-	session.Stdout = &b
+	session.Stdout = dest
 	if err := session.Run(command); err != nil {
-		err = errors.New("Failed to run command: " + err.Error())
 		return err
 	}
 
-	err = output.Execute(&b)
-	if err != nil {
-		err = errors.New("Failed to execute ssh command" + err.Error())
-		return
-	}
-	return
-}
-
-type DumpToWriter struct {
-	Writer io.Writer
-}
-
-func (w *DumpToWriter) Execute(r io.Reader) (err error) {
-	reader := bufio.NewReader(r)
-	_, err = (&reader).WriteTo(w.Writer)
-	return
+	return nil
 }

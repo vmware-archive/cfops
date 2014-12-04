@@ -8,9 +8,9 @@ import (
 )
 
 var _ = Describe("Backup", func() {
-	Context(" function", func() {
+	context := &BackupContext{}
 		It("", func() {
-			Ω(nil).Should(BeNil())
+	Ω(context).ShouldNot(BeNil())
 		})
 	})
 })

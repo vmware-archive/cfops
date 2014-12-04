@@ -8,126 +8,97 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/cloudfoundry/gosteno"
-	"github.com/pivotalservices/cfops/cli"
 	"github.com/pivotalservices/cfops/ssh"
-	"github.com/pivotalservices/cfops/system"
 	"github.com/pivotalservices/cfops/utils"
-	"github.com/xchapter7x/goutil/unpack"
-	"github.com/xchapter7x/toggle"
-	"github.com/xchapter7x/toggle/engines/localengine"
 )
 
-type BackupCommand struct {
-	CommandRunner system.CommandRunner
-	Logger        *gosteno.Logger
-	Config        *BackupConfig
+// BackupContext provides context for a backup job
+type BackupContext struct {
+	Hostname      string
+	Username      string
+	Password      string
+	TPassword     string
+	Target        string
+	backupDir     string
+	deploymentDir string
+	databaseDir   string
+	nfsDir        string
+	json          string
 }
 
-func (cmd BackupCommand) Metadata() cli.CommandMetadata {
-	return cli.CommandMetadata{
-		Name:        "backup",
-		ShortName:   "b",
-		Usage:       "backup an existing deployment",
-		Description: "backup an existing cloud foundry foundation deployment from the iaas",
-	}
+// Backup performs a backup of a target Cloud Foundry deployment
+func (context *BackupContext) Run() {
+	// Step 1 - Prepare Filesystem
+	// backupscript := path.Join(".", "backup", "scripts", "backup.sh")
+	context.backupDir = path.Join(context.Target, time.Now().Local().Format("2006_01_02"))
+	context.deploymentDir = path.Join(context.backupDir, "deployments")
+	context.databaseDir = path.Join(context.backupDir, "database")
+	context.nfsDir = path.Join(context.backupDir, "nfs")
+	context.json = path.Join(context.backupDir, "installation.json")
+
+	// Step 2
+	context.createDirectories()
+
+	// Step 3
+	context.backupDeployment()
 }
 
-func (cmd BackupCommand) Run(args []string) error {
-	toggle.Init("CFOPS_BACKUP", localengine.NewLocalEngine())
-	toggle.RegisterFeature("CREATE_DIR")
-
-	backupscript := "./backup/scripts/backup.sh"
-	params := []string{"usage"}
-	if len(args) > 0 {
-		cmd.CommandRunner.Run(backupscript, params...)
-		return nil
-	}
-
-	opsManagerHost := cmd.Config.OpsManagerHost
-	tempestPasswd := cmd.Config.TempestPassword
-	opsManagerAdmin := cmd.Config.OpsManagerAdminUser
-	opsManagerAdminPasswd := cmd.Config.OpsManagerAdminPassword
-	backupLocation := cmd.Config.BackupFileLocation
-
-	currenttime := time.Now().Local()
-	formattedtime := currenttime.Format("2006_01_02")
-	backupDir := backupLocation + "/Backup_" + formattedtime
-
-	deploymentDir := backupDir + "/deployments"
-	databaseDir := backupDir + "/database"
-	nfsDir := backupDir + "/nfs_share"
-	jsonfile := backupDir + "/installation.json"
-
-	responseArray := toggle.Flip("CREATE_DIR", createDirectories, CreateDirectoriesAdaptor(os.MkdirAll), backupDir, deploymentDir, databaseDir, nfsDir)
-	var err error
-	unpack.Unpack(responseArray, &err)
-
-	if err != nil {
-		fmt.Println("Something went terribly wrong")
-	}
-
-	backupDeploymentFiles(opsManagerHost, tempestPasswd, deploymentDir)
-
-	extractEncryptionKey(backupscript, backupDir, deploymentDir)
-
-	exportInstallationSettings(opsManagerHost, opsManagerAdmin, opsManagerAdminPasswd, jsonfile)
-
-	ip, username, password := verifyBoshLogin(jsonfile)
-
-	deploymentName := getElasticRuntimeDeploymentName(ip, username, password, backupDir)
-
-	ccJobs := getAllCloudControllerVMs(ip, username, password, deploymentName, backupDir)
-
-	toggleCCJobs(backupscript, ip, username, password, deploymentName, ccJobs, "stopped")
-
-	backupCCDB(backupscript, jsonfile, databaseDir)
-
-	backupUAADB(backupscript, jsonfile, databaseDir)
-
-	backupConsoleDB(backupscript, jsonfile, databaseDir)
-
-	backupNfs(jsonfile, nfsDir)
-
-	toggleCCJobs(backupscript, ip, username, password, deploymentName, ccJobs, "started")
-
-	backupMySqlDB(backupscript, jsonfile, databaseDir)
-
-	return nil
+// CreateDirectories ensures directories required for a backup job exist
+func (context *BackupContext) createDirectories() {
+	os.MkdirAll(context.backupDir, 0777)
+	os.MkdirAll(context.deploymentDir, 0777)
+	os.MkdirAll(context.databaseDir, 0777)
+	os.MkdirAll(context.nfsDir, 0777)
 }
 
-func createDirectories(backupDir string, deploymentDir string, databaseDir string, nfsDir string) (err error) {
-	os.MkdirAll(backupDir, 0777)
-	os.MkdirAll(deploymentDir, 0777)
-	os.MkdirAll(databaseDir, 0777)
-	os.MkdirAll(nfsDir, 0777)
-	fmt.Println("Created all required directories")
-	return
-}
-
-func backupDeploymentFiles(opsManagerHost string, tempestPasswd string, deploymentDir string) {
-
-	sshCfg := &ssh.SshConfig{
+func (context *BackupContext) backupDeployment() {
+	config := &ssh.Config{
 		Username: "tempest",
-		Password: tempestPasswd,
-		Host:     opsManagerHost,
-		Port:     "22",
+		Password: context.TPassword,
+		Host:     context.Hostname,
+		Port:     22,
 	}
 
-	file, _ := os.Create(deploymentDir + "/deployments.tar.gz")
+	file, _ := os.Create(path.Join(context.deploymentDir, "deployments.tar.gz"))
 	defer file.Close()
-	dump := &ssh.DumpToWriter{
-		Writer: file,
-	}
 	command := "cd /var/tempest/workspaces/default && tar cz deployments"
 
-	ssh.DialSsh(sshCfg, command, dump)
-	fmt.Println("Backup of Deployment files completed")
+	config.Copy(file, command)
 }
+
+// func Run(context *BackupContext) error {
+
+// extractEncryptionKey(backupscript, backupDir, deploymentDir)
+//
+// exportInstallationSettings(context.Hostname, context.Username, context.Password, jsonfile)
+//
+// ip, username, password := verifyBoshLogin(jsonfile)
+//
+// deploymentName := getElasticRuntimeDeploymentName(ip, username, password, backupDir)
+//
+// ccJobs := getAllCloudControllerVMs(ip, username, password, deploymentName, backupDir)
+//
+// toggleCCJobs(backupscript, ip, username, password, deploymentName, ccJobs, "stopped")
+//
+// backupCCDB(backupscript, jsonfile, databaseDir)
+//
+// backupUAADB(backupscript, jsonfile, databaseDir)
+//
+// backupConsoleDB(backupscript, jsonfile, databaseDir)
+//
+// backupNfs(jsonfile, nfsDir)
+//
+// toggleCCJobs(backupscript, ip, username, password, deploymentName, ccJobs, "started")
+//
+// backupMySqlDB(backupscript, jsonfile, databaseDir)
+//
+// 	return nil
+// }
 
 func extractEncryptionKey(backupscript string, backupDir string, deploymentDir string) {
 	params := []string{"export_Encryption_key", backupDir, deploymentDir}
@@ -135,10 +106,10 @@ func extractEncryptionKey(backupscript string, backupDir string, deploymentDir s
 	fmt.Println("Backup of cloud controller db encryption key completed")
 }
 
-func exportInstallationSettings(opsManagerHost string, opsManagerAdmin string, opsManagerAdminPasswd string, jsonfile string) {
-	connectionURL := "https://" + opsManagerHost + "/api/installation_settings"
+func (context *BackupContext) exportInstallationSettings(jsonfile string) {
+	connectionURL := "https://" + context.Hostname + "/api/installation_settings"
 
-	resp, err := invoke("GET", connectionURL, opsManagerAdmin, opsManagerAdminPasswd, false)
+	resp, err := invoke("GET", connectionURL, context.Username, context.Password, false)
 	if err != nil {
 		fmt.Printf("%s", err)
 		os.Exit(1)
@@ -372,21 +343,16 @@ func backupNfs(jsonfile, destDir string) {
 	password := utils.GetPassword(arguments)
 	ip := utils.GetIP(arguments)
 
-	sshCfg := &ssh.SshConfig{
+	config := &ssh.Config{
 		Username: "vcap",
 		Password: password,
 		Host:     ip,
-		Port:     "22",
+		Port:     22,
 	}
 	file, _ := os.Create(destDir + "/nfs.tar.gz")
 	defer file.Close()
-	dump := &ssh.DumpToWriter{
-		Writer: file,
-	}
 	command := "cd /var/vcap/store && tar cz shared"
-
-	ssh.DialSsh(sshCfg, command, dump)
-	fmt.Println("Completed Backup of NFS Server")
+	config.Copy(file, command)
 }
 
 func backupCCDB(backupscript string, jsonfile string, databaseDir string) {
