@@ -63,7 +63,7 @@ func (cmd BackupCommand) Run(args []string) error {
 	nfsDir := backupDir + "/nfs_share"
 	jsonfile := backupDir + "/installation.json"
 
-	responseArray := toggle.Flip("CREATE_DIR", createDirectories, CreateDirectoriesAdaptor, backupDir, deploymentDir, databaseDir, nfsDir)
+	responseArray := toggle.Flip("CREATE_DIR", createDirectories, CreateDirectoriesAdaptor(os.MkdirAll), backupDir, deploymentDir, databaseDir, nfsDir)
 	var err error
 	unpack.Unpack(responseArray, &err)
 

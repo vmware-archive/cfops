@@ -4,10 +4,11 @@ import "os"
 
 var defaultFileMode os.FileMode = 0777
 
-func CreateDirectoriesAdaptor(backupDir string, deploymentDir string, databaseDir string, nfsDir string) (err error) {
-	directoryList := []string{backupDir, deploymentDir, databaseDir, nfsDir}
-	err = MultiDirectoryCreate(directoryList, os.MkdirAll)
-	return
+func CreateDirectoriesAdaptor(makeDirectoryFunctor func(string, os.FileMode) error) func(directoryList ...string) (err error) {
+	return func(directoryList ...string) (err error) {
+		err = MultiDirectoryCreate(directoryList, makeDirectoryFunctor)
+		return
+	}
 }
 
 func MultiDirectoryCreate(directoryList []string, makeDirectoryFunctor func(string, os.FileMode) error) (err error) {
