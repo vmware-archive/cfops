@@ -1,4 +1,4 @@
-package createfs_test
+package osutils_test
 
 import (
 	. "github.com/onsi/ginkgo"
@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestCreatefs(t *testing.T) {
+func TestOsutils(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Createfs Suite")
+	RunSpecs(t, "Osutils Suite")
 }

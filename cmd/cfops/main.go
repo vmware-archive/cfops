@@ -12,6 +12,7 @@ func main() {
 	app.Run(os.Args)
 }
 
+// NewApp creates a new cli app
 func NewApp() *cli.App {
 
 	app := cli.NewApp()
@@ -59,13 +60,8 @@ func NewApp() *cli.App {
 				if c.String("hostname") == "" || c.String("username") == "" || c.String("password") == "" || c.String("tempestpassword") == "" || c.String("destination") == "" {
 					cli.ShowCommandHelp(c, "backup")
 				}
-				context := &backup.BackupContext{}
-				context.Hostname = c.String("hostname")
-				context.Username = c.String("username")
-				context.Password = c.String("password")
-				context.TPassword = c.String("tempestpassword")
-				context.Target = c.String("destination")
-				context.Run()
+				opsmanager := backup.NewOpsManager(c.String("hostname"), c.String("username"), c.String("password"), c.String("tempestpassword"), c.String("destination"))
+				opsmanager.Backup()
 			},
 		},
 	}...)
