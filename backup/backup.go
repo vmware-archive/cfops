@@ -36,14 +36,36 @@ func New(hostname string, username string, password string, tempestpassword stri
 	return context
 }
 
-// Backup performs a backup of a target Cloud Foundry deployment
-func (context *BackupContext) Run() {
-	// Prepare Filesystem
-	context.prepareFilesystem()
+// Run performs a backup of a target Cloud Foundry deployment
+func (context *BackupContext) Run() (err error) {
+	pipeline := context.getPipeline()
+	err = context.ExecutePipeline(pipeline)
+	return
+}
 
-	// Backup Tempest Files
+//ExecutePipeline runs through a pipeline of backup tasks
+func (context *BackupContext) ExecutePipeline(pipeline []func() error) (err error) {
+	for _, functor := range pipeline {
+		err = functor()
+
+		if err != nil {
+			break
+		}
+	}
+	return
+}
+
+func (context *BackupContext) getPipeline() (pipeline []func() error) {
+	pipeline = []func() error{
+		context.prepareFilesystem(os.MkdirAll),
+		context.backupTempestFiles,
+	}
+	return
+}
+
+func (context *BackupContext) backupTempestFiles() error {
 	copier := ssh.New("tempest", context.TPassword, context.Hostname, 22)
-	context.backupDeployment(copier)
+	return context.backupDeployment(copier)
 }
 
 func (context *BackupContext) initPaths() {
@@ -54,16 +76,17 @@ func (context *BackupContext) initPaths() {
 	context.json = path.Join(context.backupDir, "installation.json")
 }
 
-// CreateDirectories ensures directories required for a backup job exist
-func (context *BackupContext) prepareFilesystem() (err error) {
-	directoryList := []string{
-		context.backupDir,
-		context.deploymentDir,
-		context.databaseDir,
-		context.nfsDir,
+func (context *BackupContext) prepareFilesystem(MkdirAll func(string, os.FileMode) error) func() error {
+	return func() (err error) {
+		directoryList := []string{
+			context.backupDir,
+			context.deploymentDir,
+			context.databaseDir,
+			context.nfsDir,
+		}
+		err = MultiDirectoryCreate(directoryList, MkdirAll)
+		return
 	}
-	err = MultiDirectoryCreate(directoryList, os.MkdirAll)
-	return
 }
 
 func (context *BackupContext) backupDeployment(copier ssh.Copier) error {

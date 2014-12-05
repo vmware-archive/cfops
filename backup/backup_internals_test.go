@@ -31,7 +31,7 @@ var _ = Describe("Backup", func() {
 				Ω(context.Target).NotTo(BeEquivalentTo(""))
 				Ω(FileExists(context.Target)).To(BeFalse())
 				context.initPaths()
-				context.prepareFilesystem()
+				context.prepareFilesystem(os.MkdirAll)()
 				Ω(FileExists(context.Target)).To(BeTrue())
 			})
 
