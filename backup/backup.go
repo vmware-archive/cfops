@@ -44,29 +44,6 @@ type BackupContext struct {
 // 	fmt.Println("Backup of cloud controller db encryption key completed")
 // }
 //
-// func (context *BackupContext) exportInstallationSettings(jsonfile string) {
-// 	connectionURL := "https://" + context.Hostname + "/api/installation_settings"
-//
-// 	resp, err := invoke("GET", connectionURL, context.Username, context.Password, false)
-// 	if err != nil {
-// 		fmt.Printf("%s", err)
-// 		os.Exit(1)
-// 	}
-//
-// 	defer resp.Body.Close()
-// 	contents, err := ioutil.ReadAll(resp.Body)
-// 	if err != nil {
-// 		fmt.Printf("%s", err)
-// 		os.Exit(1)
-// 	}
-//
-// 	err = ioutil.WriteFile(jsonfile, contents, 0644)
-// 	if err != nil {
-// 		fmt.Printf("%s", err)
-// 		os.Exit(1)
-// 	}
-// 	fmt.Println("Backup of Installation settings completed")
-// }
 //
 // func verifyBoshLogin(jsonfile string) (directorIP string, directorUser string, directorPassword string) {
 // 	var username = "director"
@@ -255,25 +232,6 @@ type BackupContext struct {
 // 	return contents, err
 // }
 //
-// func invoke(method string, connectionURL string, username string, password string, isYaml bool) (*http.Response, error) {
-// 	tr := &http.Transport{
-// 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-// 	}
-//
-// 	req, err := http.NewRequest(method, connectionURL, nil)
-// 	req.SetBasicAuth(username, password)
-//
-// 	if isYaml {
-// 		req.Header.Set("Content-Type", "text/yaml")
-// 	}
-//
-// 	resp, err := tr.RoundTrip(req)
-// 	if err != nil {
-// 		fmt.Printf("Error : %s", err)
-// 	}
-//
-// 	return resp, err
-// }
 //
 // func backupNfs(jsonfile, destDir string) {
 // 	fmt.Println("Backup NFS Server")

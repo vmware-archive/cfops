@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"os"
 	"path"
 	"strings"
 
@@ -22,7 +23,7 @@ var _ = Describe("Backup", func() {
 	})
 
 	AfterEach(func() {
-		//os.RemoveAll(dir)
+		os.RemoveAll(dir)
 	})
 
 	Describe("Prepare Filesystem", func() {
