@@ -4,13 +4,6 @@ import "os"
 
 var defaultFileMode os.FileMode = 0777
 
-func CreateDirectoriesAdaptor(makeDirectoryFunctor func(string, os.FileMode) error) func(directoryList ...string) (err error) {
-	return func(directoryList ...string) (err error) {
-		err = MultiDirectoryCreate(directoryList, makeDirectoryFunctor)
-		return
-	}
-}
-
 func MultiDirectoryCreate(directoryList []string, makeDirectoryFunctor func(string, os.FileMode) error) (err error) {
 
 	for _, dirname := range directoryList {

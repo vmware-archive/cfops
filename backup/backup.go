@@ -55,11 +55,15 @@ func (context *BackupContext) initPaths() {
 }
 
 // CreateDirectories ensures directories required for a backup job exist
-func (context *BackupContext) prepareFilesystem() {
-	os.MkdirAll(context.backupDir, 0777)
-	os.MkdirAll(context.deploymentDir, 0777)
-	os.MkdirAll(context.databaseDir, 0777)
-	os.MkdirAll(context.nfsDir, 0777)
+func (context *BackupContext) prepareFilesystem() (err error) {
+	directoryList := []string{
+		context.backupDir,
+		context.deploymentDir,
+		context.databaseDir,
+		context.nfsDir,
+	}
+	err = MultiDirectoryCreate(directoryList, os.MkdirAll)
+	return
 }
 
 func (context *BackupContext) backupDeployment(copier ssh.Copier) error {

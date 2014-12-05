@@ -53,32 +53,6 @@ var _ = Describe("Backup", func() {
 		successCounter = 0
 	})
 
-	Context("CreateDirectoriesAdaptor function", func() {
-		It("Should return nil error on success and have called the mkdir functor the proper amount of times", func() {
-			controlCallCount := len(directoryList)
-			f := CreateDirectoriesAdaptor(mockMkDirSuccess)
-			err := f(directoryList...)
-			Ω(err).Should(BeNil())
-			Expect(successCounter).To(Equal(controlCallCount))
-		})
-
-		It("Should return not nil error on error", func() {
-			controlCallCount := len(directoryList)
-			f := CreateDirectoriesAdaptor(mockMkDirError)
-			err := f(directoryList...)
-			Ω(err).ShouldNot(BeNil())
-			Expect(errorCounter).NotTo(Equal(controlCallCount))
-		})
-
-		It("Should exit the call loop when a error is encountered", func() {
-			controlCallCount := callCountCutoff
-			f := CreateDirectoriesAdaptor(mockMkDirErrorIfTwiceCalled)
-			err := f(directoryList...)
-			Ω(err).ShouldNot(BeNil())
-			Expect(successCounter).To(Equal(controlCallCount))
-		})
-	})
-
 	Context("MultiDirectoryCreate function", func() {
 		It("Should return nil error on success and have called the mkdir functor the proper amount of times", func() {
 			controlCallCount := len(directoryList)
