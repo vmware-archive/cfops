@@ -3,10 +3,10 @@ package backup
 import (
 	"os"
 	"path"
-	"strings"
 	"time"
 
 	"github.com/pivotalservices/cfops/backup/steps/createfs"
+	"github.com/pivotalservices/cfops/backup/steps/deployment"
 	"github.com/pivotalservices/cfops/ssh"
 )
 
@@ -74,7 +74,8 @@ func (context *BackupContext) initPaths() {
 
 func (context *BackupContext) backupTempestFiles() error {
 	copier := ssh.New("tempest", context.TPassword, context.Hostname, 22)
-	return context.backupDeployment(copier)
+	deploy := deployment.New(context.deploymentDir)
+	return deploy.Backup(copier)
 }
 
 func (context *BackupContext) prepareFilesystem() (err error) {
@@ -86,15 +87,6 @@ func (context *BackupContext) prepareFilesystem() (err error) {
 	}
 	err = createfs.MultiDirectoryCreate(directoryList, os.MkdirAll)
 	return
-}
-
-func (context *BackupContext) backupDeployment(copier ssh.Copier) error {
-	file, _ := os.Create(path.Join(context.deploymentDir, "deployments.tar.gz"))
-	defer file.Close()
-	command := "cd /var/tempest/workspaces/default && tar cz deployments"
-
-	err := copier.Copy(file, strings.NewReader(command))
-	return err
 }
 
 // func Run(context *BackupContext) error {

@@ -1,7 +1,6 @@
 package backup
 
 import (
-	"io"
 	"io/ioutil"
 	"os"
 	"path"
@@ -34,29 +33,9 @@ var _ = Describe("Backup", func() {
 				context.prepareFilesystem()
 				Ω(FileExists(context.Target)).To(BeTrue())
 			})
-
-			It("should backup a tempest deployment's files", func() {
-				copier := &testCopier{}
-				err := context.backupDeployment(copier)
-				Ω(err).Should(BeNil())
-				s, _ := ioutil.ReadAll(copier.src)
-				Ω(string(s[:])).To(BeEquivalentTo("cd /var/tempest/workspaces/default && tar cz deployments"))
-			})
 		})
 	})
 })
-
-type testCopier struct {
-	src  io.Reader
-	dest io.Writer
-}
-
-func (copier *testCopier) Copy(dest io.Writer, src io.Reader) error {
-	io.Copy(dest, src)
-	copier.dest = dest
-	copier.src = src
-	return nil
-}
 
 func FileExists(path string) bool {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
