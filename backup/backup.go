@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pivotalservices/cfops/backup/steps/createfs"
 	"github.com/pivotalservices/cfops/ssh"
 )
 
@@ -38,7 +39,7 @@ func New(hostname string, username string, password string, tempestpassword stri
 
 // Run performs a backup of a target Cloud Foundry deployment
 func (context *BackupContext) Run() (err error) {
-	pipeline := context.getPipeline()
+	pipeline := context.getStandardPipeline()
 	err = context.ExecutePipeline(pipeline)
 	return
 }
@@ -55,17 +56,12 @@ func (context *BackupContext) ExecutePipeline(pipeline []func() error) (err erro
 	return
 }
 
-func (context *BackupContext) getPipeline() (pipeline []func() error) {
+func (context *BackupContext) getStandardPipeline() (pipeline []func() error) {
 	pipeline = []func() error{
-		context.prepareFilesystem(os.MkdirAll),
+		context.prepareFilesystem,
 		context.backupTempestFiles,
 	}
 	return
-}
-
-func (context *BackupContext) backupTempestFiles() error {
-	copier := ssh.New("tempest", context.TPassword, context.Hostname, 22)
-	return context.backupDeployment(copier)
 }
 
 func (context *BackupContext) initPaths() {
@@ -76,17 +72,20 @@ func (context *BackupContext) initPaths() {
 	context.json = path.Join(context.backupDir, "installation.json")
 }
 
-func (context *BackupContext) prepareFilesystem(MkdirAll func(string, os.FileMode) error) func() error {
-	return func() (err error) {
-		directoryList := []string{
-			context.backupDir,
-			context.deploymentDir,
-			context.databaseDir,
-			context.nfsDir,
-		}
-		err = MultiDirectoryCreate(directoryList, MkdirAll)
-		return
+func (context *BackupContext) backupTempestFiles() error {
+	copier := ssh.New("tempest", context.TPassword, context.Hostname, 22)
+	return context.backupDeployment(copier)
+}
+
+func (context *BackupContext) prepareFilesystem() (err error) {
+	directoryList := []string{
+		context.backupDir,
+		context.deploymentDir,
+		context.databaseDir,
+		context.nfsDir,
 	}
+	err = createfs.MultiDirectoryCreate(directoryList, os.MkdirAll)
+	return
 }
 
 func (context *BackupContext) backupDeployment(copier ssh.Copier) error {

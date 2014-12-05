@@ -1,4 +1,4 @@
-package backup
+package createfs
 
 import "os"
 

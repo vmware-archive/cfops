@@ -1,10 +1,10 @@
-package backup_test
+package createfs_test
 
 import (
 	"fmt"
 	"os"
 
-	. "github.com/pivotalservices/cfops/backup"
+	. "github.com/pivotalservices/cfops/backup/steps/createfs"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
