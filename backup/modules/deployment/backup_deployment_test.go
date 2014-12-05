@@ -8,7 +8,7 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/pivotalservices/cfops/backup/steps/deployment"
+	"github.com/pivotalservices/cfops/backup/modules/deployment"
 )
 
 var _ = Describe("Backup", func() {

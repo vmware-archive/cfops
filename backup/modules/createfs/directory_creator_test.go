@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	. "github.com/pivotalservices/cfops/backup/steps/createfs"
+	. "github.com/pivotalservices/cfops/backup/modules/createfs"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

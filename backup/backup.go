@@ -5,8 +5,8 @@ import (
 	"path"
 	"time"
 
-	"github.com/pivotalservices/cfops/backup/steps/createfs"
-	"github.com/pivotalservices/cfops/backup/steps/deployment"
+	"github.com/pivotalservices/cfops/backup/modules/createfs"
+	"github.com/pivotalservices/cfops/backup/modules/deployment"
 	"github.com/pivotalservices/cfops/ssh"
 )
 
