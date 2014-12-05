@@ -1,92 +1,12 @@
 package backup
 
-import (
-	"os"
-	"path"
-	"time"
+// Tile is a deployable component that can be backed up
+type Tile interface {
+	Backup() error
+}
 
-	"github.com/pivotalservices/cfops/backup/modules/createfs"
-	"github.com/pivotalservices/cfops/backup/modules/deployment"
-	"github.com/pivotalservices/cfops/ssh"
-)
-
-// BackupContext provides context for a backup job
 type BackupContext struct {
-	Hostname      string
-	Username      string
-	Password      string
-	TPassword     string
-	Target        string
-	backupDir     string
-	deploymentDir string
-	databaseDir   string
-	nfsDir        string
-	json          string
-}
-
-func New(hostname string, username string, password string, tempestpassword string, target string) *BackupContext {
-	context := &BackupContext{
-		Hostname:  hostname,
-		Username:  username,
-		Password:  password,
-		TPassword: tempestpassword,
-		Target:    target,
-	}
-
-	context.initPaths()
-	return context
-}
-
-// Run performs a backup of a target Cloud Foundry deployment
-func (context *BackupContext) Run() (err error) {
-	pipeline := context.getStandardPipeline()
-	err = context.ExecutePipeline(pipeline)
-	return
-}
-
-//ExecutePipeline runs through a pipeline of backup tasks
-func (context *BackupContext) ExecutePipeline(pipeline []func() error) (err error) {
-	for _, functor := range pipeline {
-		err = functor()
-
-		if err != nil {
-			break
-		}
-	}
-	return
-}
-
-func (context *BackupContext) getStandardPipeline() (pipeline []func() error) {
-	pipeline = []func() error{
-		context.prepareFilesystem,
-		context.backupTempestFiles,
-	}
-	return
-}
-
-func (context *BackupContext) initPaths() {
-	context.backupDir = path.Join(context.Target, time.Now().Local().Format("2006_01_02"))
-	context.deploymentDir = path.Join(context.backupDir, "deployments")
-	context.databaseDir = path.Join(context.backupDir, "database")
-	context.nfsDir = path.Join(context.backupDir, "nfs")
-	context.json = path.Join(context.backupDir, "installation.json")
-}
-
-func (context *BackupContext) backupTempestFiles() error {
-	copier := ssh.New("tempest", context.TPassword, context.Hostname, 22)
-	deploy := deployment.New(context.deploymentDir)
-	return deploy.Backup(copier)
-}
-
-func (context *BackupContext) prepareFilesystem() (err error) {
-	directoryList := []string{
-		context.backupDir,
-		context.deploymentDir,
-		context.databaseDir,
-		context.nfsDir,
-	}
-	err = createfs.MultiDirectoryCreate(directoryList, os.MkdirAll)
-	return
+	TargetDir string
 }
 
 // func Run(context *BackupContext) error {
