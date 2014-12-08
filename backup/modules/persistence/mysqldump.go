@@ -13,7 +13,7 @@ type MysqlDump struct {
 	Caller   CmdOutputter
 }
 
-func New(ip, username, password, dbFile string) *MysqlDump {
+func NewMysqlDump(ip, username, password, dbFile string) *MysqlDump {
 	return &MysqlDump{
 		Ip:       ip,
 		Username: username,
