@@ -1,8 +1,10 @@
 package persistence
 
 import (
+	"bytes"
 	"fmt"
-	"os/exec"
+
+	"github.com/pivotalservices/cfops/command"
 )
 
 type MysqlDump struct {
@@ -10,7 +12,7 @@ type MysqlDump struct {
 	Username string
 	Password string
 	DbFile   string
-	Caller   CmdOutputter
+	Caller   command.CmdExecuter
 }
 
 func NewMysqlDump(ip, username, password, dbFile string) *MysqlDump {
@@ -19,7 +21,7 @@ func NewMysqlDump(ip, username, password, dbFile string) *MysqlDump {
 		Username: username,
 		Password: password,
 		DbFile:   dbFile,
-		Caller:   ExecCommandOutputterAdaptor(exec.Command),
+		Caller:   command.NewLocalExecuter(),
 	}
 }
 
@@ -32,12 +34,14 @@ func (s *MysqlDump) Dump() (err error) {
 }
 
 func (s *MysqlDump) setupConfigFile() (err error) {
-	_, err = s.Caller.Output(s.getConfigCommand())
+	var b bytes.Buffer
+	err = s.Caller.Execute(&b, s.getConfigCommand())
 	return
 }
 
 func (s *MysqlDump) executeDumpToFile() (err error) {
-	_, err = s.Caller.Output(s.getDumpCommand())
+	var b bytes.Buffer
+	err = s.Caller.Execute(&b, s.getDumpCommand())
 	return
 }
 

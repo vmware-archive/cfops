@@ -2,6 +2,7 @@ package persistence_test
 
 import (
 	"fmt"
+	"io"
 
 	. "github.com/pivotalservices/cfops/backup/modules/persistence"
 
@@ -16,14 +17,14 @@ var (
 
 type MockSuccessCall struct{}
 
-func (s MockSuccessCall) Output(cmdstring string) (stdout []byte, err error) {
+func (s MockSuccessCall) Execute(destination io.Writer, command string) (err error) {
 	successCounter++
 	return
 }
 
 type MockFailFirstCall struct{}
 
-func (s MockFailFirstCall) Output(cmdstring string) (stdout []byte, err error) {
+func (s MockFailFirstCall) Execute(destination io.Writer, command string) (err error) {
 	failureCounter++
 	err = fmt.Errorf("random mock error")
 	return
@@ -31,7 +32,7 @@ func (s MockFailFirstCall) Output(cmdstring string) (stdout []byte, err error) {
 
 type MockFailSecondCall struct{}
 
-func (s MockFailSecondCall) Output(cmdstring string) (stdout []byte, err error) {
+func (s MockFailSecondCall) Execute(destination io.Writer, command string) (err error) {
 	if successCounter < 1 {
 		successCounter++
 	} else {
