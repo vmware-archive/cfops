@@ -31,19 +31,7 @@ func NewContext(username, password, db, host string, port int) Context {
 	}
 }
 
-type Database struct {
-	context Context
-	backup  Command
-}
-
-func NewDatabase(context Context, fn Command) Database {
-	return Database{
-		context: context,
-		backup:  fn,
-	}
-}
-
-func (db *Database) Backup(writer io.Writer) error {
-	command := db.backup(db.context, writer)
+func (db Context) Exec(writer io.Writer, getCommand Command) error {
+	command := getCommand(db, writer)
 	return command.Run()
 }

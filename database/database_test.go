@@ -38,8 +38,7 @@ var _ = Describe("Database", func() {
 						success: false,
 					}
 				}
-				var db = database.NewDatabase(context, failedCommand)
-				err := db.Backup(&writer)
+				err := context.Exec(&writer, failedCommand)
 				Ω(err).ShouldNot(BeNil())
 			})
 		})
@@ -51,8 +50,7 @@ var _ = Describe("Database", func() {
 						success: true,
 					}
 				}
-				var db = database.NewDatabase(context, successCommand)
-				err := db.Backup(&writer)
+				err := context.Exec(&writer, successCommand)
 				Ω(err).ShouldNot(HaveOccurred())
 			})
 		})
