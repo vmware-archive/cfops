@@ -40,7 +40,7 @@ type DefaultCopier struct {
 //}
 
 // New ssh copier
-func New(session SSHSession) (copier *DefaultCopier) {
+func NewCopier(session SSHSession) (copier *DefaultCopier) {
 	copier = &DefaultCopier{
 		session: session,
 	}
@@ -62,12 +62,15 @@ func (copier *DefaultCopier) Copy(dest io.Writer, src io.Reader) error {
 // Copy the output from a command to the specified io.Writer
 func (copier *DefaultCopier) Execute(dest io.Writer, command string) (err error) {
 
-	if stdoutReader, err := copier.session.StdoutPipe(); err == nil {
-
-		if b, err := ioutil.ReadAll(stdoutReader); err == nil {
-			dest.Write(b)
-			err = copier.session.Run(command)
-		}
+	stdoutReader, err := copier.session.StdoutPipe()
+	if err != nil {
+		return
 	}
-	return err
+	b, err := ioutil.ReadAll(stdoutReader)
+	if err != nil {
+		return
+	}
+	dest.Write(b)
+	err = copier.session.Run(command)
+	return
 }
