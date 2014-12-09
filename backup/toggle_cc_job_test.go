@@ -3,7 +3,6 @@ package backup_test
 import (
 	"fmt"
 	"io"
-	"strings"
 
 	. "github.com/pivotalservices/cfops/backup"
 
@@ -11,17 +10,22 @@ import (
 	. "github.com/onsi/gomega"
 )
 
+var (
+	successControlOuput string = "successful execute"
+	failureControlOuput string = "failed to execute"
+)
+
 type MockSuccessCall struct{}
 
 func (s MockSuccessCall) Execute(destination io.Writer, command string) (err error) {
-	destination.Write([]byte(command))
+	destination.Write([]byte(successControlOuput))
 	return
 }
 
 type MockFailCall struct{}
 
 func (s MockFailCall) Execute(destination io.Writer, command string) (err error) {
-	destination.Write([]byte(command))
+	destination.Write([]byte(failureControlOuput))
 	err = fmt.Errorf("random mock error")
 	return
 }
@@ -36,9 +40,7 @@ var _ = Describe("ToggleCCJobRunner", func() {
 		It("Should return nil error and pass through the cmd output", func() {
 			msg, err := ToggleCCJobRunner(username, password, serverUrl, &MockSuccessCall{})
 			Ω(err).Should(BeNil())
-			Ω(strings.Contains(msg, username)).Should(BeTrue())
-			Ω(strings.Contains(msg, password)).Should(BeTrue())
-			Ω(strings.Contains(msg, serverUrl)).Should(BeTrue())
+			Ω(msg).Should(Equal(successControlOuput))
 		})
 	})
 
@@ -51,9 +53,7 @@ var _ = Describe("ToggleCCJobRunner", func() {
 		It("Should return non nil error and pass through the cmd output", func() {
 			msg, err := ToggleCCJobRunner(username, password, serverUrl, &MockFailCall{})
 			Ω(err).ShouldNot(BeNil())
-			Ω(strings.Contains(msg, username)).Should(BeTrue())
-			Ω(strings.Contains(msg, password)).Should(BeTrue())
-			Ω(strings.Contains(msg, serverUrl)).Should(BeTrue())
+			Ω(msg).Should(Equal(failureControlOuput))
 		})
 	})
 })
