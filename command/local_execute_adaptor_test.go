@@ -3,6 +3,8 @@ package command_test
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
+	"os"
 	"os/exec"
 	"strings"
 
@@ -14,6 +16,31 @@ import (
 
 var _ = Describe("Exec Command Adaptor", func() {
 	Context("an adapted exec.Command function", func() {
+		var filename string = "output.txt"
+
+		BeforeEach(func() {
+			os.Remove(filename)
+		})
+
+		AfterEach(func() {
+			os.Remove(filename)
+		})
+
+		It("Should write to file when the io.Writer is a file reference", func() {
+			controlString := "exit 1"
+			testControlByte := []byte(fmt.Sprintf("%s\n", controlString))
+			testcmd := fmt.Sprintf("echo %s", controlString)
+			syscall := NewLocalExecuter()
+			commandArr := strings.Split(testcmd, " ")
+			exec.Command(commandArr[0], commandArr[1:]...).Output()
+			b, err := os.Create(filename)
+			defer b.Close()
+			err = syscall.Execute(b, testcmd)
+			fileBytes, _ := ioutil.ReadFile(filename)
+			Ω(err).Should(BeNil())
+			Ω(fileBytes).Should(Equal(testControlByte))
+		})
+
 		It("Should on success call through Command().Output() and return Output() methods response w/ nil error", func() {
 			controlResponseString := "some random output"
 			testcmd := fmt.Sprintf("echo %s", controlResponseString)

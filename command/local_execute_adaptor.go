@@ -8,11 +8,12 @@ import (
 
 type localExecuteAdaptor func(name string, arg ...string) *exec.Cmd
 
-func (cmd localExecuteAdaptor) Execute(destination io.Writer, command string) error {
+func (cmd localExecuteAdaptor) Execute(destination io.Writer, command string) (err error) {
 	commandArr := strings.Split(command, " ")
-	byteArray, err := cmd(commandArr[0], commandArr[1:]...).Output()
-	destination.Write(byteArray)
-	return err
+	c := cmd(commandArr[0], commandArr[1:]...)
+	c.Stdout = destination
+	err = c.Run()
+	return
 }
 
 func NewLocalExecuter() CmdExecuter {

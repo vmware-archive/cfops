@@ -1,5 +1,7 @@
 package persistence
 
+import "io"
+
 type PersistanceBackup interface {
-	Dump() error
+	Dump(io.Writer) error
 }

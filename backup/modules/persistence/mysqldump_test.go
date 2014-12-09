@@ -3,8 +3,10 @@ package persistence_test
 import (
 	"fmt"
 	"io"
+	"os"
 
 	. "github.com/pivotalservices/cfops/backup/modules/persistence"
+	"github.com/pivotalservices/cfops/osutils"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -49,6 +51,7 @@ var _ = Describe("Mysql", func() {
 		username          string = "testuser"
 		password          string = "testpass"
 		dbFile            string = "testfile"
+		configFile        string = ".my.cnf"
 	)
 
 	Context("Dump function call success", func() {
@@ -56,11 +59,12 @@ var _ = Describe("Mysql", func() {
 			successCounter = 0
 			failureCounter = 0
 			mysqlDumpInstance = &MysqlDump{
-				Ip:       ip,
-				Username: username,
-				Password: password,
-				DbFile:   dbFile,
-				Caller:   &MockSuccessCall{},
+				Ip:         ip,
+				Username:   username,
+				Password:   password,
+				DbFile:     dbFile,
+				ConfigFile: configFile,
+				Caller:     &MockSuccessCall{},
 			}
 		})
 
@@ -68,12 +72,16 @@ var _ = Describe("Mysql", func() {
 			mysqlDumpInstance = nil
 			successCounter = 0
 			failureCounter = 0
+			os.Remove(configFile)
+			os.Remove(dbFile)
 		})
 
 		It("Should return nil error on success", func() {
 			controlSuccessCount := 2
 			controlFailureCount := 0
-			err := mysqlDumpInstance.Dump()
+			f, _ := osutils.SafeCreate(dbFile)
+			defer f.Close()
+			err := mysqlDumpInstance.Dump(f)
 			Ω(err).Should(BeNil())
 			Ω(successCounter).Should(Equal(controlSuccessCount))
 			Ω(failureCounter).Should(Equal(controlFailureCount))
@@ -85,11 +93,12 @@ var _ = Describe("Mysql", func() {
 			successCounter = 0
 			failureCounter = 0
 			mysqlDumpInstance = &MysqlDump{
-				Ip:       ip,
-				Username: username,
-				Password: password,
-				DbFile:   dbFile,
-				Caller:   &MockFailFirstCall{},
+				Ip:         ip,
+				Username:   username,
+				Password:   password,
+				DbFile:     dbFile,
+				ConfigFile: configFile,
+				Caller:     &MockFailFirstCall{},
 			}
 		})
 
@@ -97,12 +106,16 @@ var _ = Describe("Mysql", func() {
 			mysqlDumpInstance = nil
 			successCounter = 0
 			failureCounter = 0
+			os.Remove(configFile)
+			os.Remove(dbFile)
 		})
 
 		It("Should return non nil error on failure", func() {
 			controlSuccessCount := 0
 			controlFailureCount := 1
-			err := mysqlDumpInstance.Dump()
+			f, _ := osutils.SafeCreate(dbFile)
+			defer f.Close()
+			err := mysqlDumpInstance.Dump(f)
 			Ω(err).ShouldNot(BeNil())
 			Ω(successCounter).Should(Equal(controlSuccessCount))
 			Ω(failureCounter).Should(Equal(controlFailureCount))
@@ -114,11 +127,12 @@ var _ = Describe("Mysql", func() {
 			successCounter = 0
 			failureCounter = 0
 			mysqlDumpInstance = &MysqlDump{
-				Ip:       ip,
-				Username: username,
-				Password: password,
-				DbFile:   dbFile,
-				Caller:   &MockFailSecondCall{},
+				Ip:         ip,
+				Username:   username,
+				Password:   password,
+				DbFile:     dbFile,
+				ConfigFile: configFile,
+				Caller:     &MockFailSecondCall{},
 			}
 		})
 
@@ -126,12 +140,16 @@ var _ = Describe("Mysql", func() {
 			mysqlDumpInstance = nil
 			successCounter = 0
 			failureCounter = 0
+			os.Remove(configFile)
+			os.Remove(dbFile)
 		})
 
 		It("Should return non nil error on failure", func() {
 			controlSuccessCount := 1
 			controlFailureCount := 1
-			err := mysqlDumpInstance.Dump()
+			f, _ := osutils.SafeCreate(dbFile)
+			defer f.Close()
+			err := mysqlDumpInstance.Dump(f)
 			Ω(err).ShouldNot(BeNil())
 			Ω(successCounter).Should(Equal(controlSuccessCount))
 			Ω(failureCounter).Should(Equal(controlFailureCount))
