@@ -69,5 +69,5 @@ func (copier *DefaultCopier) Execute(dest io.Writer, command string) (err error)
 			err = copier.session.Run(command)
 		}
 	}
-	return nil
+	return err
 }
