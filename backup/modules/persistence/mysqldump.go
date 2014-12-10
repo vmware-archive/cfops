@@ -42,7 +42,10 @@ func (s *MysqlDump) setupConfigFile() (err error) {
 	os.Remove(s.ConfigFile)
 	b, err := osutils.SafeCreate(s.ConfigFile)
 	defer b.Close()
-	err = s.Caller.Execute(b, s.getConfigCommand())
+
+	if err == nil {
+		err = s.Caller.Execute(b, s.getConfigCommand())
+	}
 	return
 }
 

@@ -37,12 +37,6 @@ type BackupContext struct {
 //
 // 	return nil
 // }
-
-// func extractEncryptionKey(backupscript string, backupDir string, deploymentDir string) {
-// 	params := []string{"export_Encryption_key", backupDir, deploymentDir}
-// 	executeCommand(backupscript, params...)
-// 	fmt.Println("Backup of cloud controller db encryption key completed")
-// }
 //
 //
 // func verifyBoshLogin(jsonfile string) (directorIP string, directorUser string, directorPassword string) {
