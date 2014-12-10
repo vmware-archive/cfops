@@ -8,7 +8,7 @@ import (
 	"github.com/pivotalservices/cfops/osutils"
 )
 
-func ExtractEncryptionKey(backupDir, deploymentDir string, exec command.CmdExecuter) (err error) {
+func ExtractEncryptionKey(backupDir, deploymentDir string, exec command.Executer) (err error) {
 	backupFileName := path.Join(backupDir, "cc_db_encryption_key.txt")
 	b, err := osutils.SafeCreate(backupFileName)
 	defer b.Close()

@@ -15,7 +15,7 @@ type MysqlDump struct {
 	Password   string
 	DbFile     string
 	ConfigFile string
-	Caller     command.CmdExecuter
+	Caller     command.Executer
 }
 
 func NewMysqlDump(ip, username, password, dbFile string) *MysqlDump {

@@ -74,8 +74,10 @@ var _ = Describe("Ssh", func() {
 		Context("Everything is fine", func() {
 			It("should write to the writer", func() {
 				var writer bytes.Buffer
-				copier := NewCopier(client)
-				err := copier.Execute(&writer, "command")
+				executor := &DefaultRemoteExecutor{
+					Client: client,
+				}
+				err := executor.Execute(&writer, "command")
 				Ω(err).ShouldNot(HaveOccurred())
 				Ω(writer.String()).Should(Equal("mocksession"))
 			})
@@ -87,18 +89,23 @@ var _ = Describe("Ssh", func() {
 		Context("With bad stdpipeline", func() {
 			It("should fail to write to the writer", func() {
 				var writer bytes.Buffer
-				copier := NewCopier(client)
+				executor := &DefaultRemoteExecutor{
+					Client: client,
+				}
 				session.StdOutSuccess = false
-				err := copier.Execute(&writer, "command")
+				err := executor.Execute(&writer, "command")
+				session.StdOutSuccess = false
 				Ω(err).Should(HaveOccurred())
 			})
 		})
 		Context("With bad command start", func() {
 			It("should fail to write to the writer", func() {
 				var writer bytes.Buffer
-				copier := NewCopier(client)
 				session.StartSuccess = false
-				err := copier.Execute(&writer, "command")
+				executor := &DefaultRemoteExecutor{
+					Client: client,
+				}
+				err := executor.Execute(&writer, "command")
 				Ω(err).Should(HaveOccurred())
 			})
 		})

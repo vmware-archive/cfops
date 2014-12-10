@@ -1,7 +1,6 @@
 package command
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 
@@ -16,26 +15,18 @@ type SshConfig struct {
 	Port     int
 }
 
-// Copier copies from an io.Reader to an io.Writer
-type Copier interface {
-	Copy(dest io.Writer, src io.Reader) error
-}
-
-// DefaultCopier is an SSH copier
-type DefaultCopier struct {
-	client ClientInterface
-}
-
 type ClientInterface interface {
 	NewSession() (SSHSession, error)
+}
+
+type DefaultRemoteExecutor struct {
+	Client ClientInterface
 }
 
 //Wrapper of ssh client to match client interface signature, since client.NewSession() does not use an interface
 type SshClientWrapper struct {
 	sshclient *ssh.Client
 }
-
-// Create copier based on client. Have direct ssh package reference
 
 func NewClientWrapper(client *ssh.Client) *SshClientWrapper {
 	return &SshClientWrapper{
@@ -47,16 +38,8 @@ func (c *SshClientWrapper) NewSession() (SSHSession, error) {
 	return c.sshclient.NewSession()
 }
 
-// Create copier based on client. Have direct ssh package reference
-func NewCopier(client ClientInterface) (copier *DefaultCopier) {
-	copier = &DefaultCopier{
-		client: client,
-	}
-	return
-}
-
-// This method creates copier based on ssh, it has concrete ssh reference
-func NewSshCopier(sshCfg SshConfig) (copier *DefaultCopier, err error) {
+// This method creates executor based on ssh, it has concrete ssh reference
+func NewRemoteExecutor(sshCfg SshConfig) (executor Executer, err error) {
 	clientconfig := &ssh.ClientConfig{
 		User: sshCfg.Username,
 		Auth: []ssh.AuthMethod{
@@ -67,7 +50,10 @@ func NewSshCopier(sshCfg SshConfig) (copier *DefaultCopier, err error) {
 	if err != nil {
 		return
 	}
-	copier = NewCopier(NewClientWrapper(client))
+	c := NewClientWrapper(client)
+	executor = &DefaultRemoteExecutor{
+		Client: c,
+	}
 	return
 }
 
@@ -78,16 +64,9 @@ type SSHSession interface {
 	Close() error
 }
 
-func (copier *DefaultCopier) Copy(dest io.Writer, src io.Reader) error {
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(src)
-	s := buf.String()
-	return copier.Execute(dest, s)
-}
-
 // Copy the output from a command to the specified io.Writer
-func (copier *DefaultCopier) Execute(dest io.Writer, command string) (err error) {
-	session, err := copier.client.NewSession()
+func (executor *DefaultRemoteExecutor) Execute(dest io.Writer, command string) (err error) {
+	session, err := executor.Client.NewSession()
 	defer session.Close()
 	if err != nil {
 		return

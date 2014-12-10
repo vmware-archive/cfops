@@ -14,7 +14,7 @@ type PgDump struct {
 	Username string
 	Password string
 	DbFile   string
-	Caller   command.CmdExecuter
+	Caller   command.Executer
 }
 
 func NewPgDump(ip string, port int, database, username, password string) *PgDump {
@@ -29,7 +29,7 @@ func NewPgDump(ip string, port int, database, username, password string) *PgDump
 }
 
 func NewPgRemoteDump(port int, database, username, password string, sshCfg command.SshConfig) (*PgDump, error) {
-	remoteExecuter, err := command.NewSshCopier(sshCfg)
+	remoteExecuter, err := command.NewRemoteExecutor(sshCfg)
 	return &PgDump{
 		Ip:       "localhost",
 		Port:     port,

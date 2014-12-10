@@ -7,7 +7,7 @@ import (
 	"github.com/pivotalservices/cfops/command"
 )
 
-var ToggleCCJobRunner = func(serverUrl, username, password string, exec command.CmdExecuter) (res string, err error) {
+var ToggleCCJobRunner = func(serverUrl, username, password string, exec command.Executer) (res string, err error) {
 	var b bytes.Buffer
 	formatString := `curl -v -XPUT -u "%s:%s" %s --insecure -H "Content-Type:text/yaml" -i -s | grep Location: | grep Location: | cut -d ' ' -f 2`
 	cmd := fmt.Sprintf(formatString, username, password, serverUrl)
