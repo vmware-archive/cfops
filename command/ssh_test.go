@@ -11,19 +11,42 @@ import (
 	. "github.com/pivotalservices/cfops/command"
 )
 
-type mockSession struct {
-	runSuccess    bool
-	StdOutSuccess bool
+type mockClient struct {
+	session SSHSession
 }
 
-func (session mockSession) Run(command string) (err error) {
-	if !session.runSuccess {
+func (c *mockClient) NewSession() (SSHSession, error) {
+	return c.session, nil
+}
+
+type mockSession struct {
+	StartSuccess  bool
+	StdOutSuccess bool
+	WaitSuccess   bool
+	CloseSuccess  bool
+}
+
+func (session *mockSession) Start(command string) (err error) {
+	if !session.StartSuccess {
 		err = errors.New("")
 	}
 	return
 }
 
-func (session mockSession) StdoutPipe() (reader io.Reader, err error) {
+func (session *mockSession) Close() (err error) {
+	if !session.CloseSuccess {
+		err = errors.New("")
+	}
+	return
+}
+func (session *mockSession) Wait() (err error) {
+	if !session.WaitSuccess {
+		err = errors.New("")
+	}
+	return
+}
+
+func (session *mockSession) StdoutPipe() (reader io.Reader, err error) {
 	if !session.StdOutSuccess {
 		err = errors.New("")
 		return nil, err
@@ -34,44 +57,47 @@ func (session mockSession) StdoutPipe() (reader io.Reader, err error) {
 
 var _ = Describe("Ssh", func() {
 	var (
-		session mockSession
+		session *mockSession
+		client  *mockClient
 	)
 
 	BeforeEach(func() {
-		session = mockSession{}
+		session = &mockSession{StartSuccess: true,
+			StdOutSuccess: true,
+			WaitSuccess:   true,
+			CloseSuccess:  true}
+		client = &mockClient{session: session}
+
 	})
 
 	Describe("Session Run success", func() {
-		Context("With Good stdpipeline", func() {
+		Context("Everything is fine", func() {
 			It("should write to the writer", func() {
 				var writer bytes.Buffer
-				session.runSuccess = true
-				session.StdOutSuccess = true
-				copier := NewCopier(session)
+				copier := NewCopier(client)
 				err := copier.Execute(&writer, "command")
 				Ω(err).ShouldNot(HaveOccurred())
 				Ω(writer.String()).Should(Equal("mocksession"))
 			})
 		})
 
+	})
+	Describe("Session Run failed", func() {
+
 		Context("With bad stdpipeline", func() {
-			It("should failed to write to the writer", func() {
+			It("should fail to write to the writer", func() {
 				var writer bytes.Buffer
-				session.runSuccess = true
+				copier := NewCopier(client)
 				session.StdOutSuccess = false
-				copier := NewCopier(session)
 				err := copier.Execute(&writer, "command")
 				Ω(err).Should(HaveOccurred())
 			})
 		})
-	})
-	Describe("Session Run failed", func() {
-		Context("With Good stdpipeline", func() {
-			It("should write to the writer", func() {
+		Context("With bad command start", func() {
+			It("should fail to write to the writer", func() {
 				var writer bytes.Buffer
-				session.runSuccess = false
-				session.StdOutSuccess = true
-				copier := NewCopier(session)
+				copier := NewCopier(client)
+				session.StartSuccess = false
 				err := copier.Execute(&writer, "command")
 				Ω(err).Should(HaveOccurred())
 			})

@@ -3,7 +3,8 @@ package command
 import (
 	"bytes"
 	"io"
-	"io/ioutil"
+
+	"golang.org/x/crypto/ssh"
 )
 
 // Config for the SSH connection
@@ -21,35 +22,40 @@ type Copier interface {
 
 // DefaultCopier is an SSH copier
 type DefaultCopier struct {
-	session SSHSession
+	client ClientInterface
 }
 
-//func main() {
-//clientconfig := &ssh.ClientConfig{
-//User: copier.config.Username,
-//Auth: []ssh.AuthMethod{
-//ssh.Password(copier.config.Password),
-//},
-//}
+type ClientInterface interface {
+	NewSession() (SSHSession, error)
+}
 
-//client, err := ssh.Dial("tcp", fmt.Sprintf("%s:%d", copier.config.Host, copier.config.Port)
-//session, err := client.NewSession()
-//defer session.Close()
-//sshExecuteRef := New(session)
-//sshExecuteRef.Execute(writer)
-//}
+//Wrapper of ssh client to match client interface signature, since client.NewSession() does not use an interface
+type SshClientWrapper struct {
+	sshclient *ssh.Client
+}
 
-// New ssh copier
-func NewCopier(session SSHSession) (copier *DefaultCopier) {
+func NewClientWrapper(client *ssh.Client) *SshClientWrapper {
+	return &SshClientWrapper{
+		sshclient: client,
+	}
+}
+
+func (c *SshClientWrapper) NewSession() (SSHSession, error) {
+	return c.sshclient.NewSession()
+}
+
+func NewCopier(client ClientInterface) (copier *DefaultCopier) {
 	copier = &DefaultCopier{
-		session: session,
+		client: client,
 	}
 	return
 }
 
 type SSHSession interface {
-	Run(string) error
+	Start(cmd string) error
+	Wait() error
 	StdoutPipe() (io.Reader, error)
+	Close() error
 }
 
 func (copier *DefaultCopier) Copy(dest io.Writer, src io.Reader) error {
@@ -61,16 +67,23 @@ func (copier *DefaultCopier) Copy(dest io.Writer, src io.Reader) error {
 
 // Copy the output from a command to the specified io.Writer
 func (copier *DefaultCopier) Execute(dest io.Writer, command string) (err error) {
-
-	stdoutReader, err := copier.session.StdoutPipe()
+	session, err := copier.client.NewSession()
+	defer session.Close()
 	if err != nil {
 		return
 	}
-	b, err := ioutil.ReadAll(stdoutReader)
+	stdoutReader, err := session.StdoutPipe()
 	if err != nil {
 		return
 	}
-	dest.Write(b)
-	err = copier.session.Run(command)
+	err = session.Start(command)
+	if err != nil {
+		return
+	}
+	_, err = io.Copy(dest, stdoutReader)
+	if err != nil {
+		return
+	}
+	err = session.Wait()
 	return
 }
