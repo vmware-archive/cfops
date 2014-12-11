@@ -1,46 +1,36 @@
 package persistence_test
 
 import (
+	"bytes"
 	"fmt"
 	"io"
-	"os"
 
 	. "github.com/pivotalservices/cfops/backup/modules/persistence"
-	"github.com/pivotalservices/cfops/osutils"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
 var (
-	successCounter int
-	failureCounter int
+	successCounter    int
+	failureCounter    int
+	mysqlCatchCommand string
 )
 
-type MockSuccessCall struct{}
+type MockSuccessCall struct {
+}
 
 func (s MockSuccessCall) Execute(destination io.Writer, command string) (err error) {
+	mysqlCatchCommand = command
 	successCounter++
 	return
 }
 
-type MockFailFirstCall struct{}
+type MockFailCall struct{}
 
-func (s MockFailFirstCall) Execute(destination io.Writer, command string) (err error) {
+func (s MockFailCall) Execute(destination io.Writer, command string) (err error) {
 	failureCounter++
 	err = fmt.Errorf("random mock error")
-	return
-}
-
-type MockFailSecondCall struct{}
-
-func (s MockFailSecondCall) Execute(destination io.Writer, command string) (err error) {
-	if successCounter < 1 {
-		successCounter++
-	} else {
-		failureCounter++
-		err = fmt.Errorf("mock failure")
-	}
 	return
 }
 
@@ -50,8 +40,8 @@ var _ = Describe("Mysql", func() {
 		ip                string = "0.0.0.0"
 		username          string = "testuser"
 		password          string = "testpass"
-		dbFile            string = "testfile"
-		configFile        string = ".my.cnf"
+		writer            bytes.Buffer
+		successCall       *MockSuccessCall = &MockSuccessCall{}
 	)
 
 	Context("Dump function call success", func() {
@@ -59,32 +49,28 @@ var _ = Describe("Mysql", func() {
 			successCounter = 0
 			failureCounter = 0
 			mysqlDumpInstance = &MysqlDump{
-				Ip:         ip,
-				Username:   username,
-				Password:   password,
-				DbFile:     dbFile,
-				ConfigFile: configFile,
-				Caller:     &MockSuccessCall{},
+				Ip:       ip,
+				Username: username,
+				Password: password,
+				Caller:   successCall,
 			}
+			mysqlCatchCommand = ""
 		})
 
 		AfterEach(func() {
 			mysqlDumpInstance = nil
 			successCounter = 0
 			failureCounter = 0
-			os.Remove(configFile)
-			os.Remove(dbFile)
 		})
 
 		It("Should return nil error on success", func() {
-			controlSuccessCount := 2
+			controlSuccessCount := 1
 			controlFailureCount := 0
-			f, _ := osutils.SafeCreate(dbFile)
-			defer f.Close()
-			err := mysqlDumpInstance.Dump(f)
+			err := mysqlDumpInstance.Dump(&writer)
 			Ω(err).Should(BeNil())
 			Ω(successCounter).Should(Equal(controlSuccessCount))
 			Ω(failureCounter).Should(Equal(controlFailureCount))
+			Ω(mysqlCatchCommand).Should(Equal("mysqldump -u testuser -h 0.0.0.0 --password=testpass --all-databases"))
 		})
 	})
 
@@ -93,12 +79,10 @@ var _ = Describe("Mysql", func() {
 			successCounter = 0
 			failureCounter = 0
 			mysqlDumpInstance = &MysqlDump{
-				Ip:         ip,
-				Username:   username,
-				Password:   password,
-				DbFile:     dbFile,
-				ConfigFile: configFile,
-				Caller:     &MockFailFirstCall{},
+				Ip:       ip,
+				Username: username,
+				Password: password,
+				Caller:   &MockFailCall{},
 			}
 		})
 
@@ -106,50 +90,12 @@ var _ = Describe("Mysql", func() {
 			mysqlDumpInstance = nil
 			successCounter = 0
 			failureCounter = 0
-			os.Remove(configFile)
-			os.Remove(dbFile)
 		})
 
 		It("Should return non nil error on failure", func() {
 			controlSuccessCount := 0
 			controlFailureCount := 1
-			f, _ := osutils.SafeCreate(dbFile)
-			defer f.Close()
-			err := mysqlDumpInstance.Dump(f)
-			Ω(err).ShouldNot(BeNil())
-			Ω(successCounter).Should(Equal(controlSuccessCount))
-			Ω(failureCounter).Should(Equal(controlFailureCount))
-		})
-	})
-
-	Context("Dump function call partial failure", func() {
-		BeforeEach(func() {
-			successCounter = 0
-			failureCounter = 0
-			mysqlDumpInstance = &MysqlDump{
-				Ip:         ip,
-				Username:   username,
-				Password:   password,
-				DbFile:     dbFile,
-				ConfigFile: configFile,
-				Caller:     &MockFailSecondCall{},
-			}
-		})
-
-		AfterEach(func() {
-			mysqlDumpInstance = nil
-			successCounter = 0
-			failureCounter = 0
-			os.Remove(configFile)
-			os.Remove(dbFile)
-		})
-
-		It("Should return non nil error on failure", func() {
-			controlSuccessCount := 1
-			controlFailureCount := 1
-			f, _ := osutils.SafeCreate(dbFile)
-			defer f.Close()
-			err := mysqlDumpInstance.Dump(f)
+			err := mysqlDumpInstance.Dump(&writer)
 			Ω(err).ShouldNot(BeNil())
 			Ω(successCounter).Should(Equal(controlSuccessCount))
 			Ω(failureCounter).Should(Equal(controlFailureCount))
