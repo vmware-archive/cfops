@@ -37,3 +37,17 @@ func Exists(path string) (bool, error) {
 	}
 	return false, err
 }
+
+func OpenFile(name ...string) (file *os.File, err error) {
+	p, e := ensurePath(path.Join(name...))
+	if e != nil {
+		return nil, e
+	}
+
+	f, err := os.Open(p)
+	if err != nil {
+		return nil, err
+	}
+
+	return f, err
+}
