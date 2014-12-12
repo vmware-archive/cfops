@@ -21,7 +21,8 @@ type BackupContext struct {
 //
 // ccJobs := getAllCloudControllerVMs(ip, username, password, deploymentName, backupDir)
 //
-// toggleCCJobs(backupscript, ip, username, password, deploymentName, ccJobs, "stopped")
+// cc := NewCloudController(ip, username, password, deploymentName, "stopped")
+// cc.ToggleJobs(CloudControllerJobs(ccJobs))
 //
 // backupCCDB(backupscript, jsonfile, databaseDir)
 //

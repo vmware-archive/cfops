@@ -26,7 +26,7 @@ var _ = Describe("File", func() {
 		os.RemoveAll(dir)
 	})
 
-	FDescribe("File creation", func() {
+	Describe("File creation", func() {
 		Context("With a path that does not exist and has missing directories", func() {
 			BeforeEach(func() {
 				file = path.Join(dir, "a", "nonexistent", "directory", "with", "af.ile")

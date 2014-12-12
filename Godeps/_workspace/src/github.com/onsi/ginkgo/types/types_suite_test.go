@@ -9,5 +9,5 @@ import (
 
 func TestTypes(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Ginkgo Types Suite")
+	RunSpecs(t, "Types Suite")
 }
