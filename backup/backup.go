@@ -167,26 +167,6 @@ type BackupContext struct {
 // }
 //
 //
-//
-//
-// func backupNfs(jsonfile, destDir string) {
-// 	fmt.Println("Backup NFS Server")
-// 	arguments := []string{jsonfile, "cf", "nfs_server", "vcap"}
-// 	password := utils.GetPassword(arguments)
-// 	ip := utils.GetIP(arguments)
-//
-// 	config := &ssh.Config{
-// 		Username: "vcap",
-// 		Password: password,
-// 		Host:     ip,
-// 		Port:     22,
-// 	}
-// 	file, _ := os.Create(destDir + "/nfs.tar.gz")
-// 	defer file.Close()
-// 	command := "cd /var/vcap/store && tar cz shared"
-// 	config.Copy(file, command)
-// }
-//
 // func backupCCDB(backupscript string, jsonfile string, databaseDir string) {
 // 	fmt.Println("Backup Cloud Controller Database")
 // 	ip, password := getConnectionDetails(jsonfile, "cf", "ccdb", "admin")
