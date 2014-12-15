@@ -12,8 +12,6 @@ import (
 )
 
 var (
-	successCounter    int
-	failureCounter    int
 	mysqlCatchCommand string
 )
 
@@ -22,14 +20,12 @@ type MockSuccessCall struct {
 
 func (s MockSuccessCall) Execute(destination io.Writer, command string) (err error) {
 	mysqlCatchCommand = command
-	successCounter++
 	return
 }
 
 type MockFailCall struct{}
 
 func (s MockFailCall) Execute(destination io.Writer, command string) (err error) {
-	failureCounter++
 	err = fmt.Errorf("random mock error")
 	return
 }
@@ -44,10 +40,8 @@ var _ = Describe("Mysql", func() {
 		successCall       *MockSuccessCall = &MockSuccessCall{}
 	)
 
-	Context("Dump function call success", func() {
+	Context("With command execute success", func() {
 		BeforeEach(func() {
-			successCounter = 0
-			failureCounter = 0
 			mysqlDumpInstance = &MysqlDump{
 				Ip:       ip,
 				Username: username,
@@ -59,25 +53,20 @@ var _ = Describe("Mysql", func() {
 
 		AfterEach(func() {
 			mysqlDumpInstance = nil
-			successCounter = 0
-			failureCounter = 0
 		})
 
-		It("Should return nil error on success", func() {
-			controlSuccessCount := 1
-			controlFailureCount := 0
+		It("Should return nil error", func() {
 			err := mysqlDumpInstance.Dump(&writer)
 			Ω(err).Should(BeNil())
-			Ω(successCounter).Should(Equal(controlSuccessCount))
-			Ω(failureCounter).Should(Equal(controlFailureCount))
+		})
+		It("Should execute mysqldump command", func() {
+			mysqlDumpInstance.Dump(&writer)
 			Ω(mysqlCatchCommand).Should(Equal("mysqldump -u testuser -h 0.0.0.0 --password=testpass --all-databases"))
 		})
 	})
 
-	Context("Dump function call failure", func() {
+	Context("With command execute failed", func() {
 		BeforeEach(func() {
-			successCounter = 0
-			failureCounter = 0
 			mysqlDumpInstance = &MysqlDump{
 				Ip:       ip,
 				Username: username,
@@ -88,17 +77,11 @@ var _ = Describe("Mysql", func() {
 
 		AfterEach(func() {
 			mysqlDumpInstance = nil
-			successCounter = 0
-			failureCounter = 0
 		})
 
-		It("Should return non nil error on failure", func() {
-			controlSuccessCount := 0
-			controlFailureCount := 1
+		It("Should return non nil error", func() {
 			err := mysqlDumpInstance.Dump(&writer)
 			Ω(err).ShouldNot(BeNil())
-			Ω(successCounter).Should(Equal(controlSuccessCount))
-			Ω(failureCounter).Should(Equal(controlFailureCount))
 		})
 	})
 
