@@ -58,8 +58,13 @@ var _ = Describe("Http", func() {
 		It("Should return nil error on success", func() {
 			roundTripSuccess = true
 			handlerSuccess = true
-			val, err := executor.Execute("Get")
+			_, err := executor.Execute("Get")
 			Ω(err).Should(BeNil())
+		})
+		It("Should execute correct request", func() {
+			roundTripSuccess = true
+			handlerSuccess = true
+			val, _ := executor.Execute("Get")
 			Ω(requestCatcher.URL.Host).Should(Equal("endpoint"))
 			Ω(requestCatcher.Method).Should(Equal("Get"))
 			Ω(requestCatcher.Header["Content-Type"][0]).Should(Equal("contentType"))
