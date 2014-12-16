@@ -43,27 +43,27 @@ func (handler *MockHandler) Handle(resp *http.Response) (val interface{},
 var _ = Describe("Http", func() {
 	var (
 		handler  *MockHandler
-		executor *HttpExecutor
+		executor *HttpGateway
 	)
 	BeforeEach(func() {
 		requestCatcher = &http.Request{}
 		handler = &MockHandler{}
-		executor = NewHttpExecutor("http://endpoint/test", "username", "password", "contentType", handler)
+		executor = NewHttpGateway("http://endpoint/test", "username", "password", "contentType", handler)
 		NewRoundTripper = func() http.RoundTripper {
 			return &MockRoundTripper{}
 		}
 	})
 
 	Context("The http is request and handled successfully", func() {
-		It("Should return nil error on success", func() {
+		BeforeEach(func() {
 			roundTripSuccess = true
 			handlerSuccess = true
+		})
+		It("Should return nil error on success", func() {
 			_, err := executor.Execute("Get")
 			Ω(err).Should(BeNil())
 		})
 		It("Should execute correct request", func() {
-			roundTripSuccess = true
-			handlerSuccess = true
 			val, _ := executor.Execute("Get")
 			Ω(requestCatcher.URL.Host).Should(Equal("endpoint"))
 			Ω(requestCatcher.Method).Should(Equal("Get"))
@@ -74,18 +74,22 @@ var _ = Describe("Http", func() {
 	})
 
 	Context("The round trip request failed", func() {
-		It("Should return error", func() {
+		BeforeEach(func() {
 			roundTripSuccess = false
 			handlerSuccess = true
+		})
+		It("Should return error", func() {
 			_, err := executor.Execute("Get")
 			Ω(err).ShouldNot(BeNil())
 		})
 	})
 
 	Context("The handler failed", func() {
-		It("Should return error", func() {
+		BeforeEach(func() {
 			roundTripSuccess = true
 			handlerSuccess = false
+		})
+		It("Should return error", func() {
 			_, err := executor.Execute("Get")
 			Ω(err).ShouldNot(BeNil())
 		})

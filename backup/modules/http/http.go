@@ -5,16 +5,16 @@ import (
 	"net/http"
 )
 
-type HttpExecutor struct {
+type HttpGateway struct {
 	endpoint    string
 	username    string
 	password    string
 	contentType string
-	handler     Handler
+	handler     HttpResponseHandler
 }
 
-func NewHttpExecutor(endpoint, username, password, contentType string, handler Handler) *HttpExecutor {
-	return &HttpExecutor{
+func NewHttpGateway(endpoint, username, password, contentType string, handler HttpResponseHandler) *HttpGateway {
+	return &HttpGateway{
 		endpoint:    endpoint,
 		username:    username,
 		password:    password,
@@ -29,17 +29,17 @@ var NewRoundTripper = func() http.RoundTripper {
 	}
 }
 
-func (executor *HttpExecutor) Execute(method string) (val interface{}, err error) {
+func (gateway *HttpGateway) Execute(method string) (val interface{}, err error) {
 	transport := NewRoundTripper()
-	req, err := http.NewRequest(method, executor.endpoint, nil)
+	req, err := http.NewRequest(method, gateway.endpoint, nil)
 	if err != nil {
 		return
 	}
-	req.SetBasicAuth(executor.username, executor.password)
-	req.Header.Set("Content-Type", executor.contentType)
+	req.SetBasicAuth(gateway.username, gateway.password)
+	req.Header.Set("Content-Type", gateway.contentType)
 	resp, err := transport.RoundTrip(req)
 	if err != nil {
 		return
 	}
-	return executor.handler.Handle(resp)
+	return gateway.handler.Handle(resp)
 }

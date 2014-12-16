@@ -4,6 +4,6 @@ import (
 	"net/http"
 )
 
-type Handler interface {
+type HttpResponseHandler interface {
 	Handle(response *http.Response) (interface{}, error)
 }
