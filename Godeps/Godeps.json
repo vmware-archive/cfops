@@ -25,9 +25,17 @@
 			"Rev": "dc751ce5f266d83c26fae5c0a9093973b29cb61d"
 		},
 		{
+			"ImportPath": "github.com/xchapter7x/goutil/itertools",
+			"Rev": "00897734d40d95b47f0cdabf19aafb83505d8732"
+		},
+		{
 			"ImportPath": "golang.org/x/crypto/ssh",
 			"Comment": "null-234",
 			"Rev": "60a80aaa50ff0e8506f61b1fa35078a24941be50"
+		},
+		{
+			"ImportPath": "gopkg.in/yaml.v1",
+			"Rev": "feb4ca79644e8e7e39c06095246ee54b1282c118"
 		},
 		{
 			"ImportPath": "launchpad.net/goyaml",
