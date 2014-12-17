@@ -1,11 +1,7 @@
 package backup_test
 
 import (
-	"fmt"
-	"io"
-	"io/ioutil"
-	"os"
-	"path"
+	"bytes"
 
 	. "github.com/pivotalservices/cfops/backup"
 
@@ -13,58 +9,50 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var (
-	eeksuccessControlOuput string = "successful execute"
-	eekfailureControlOuput string = "failed to execute"
-)
-
-type eekMockSuccessCall struct{}
-
-func (s eekMockSuccessCall) Execute(destination io.Writer, command string) (err error) {
-	destination.Write([]byte(eeksuccessControlOuput))
-	return
-}
-
-type eekMockFailCall struct{}
-
-func (s eekMockFailCall) Execute(destination io.Writer, command string) (err error) {
-	destination.Write([]byte(eekfailureControlOuput))
-	err = fmt.Errorf("random mock error")
-	return
-}
-
-var _ = Describe("ToggleCCJobRunner", func() {
-	var (
-		backupDir                string = "backupDirTest"
-		deploymentDir            string = "deploymentDirTest"
-		controlBackupFilename    string = path.Join(backupDir, "cc_db_encryption_key.txt")
-		controlSuccessByteOutput []byte = []byte(eeksuccessControlOuput)
-		controlFailureByteOutput []byte = []byte(eekfailureControlOuput)
-	)
-
-	BeforeEach(func() {
-		os.Remove(controlBackupFilename)
-	})
-
-	AfterEach(func() {
-		os.Remove(controlBackupFilename)
-	})
+var _ = Describe("ExtractEncryptionKey", func() {
 
 	Context("successful call", func() {
-		It("Should return nil error and pass through the cmd output", func() {
-			err := ExtractEncryptionKey(backupDir, deploymentDir, &eekMockSuccessCall{})
-			fileBytes, _ := ioutil.ReadFile(controlBackupFilename)
+		var (
+			deploymentDir string = "fixtures/encryptionkey"
+		)
+		It("Should return nil error and write the correct key", func() {
+			var keystring bytes.Buffer
+			err := ExtractEncryptionKey(&keystring, deploymentDir)
 			Ω(err).Should(BeNil())
-			Ω(fileBytes).Should(Equal(controlSuccessByteOutput))
+			Ω(keystring.String()).Should(Equal("b963127302433579"))
 		})
 	})
 
-	Context("failure call", func() {
-		It("Should return non nil error and pass through the cmd output", func() {
-			err := ExtractEncryptionKey(backupDir, deploymentDir, &eekMockFailCall{})
-			fileBytes, _ := ioutil.ReadFile(controlBackupFilename)
+	Context("yaml dir doesnt exist", func() {
+		var deploymentDir string = "dirdoesntexist"
+
+		It("Should return non nil error and an empty writer", func() {
+			var keystring bytes.Buffer
+			err := ExtractEncryptionKey(&keystring, deploymentDir)
 			Ω(err).ShouldNot(BeNil())
-			Ω(fileBytes).Should(Equal(controlFailureByteOutput))
+			Ω(keystring.String()).Should(BeEmpty())
+		})
+	})
+
+	Context("invalid yaml file", func() {
+		var deploymentDir string = "fixtures/encryptionkey/invalidfileerror"
+
+		It("Should return non nil error and an empty writer", func() {
+			var keystring bytes.Buffer
+			err := ExtractEncryptionKey(&keystring, deploymentDir)
+			Ω(err).ShouldNot(BeNil())
+			Ω(keystring.String()).Should(BeEmpty())
+		})
+	})
+
+	Context("yaml dir doesnt exist", func() {
+		var deploymentDir string = "fixtures/encryptionkey/emptyerror"
+
+		It("Should return non nil error and an empty writer", func() {
+			var keystring bytes.Buffer
+			err := ExtractEncryptionKey(&keystring, deploymentDir)
+			Ω(err).ShouldNot(BeNil())
+			Ω(keystring.String()).Should(BeEmpty())
 		})
 	})
 })
