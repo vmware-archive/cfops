@@ -4,19 +4,13 @@ import (
 	"io"
 
 	"github.com/pivotalservices/cfops/command"
-	"github.com/pivotalservices/cfops/osutils"
-	"github.com/pivotalservices/cfops/utils"
 )
 
-func backupNfs(jsonfile, destDir string) (err error) {
-	arguments := []string{jsonfile, "cf", "nfs_server", "vcap"}
-	password := utils.GetPassword(arguments)
-	ip := utils.GetIP(arguments)
-	file, _ := osutils.SafeCreate(destDir, "nfs.tar.gz")
-	defer file.Close()
+func BackupNfs(password, ip string, dest io.Writer) (err error) {
+	var nfsb *NFSBackup
 
-	if nfsb, err := NewNFSBackup(password, ip); err == nil {
-		err = nfsb.Dump(file)
+	if nfsb, err = NewNFSBackup(password, ip); err == nil {
+		err = nfsb.Dump(dest)
 	}
 	return
 }

@@ -30,7 +30,10 @@ type BackupContext struct {
 //
 // backupConsoleDB(backupscript, jsonfile, databaseDir)
 //
-// backupNfs(jsonfile, nfsDir)
+//-       arguments := []string{jsonfile, "cf", "nfs_server", "vcap"}
+//-       password := utils.GetPassword(arguments)
+//-       ip := utils.GetIP(arguments)
+// BackupNfs(password, ip, outfileref)
 //
 // toggleCCJobs(backupscript, ip, username, password, deploymentName, ccJobs, "started")
 //
