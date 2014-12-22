@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/codegangsta/cli"
@@ -60,8 +61,12 @@ func NewApp() *cli.App {
 				if c.String("hostname") == "" || c.String("username") == "" || c.String("password") == "" || c.String("tempestpassword") == "" || c.String("destination") == "" {
 					cli.ShowCommandHelp(c, "backup")
 				}
-				opsmanager := backup.NewOpsManager(c.String("hostname"), c.String("username"), c.String("password"), c.String("tempestpassword"), c.String("destination"))
-				opsmanager.Backup()
+				if opsmanager, err := backup.NewOpsManager(c.String("hostname"), c.String("username"), c.String("password"), c.String("tempestpassword"), c.String("destination")); err == nil {
+					opsmanager.Backup()
+
+				} else {
+					fmt.Println("ERROR: ", err)
+				}
 			},
 		},
 	}...)

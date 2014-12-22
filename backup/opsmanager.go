@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
+	"os"
+	"path"
 
+	"github.com/pivotalservices/cfops/command"
 	"github.com/pivotalservices/cfops/osutils"
-	"github.com/pivotalservices/cfops/ssh"
+	"github.com/xchapter7x/goutil"
 )
 
 // OpsManager contains the location and credentials of a Pivotal Ops Manager instance
@@ -19,70 +21,75 @@ type OpsManager struct {
 	Password        string
 	TempestPassword string
 	DbEncryptionKey string
+	RestRunner      RestAdapter
+	Executer        command.Executer
+	DeploymentDir   string
 }
 
 // Backup performs a backup of a Pivotal Ops Manager instance
-func (context *OpsManager) Backup() error {
-	// Step 1: Download Ops Manager Installation Settings
-	// :::TODO:::
-	// CONNECTION_URL=https://$OPS_MANAGER_HOST/api/installation_settings
-	// echo "EXPORT INSTALLATION FILES FROM " $CONNECTION_URL
-	// curl "$CONNECTION_URL" -X GET -u $OPS_MGR_ADMIN_USERNAME:$OPS_MGR_ADMIN_PASSWORD --insecure -k -o $WORK_DIR/installation.yml
-
-	// Step 2: Export Ops Manager Deployments (http://docs.pivotal.io/pivotalcf/customizing/backup-settings.html#export)
-	copier := ssh.New("tempest", context.TempestPassword, context.Hostname, 22)
-	err := context.copyDeployments(copier)
-	if err != nil {
-		// TODO: Log
-	}
-
-	// Step 3 (Optional): Export Ops Manager Installation
-	// CONNECTION_URL=https://$OPS_MANAGER_HOST/api/installation_asset_collection
-	// echo "EXPORT INSTALLATION FILES FROM " $CONNECTION_URL
-	// curl "$CONNECTION_URL" -X GET -u $OPS_MGR_ADMIN_USERNAME:$OPS_MGR_ADMIN_PASSWORD --insecure -k -o $WORK_DIR/installation.zip
-
-	return err
+func (context *OpsManager) Backup() (err error) {
+	var (
+		settingsFileRef     *os.File
+		keyFileRef          *os.File
+		opsmanagerBackupDir string = "opsmanager"
+	)
+	defer settingsFileRef.Close()
+	defer keyFileRef.Close()
+	c := goutil.NewChain(nil)
+	c.Call(context.copyDeployments)
+	c.CallP(c.Returns(&keyFileRef, &err), osutils.SafeCreate, context.TargetDir, opsmanagerBackupDir, "cc_db_encryption_key.txt")
+	c.Call(ExtractEncryptionKey, keyFileRef, context.DeploymentDir)
+	c.CallP(c.Returns(&settingsFileRef, &err), osutils.SafeCreate, context.TargetDir, opsmanagerBackupDir, "installation.yml")
+	c.Call(context.exportInstallationSettings, settingsFileRef)
+	err = c.Error
+	return
 }
 
 // NewOpsManager initializes an OpsManager instance
-func NewOpsManager(hostname string, username string, password string, tempestpassword string, target string) *OpsManager {
-	context := &OpsManager{
-		Hostname:        hostname,
-		Username:        username,
-		Password:        password,
-		TempestPassword: tempestpassword,
-		BackupContext: BackupContext{
-			TargetDir: target,
-		},
+func NewOpsManager(hostname string, username string, password string, tempestpassword string, target string) (context *OpsManager, err error) {
+	var remoteExecuter command.Executer
+	remoteExecuter, err = command.NewRemoteExecutor(command.SshConfig{
+		Username: "tempest",
+		Password: tempestpassword,
+		Host:     hostname,
+		Port:     22,
+	})
+
+	if err == nil {
+		context = &OpsManager{
+			DeploymentDir: path.Join(target, "opsmanager", "deployments"),
+			Hostname:      hostname,
+			Username:      username,
+			Password:      password,
+			BackupContext: BackupContext{
+				TargetDir: target,
+			},
+			RestRunner: RestAdapter(invoke),
+			Executer:   remoteExecuter,
+		}
 	}
-	return context
+	return
 }
 
-func (context *OpsManager) copyDeployments(copier ssh.Copier) error {
-	file, err := osutils.SafeCreate(context.TargetDir, "opsmanager", "deployments.tar.gz")
+func (context *OpsManager) copyDeployments() (err error) {
+	var file *os.File
 	defer file.Close()
-	if err != nil {
-		return err
-	}
 
-	command := "cd /var/tempest/workspaces/default && tar cz deployments"
-	return copier.Copy(file, strings.NewReader(command))
+	if file, err = osutils.SafeCreate(context.TargetDir, "opsmanager", "deployments.tar.gz"); err == nil {
+		command := "cd /var/tempest/workspaces/default && tar cz deployments"
+		err = context.Executer.Execute(file, command)
+	}
+	return
 }
 
-func (context *OpsManager) exportInstallationSettings() {
-	connectionURL := "https://" + context.Hostname + "/api/installation_settings"
+func (context *OpsManager) exportInstallationSettings(dest io.Writer) (err error) {
+	var body io.Reader
+	connectionURL := fmt.Sprintf("https://%s/api/installation_settings", context.Hostname)
 
-	resp, err := invoke("GET", connectionURL, context.Username, context.Password, false)
-	if err != nil {
-		// TODO: Log
+	if _, body, err = context.RestRunner.Run("GET", connectionURL, context.Username, context.Password, false); err == nil {
+		_, err = io.Copy(dest, body)
 	}
-	defer resp.Body.Close()
-	f, err := osutils.SafeCreate(context.TargetDir, "opsmanager", "installation.yml")
-	defer f.Close()
-	_, e := io.Copy(f, resp.Body)
-	if e != nil {
-		// TODO: Log
-	}
+	return
 }
 
 func invoke(method string, connectionURL string, username string, password string, isYaml bool) (*http.Response, error) {
