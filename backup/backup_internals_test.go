@@ -1,12 +1,10 @@
 package backup
 
 import (
-	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
 	"path"
-	"strings"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -32,7 +30,16 @@ var _ = Describe("Backup", func() {
 		)
 
 		BeforeEach(func() {
-			context = NewOpsManager("localhost", "admin", "admin", "admin", path.Join(dir, "backup"))
+			context = &OpsManager{
+				Hostname: "localhost",
+				Username: "user",
+				Password: "password",
+				BackupContext: BackupContext{
+					TargetDir: path.Join(dir, "backup"),
+				},
+				RestRunner: RestAdapter(invoke),
+				Executer:   &testExecuter{},
+			}
 		})
 
 		AfterEach(func() {
@@ -41,33 +48,21 @@ var _ = Describe("Backup", func() {
 
 		Context("With an empty target", func() {
 			It("should backup a tempest deployment's files", func() {
-				copier := &testCopier{}
 				Ω(context.TargetDir).NotTo(BeEquivalentTo(""))
 				e, _ := osutils.Exists(context.TargetDir)
 				Ω(e).To(BeFalse())
-				err := context.copyDeployments(copier)
+				err := context.copyDeployments()
 				Ω(err).Should(BeNil())
 				e, _ = osutils.Exists(context.TargetDir)
 				Ω(e).To(BeTrue())
-				Ω(copier.src).ToNot(BeNil())
-				fmt.Println(copier.src)
-				s, _ := ioutil.ReadAll(copier.src)
-				Ω(string(s[:])).To(BeEquivalentTo("cd /var/tempest/workspaces/default && tar cz deployments"))
 			})
 		})
 	})
 })
 
-type testCopier struct {
-	src  io.Reader
-	dest io.Writer
-}
+type testExecuter struct{}
 
-func (copier *testCopier) Copy(dest io.Writer, src io.Reader) error {
-	s, _ := ioutil.ReadAll(src)
-	srcvalue := string(s[:])
-	copier.dest = dest
-	copier.src = strings.NewReader(srcvalue)
-	_, err := io.Copy(dest, strings.NewReader(srcvalue))
-	return err
+func (s *testExecuter) Execute(dest io.Writer, src string) (err error) {
+	dest.Write([]byte(src))
+	return
 }
