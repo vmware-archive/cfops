@@ -23,6 +23,7 @@ type OpsManager struct {
 	DbEncryptionKey string
 	RestRunner      RestAdapter
 	Executer        command.Executer
+	DeploymentDir   string
 }
 
 // Backup performs a backup of a Pivotal Ops Manager instance
@@ -34,12 +35,11 @@ func (context *OpsManager) Backup() (err error) {
 	)
 	defer settingsFileRef.Close()
 	defer keyFileRef.Close()
-	deploymentDir := path.Join(context.TargetDir, "deployments")
-	c := goutil.NewChain(err)
+	c := goutil.NewChain(nil)
 	c.Call(context.copyDeployments)
-	c.CallP(c.Returns(keyFileRef, err), osutils.SafeCreate, context.TargetDir, opsmanagerBackupDir, "cc_db_encryption_key.txt")
-	c.Call(ExtractEncryptionKey, keyFileRef, deploymentDir)
-	c.CallP(c.Returns(settingsFileRef, err), osutils.SafeCreate, context.TargetDir, opsmanagerBackupDir, "installation.yml")
+	c.CallP(c.Returns(&keyFileRef, &err), osutils.SafeCreate, context.TargetDir, opsmanagerBackupDir, "cc_db_encryption_key.txt")
+	c.Call(ExtractEncryptionKey, keyFileRef, context.DeploymentDir)
+	c.CallP(c.Returns(&settingsFileRef, &err), osutils.SafeCreate, context.TargetDir, opsmanagerBackupDir, "installation.yml")
 	c.Call(context.exportInstallationSettings, settingsFileRef)
 	err = c.Error
 	return
@@ -57,9 +57,10 @@ func NewOpsManager(hostname string, username string, password string, tempestpas
 
 	if err == nil {
 		context = &OpsManager{
-			Hostname: hostname,
-			Username: username,
-			Password: password,
+			DeploymentDir: path.Join(target, "opsmanager", "deployments"),
+			Hostname:      hostname,
+			Username:      username,
+			Password:      password,
 			BackupContext: BackupContext{
 				TargetDir: target,
 			},
