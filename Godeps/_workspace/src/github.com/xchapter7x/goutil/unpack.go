@@ -35,7 +35,7 @@ func mapPackedValuesToUnpackedPointers(packedValues []interface{}, unpackedPoint
 			(unpackedPointers)[i] = ptrElem.Interface()
 
 		} else if packedValueReflectValue.IsValid() {
-			err = fmt.Errorf("Incorrect pointer type %s != %s", ptrElemKind, packedValueReflectValueKind)
+			err = fmt.Errorf("Incorrect pointer type %s != %s at index %s", ptrElemKind, packedValueReflectValueKind, i)
 
 		}
 	}

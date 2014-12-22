@@ -101,6 +101,15 @@ var _ = Describe("CallChain", func() {
 				Ω(callCount).Should(Equal(0))
 			})
 
+			It("Should skip the function if passed an error - even a failed call function", func() {
+				e := fmt.Errorf("new error")
+				c := NewChain(e)
+				t := "string"
+				c.CallP([]interface{}{&t, &e}, successMultiReturn, "testing_error")
+				Ω(callCount).Should(Equal(0))
+				Ω(c.Error).ShouldNot(BeNil())
+			})
+
 		})
 
 		Context("with a nil chained error", func() {
@@ -130,6 +139,7 @@ var _ = Describe("CallChain", func() {
 					_, err := c.Call(failMultiReturn, "testing_error")
 					Ω(err).ShouldNot(BeNil())
 					Ω(err).Should(Equal(controlError))
+					Ω(c.Error).ShouldNot(BeNil())
 				})
 
 				It("Should return a non nil error w/ no args", func() {
@@ -138,6 +148,16 @@ var _ = Describe("CallChain", func() {
 					Ω(err).ShouldNot(BeNil())
 					Ω(err).Should(Equal(controlError))
 				})
+
+				It("Should skip the function if passed an error - even a failed call function", func() {
+					var e error
+					c := NewChain(nil)
+					t := "string"
+					c.CallP([]interface{}{&t, &e}, failMultiReturn, "testing_error")
+					Ω(c.Error).ShouldNot(BeNil())
+					Ω(e).ShouldNot(BeNil())
+				})
+
 			})
 		})
 	})

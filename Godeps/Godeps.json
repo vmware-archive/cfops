@@ -26,7 +26,7 @@
 		},
 		{
 			"ImportPath": "github.com/xchapter7x/goutil",
-			"Rev": "8285696cdc76fa9013ac81f4d20c1e9f257c44d9"
+			"Rev": "71f2721df5669925d730eb1e0a807ff254f40506"
 		},
 		{
 			"ImportPath": "golang.org/x/crypto/ssh",
