@@ -63,7 +63,7 @@ var _ = Describe("CallChain", func() {
 				}
 				c := NewChain(nil)
 				err := c.CallP(response, failMultiReturn, "random")
-				Ω(sampleFailureReturn).ShouldNot(Equal(stres))
+				Ω(sampleFailureReturn).Should(Equal(stres))
 				Ω(err).ShouldNot(BeNil())
 			})
 
@@ -149,15 +149,23 @@ var _ = Describe("CallChain", func() {
 					Ω(err).Should(Equal(controlError))
 				})
 
-				It("Should skip the function if passed an error - even a failed call function", func() {
+				It("Should have the correct error status in the chain Error value", func() {
 					var e error
 					c := NewChain(nil)
 					t := "string"
 					c.CallP([]interface{}{&t, &e}, failMultiReturn, "testing_error")
 					Ω(c.Error).ShouldNot(BeNil())
-					Ω(e).ShouldNot(BeNil())
 				})
 
+				It("Should return proper value & error to given pointers", func() {
+					var e error = nil
+					c := NewChain(nil)
+					t := "original value"
+					err := c.CallP([]interface{}{&t, &e}, failMultiReturn, "testing_error")
+					Ω(err).ShouldNot(BeNil())
+					Ω(t).Should(Equal(sampleFailureReturn))
+					Ω(e).ShouldNot(BeNil())
+				})
 			})
 		})
 	})

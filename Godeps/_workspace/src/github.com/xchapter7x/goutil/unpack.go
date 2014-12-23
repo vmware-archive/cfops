@@ -34,9 +34,19 @@ func mapPackedValuesToUnpackedPointers(packedValues []interface{}, unpackedPoint
 			ptrElem.Set(packedValueReflectValue)
 			(unpackedPointers)[i] = ptrElem.Interface()
 
-		} else if packedValueReflectValue.IsValid() {
-			err = fmt.Errorf("Incorrect pointer type %s != %s at index %s", ptrElemKind, packedValueReflectValueKind, i)
+		} else if !packedValueReflectValue.IsValid() {
 
+			if packedValue != nil {
+				err = fmt.Errorf("invalid packed value %s", packedValue)
+			}
+
+		} else if packedValueReflectValue.Type() == reflect.ValueOf(fmt.Errorf("")).Type() {
+			e := fmt.Sprintf("%s", packedValue)
+			*((unpackedPointers)[i].(*error)) = fmt.Errorf(e)
+			(unpackedPointers)[i] = fmt.Errorf(e)
+
+		} else if packedValueReflectValue.IsValid() {
+			err = fmt.Errorf("Incorrect pointer type %s != %s at index %s %s %s %s", ptrElemKind, packedValueReflectValueKind, i, ptrVal.Type(), ptrElem, packedValueReflectValue.Type())
 		}
 	}
 	return

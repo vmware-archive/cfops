@@ -63,8 +63,10 @@ func CallChain(preverr error, functor interface{}, iargs ...interface{}) (respon
 
 func CallChainP(preverr error, responseInterfaceArray []interface{}, functor interface{}, iargs ...interface{}) (err error) {
 	var res []interface{}
-	res, err = CallChain(preverr, functor, iargs...)
-	_, err = CallChain(err, UnpackArray, res, responseInterfaceArray)
-	_, err = CallChain(err, findErrorValue, responseInterfaceArray)
+	res, _ = CallChain(preverr, functor, iargs...)
+
+	if err = UnpackArray(res, responseInterfaceArray); err == nil {
+		err = findErrorValue(responseInterfaceArray)
+	}
 	return
 }
