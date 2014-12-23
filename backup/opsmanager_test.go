@@ -34,9 +34,10 @@ var _ = Describe("OpsManager object", func() {
 					BackupContext: BackupContext{
 						TargetDir: path.Join(tmpDir, "backup"),
 					},
-					RestRunner:    RestAdapter(restFailure),
-					Executer:      &failExecuter{},
-					DeploymentDir: "fixtures/encryptionkey",
+					RestRunner:          RestAdapter(restFailure),
+					Executer:            &failExecuter{},
+					DeploymentDir:       "fixtures/encryptionkey",
+					OpsmanagerBackupDir: "opsmanager",
 				}
 
 			})
@@ -76,9 +77,10 @@ var _ = Describe("OpsManager object", func() {
 					BackupContext: BackupContext{
 						TargetDir: path.Join(tmpDir, "backup"),
 					},
-					RestRunner:    RestAdapter(restSuccess),
-					Executer:      &successExecuter{},
-					DeploymentDir: "fixtures/encryptionkey",
+					RestRunner:          RestAdapter(restSuccess),
+					Executer:            &successExecuter{},
+					DeploymentDir:       "fixtures/encryptionkey",
+					OpsmanagerBackupDir: "opsmanager",
 				}
 
 			})
