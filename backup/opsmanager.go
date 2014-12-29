@@ -10,38 +10,54 @@ import (
 
 	"github.com/pivotalservices/cfops/command"
 	"github.com/pivotalservices/cfops/osutils"
-	"github.com/xchapter7x/goutil"
 )
 
 // OpsManager contains the location and credentials of a Pivotal Ops Manager instance
 type OpsManager struct {
 	BackupContext
-	Hostname        string
-	Username        string
-	Password        string
-	TempestPassword string
-	DbEncryptionKey string
-	RestRunner      RestAdapter
-	Executer        command.Executer
-	DeploymentDir   string
+	Hostname            string
+	Username            string
+	Password            string
+	TempestPassword     string
+	DbEncryptionKey     string
+	RestRunner          RestAdapter
+	Executer            command.Executer
+	DeploymentDir       string
+	OpsmanagerBackupDir string
 }
 
 // Backup performs a backup of a Pivotal Ops Manager instance
 func (context *OpsManager) Backup() (err error) {
-	var (
-		settingsFileRef     *os.File
-		keyFileRef          *os.File
-		opsmanagerBackupDir string = "opsmanager"
-	)
+	if err = context.copyDeployments(); err == nil {
+		err = context.exportAndExtract()
+	}
+	return
+}
+
+func (context *OpsManager) exportAndExtract() (err error) {
+	if err = context.extract(); err == nil {
+		err = context.export()
+	}
+	return
+}
+
+func (context *OpsManager) export() (err error) {
+	var settingsFileRef *os.File
 	defer settingsFileRef.Close()
+
+	if settingsFileRef, err = osutils.SafeCreate(context.TargetDir, context.OpsmanagerBackupDir, "installation.yml"); err == nil {
+		err = context.exportInstallationSettings(settingsFileRef)
+	}
+	return
+}
+
+func (context *OpsManager) extract() (err error) {
+	var keyFileRef *os.File
 	defer keyFileRef.Close()
-	c := goutil.NewChain(nil)
-	c.Call(context.copyDeployments)
-	c.CallP(c.Returns(&keyFileRef, &err), osutils.SafeCreate, context.TargetDir, opsmanagerBackupDir, "cc_db_encryption_key.txt")
-	c.Call(ExtractEncryptionKey, keyFileRef, context.DeploymentDir)
-	c.CallP(c.Returns(&settingsFileRef, &err), osutils.SafeCreate, context.TargetDir, opsmanagerBackupDir, "installation.yml")
-	c.Call(context.exportInstallationSettings, settingsFileRef)
-	err = c.Error
+
+	if keyFileRef, err = osutils.SafeCreate(context.TargetDir, context.OpsmanagerBackupDir, "cc_db_encryption_key.txt"); err == nil {
+		err = ExtractEncryptionKey(keyFileRef, context.DeploymentDir)
+	}
 	return
 }
 
@@ -64,8 +80,9 @@ func NewOpsManager(hostname string, username string, password string, tempestpas
 			BackupContext: BackupContext{
 				TargetDir: target,
 			},
-			RestRunner: RestAdapter(invoke),
-			Executer:   remoteExecuter,
+			RestRunner:          RestAdapter(invoke),
+			Executer:            remoteExecuter,
+			OpsmanagerBackupDir: "opsmanager",
 		}
 	}
 	return

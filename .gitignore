@@ -22,3 +22,4 @@ _testmain.go
 cfdeploy.iml
 cfdeploy
 test/deployments/
+main

@@ -28,3 +28,12 @@ build:
         name: go test cover
         code: |
           ./testCoverage ./... 0 
+
+    # lets make sure we can build
+    # the main executable (later we can cross compile and upload)
+    - script:
+        name: go build
+        code: |
+          godep go build ./cmd/cfops/main.go 
+
+    
