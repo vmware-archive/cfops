@@ -69,13 +69,11 @@ func NewApp() *cli.App {
 					if opsmanager, err = backup.NewOpsManager(c.String("hostname"), c.String("username"), c.String("password"), c.String("tempestpassword"), c.String("destination")); err == nil {
 						err = opsmanager.Backup()
 					}
-
 				}
 
 				if err != nil {
 					fmt.Println(err)
 				}
-
 			},
 		},
 	}...)
