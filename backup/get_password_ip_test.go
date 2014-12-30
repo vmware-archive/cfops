@@ -25,6 +25,10 @@ var _ = Describe("get_password_ip", func() {
 				fileRef, _ = os.Open("fixtures/installation.json")
 			})
 
+			AfterEach(func() {
+				fileRef.Close()
+			})
+
 			It("Should return nil error, correct ip & password", func() {
 				ip, password, err := GetPasswordAndIP(fileRef, product, component, username)
 				Ω(err).Should(BeNil())
@@ -62,6 +66,10 @@ var _ = Describe("get_password_ip", func() {
 				}
 			})
 
+			AfterEach(func() {
+				fileRef.Close()
+			})
+
 			It("Should return nil error, correct ip & password", func() {
 				ip, password, err := parser.Parse(fileRef)
 				Ω(err).Should(BeNil())
@@ -93,6 +101,10 @@ var _ = Describe("get_password_ip", func() {
 					Component: component,
 					Username:  username,
 				}
+			})
+
+			AfterEach(func() {
+				fileRef.Close()
 			})
 
 			It("Should return error", func() {
@@ -128,6 +140,10 @@ var _ = Describe("get_password_ip", func() {
 				}
 			})
 
+			AfterEach(func() {
+				fileRef.Close()
+			})
+
 			It("Should return error", func() {
 				ip, password, err := parser.Parse(fileRef)
 				Ω(err).ShouldNot(BeNil())
@@ -159,6 +175,10 @@ var _ = Describe("get_password_ip", func() {
 					Component: component,
 					Username:  username,
 				}
+			})
+
+			AfterEach(func() {
+				fileRef.Close()
 			})
 
 			It("Should return error", func() {
