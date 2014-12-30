@@ -1,5 +1,10 @@
 package backup
 
+import (
+	"fmt"
+	"os"
+)
+
 // ElasticRuntime contains information about a Pivotal Elastic Runtime deployment
 type ElasticRuntime struct {
 	DeploymentsFile string
@@ -20,39 +25,52 @@ func NewElasticRuntime(deploymentsFile, dbEncryptionKey string, target string) *
 }
 
 // Backup performs a backup of a Pivotal Elastic Runtime deployment
-func (context *ElasticRuntime) Backup() error {
-	// Step 1: Back Up the Cloud Controller DB Encryption Credentials (http://docs.pivotal.io/pivotalcf/customizing/backup-settings.html#encrypt-key)
-	err := context.extractDbEncryptionKey()
-	if err != nil {
-		// TODO: Log
-		return err
+func (context *ElasticRuntime) Backup() (err error) {
+	// ip, username, password := verifyBoshLogin(jsonfile)
+	//
+	// deploymentName := getElasticRuntimeDeploymentName(ip, username, password, backupDir)
+	//
+	// ccJobs := getAllCloudControllerVMs(ip, username, password, deploymentName, backupDir)
+	//
+	// cc := NewCloudController(ip, username, password, deploymentName, "stopped")
+	// cc.ToggleJobs(CloudControllerJobs(ccJobs))
+	//
+	//backupCCDB(backupscript, jsonfile, databaseDir)
+	//
+	// backupUAADB(backupscript, jsonfile, databaseDir)
+	//
+	// backupConsoleDB(backupscript, jsonfile, databaseDir)
+	//
+	//-       arguments := []string{jsonfile, "cf", "nfs_server", "vcap"}
+	//-       password := utils.GetPassword(arguments)
+	//-       ip := utils.GetIP(arguments)
+	// BackupNfs(password, ip, outfileref)
+	//
+	// toggleCCJobs(backupscript, ip, username, password, deploymentName, ccJobs, "started")
+	//
+	// backupMySqlDB(backupscript, jsonfile, databaseDir)
+
+	return nil
+}
+
+func backupCCDB(backupscript string, jsonfile string, databaseDir string) (err error) {
+	var (
+		ip       string
+		password string
+		fileRef  *os.File
+	)
+
+	if fileRef, err = os.Open(jsonfile); err == nil {
+		ip, password, err = GetPasswordAndIP(fileRef, "cf", "ccdb", "admin")
 	}
-
-	// Step 2: Find Job Names
-
-	// Step 3: Stop Jobs
-	// 4.1: cloud_controller-partition-default_az_guid
-	// 4.2: cloud_controller_worker-partition-default_az_guid
-
-	// Step 4: Backup Databases
-	// Cloud Controller Database
-	// UAA Database
-	// Console Database
-	// The NFS Server
-
-	// Step 5: Start Jobs
-
-	return nil
-}
-
-func (context *ElasticRuntime) extractDbEncryptionKey() error {
-	return nil
-}
-
-func (context *ElasticRuntime) startJob(job string) error {
-	return nil
-}
-
-func (context *ElasticRuntime) stopJob(job string) error {
-	return nil
+	//dbparams := []string{"export_db", ip, "admin", password, "2544", "ccdb", databaseDir + "/ccdb.sql"}
+	//IP=$2
+	//USERNAME=$3
+	//export PGPASSWORD=$4
+	//PORT=$5
+	//DB=$6
+	//DB_FILE=$7
+	//executeCommand(backupscript, dbparams...)
+	fmt.Println("Completed Backup of Cloud Controller Database", ip, password)
+	return
 }

@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	"github.com/pivotalservices/cfops/command"
-	"github.com/pivotalservices/cfops/utils"
 )
 
 type CloudControllerJobs []string
@@ -22,7 +21,14 @@ type JobTogglerAdapter func(serverUrl, username, password string, exec command.E
 type EvenTaskCreaterAdapter func(method, url, username, password string, isYaml bool) (task EventTasker)
 
 type EventTasker interface {
-	WaitForEventStateDone(contents bytes.Buffer, eventObject *utils.EventObject) (err error)
+	WaitForEventStateDone(contents bytes.Buffer, eventObject *EventObject) (err error)
+}
+
+type EventObject struct {
+	Id          int    `json:"id"`
+	State       string `json:"state"`
+	Description string `json:"description"`
+	Result      string `json:"result"`
 }
 
 type CloudController struct {
@@ -85,7 +91,7 @@ func (s *CloudController) ToggleJobs(ccjobs CloudControllerJobs) (err error) {
 func (s *CloudController) ToggleJob(ccjob, serverURL string, ccjobindex int) (err error) {
 	var (
 		contents      bytes.Buffer
-		eventObject   utils.EventObject
+		eventObject   EventObject
 		connectionURL string = newConnectionURL(serverURL, s.deploymentName, ccjob, s.state, ccjobindex)
 	)
 
@@ -120,7 +126,7 @@ func (s *Task) getEvents(dest io.Writer) (err error) {
 	return
 }
 
-func (s *Task) WaitForEventStateDone(contents bytes.Buffer, eventObject *utils.EventObject) (err error) {
+func (s *Task) WaitForEventStateDone(contents bytes.Buffer, eventObject *EventObject) (err error) {
 
 	if err = json.Unmarshal(contents.Bytes(), eventObject); err == nil && eventObject.State != "done" {
 		contents.Reset()
