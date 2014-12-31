@@ -62,7 +62,7 @@ var _ = Describe("ElasticRuntime", func() {
 			})
 
 			It("Should write the dumped output to a file in the databaseDir", func() {
-				er.RunPostgresBackup(info, target)
+				er.RunDbBackups([]DbBackupInfo{info})
 				filename := fmt.Sprintf("%s.sql", component)
 				exists, _ := osutils.Exists(path.Join(target, filename))
 				Ω(exists).Should(BeTrue())
@@ -71,7 +71,7 @@ var _ = Describe("ElasticRuntime", func() {
 			It("Should have a nil error and not panic", func() {
 				var err error
 				Ω(func() {
-					err = er.RunPostgresBackup(info, target)
+					err = er.RunDbBackups([]DbBackupInfo{info})
 				}).ShouldNot(Panic())
 				Ω(err).Should(BeNil())
 			})
@@ -109,7 +109,7 @@ var _ = Describe("ElasticRuntime", func() {
 			})
 
 			It("Should write the dumped output to a file in the databaseDir", func() {
-				er.RunPostgresBackup(info, target)
+				er.RunDbBackups([]DbBackupInfo{info})
 				filename := fmt.Sprintf("%s.sql", component)
 				exists, _ := osutils.Exists(path.Join(target, filename))
 				Ω(exists).Should(BeTrue())
@@ -118,7 +118,7 @@ var _ = Describe("ElasticRuntime", func() {
 			It("Should have a nil error and not panic", func() {
 				var err error
 				Ω(func() {
-					err = er.RunPostgresBackup(info, target)
+					err = er.RunDbBackups([]DbBackupInfo{info})
 				}).ShouldNot(Panic())
 				Ω(err).Should(BeNil())
 			})
@@ -156,7 +156,7 @@ var _ = Describe("ElasticRuntime", func() {
 			})
 
 			It("Should not write the dumped output to a file in the databaseDir", func() {
-				er.RunPostgresBackup(info, target)
+				er.RunDbBackups([]DbBackupInfo{info})
 				filename := fmt.Sprintf("%s.sql", component)
 				exists, _ := osutils.Exists(path.Join(target, filename))
 				Ω(exists).ShouldNot(BeTrue())
@@ -165,7 +165,7 @@ var _ = Describe("ElasticRuntime", func() {
 			It("Should have a nil error and not panic", func() {
 				var err error
 				Ω(func() {
-					err = er.RunPostgresBackup(info, target)
+					err = er.RunDbBackups([]DbBackupInfo{info})
 				}).ShouldNot(Panic())
 				Ω(err).ShouldNot(BeNil())
 			})

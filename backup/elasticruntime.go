@@ -62,40 +62,51 @@ func (context *ElasticRuntime) Backup() (err error) {
 	// ccJobs := getAllCloudControllerVMs(ip, username, password, deploymentName, backupDir)
 	// cc := NewCloudController(ip, username, password, deploymentName, "stopped")
 	// cc.ToggleJobs(CloudControllerJobs(ccJobs))
-	if err = context.backupCCDB(); err == nil {
-		err = context.backupUAADB()
+	consoledbInfo := DbBackupInfo{
+		Product:   "cf",
+		Component: "consoledb",
+		Username:  "root",
 	}
-	// backupConsoleDB(backupscript, jsonfile, databaseDir)
+
+	uaadbInfo := DbBackupInfo{
+		Product:   "cf",
+		Component: "uaadb",
+		Username:  "root",
+	}
+
+	ccdbInfo := DbBackupInfo{
+		Product:   "cf",
+		Component: "ccdb",
+		Username:  "admin",
+	}
+
+	backupDbList := []DbBackupInfo{
+		ccdbInfo,
+		uaadbInfo,
+		consoledbInfo,
+	}
+	err = context.RunDbBackups(backupDbList)
 	//-       arguments := []string{jsonfile, "cf", "nfs_server", "vcap"}
 	//-       password := utils.GetPassword(arguments)
 	//-       ip := utils.GetIP(arguments)
 	// BackupNfs(password, ip, outfileref)
 	// toggleCCJobs(backupscript, ip, username, password, deploymentName, ccJobs, "started")
 	// backupMySqlDB(backupscript, jsonfile, databaseDir)
-	return nil
-}
-
-func (context *ElasticRuntime) backupUAADB() (err error) {
-	info := DbBackupInfo{
-		Product:   "cf",
-		Component: "uaadb",
-		Username:  "root",
-	}
-	err = context.RunPostgresBackup(info, context.TargetDir)
 	return
 }
 
-func (context *ElasticRuntime) backupCCDB() (err error) {
-	info := DbBackupInfo{
-		Product:   "cf",
-		Component: "ccdb",
-		Username:  "admin",
+func (context *ElasticRuntime) RunDbBackups(dbInfoList []DbBackupInfo) (err error) {
+
+	for _, info := range dbInfoList {
+
+		if err = context.runPostgresBackup(info, context.TargetDir); err != nil {
+			break
+		}
 	}
-	err = context.RunPostgresBackup(info, context.TargetDir)
 	return
 }
 
-func (context *ElasticRuntime) RunPostgresBackup(dbInfo DbBackupInfo, databaseDir string) (err error) {
+func (context *ElasticRuntime) runPostgresBackup(dbInfo DbBackupInfo, databaseDir string) (err error) {
 	var (
 		creds          credentials
 		outfile        *os.File
