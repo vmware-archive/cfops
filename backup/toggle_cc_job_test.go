@@ -8,7 +8,6 @@ import (
 
 	. "github.com/pivotalservices/cfops/backup"
 	"github.com/pivotalservices/cfops/command"
-	"github.com/pivotalservices/cfops/utils"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -47,7 +46,7 @@ func (cb *ClosingBuffer) Close() (err error) {
 type SuccessMockEventTasker struct {
 }
 
-func (s SuccessMockEventTasker) WaitForEventStateDone(contents bytes.Buffer, eventObject *utils.EventObject) (err error) {
+func (s SuccessMockEventTasker) WaitForEventStateDone(contents bytes.Buffer, eventObject *EventObject) (err error) {
 	successWaitCalled++
 	return
 }
@@ -55,7 +54,7 @@ func (s SuccessMockEventTasker) WaitForEventStateDone(contents bytes.Buffer, eve
 type FailureMockEventTasker struct {
 }
 
-func (s FailureMockEventTasker) WaitForEventStateDone(contents bytes.Buffer, eventObject *utils.EventObject) (err error) {
+func (s FailureMockEventTasker) WaitForEventStateDone(contents bytes.Buffer, eventObject *EventObject) (err error) {
 	failureWaitCalled++
 	return
 }
@@ -142,14 +141,14 @@ var _ = Describe("toggle cc job", func() {
 			})
 
 			It("Should return nil error on valid arguments", func() {
-				eventObject := &utils.EventObject{}
+				eventObject := &EventObject{}
 				bbf := bytes.NewBuffer([]byte(successString))
 				err := task.WaitForEventStateDone(*bbf, eventObject)
 				Ω(err).Should(BeNil())
 			})
 
 			It("Should return nil error and return if rest endpoint returns done status", func() {
-				eventObject := &utils.EventObject{}
+				eventObject := &EventObject{}
 				bbf := bytes.NewBuffer([]byte(failureString))
 				err := task.WaitForEventStateDone(*bbf, eventObject)
 				Ω(err).Should(BeNil())
@@ -172,7 +171,7 @@ var _ = Describe("toggle cc job", func() {
 			})
 
 			It("Should loop endlessly if done is never returned", func() {
-				eventObject := &utils.EventObject{}
+				eventObject := &EventObject{}
 				bbf := bytes.NewBuffer([]byte(failureString))
 				err := task.WaitForEventStateDone(*bbf, eventObject)
 				Ω(err).Should(BeNil())
@@ -202,7 +201,7 @@ var _ = Describe("toggle cc job", func() {
 			})
 
 			It("Should loop endlessly if done is never returned", func() {
-				eventObject := &utils.EventObject{}
+				eventObject := &EventObject{}
 				bbf := bytes.NewBuffer([]byte(failureString))
 				err := task.WaitForEventStateDone(*bbf, eventObject)
 				Ω(err).ShouldNot(BeNil())
