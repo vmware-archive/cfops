@@ -77,6 +77,53 @@ var _ = Describe("ElasticRuntime", func() {
 			})
 		})
 
+		Context("with a valid product and component for consoledb", func() {
+			var (
+				product   string = "cf"
+				component string = "consoledb"
+				username  string = "root"
+				target    string
+				er        ElasticRuntime
+				info      DbBackupInfo = DbBackupInfo{
+					Product:   product,
+					Component: component,
+					Username:  username,
+				}
+			)
+
+			BeforeEach(func() {
+				target, _ = ioutil.TempDir("/tmp", "spec")
+				er = ElasticRuntime{
+					NewDumper:       mockDumperFunc,
+					JsonFile:        "fixtures/installation.json",
+					DeploymentsFile: "",
+					DbEncryptionKey: "",
+					BackupContext: BackupContext{
+						TargetDir: target,
+					},
+				}
+			})
+
+			AfterEach(func() {
+				os.Remove(target)
+			})
+
+			It("Should write the dumped output to a file in the databaseDir", func() {
+				er.RunDbBackups([]DbBackupInfo{info})
+				filename := fmt.Sprintf("%s.sql", component)
+				exists, _ := osutils.Exists(path.Join(target, filename))
+				Ω(exists).Should(BeTrue())
+			})
+
+			It("Should have a nil error and not panic", func() {
+				var err error
+				Ω(func() {
+					err = er.RunDbBackups([]DbBackupInfo{info})
+				}).ShouldNot(Panic())
+				Ω(err).Should(BeNil())
+			})
+		})
+
 		Context("with a valid product and component for uaadb", func() {
 			var (
 				product   string = "cf"
