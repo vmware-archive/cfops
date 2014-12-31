@@ -28,6 +28,12 @@ type credentials struct {
 	AdminPass string
 }
 
+type DbBackupInfo struct {
+	Product   string
+	Component string
+	Username  string
+}
+
 func (s *credentials) Error() (err error) {
 	if s.Ip == "" || s.VcapPass == "" || s.AdminPass == "" {
 		err = fmt.Errorf("incomplete or invalid credential object")
@@ -56,8 +62,9 @@ func (context *ElasticRuntime) Backup() (err error) {
 	// ccJobs := getAllCloudControllerVMs(ip, username, password, deploymentName, backupDir)
 	// cc := NewCloudController(ip, username, password, deploymentName, "stopped")
 	// cc.ToggleJobs(CloudControllerJobs(ccJobs))
-	err = context.backupCCDB()
-	// backupUAADB(backupscript, jsonfile, databaseDir)
+	if err = context.backupCCDB(); err == nil {
+		err = context.backupUAADB()
+	}
 	// backupConsoleDB(backupscript, jsonfile, databaseDir)
 	//-       arguments := []string{jsonfile, "cf", "nfs_server", "vcap"}
 	//-       password := utils.GetPassword(arguments)
@@ -68,23 +75,34 @@ func (context *ElasticRuntime) Backup() (err error) {
 	return nil
 }
 
-func (context *ElasticRuntime) backupCCDB() (err error) {
-	var (
-		product   string = "cf"
-		component string = "ccdb"
-	)
-	err = context.RunPostgresBackup(product, component, context.TargetDir)
+func (context *ElasticRuntime) backupUAADB() (err error) {
+	info := DbBackupInfo{
+		Product:   "cf",
+		Component: "uaadb",
+		Username:  "root",
+	}
+	err = context.RunPostgresBackup(info, context.TargetDir)
 	return
 }
 
-func (context *ElasticRuntime) RunPostgresBackup(product, component, databaseDir string) (err error) {
+func (context *ElasticRuntime) backupCCDB() (err error) {
+	info := DbBackupInfo{
+		Product:   "cf",
+		Component: "ccdb",
+		Username:  "admin",
+	}
+	err = context.RunPostgresBackup(info, context.TargetDir)
+	return
+}
+
+func (context *ElasticRuntime) RunPostgresBackup(dbInfo DbBackupInfo, databaseDir string) (err error) {
 	var (
 		creds          credentials
 		outfile        *os.File
 		remotePGBackup persistence.Dumper
 	)
 
-	if err = context.getCredentials(product, component, &creds); err == nil {
+	if err = context.getCredentials(dbInfo.Product, dbInfo.Component, dbInfo.Username, &creds); err == nil {
 		sshConfig := command.SshConfig{
 			Username: creds.VcapUser,
 			Password: creds.VcapPass,
@@ -92,8 +110,8 @@ func (context *ElasticRuntime) RunPostgresBackup(product, component, databaseDir
 			Port:     22,
 		}
 
-		if remotePGBackup, err = context.NewDumper(2544, component, creds.AdminUser, creds.AdminPass, sshConfig); err == nil {
-			filename := fmt.Sprintf("%s.sql", component)
+		if remotePGBackup, err = context.NewDumper(2544, dbInfo.Component, creds.AdminUser, creds.AdminPass, sshConfig); err == nil {
+			filename := fmt.Sprintf("%s.sql", dbInfo.Component)
 
 			if outfile, err = osutils.SafeCreate(databaseDir, filename); err == nil {
 				err = remotePGBackup.Dump(outfile)
@@ -103,7 +121,7 @@ func (context *ElasticRuntime) RunPostgresBackup(product, component, databaseDir
 	return
 }
 
-func (context *ElasticRuntime) getCredentials(product, component string, creds *credentials) (err error) {
+func (context *ElasticRuntime) getCredentials(product, component, username string, creds *credentials) (err error) {
 	var (
 		wg      sync.WaitGroup
 		fileRef *os.File
@@ -117,7 +135,7 @@ func (context *ElasticRuntime) getCredentials(product, component string, creds *
 		r, w := io.Pipe()
 		reader = io.TeeReader(fileRef, w)
 		wg.Add(2)
-		go readAdminUserCredentials(&wg, creds, reader, w, product, component, ec)
+		go readAdminUserCredentials(&wg, creds, reader, w, product, component, username, ec)
 		go readVcapUserCredentials(&wg, creds, r, product, component, ec)
 		wg.Wait()
 
@@ -139,11 +157,11 @@ func readErrors(ec chan error) (err error) {
 	return
 }
 
-func readAdminUserCredentials(wg *sync.WaitGroup, creds *credentials, reader io.Reader, writer io.WriteCloser, product, component string, ec chan error) {
+func readAdminUserCredentials(wg *sync.WaitGroup, creds *credentials, reader io.Reader, writer io.WriteCloser, product, component, username string, ec chan error) {
 	var err error
 	defer wg.Done()
 	defer writer.Close()
-	(*creds).AdminUser = "admin"
+	(*creds).AdminUser = username
 
 	if (*creds).Ip, (*creds).AdminPass, err = GetPasswordAndIP(reader, product, component, (*creds).AdminUser); err != nil {
 		go func() {
