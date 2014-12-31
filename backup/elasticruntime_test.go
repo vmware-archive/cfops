@@ -70,5 +70,45 @@ var _ = Describe("ElasticRuntime", func() {
 				Ω(err).Should(BeNil())
 			})
 		})
+		Context("with a invalid product and component", func() {
+			var (
+				product   string = "aaaaaaaa"
+				component string = "aaaaaaaa"
+				target    string
+				er        ElasticRuntime
+			)
+
+			BeforeEach(func() {
+				target, _ = ioutil.TempDir("/tmp", "spec")
+				er = ElasticRuntime{
+					NewDumper:       mockDumperFunc,
+					JsonFile:        "fixtures/installation.json",
+					DeploymentsFile: "",
+					DbEncryptionKey: "",
+					BackupContext: BackupContext{
+						TargetDir: target,
+					},
+				}
+			})
+
+			AfterEach(func() {
+				os.Remove(target)
+			})
+
+			It("Should not write the dumped output to a file in the databaseDir", func() {
+				er.RunPostgresBackup(product, component, target)
+				filename := fmt.Sprintf("%s.sql", component)
+				exists, _ := osutils.Exists(path.Join(target, filename))
+				Ω(exists).ShouldNot(BeTrue())
+			})
+
+			It("Should have a nil error and not panic", func() {
+				var err error
+				Ω(func() {
+					err = er.RunPostgresBackup(product, component, target)
+				}).ShouldNot(Panic())
+				Ω(err).ShouldNot(BeNil())
+			})
+		})
 	})
 })

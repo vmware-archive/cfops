@@ -28,6 +28,13 @@ type credentials struct {
 	AdminPass string
 }
 
+func (s *credentials) Error() (err error) {
+	if s.Ip == "" || s.VcapPass == "" || s.AdminPass == "" {
+		err = fmt.Errorf("incomplete or invalid credential object")
+	}
+	return
+}
+
 // NewElasticRuntime initializes an ElasticRuntime intance
 func NewElasticRuntime(jsonFile, deploymentsFile, dbEncryptionKey string, target string) *ElasticRuntime {
 	context := &ElasticRuntime{
@@ -113,7 +120,10 @@ func (context *ElasticRuntime) getCredentials(product, component string, creds *
 		go readAdminUserCredentials(&wg, creds, reader, w, product, component, ec)
 		go readVcapUserCredentials(&wg, creds, r, product, component, ec)
 		wg.Wait()
-		err = readErrors(ec)
+
+		if err = readErrors(ec); err == nil {
+			err = creds.Error()
+		}
 	}
 	return
 }
@@ -136,7 +146,9 @@ func readAdminUserCredentials(wg *sync.WaitGroup, creds *credentials, reader io.
 	(*creds).AdminUser = "admin"
 
 	if (*creds).Ip, (*creds).AdminPass, err = GetPasswordAndIP(reader, product, component, (*creds).AdminUser); err != nil {
-		ec <- err
+		go func() {
+			ec <- err
+		}()
 	}
 }
 
@@ -146,6 +158,8 @@ func readVcapUserCredentials(wg *sync.WaitGroup, creds *credentials, reader io.R
 	(*creds).VcapUser = "vcap"
 
 	if (*creds).Ip, (*creds).VcapPass, err = GetPasswordAndIP(reader, product, component, (*creds).VcapUser); err != nil {
-		ec <- err
+		go func() {
+			ec <- err
+		}()
 	}
 }
