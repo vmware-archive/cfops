@@ -30,12 +30,18 @@ func mockDumperFunc(port int, database, username, password string, sshCfg comman
 
 var _ = Describe("ElasticRuntime", func() {
 	Describe("RunPostgresBackup function", func() {
-		Context("with a valid product and component", func() {
+		Context("with a valid product and component for ccdb", func() {
 			var (
 				product   string = "cf"
 				component string = "ccdb"
+				username  string = "admin"
 				target    string
 				er        ElasticRuntime
+				info      DbBackupInfo = DbBackupInfo{
+					Product:   product,
+					Component: component,
+					Username:  username,
+				}
 			)
 
 			BeforeEach(func() {
@@ -56,7 +62,7 @@ var _ = Describe("ElasticRuntime", func() {
 			})
 
 			It("Should write the dumped output to a file in the databaseDir", func() {
-				er.RunPostgresBackup(product, component, target)
+				er.RunPostgresBackup(info, target)
 				filename := fmt.Sprintf("%s.sql", component)
 				exists, _ := osutils.Exists(path.Join(target, filename))
 				Ω(exists).Should(BeTrue())
@@ -65,17 +71,71 @@ var _ = Describe("ElasticRuntime", func() {
 			It("Should have a nil error and not panic", func() {
 				var err error
 				Ω(func() {
-					err = er.RunPostgresBackup(product, component, target)
+					err = er.RunPostgresBackup(info, target)
 				}).ShouldNot(Panic())
 				Ω(err).Should(BeNil())
 			})
 		})
-		Context("with a invalid product and component", func() {
+
+		Context("with a valid product and component for uaadb", func() {
+			var (
+				product   string = "cf"
+				component string = "uaadb"
+				username  string = "root"
+				target    string
+				er        ElasticRuntime
+				info      DbBackupInfo = DbBackupInfo{
+					Product:   product,
+					Component: component,
+					Username:  username,
+				}
+			)
+
+			BeforeEach(func() {
+				target, _ = ioutil.TempDir("/tmp", "spec")
+				er = ElasticRuntime{
+					NewDumper:       mockDumperFunc,
+					JsonFile:        "fixtures/installation.json",
+					DeploymentsFile: "",
+					DbEncryptionKey: "",
+					BackupContext: BackupContext{
+						TargetDir: target,
+					},
+				}
+			})
+
+			AfterEach(func() {
+				os.Remove(target)
+			})
+
+			It("Should write the dumped output to a file in the databaseDir", func() {
+				er.RunPostgresBackup(info, target)
+				filename := fmt.Sprintf("%s.sql", component)
+				exists, _ := osutils.Exists(path.Join(target, filename))
+				Ω(exists).Should(BeTrue())
+			})
+
+			It("Should have a nil error and not panic", func() {
+				var err error
+				Ω(func() {
+					err = er.RunPostgresBackup(info, target)
+				}).ShouldNot(Panic())
+				Ω(err).Should(BeNil())
+			})
+		})
+
+		Context("with a invalid product, username and component", func() {
 			var (
 				product   string = "aaaaaaaa"
 				component string = "aaaaaaaa"
+				username  string = "aaaaaaaa"
 				target    string
 				er        ElasticRuntime
+				info      DbBackupInfo = DbBackupInfo{
+					Product:   product,
+					Component: component,
+					Username:  username,
+				}
 			)
 
 			BeforeEach(func() {
@@ -96,7 +156,7 @@ var _ = Describe("ElasticRuntime", func() {
 			})
 
 			It("Should not write the dumped output to a file in the databaseDir", func() {
-				er.RunPostgresBackup(product, component, target)
+				er.RunPostgresBackup(info, target)
 				filename := fmt.Sprintf("%s.sql", component)
 				exists, _ := osutils.Exists(path.Join(target, filename))
 				Ω(exists).ShouldNot(BeTrue())
@@ -105,7 +165,7 @@ var _ = Describe("ElasticRuntime", func() {
 			It("Should have a nil error and not panic", func() {
 				var err error
 				Ω(func() {
-					err = er.RunPostgresBackup(product, component, target)
+					err = er.RunPostgresBackup(info, target)
 				}).ShouldNot(Panic())
 				Ω(err).ShouldNot(BeNil())
 			})
