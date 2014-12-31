@@ -98,38 +98,54 @@ func (context *ElasticRuntime) RunPostgresBackup(product, component, databaseDir
 
 func (context *ElasticRuntime) getCredentials(product, component string, creds *credentials) (err error) {
 	var (
-		ip            string
-		adminPassword string
-		vcapPassword  string
-		wg            sync.WaitGroup
-		fileRef       *os.File
-		vcapUser      string = "vcap"
-		adminUser     string = "admin"
-		reader        io.Reader
+		wg      sync.WaitGroup
+		fileRef *os.File
+		reader  io.Reader
+		ec      chan error
 	)
 	defer fileRef.Close()
+	ec = make(chan error)
 
 	if fileRef, err = os.Open(context.JsonFile); err == nil {
-		wg.Add(1)
 		r, w := io.Pipe()
 		reader = io.TeeReader(fileRef, w)
-
-		go func() {
-			defer wg.Done()
-			defer w.Close()
-
-			if ip, adminPassword, err = GetPasswordAndIP(reader, product, component, adminUser); err == nil {
-				(*creds).Ip = ip
-				(*creds).VcapUser = vcapUser
-				(*creds).AdminUser = adminUser
-				(*creds).AdminPass = adminPassword
-			}
-		}()
-
-		if _, vcapPassword, err = GetPasswordAndIP(r, product, component, vcapUser); err == nil {
-			(*creds).VcapPass = vcapPassword
-		}
+		wg.Add(2)
+		go readAdminUserCredentials(&wg, creds, reader, w, product, component, ec)
+		go readVcapUserCredentials(&wg, creds, r, product, component, ec)
 		wg.Wait()
+		err = readErrors(ec)
 	}
 	return
+}
+
+func readErrors(ec chan error) (err error) {
+
+	if len(ec) > 0 {
+
+		for e := range ec {
+			err = fmt.Errorf("%v ; %v", err, e)
+		}
+	}
+	return
+}
+
+func readAdminUserCredentials(wg *sync.WaitGroup, creds *credentials, reader io.Reader, writer io.WriteCloser, product, component string, ec chan error) {
+	var err error
+	defer wg.Done()
+	defer writer.Close()
+	(*creds).AdminUser = "admin"
+
+	if (*creds).Ip, (*creds).AdminPass, err = GetPasswordAndIP(reader, product, component, (*creds).AdminUser); err != nil {
+		ec <- err
+	}
+}
+
+func readVcapUserCredentials(wg *sync.WaitGroup, creds *credentials, reader io.Reader, product, component string, ec chan error) {
+	var err error
+	defer wg.Done()
+	(*creds).VcapUser = "vcap"
+
+	if (*creds).Ip, (*creds).VcapPass, err = GetPasswordAndIP(reader, product, component, (*creds).VcapUser); err != nil {
+		ec <- err
+	}
 }
