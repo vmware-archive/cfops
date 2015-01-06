@@ -2,9 +2,7 @@ package backup
 
 import (
 	"fmt"
-	"io"
 	"os"
-	"sync"
 
 	"github.com/pivotalservices/cfops/backup/modules/persistence"
 	"github.com/pivotalservices/cfops/command"
@@ -17,26 +15,33 @@ type ElasticRuntime struct {
 	JsonFile        string
 	DeploymentsFile string
 	DbEncryptionKey string
+	SystemsInfo     map[string]SystemInfo
+	DbSystems       []string
+	RestRunner      RestAdapter
 	BackupContext
 }
 
-type credentials struct {
-	Ip        string
-	VcapUser  string
-	VcapPass  string
-	AdminUser string
-	AdminPass string
-}
-
-type DbBackupInfo struct {
+type SystemInfo struct {
 	Product   string
 	Component string
-	Username  string
+	Identity  string
+	Ip        string
+	User      string
+	Pass      string
+	VcapUser  string
+	VcapPass  string
 }
 
-func (s *credentials) Error() (err error) {
-	if s.Ip == "" || s.VcapPass == "" || s.AdminPass == "" {
-		err = fmt.Errorf("incomplete or invalid credential object")
+func (s *SystemInfo) Error() (err error) {
+	if s.Product == "" ||
+		s.Component == "" ||
+		s.Identity == "" ||
+		s.Ip == "" ||
+		s.User == "" ||
+		s.Pass == "" ||
+		s.VcapUser == "" ||
+		s.VcapPass == "" {
+		err = fmt.Errorf("invalid or incomplete system info object: %s", s)
 	}
 	return
 }
@@ -48,147 +53,134 @@ func NewElasticRuntime(jsonFile, deploymentsFile, dbEncryptionKey string, target
 		JsonFile:        jsonFile,
 		DeploymentsFile: deploymentsFile,
 		DbEncryptionKey: dbEncryptionKey,
+		RestRunner:      RestAdapter(invoke),
 		BackupContext: BackupContext{
 			TargetDir: target,
 		},
+		SystemsInfo: map[string]SystemInfo{
+			"ConsoledbInfo": SystemInfo{
+				Product:   "cf",
+				Component: "consoledb",
+				Identity:  "root",
+			},
+			"UaadbInfo": SystemInfo{
+				Product:   "cf",
+				Component: "uaadb",
+				Identity:  "root",
+			},
+			"CcdbInfo": SystemInfo{
+				Product:   "cf",
+				Component: "ccdb",
+				Identity:  "admin",
+			},
+			"DirectorInfo": SystemInfo{
+				Product:   "microbosh",
+				Component: "director",
+				Identity:  "director",
+			},
+		},
+		DbSystems: []string{"ConsoledbInfo", "UaadbInfo", "CcdbInfo"},
 	}
 	return context
 }
 
 // Backup performs a backup of a Pivotal Elastic Runtime deployment
 func (context *ElasticRuntime) Backup() (err error) {
-	// ip, username, password := verifyBoshLogin(jsonfile)
-	// deploymentName := getElasticRuntimeDeploymentName(ip, username, password, backupDir)
-	// ccJobs := getAllCloudControllerVMs(ip, username, password, deploymentName, backupDir)
-	// cc := NewCloudController(ip, username, password, deploymentName, "stopped")
-	// cc.ToggleJobs(CloudControllerJobs(ccJobs))
-	consoledbInfo := DbBackupInfo{
-		Product:   "cf",
-		Component: "consoledb",
-		Username:  "root",
-	}
+	var backupDbList []SystemInfo
 
-	uaadbInfo := DbBackupInfo{
-		Product:   "cf",
-		Component: "uaadb",
-		Username:  "root",
-	}
+	if err = context.ReadAllUserCredentials(); err == nil && context.directorCredentialsValid() {
+		// deploymentName := getElasticRuntimeDeploymentName(ip, username, password, backupDir)
+		// ccJobs := getAllCloudControllerVMs(ip, username, password, deploymentName, backupDir)
+		// cc := NewCloudController(ip, username, password, deploymentName, "stopped")
+		// cc.ToggleJobs(CloudControllerJobs(ccJobs))
 
-	ccdbInfo := DbBackupInfo{
-		Product:   "cf",
-		Component: "ccdb",
-		Username:  "admin",
+		for _, n := range context.DbSystems {
+			backupDbList = append(backupDbList, context.SystemsInfo[n])
+		}
+		err = context.RunDbBackups(backupDbList)
+		//-       arguments := []string{jsonfile, "cf", "nfs_server", "vcap"}
+		//-       password := utils.GetPassword(arguments)
+		//-       ip := utils.GetIP(arguments)
+		// BackupNfs(password, ip, outfileref)
+		// toggleCCJobs(backupscript, ip, username, password, deploymentName, ccJobs, "started")
+		// backupMySqlDB(backupscript, jsonfile, databaseDir)
+	} else if err == nil {
+		err = fmt.Errorf("invalid director credentials")
 	}
-
-	backupDbList := []DbBackupInfo{
-		ccdbInfo,
-		uaadbInfo,
-		consoledbInfo,
-	}
-	err = context.RunDbBackups(backupDbList)
-	//-       arguments := []string{jsonfile, "cf", "nfs_server", "vcap"}
-	//-       password := utils.GetPassword(arguments)
-	//-       ip := utils.GetIP(arguments)
-	// BackupNfs(password, ip, outfileref)
-	// toggleCCJobs(backupscript, ip, username, password, deploymentName, ccJobs, "started")
-	// backupMySqlDB(backupscript, jsonfile, databaseDir)
 	return
 }
 
-func (context *ElasticRuntime) RunDbBackups(dbInfoList []DbBackupInfo) (err error) {
+func (context *ElasticRuntime) RunDbBackups(dbInfoList []SystemInfo) (err error) {
 
 	for _, info := range dbInfoList {
 
-		if err = context.runPostgresBackup(info, context.TargetDir); err != nil {
+		if err = info.Error(); err == nil {
+			err = context.runPostgresBackup(info, context.TargetDir)
+		}
+
+		if err != nil {
 			break
 		}
 	}
 	return
 }
 
-func (context *ElasticRuntime) runPostgresBackup(dbInfo DbBackupInfo, databaseDir string) (err error) {
+func (context *ElasticRuntime) runPostgresBackup(dbInfo SystemInfo, databaseDir string) (err error) {
 	var (
-		creds          credentials
 		outfile        *os.File
 		remotePGBackup persistence.Dumper
 	)
 
-	if err = context.getCredentials(dbInfo.Product, dbInfo.Component, dbInfo.Username, &creds); err == nil {
-		sshConfig := command.SshConfig{
-			Username: creds.VcapUser,
-			Password: creds.VcapPass,
-			Host:     creds.Ip,
-			Port:     22,
-		}
+	sshConfig := command.SshConfig{
+		Username: dbInfo.VcapUser,
+		Password: dbInfo.VcapPass,
+		Host:     dbInfo.Ip,
+		Port:     22,
+	}
 
-		if remotePGBackup, err = context.NewDumper(2544, dbInfo.Component, creds.AdminUser, creds.AdminPass, sshConfig); err == nil {
-			filename := fmt.Sprintf("%s.sql", dbInfo.Component)
+	if remotePGBackup, err = context.NewDumper(2544, dbInfo.Component, dbInfo.User, dbInfo.Pass, sshConfig); err == nil {
+		filename := fmt.Sprintf("%s.sql", dbInfo.Component)
 
-			if outfile, err = osutils.SafeCreate(databaseDir, filename); err == nil {
-				err = remotePGBackup.Dump(outfile)
-			}
+		if outfile, err = osutils.SafeCreate(databaseDir, filename); err == nil {
+			err = remotePGBackup.Dump(outfile)
 		}
 	}
 	return
 }
 
-func (context *ElasticRuntime) getCredentials(product, component, username string, creds *credentials) (err error) {
+func (context *ElasticRuntime) ReadAllUserCredentials() (err error) {
 	var (
-		wg      sync.WaitGroup
 		fileRef *os.File
-		reader  io.Reader
-		ec      chan error
+		jsonObj InstallationCompareObject
 	)
 	defer fileRef.Close()
-	ec = make(chan error)
 
 	if fileRef, err = os.Open(context.JsonFile); err == nil {
-		r, w := io.Pipe()
-		reader = io.TeeReader(fileRef, w)
-		wg.Add(2)
-		go readAdminUserCredentials(&wg, creds, reader, w, product, component, username, ec)
-		go readVcapUserCredentials(&wg, creds, r, product, component, ec)
-		wg.Wait()
 
-		if err = readErrors(ec); err == nil {
-			err = creds.Error()
+		if jsonObj, err = ReadAndUnmarshal(fileRef); err == nil {
+			err = context.assignCredentials(jsonObj)
 		}
 	}
 	return
 }
 
-func readErrors(ec chan error) (err error) {
+func (context *ElasticRuntime) assignCredentials(jsonObj InstallationCompareObject) (err error) {
 
-	if len(ec) > 0 {
+	for name, sysInfo := range context.SystemsInfo {
+		sysInfo.VcapUser = "vcap"
+		sysInfo.User = sysInfo.Identity
 
-		for e := range ec {
-			err = fmt.Errorf("%v ; %v", err, e)
+		if sysInfo.Ip, sysInfo.Pass, err = GetPasswordAndIP(jsonObj, sysInfo.Product, sysInfo.Component, sysInfo.Identity); err == nil {
+			_, sysInfo.VcapPass, err = GetPasswordAndIP(jsonObj, sysInfo.Product, sysInfo.Component, "vcap")
+			context.SystemsInfo[name] = sysInfo
 		}
 	}
 	return
 }
 
-func readAdminUserCredentials(wg *sync.WaitGroup, creds *credentials, reader io.Reader, writer io.WriteCloser, product, component, username string, ec chan error) {
-	var err error
-	defer wg.Done()
-	defer writer.Close()
-	(*creds).AdminUser = username
-
-	if (*creds).Ip, (*creds).AdminPass, err = GetPasswordAndIP(reader, product, component, (*creds).AdminUser); err != nil {
-		go func() {
-			ec <- err
-		}()
-	}
-}
-
-func readVcapUserCredentials(wg *sync.WaitGroup, creds *credentials, reader io.Reader, product, component string, ec chan error) {
-	var err error
-	defer wg.Done()
-	(*creds).VcapUser = "vcap"
-
-	if (*creds).Ip, (*creds).VcapPass, err = GetPasswordAndIP(reader, product, component, (*creds).VcapUser); err != nil {
-		go func() {
-			ec <- err
-		}()
-	}
+func (context *ElasticRuntime) directorCredentialsValid() (ok bool) {
+	connectionURL := fmt.Sprintf("https://%s:25555/info", context.SystemsInfo["DirectorInfo"].Ip)
+	statusCode, _, err := context.RestRunner.Run("GET", connectionURL, context.SystemsInfo["DirectorInfo"].User, context.SystemsInfo["DirectorInfo"].Pass, false)
+	ok = (err == nil && statusCode == 200)
+	return
 }

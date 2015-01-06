@@ -1,10 +1,8 @@
 package backup
 
 import (
-	"crypto/tls"
 	"fmt"
 	"io"
-	"net/http"
 	"os"
 	"path"
 
@@ -107,24 +105,4 @@ func (context *OpsManager) exportInstallationSettings(dest io.Writer) (err error
 		_, err = io.Copy(dest, body)
 	}
 	return
-}
-
-func invoke(method string, connectionURL string, username string, password string, isYaml bool) (*http.Response, error) {
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-
-	req, err := http.NewRequest(method, connectionURL, nil)
-	req.SetBasicAuth(username, password)
-
-	if isYaml {
-		req.Header.Set("Content-Type", "text/yaml")
-	}
-
-	resp, err := tr.RoundTrip(req)
-	if err != nil {
-		fmt.Printf("Error : %s", err)
-	}
-
-	return resp, err
 }

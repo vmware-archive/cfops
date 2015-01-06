@@ -11,7 +11,7 @@ import (
 )
 
 type (
-	installationCompareObject struct {
+	InstallationCompareObject struct {
 		Guid                 string
 		Installation_Version string
 		Products             []productCompareObject
@@ -48,36 +48,33 @@ type (
 	}
 )
 
-func GetPasswordAndIP(src io.Reader, product, component, username string) (ip, password string, err error) {
+func GetPasswordAndIP(jsonObj InstallationCompareObject, product, component, username string) (ip, password string, err error) {
 	parser := &IpPasswordParser{
 		Product:   product,
 		Component: component,
 		Username:  username,
 	}
-	return parser.Parse(src)
+	return parser.Parse(jsonObj)
 }
 
-func (s *IpPasswordParser) Parse(src io.Reader) (ip, password string, err error) {
-	var jsonObj installationCompareObject
-
-	if err = s.readAndUnmarshal(src, &jsonObj); err == nil {
-		err = s.setupAndRun(jsonObj)
+func (s *IpPasswordParser) Parse(jsonObj InstallationCompareObject) (ip, password string, err error) {
+	if err = s.setupAndRun(jsonObj); err == nil {
 		ip = s.ip
 		password = s.password
 	}
 	return
 }
 
-func (s *IpPasswordParser) readAndUnmarshal(src io.Reader, jsonObj *installationCompareObject) (err error) {
+func ReadAndUnmarshal(src io.Reader) (jsonObj InstallationCompareObject, err error) {
 	var contents []byte
 
 	if contents, err = ioutil.ReadAll(src); err == nil {
-		err = json.Unmarshal(contents, jsonObj)
+		err = json.Unmarshal(contents, &jsonObj)
 	}
 	return
 }
 
-func (s *IpPasswordParser) setupAndRun(jsonObj installationCompareObject) (err error) {
+func (s *IpPasswordParser) setupAndRun(jsonObj InstallationCompareObject) (err error) {
 	var productObj productCompareObject
 	s.modifyProductTypeName(jsonObj.Infrastructure.Type)
 
