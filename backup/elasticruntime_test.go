@@ -37,10 +37,12 @@ var _ = Describe("ElasticRuntime", func() {
 				username  string = "admin"
 				target    string
 				er        ElasticRuntime
-				info      DbBackupInfo = DbBackupInfo{
-					Product:   product,
-					Component: component,
-					Username:  username,
+				info      map[string]SystemInfo = map[string]SystemInfo{
+					"ConsoledbInfo": SystemInfo{
+						Product:   product,
+						Component: component,
+						Identity:  username,
+					},
 				}
 			)
 
@@ -54,7 +56,9 @@ var _ = Describe("ElasticRuntime", func() {
 					BackupContext: BackupContext{
 						TargetDir: target,
 					},
+					SystemsInfo: info,
 				}
+				er.ReadAllUserCredentials()
 			})
 
 			AfterEach(func() {
@@ -62,7 +66,7 @@ var _ = Describe("ElasticRuntime", func() {
 			})
 
 			It("Should write the dumped output to a file in the databaseDir", func() {
-				er.RunDbBackups([]DbBackupInfo{info})
+				er.RunDbBackups([]SystemInfo{info["ConsoledbInfo"]})
 				filename := fmt.Sprintf("%s.sql", component)
 				exists, _ := osutils.Exists(path.Join(target, filename))
 				Ω(exists).Should(BeTrue())
@@ -71,7 +75,7 @@ var _ = Describe("ElasticRuntime", func() {
 			It("Should have a nil error and not panic", func() {
 				var err error
 				Ω(func() {
-					err = er.RunDbBackups([]DbBackupInfo{info})
+					err = er.RunDbBackups([]SystemInfo{info["ConsoledbInfo"]})
 				}).ShouldNot(Panic())
 				Ω(err).Should(BeNil())
 			})
@@ -84,10 +88,12 @@ var _ = Describe("ElasticRuntime", func() {
 				username  string = "root"
 				target    string
 				er        ElasticRuntime
-				info      DbBackupInfo = DbBackupInfo{
-					Product:   product,
-					Component: component,
-					Username:  username,
+				info      map[string]SystemInfo = map[string]SystemInfo{
+					"ConsoledbInfo": SystemInfo{
+						Product:   product,
+						Component: component,
+						Identity:  username,
+					},
 				}
 			)
 
@@ -101,7 +107,9 @@ var _ = Describe("ElasticRuntime", func() {
 					BackupContext: BackupContext{
 						TargetDir: target,
 					},
+					SystemsInfo: info,
 				}
+				er.ReadAllUserCredentials()
 			})
 
 			AfterEach(func() {
@@ -109,7 +117,7 @@ var _ = Describe("ElasticRuntime", func() {
 			})
 
 			It("Should write the dumped output to a file in the databaseDir", func() {
-				er.RunDbBackups([]DbBackupInfo{info})
+				er.RunDbBackups([]SystemInfo{info["ConsoledbInfo"]})
 				filename := fmt.Sprintf("%s.sql", component)
 				exists, _ := osutils.Exists(path.Join(target, filename))
 				Ω(exists).Should(BeTrue())
@@ -118,7 +126,7 @@ var _ = Describe("ElasticRuntime", func() {
 			It("Should have a nil error and not panic", func() {
 				var err error
 				Ω(func() {
-					err = er.RunDbBackups([]DbBackupInfo{info})
+					err = er.RunDbBackups([]SystemInfo{info["ConsoledbInfo"]})
 				}).ShouldNot(Panic())
 				Ω(err).Should(BeNil())
 			})
@@ -131,10 +139,12 @@ var _ = Describe("ElasticRuntime", func() {
 				username  string = "root"
 				target    string
 				er        ElasticRuntime
-				info      DbBackupInfo = DbBackupInfo{
-					Product:   product,
-					Component: component,
-					Username:  username,
+				info      map[string]SystemInfo = map[string]SystemInfo{
+					"ConsoledbInfo": SystemInfo{
+						Product:   product,
+						Component: component,
+						Identity:  username,
+					},
 				}
 			)
 
@@ -148,7 +158,9 @@ var _ = Describe("ElasticRuntime", func() {
 					BackupContext: BackupContext{
 						TargetDir: target,
 					},
+					SystemsInfo: info,
 				}
+				er.ReadAllUserCredentials()
 			})
 
 			AfterEach(func() {
@@ -156,7 +168,7 @@ var _ = Describe("ElasticRuntime", func() {
 			})
 
 			It("Should write the dumped output to a file in the databaseDir", func() {
-				er.RunDbBackups([]DbBackupInfo{info})
+				er.RunDbBackups([]SystemInfo{info["ConsoledbInfo"]})
 				filename := fmt.Sprintf("%s.sql", component)
 				exists, _ := osutils.Exists(path.Join(target, filename))
 				Ω(exists).Should(BeTrue())
@@ -165,7 +177,7 @@ var _ = Describe("ElasticRuntime", func() {
 			It("Should have a nil error and not panic", func() {
 				var err error
 				Ω(func() {
-					err = er.RunDbBackups([]DbBackupInfo{info})
+					err = er.RunDbBackups([]SystemInfo{info["ConsoledbInfo"]})
 				}).ShouldNot(Panic())
 				Ω(err).Should(BeNil())
 			})
@@ -178,10 +190,12 @@ var _ = Describe("ElasticRuntime", func() {
 				username  string = "aaaaaaaa"
 				target    string
 				er        ElasticRuntime
-				info      DbBackupInfo = DbBackupInfo{
-					Product:   product,
-					Component: component,
-					Username:  username,
+				info      map[string]SystemInfo = map[string]SystemInfo{
+					"ConsoledbInfo": SystemInfo{
+						Product:   product,
+						Component: component,
+						Identity:  username,
+					},
 				}
 			)
 
@@ -195,7 +209,9 @@ var _ = Describe("ElasticRuntime", func() {
 					BackupContext: BackupContext{
 						TargetDir: target,
 					},
+					SystemsInfo: info,
 				}
+				er.ReadAllUserCredentials()
 			})
 
 			AfterEach(func() {
@@ -203,7 +219,7 @@ var _ = Describe("ElasticRuntime", func() {
 			})
 
 			It("Should not write the dumped output to a file in the databaseDir", func() {
-				er.RunDbBackups([]DbBackupInfo{info})
+				er.RunDbBackups([]SystemInfo{info["ConsoledbInfo"]})
 				filename := fmt.Sprintf("%s.sql", component)
 				exists, _ := osutils.Exists(path.Join(target, filename))
 				Ω(exists).ShouldNot(BeTrue())
@@ -212,7 +228,7 @@ var _ = Describe("ElasticRuntime", func() {
 			It("Should have a nil error and not panic", func() {
 				var err error
 				Ω(func() {
-					err = er.RunDbBackups([]DbBackupInfo{info})
+					err = er.RunDbBackups([]SystemInfo{info["ConsoledbInfo"]})
 				}).ShouldNot(Panic())
 				Ω(err).ShouldNot(BeNil())
 			})
