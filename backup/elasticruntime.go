@@ -16,6 +16,8 @@ type ElasticRuntime struct {
 	DeploymentsFile string
 	DbEncryptionKey string
 	SystemsInfo     map[string]SystemInfo
+	DbSystems       []string
+	RestRunner      RestAdapter
 	BackupContext
 }
 
@@ -51,6 +53,7 @@ func NewElasticRuntime(jsonFile, deploymentsFile, dbEncryptionKey string, target
 		JsonFile:        jsonFile,
 		DeploymentsFile: deploymentsFile,
 		DbEncryptionKey: dbEncryptionKey,
+		RestRunner:      RestAdapter(invoke),
 		BackupContext: BackupContext{
 			TargetDir: target,
 		},
@@ -76,23 +79,23 @@ func NewElasticRuntime(jsonFile, deploymentsFile, dbEncryptionKey string, target
 				Identity:  "director",
 			},
 		},
+		DbSystems: []string{"ConsoledbInfo", "UaadbInfo", "CcdbInfo"},
 	}
 	return context
 }
 
 // Backup performs a backup of a Pivotal Elastic Runtime deployment
 func (context *ElasticRuntime) Backup() (err error) {
-	err = context.ReadAllUserCredentials()
+	var backupDbList []SystemInfo
 
-	if context.directorCredentialsValid() {
+	if err = context.ReadAllUserCredentials(); err == nil && context.directorCredentialsValid() {
 		// deploymentName := getElasticRuntimeDeploymentName(ip, username, password, backupDir)
 		// ccJobs := getAllCloudControllerVMs(ip, username, password, deploymentName, backupDir)
 		// cc := NewCloudController(ip, username, password, deploymentName, "stopped")
 		// cc.ToggleJobs(CloudControllerJobs(ccJobs))
-		backupDbList := []SystemInfo{
-			context.SystemsInfo["ConsoledbInfo"],
-			context.SystemsInfo["UaadbInfo"],
-			context.SystemsInfo["CcdbInfo"],
+
+		for _, n := range context.DbSystems {
+			backupDbList = append(backupDbList, context.SystemsInfo[n])
 		}
 		err = context.RunDbBackups(backupDbList)
 		//-       arguments := []string{jsonfile, "cf", "nfs_server", "vcap"}
@@ -101,6 +104,8 @@ func (context *ElasticRuntime) Backup() (err error) {
 		// BackupNfs(password, ip, outfileref)
 		// toggleCCJobs(backupscript, ip, username, password, deploymentName, ccJobs, "started")
 		// backupMySqlDB(backupscript, jsonfile, databaseDir)
+	} else if err == nil {
+		err = fmt.Errorf("invalid director credentials")
 	}
 	return
 }
@@ -174,11 +179,8 @@ func (context *ElasticRuntime) assignCredentials(jsonObj InstallationCompareObje
 }
 
 func (context *ElasticRuntime) directorCredentialsValid() (ok bool) {
-	ok = true
-	connectionURL := "https://" + context.SystemsInfo["DirectorInfo"].Ip + ":25555/info"
-
-	if resp, err := invoke("GET", connectionURL, context.SystemsInfo["DirectorInfo"].User, context.SystemsInfo["DirectorInfo"].Pass, false); err != nil || resp.StatusCode != 200 {
-		ok = false
-	}
+	connectionURL := fmt.Sprintf("https://%s:25555/info", context.SystemsInfo["DirectorInfo"].Ip)
+	statusCode, _, err := context.RestRunner.Run("GET", connectionURL, context.SystemsInfo["DirectorInfo"].User, context.SystemsInfo["DirectorInfo"].Pass, false)
+	ok = (err == nil && statusCode == 200)
 	return
 }
