@@ -1,0 +1,25 @@
+[
+  {
+    "name": "cf-c3aad3ad484c438ebc40",
+    "releases": [
+      {
+        "name": "cf-mysql",
+        "version": "10"
+      },
+      {
+        "name": "cf",
+        "version": "183.3"
+      },
+      {
+        "name": "push-console-release",
+        "version": "207"
+      }
+    ],
+    "stemcells": [
+      {
+        "name": "bosh-vsphere-esxi-ubuntu-trusty-go_agent",
+        "version": "2690.3"
+      }
+    ]
+  }
+]
