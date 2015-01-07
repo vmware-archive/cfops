@@ -23,9 +23,10 @@ type (
 	}
 
 	productCompareObject struct {
-		Type string
-		Jobs []jobCompare
-		IPs  ipCompare
+		Type              string
+		Installation_name string
+		Jobs              []jobCompare
+		IPs               ipCompare
 	}
 
 	ipCompare map[string][]string
@@ -47,6 +48,26 @@ type (
 		password  string
 	}
 )
+
+func filterERProducts(i, v interface{}) bool {
+	return v.(productCompareObject).Type == "cf"
+}
+
+func GetDeploymentName(jsonObj InstallationCompareObject) (deploymentName string, err error) {
+
+	if o := itertools.Filter(jsonObj.Products, filterERProducts); len(o) > 0 {
+		var (
+			idx  interface{}
+			prod productCompareObject
+		)
+		itertools.PairUnPack(<-o, &idx, &prod)
+		deploymentName = prod.Installation_name
+
+	} else {
+		err = fmt.Errorf("could not find a cf install to pull name from")
+	}
+	return
+}
 
 func GetPasswordAndIP(jsonObj InstallationCompareObject, product, component, username string) (ip, password string, err error) {
 	parser := &IpPasswordParser{

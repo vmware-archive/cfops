@@ -9,15 +9,24 @@ import (
 	"github.com/pivotalservices/cfops/osutils"
 )
 
+const (
+	ER_DEFAULT_SYSTEM_USER string = "vcap"
+	ER_DIRECTOR_INFO_URL   string = "https://%s:25555/info"
+	ER_BACKUP_DIR          string = "elasticruntime"
+	ER_NFS_DIR             string = "nfs_share"
+	ER_NFS_FILE            string = "nfs.backup"
+)
+
 // ElasticRuntime contains information about a Pivotal Elastic Runtime deployment
 type ElasticRuntime struct {
-	NewDumper       func(port int, database, username, password string, sshCfg command.SshConfig) (persistence.Dumper, error)
-	JsonFile        string
-	DeploymentsFile string
-	DbEncryptionKey string
-	SystemsInfo     map[string]SystemInfo
-	DbSystems       []string
-	RestRunner      RestAdapter
+	NewDumper        func(port int, database, username, password string, sshCfg command.SshConfig) (persistence.Dumper, error)
+	JsonFile         string
+	DeploymentsFile  string
+	DbEncryptionKey  string
+	SystemsInfo      map[string]SystemInfo
+	DbSystems        []string
+	RestRunner       RestAdapter
+	InstallationName string
 	BackupContext
 }
 
@@ -73,10 +82,20 @@ func NewElasticRuntime(jsonFile, deploymentsFile, dbEncryptionKey string, target
 				Component: "ccdb",
 				Identity:  "admin",
 			},
+			"MysqldbInfo": SystemInfo{
+				Product:   "cf",
+				Component: "mysql",
+				Identity:  "root",
+			},
 			"DirectorInfo": SystemInfo{
 				Product:   "microbosh",
 				Component: "director",
 				Identity:  "director",
+			},
+			"NfsInfo": SystemInfo{
+				Product:   "cf",
+				Component: "nfs_server",
+				Identity:  "vcap",
 			},
 		},
 		DbSystems: []string{"ConsoledbInfo", "UaadbInfo", "CcdbInfo"},
@@ -86,23 +105,31 @@ func NewElasticRuntime(jsonFile, deploymentsFile, dbEncryptionKey string, target
 
 // Backup performs a backup of a Pivotal Elastic Runtime deployment
 func (context *ElasticRuntime) Backup() (err error) {
-	var backupDbList []SystemInfo
+	var (
+		backupDbList []SystemInfo
+		ccStop       *CloudController
+		ccStart      *CloudController
+		ccJobs       []string
+	)
 
 	if err = context.ReadAllUserCredentials(); err == nil && context.directorCredentialsValid() {
-		// deploymentName := getElasticRuntimeDeploymentName(ip, username, password, backupDir)
 		// ccJobs := getAllCloudControllerVMs(ip, username, password, deploymentName, backupDir)
-		// cc := NewCloudController(ip, username, password, deploymentName, "stopped")
-		// cc.ToggleJobs(CloudControllerJobs(ccJobs))
+		directorInfo := context.SystemsInfo["DirectorInfo"]
+		ccStop = NewCloudController(directorInfo.Ip, directorInfo.User, directorInfo.Pass, context.InstallationName, "stopped")
+		ccStart = NewCloudController(directorInfo.Ip, directorInfo.User, directorInfo.Pass, context.InstallationName, "started")
+		defer ccStart.ToggleJobs(CloudControllerJobs(ccJobs))
+		ccStop.ToggleJobs(CloudControllerJobs(ccJobs))
 
 		for _, n := range context.DbSystems {
 			backupDbList = append(backupDbList, context.SystemsInfo[n])
 		}
-		err = context.RunDbBackups(backupDbList)
-		//-       arguments := []string{jsonfile, "cf", "nfs_server", "vcap"}
-		//-       password := utils.GetPassword(arguments)
-		//-       ip := utils.GetIP(arguments)
-		// BackupNfs(password, ip, outfileref)
-		// toggleCCJobs(backupscript, ip, username, password, deploymentName, ccJobs, "started")
+
+		if err = context.RunDbBackups(backupDbList); err == nil {
+			//var outfile *os.File
+			//outfile, err = osutils.SafeCreate(context.TargetDir, ER_BACKUP_DIR, ER_NFS_DIR, ER_NFS_FILE)
+			//nfsInfo := context.SystemsInfo["NfsInfo"]
+			//err = BackupNfs(nfsInfo.Pass, nfsInfo.Ip, outfile)
+		}
 		// backupMySqlDB(backupscript, jsonfile, databaseDir)
 	} else if err == nil {
 		err = fmt.Errorf("invalid director credentials")
@@ -115,7 +142,7 @@ func (context *ElasticRuntime) RunDbBackups(dbInfoList []SystemInfo) (err error)
 	for _, info := range dbInfoList {
 
 		if err = info.Error(); err == nil {
-			err = context.runPostgresBackup(info, context.TargetDir)
+			err = context.runSqlBackup(info, context.TargetDir)
 		}
 
 		if err != nil {
@@ -125,7 +152,7 @@ func (context *ElasticRuntime) RunDbBackups(dbInfoList []SystemInfo) (err error)
 	return
 }
 
-func (context *ElasticRuntime) runPostgresBackup(dbInfo SystemInfo, databaseDir string) (err error) {
+func (context *ElasticRuntime) runSqlBackup(dbInfo SystemInfo, databaseDir string) (err error) {
 	var (
 		outfile        *os.File
 		remotePGBackup persistence.Dumper
@@ -158,8 +185,16 @@ func (context *ElasticRuntime) ReadAllUserCredentials() (err error) {
 	if fileRef, err = os.Open(context.JsonFile); err == nil {
 
 		if jsonObj, err = ReadAndUnmarshal(fileRef); err == nil {
-			err = context.assignCredentials(jsonObj)
+			err = context.assignCredentialsAndInstallationName(jsonObj)
 		}
+	}
+	return
+}
+
+func (context *ElasticRuntime) assignCredentialsAndInstallationName(jsonObj InstallationCompareObject) (err error) {
+
+	if err = context.assignCredentials(jsonObj); err == nil {
+		context.InstallationName, err = GetDeploymentName(jsonObj)
 	}
 	return
 }
@@ -167,11 +202,11 @@ func (context *ElasticRuntime) ReadAllUserCredentials() (err error) {
 func (context *ElasticRuntime) assignCredentials(jsonObj InstallationCompareObject) (err error) {
 
 	for name, sysInfo := range context.SystemsInfo {
-		sysInfo.VcapUser = "vcap"
+		sysInfo.VcapUser = ER_DEFAULT_SYSTEM_USER
 		sysInfo.User = sysInfo.Identity
 
 		if sysInfo.Ip, sysInfo.Pass, err = GetPasswordAndIP(jsonObj, sysInfo.Product, sysInfo.Component, sysInfo.Identity); err == nil {
-			_, sysInfo.VcapPass, err = GetPasswordAndIP(jsonObj, sysInfo.Product, sysInfo.Component, "vcap")
+			_, sysInfo.VcapPass, err = GetPasswordAndIP(jsonObj, sysInfo.Product, sysInfo.Component, sysInfo.VcapUser)
 			context.SystemsInfo[name] = sysInfo
 		}
 	}
@@ -179,7 +214,7 @@ func (context *ElasticRuntime) assignCredentials(jsonObj InstallationCompareObje
 }
 
 func (context *ElasticRuntime) directorCredentialsValid() (ok bool) {
-	connectionURL := fmt.Sprintf("https://%s:25555/info", context.SystemsInfo["DirectorInfo"].Ip)
+	connectionURL := fmt.Sprintf(ER_DIRECTOR_INFO_URL, context.SystemsInfo["DirectorInfo"].Ip)
 	statusCode, _, err := context.RestRunner.Run("GET", connectionURL, context.SystemsInfo["DirectorInfo"].User, context.SystemsInfo["DirectorInfo"].Pass, false)
 	ok = (err == nil && statusCode == 200)
 	return

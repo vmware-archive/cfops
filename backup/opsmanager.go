@@ -10,6 +10,16 @@ import (
 	"github.com/pivotalservices/cfops/osutils"
 )
 
+const (
+	OPSMGR_INSTALLATION_FILENAME  string = "installation.json"
+	OPSMGR_DEPLOYMENTS_FILENAME   string = "deployments.tar.gz"
+	OPSMGR_ENCRYPTIONKEY_FILENAME string = "cc_db_encryption_key.txt"
+	OPSMGR_BACKUP_DIR             string = "opsmanager"
+	OPSMGR_DEPLOYMENTS_DIR        string = "deployments"
+	OPSMGR_DEFAULT_USER           string = "tempest"
+	OPSMGR_INSTALLATION_URL       string = "https://%s/api/installation_settings"
+)
+
 // OpsManager contains the location and credentials of a Pivotal Ops Manager instance
 type OpsManager struct {
 	BackupContext
@@ -43,7 +53,7 @@ func (context *OpsManager) export() (err error) {
 	var settingsFileRef *os.File
 	defer settingsFileRef.Close()
 
-	if settingsFileRef, err = osutils.SafeCreate(context.TargetDir, context.OpsmanagerBackupDir, "installation.yml"); err == nil {
+	if settingsFileRef, err = osutils.SafeCreate(context.TargetDir, context.OpsmanagerBackupDir, OPSMGR_INSTALLATION_FILENAME); err == nil {
 		err = context.exportInstallationSettings(settingsFileRef)
 	}
 	return
@@ -53,7 +63,7 @@ func (context *OpsManager) extract() (err error) {
 	var keyFileRef *os.File
 	defer keyFileRef.Close()
 
-	if keyFileRef, err = osutils.SafeCreate(context.TargetDir, context.OpsmanagerBackupDir, "cc_db_encryption_key.txt"); err == nil {
+	if keyFileRef, err = osutils.SafeCreate(context.TargetDir, context.OpsmanagerBackupDir, OPSMGR_ENCRYPTIONKEY_FILENAME); err == nil {
 		err = ExtractEncryptionKey(keyFileRef, context.DeploymentDir)
 	}
 	return
@@ -63,7 +73,7 @@ func (context *OpsManager) extract() (err error) {
 func NewOpsManager(hostname string, username string, password string, tempestpassword string, target string) (context *OpsManager, err error) {
 	var remoteExecuter command.Executer
 	remoteExecuter, err = command.NewRemoteExecutor(command.SshConfig{
-		Username: "tempest",
+		Username: OPSMGR_DEFAULT_USER,
 		Password: tempestpassword,
 		Host:     hostname,
 		Port:     22,
@@ -71,7 +81,7 @@ func NewOpsManager(hostname string, username string, password string, tempestpas
 
 	if err == nil {
 		context = &OpsManager{
-			DeploymentDir: path.Join(target, "opsmanager", "deployments"),
+			DeploymentDir: path.Join(target, OPSMGR_BACKUP_DIR, OPSMGR_DEPLOYMENTS_DIR),
 			Hostname:      hostname,
 			Username:      username,
 			Password:      password,
@@ -80,7 +90,7 @@ func NewOpsManager(hostname string, username string, password string, tempestpas
 			},
 			RestRunner:          RestAdapter(invoke),
 			Executer:            remoteExecuter,
-			OpsmanagerBackupDir: "opsmanager",
+			OpsmanagerBackupDir: OPSMGR_BACKUP_DIR,
 		}
 	}
 	return
@@ -90,7 +100,7 @@ func (context *OpsManager) copyDeployments() (err error) {
 	var file *os.File
 	defer file.Close()
 
-	if file, err = osutils.SafeCreate(context.TargetDir, "opsmanager", "deployments.tar.gz"); err == nil {
+	if file, err = osutils.SafeCreate(context.TargetDir, context.OpsmanagerBackupDir, OPSMGR_DEPLOYMENTS_FILENAME); err == nil {
 		command := "cd /var/tempest/workspaces/default && tar cz deployments"
 		err = context.Executer.Execute(file, command)
 	}
@@ -99,7 +109,7 @@ func (context *OpsManager) copyDeployments() (err error) {
 
 func (context *OpsManager) exportInstallationSettings(dest io.Writer) (err error) {
 	var body io.Reader
-	connectionURL := fmt.Sprintf("https://%s/api/installation_settings", context.Hostname)
+	connectionURL := fmt.Sprintf(OPSMGR_INSTALLATION_URL, context.Hostname)
 
 	if _, body, err = context.RestRunner.Run("GET", connectionURL, context.Username, context.Password, false); err == nil {
 		_, err = io.Copy(dest, body)

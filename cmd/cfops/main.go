@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"path"
 
 	"github.com/codegangsta/cli"
 	"github.com/pivotalservices/cfops/backup"
@@ -68,6 +69,8 @@ func NewApp() *cli.App {
 
 					if opsmanager, err = backup.NewOpsManager(c.String("hostname"), c.String("username"), c.String("password"), c.String("tempestpassword"), c.String("destination")); err == nil {
 						err = opsmanager.Backup()
+						installationFilePath := path.Join(c.String("destination"), backup.OPSMGR_BACKUP_DIR, backup.OPSMGR_INSTALLATION_FILENAME)
+						fmt.Println(installationFilePath)
 					}
 				}
 
