@@ -42,7 +42,7 @@ func (s *DeploymentParser) setupAndRun(jsonObj []DeploymentObject) (err error) {
 	return fmt.Errorf("could not find deployment name")
 }
 
-func ReadAndUnmarshalDeploymentName(src io.Reader) (jsonObj []DeploymentObject, err error) {
+func ReadAndUnmarshalDeploymentObjects(src io.Reader) (jsonObj []DeploymentObject, err error) {
 	var contents []byte
 
 	if contents, err = ioutil.ReadAll(src); err == nil {

@@ -20,7 +20,7 @@ var _ = Describe("get_deployment_name", func() {
 				var fileRef *os.File
 				defer fileRef.Close()
 				fileRef, _ = os.Open("fixtures/deployments.json")
-				jsonObj, _ = ReadAndUnmarshalDeploymentName(fileRef)
+				jsonObj, _ = ReadAndUnmarshalDeploymentObjects(fileRef)
 			})
 
 			AfterEach(func() {
@@ -51,7 +51,7 @@ var _ = Describe("get_deployment_name", func() {
 				var fileRef *os.File
 				defer fileRef.Close()
 				fileRef, _ = os.Open("fixtures/deployments.json")
-				jsonObj, _ = ReadAndUnmarshalDeploymentName(fileRef)
+				jsonObj, _ = ReadAndUnmarshalDeploymentObjects(fileRef)
 
 				parser = &DeploymentParser{}
 			})
