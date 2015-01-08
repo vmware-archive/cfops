@@ -41,10 +41,7 @@ func (s *CloudControllerDeploymentParser) setupAndRun(jsonObj []VMObject) (err e
 	if len(ccjobs) == 0 {
 		return fmt.Errorf("no cc jobs found")
 	}
-
 	s.vms = ccjobs
-	fmt.Println(fmt.Sprintf("List of Cloud Controller Jobs: %s ", ccjobs))
-
 	return nil
 }
 

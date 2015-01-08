@@ -14,8 +14,14 @@ const (
 	ER_DEFAULT_SYSTEM_USER string = "vcap"
 	ER_DIRECTOR_INFO_URL   string = "https://%s:25555/info"
 	ER_BACKUP_DIR          string = "elasticruntime"
-	ER_NFS_DIR             string = "nfs_share"
-	ER_NFS_FILE            string = "nfs.backup"
+	ER_VMS_URL             string = "https://%s:25555/deployments/%s/vms"
+	ER_DIRECTOR            string = "DirectorInfo"
+	ER_CONSOLE             string = "ConsoledbInfo"
+	ER_UAA                 string = "UaadbInfo"
+	ER_CC                  string = "CcdbInfo"
+	ER_MYSQL               string = "MysqldbInfo"
+	ER_NFS                 string = "NfsInfo"
+	ER_BACKUP_FILE_FORMAT  string = "%s.backup"
 )
 
 // ElasticRuntime contains information about a Pivotal Elastic Runtime deployment
@@ -85,14 +91,6 @@ func NewElasticRuntime(jsonFile, deploymentsFile, dbEncryptionKey string, target
 		BackupContext: BackupContext{
 			TargetDir: target,
 		},
-		SystemsInfo: map[string]SystemDump{
-			"ConsoledbInfo": consoledbInfo,
-			"UaadbInfo":     uaadbInfo,
-			"CcdbInfo":      ccdbInfo,
-			"MysqldbInfo":   mysqldbInfo,
-			"DirectorInfo":  directorInfo,
-			"NfsInfo":       nfsInfo,
-		},
 		PersistentSystems: []SystemDump{
 			consoledbInfo,
 			uaadbInfo,
@@ -101,6 +99,12 @@ func NewElasticRuntime(jsonFile, deploymentsFile, dbEncryptionKey string, target
 			mysqldbInfo,
 		},
 	}
+	context.SystemsInfo[ER_DIRECTOR] = directorInfo
+	context.SystemsInfo[ER_CONSOLE] = consoledbInfo
+	context.SystemsInfo[ER_UAA] = uaadbInfo
+	context.SystemsInfo[ER_CC] = ccdbInfo
+	context.SystemsInfo[ER_MYSQL] = mysqldbInfo
+	context.SystemsInfo[ER_NFS] = nfsInfo
 	return context
 }
 
@@ -113,15 +117,37 @@ func (context *ElasticRuntime) Backup() (err error) {
 	)
 
 	if err = context.ReadAllUserCredentials(); err == nil && context.directorCredentialsValid() {
-		// ccJobs := getAllCloudControllerVMs(ip, username, password, deploymentName, backupDir)
-		directorInfo := context.SystemsInfo["DirectorInfo"]
-		ccStop = NewCloudController(directorInfo.GetIp(), directorInfo.GetUser(), directorInfo.GetPass(), context.InstallationName, "stopped")
-		ccStart = NewCloudController(directorInfo.GetIp(), directorInfo.GetUser(), directorInfo.GetPass(), context.InstallationName, "started")
-		defer ccStart.ToggleJobs(CloudControllerJobs(ccJobs))
-		ccStop.ToggleJobs(CloudControllerJobs(ccJobs))
+
+		if ccJobs, err = context.getAllCloudControllerVMs(); err == nil {
+			directorInfo := context.SystemsInfo[ER_DIRECTOR]
+			ccStop = NewCloudController(directorInfo.GetIp(), directorInfo.GetUser(), directorInfo.GetPass(), context.InstallationName, "stopped")
+			ccStart = NewCloudController(directorInfo.GetIp(), directorInfo.GetUser(), directorInfo.GetPass(), context.InstallationName, "started")
+			defer ccStart.ToggleJobs(CloudControllerJobs(ccJobs))
+			ccStop.ToggleJobs(CloudControllerJobs(ccJobs))
+		}
 		err = context.RunDbBackups(context.PersistentSystems)
+
 	} else if err == nil {
 		err = fmt.Errorf("invalid director credentials")
+	}
+	return
+}
+
+func (context *ElasticRuntime) getAllCloudControllerVMs() (ccvms []string, err error) {
+	var (
+		statusCode int
+		body       io.Reader
+		jsonObj    []VMObject
+	)
+
+	directorInfo := context.SystemsInfo[ER_DIRECTOR]
+	connectionURL := fmt.Sprintf(ER_VMS_URL, directorInfo.GetIp(), context.InstallationName)
+
+	if statusCode, body, err = context.RestRunner.Run("GET", connectionURL, directorInfo.GetUser(), directorInfo.GetPass(), false); err == nil && statusCode == 200 {
+
+		if jsonObj, err = ReadAndUnmarshalVMObjects(body); err == nil {
+			ccvms, err = GetCCVMs(jsonObj)
+		}
 	}
 	return
 }
@@ -145,7 +171,7 @@ func (context *ElasticRuntime) openWriterAndDump(dbInfo SystemDump, databaseDir 
 	var (
 		outfile *os.File
 	)
-	filename := fmt.Sprintf("%s.backup", dbInfo.GetComponent())
+	filename := fmt.Sprintf(ER_BACKUP_FILE_FORMAT, dbInfo.GetComponent())
 
 	if outfile, err = osutils.SafeCreate(databaseDir, filename); err == nil {
 		err = context.dump(outfile, dbInfo)
@@ -211,7 +237,7 @@ func (context *ElasticRuntime) assignCredentials(jsonObj InstallationCompareObje
 func (context *ElasticRuntime) directorCredentialsValid() (ok bool) {
 	var directorInfo SystemDump
 
-	if directorInfo, ok = context.SystemsInfo["DirectorInfo"]; ok {
+	if directorInfo, ok = context.SystemsInfo[ER_DIRECTOR]; ok {
 		connectionURL := fmt.Sprintf(ER_DIRECTOR_INFO_URL, directorInfo.GetIp())
 		statusCode, _, err := context.RestRunner.Run("GET", connectionURL, directorInfo.GetUser(), directorInfo.GetPass(), false)
 		ok = (err == nil && statusCode == 200)
