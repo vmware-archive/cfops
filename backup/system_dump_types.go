@@ -2,7 +2,6 @@ package backup
 
 import (
 	"fmt"
-	"io"
 
 	"github.com/pivotalservices/cfops/backup/modules/persistence"
 	"github.com/pivotalservices/cfops/command"
@@ -129,15 +128,6 @@ func (s *PgInfo) GetDumper() (dumper persistence.Dumper, err error) {
 
 func (s *SystemInfo) GetDumper() (dumper persistence.Dumper, err error) {
 	panic("you have to extend SystemInfo and implement GetDumper method on the child")
-	return
-}
-
-func Dump(dest io.Writer, s SystemDump) (err error) {
-	var dumper persistence.Dumper
-
-	if dumper, err = s.GetDumper(); err == nil {
-		err = dumper.Dump(dest)
-	}
 	return
 }
 
