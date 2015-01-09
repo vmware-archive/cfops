@@ -86,11 +86,9 @@ var _ = Describe("ElasticRuntime", func() {
 			BeforeEach(func() {
 				target, _ = ioutil.TempDir("/tmp", "spec")
 				er = ElasticRuntime{
-					NewDumper:       mockDumperFunc,
-					JsonFile:        "fixtures/installation.json",
-					DeploymentsFile: "",
-					DbEncryptionKey: "",
-					RestRunner:      RestAdapter(restSuccess),
+					NewDumper:  mockDumperFunc,
+					JsonFile:   "fixtures/installation.json",
+					RestRunner: RestAdapter(restSuccess),
 					BackupContext: BackupContext{
 						TargetDir: target,
 					},
@@ -126,11 +124,9 @@ var _ = Describe("ElasticRuntime", func() {
 			BeforeEach(func() {
 				target, _ = ioutil.TempDir("/tmp", "spec")
 				er = ElasticRuntime{
-					NewDumper:       mockDumperFunc,
-					JsonFile:        "fixtures/installation.json",
-					DeploymentsFile: "",
-					DbEncryptionKey: "",
-					RestRunner:      RestAdapter(restFailure),
+					NewDumper:  mockDumperFunc,
+					JsonFile:   "fixtures/installation.json",
+					RestRunner: RestAdapter(restFailure),
 					BackupContext: BackupContext{
 						TargetDir: target,
 					},
@@ -178,10 +174,8 @@ var _ = Describe("ElasticRuntime", func() {
 			BeforeEach(func() {
 				target, _ = ioutil.TempDir("/tmp", "spec")
 				er = ElasticRuntime{
-					NewDumper:       mockDumperFunc,
-					JsonFile:        "fixtures/installation.json",
-					DeploymentsFile: "",
-					DbEncryptionKey: "",
+					NewDumper: mockDumperFunc,
+					JsonFile:  "fixtures/installation.json",
 					BackupContext: BackupContext{
 						TargetDir: target,
 					},
@@ -231,10 +225,8 @@ var _ = Describe("ElasticRuntime", func() {
 			BeforeEach(func() {
 				target, _ = ioutil.TempDir("/tmp", "spec")
 				er = ElasticRuntime{
-					NewDumper:       mockDumperFunc,
-					JsonFile:        "fixtures/installation.json",
-					DeploymentsFile: "",
-					DbEncryptionKey: "",
+					NewDumper: mockDumperFunc,
+					JsonFile:  "fixtures/installation.json",
 					BackupContext: BackupContext{
 						TargetDir: target,
 					},
@@ -284,10 +276,8 @@ var _ = Describe("ElasticRuntime", func() {
 			BeforeEach(func() {
 				target, _ = ioutil.TempDir("/tmp", "spec")
 				er = ElasticRuntime{
-					NewDumper:       mockDumperFunc,
-					JsonFile:        "fixtures/installation.json",
-					DeploymentsFile: "",
-					DbEncryptionKey: "",
+					NewDumper: mockDumperFunc,
+					JsonFile:  "fixtures/installation.json",
 					BackupContext: BackupContext{
 						TargetDir: target,
 					},
@@ -335,10 +325,8 @@ var _ = Describe("ElasticRuntime", func() {
 			BeforeEach(func() {
 				target, _ = ioutil.TempDir("/tmp", "spec")
 				er = ElasticRuntime{
-					NewDumper:       mockDumperFunc,
-					JsonFile:        "fixtures/installation.json",
-					DeploymentsFile: "",
-					DbEncryptionKey: "",
+					NewDumper: mockDumperFunc,
+					JsonFile:  "fixtures/installation.json",
 					BackupContext: BackupContext{
 						TargetDir: target,
 					},

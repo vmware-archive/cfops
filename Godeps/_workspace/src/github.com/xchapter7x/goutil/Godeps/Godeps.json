@@ -1,0 +1,19 @@
+{
+	"ImportPath": "github.com/xchapter7x/goutil",
+	"GoVersion": "go1.3",
+	"Packages": [
+		"./..."
+	],
+	"Deps": [
+		{
+			"ImportPath": "github.com/onsi/ginkgo",
+			"Comment": "v1.1.0-20-g75d0cd9",
+			"Rev": "75d0cd9c7ee52e99b13e6ccfd9e58b4f92b7795e"
+		},
+		{
+			"ImportPath": "github.com/onsi/gomega",
+			"Comment": "v1.0-19-g835b5e4",
+			"Rev": "835b5e4242c715976b98ed6bc6ece1d9c7879f66"
+		}
+	]
+}

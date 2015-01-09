@@ -5,28 +5,34 @@ import (
 
 	"github.com/pivotalservices/cfops/backup/modules/persistence"
 	"github.com/pivotalservices/cfops/command"
+	"github.com/xchapter7x/goutil"
+)
+
+const (
+	SD_PRODUCT   string = "Product"
+	SD_COMPONENT string = "Component"
+	SD_IDENTITY  string = "Identity"
+	SD_IP        string = "Ip"
+	SD_USER      string = "User"
+	SD_PASS      string = "Pass"
+	SD_VCAPUSER  string = "VcapUser"
+	SD_VCAPPASS  string = "VcapPass"
 )
 
 type (
+	stringGetterSetter interface {
+		Get(string) string
+		Set(string, string)
+	}
+
 	SystemDump interface {
+		stringGetterSetter
 		Error() error
 		GetDumper() (dumper persistence.Dumper, err error)
-		GetProduct() string
-		GetComponent() string
-		GetIdentity() string
-		GetIp() string
-		SetIp(string)
-		GetUser() string
-		SetUser(string)
-		GetPass() string
-		SetPass(string)
-		GetVcapUser() string
-		SetVcapUser(string)
-		GetVcapPass() string
-		SetVcapPass(string)
 	}
 
 	SystemInfo struct {
+		goutil.GetSet
 		Product   string
 		Component string
 		Identity  string
@@ -50,56 +56,12 @@ type (
 	}
 )
 
-func (s *SystemInfo) GetProduct() string {
-	return s.Product
+func (s *SystemInfo) Get(name string) string {
+	return s.GetSet.Get(s, name).(string)
 }
 
-func (s *SystemInfo) GetComponent() string {
-	return s.Component
-}
-
-func (s *SystemInfo) GetIdentity() string {
-	return s.Identity
-}
-
-func (s *SystemInfo) GetIp() string {
-	return s.Ip
-}
-
-func (s *SystemInfo) SetIp(in string) {
-	s.Ip = in
-}
-
-func (s *SystemInfo) GetUser() string {
-	return s.User
-}
-
-func (s *SystemInfo) SetUser(in string) {
-	s.User = in
-}
-
-func (s *SystemInfo) GetPass() string {
-	return s.Pass
-}
-
-func (s *SystemInfo) SetPass(in string) {
-	s.Pass = in
-}
-
-func (s *SystemInfo) GetVcapUser() string {
-	return s.VcapUser
-}
-
-func (s *SystemInfo) SetVcapUser(in string) {
-	s.VcapUser = in
-}
-
-func (s *SystemInfo) GetVcapPass() string {
-	return s.VcapPass
-}
-
-func (s *SystemInfo) SetVcapPass(in string) {
-	s.VcapPass = in
+func (s *SystemInfo) Set(name string, val string) {
+	s.GetSet.Set(s, name, val)
 }
 
 func (s *NfsInfo) GetDumper() (dumper persistence.Dumper, err error) {

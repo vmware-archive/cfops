@@ -28,8 +28,6 @@ const (
 type ElasticRuntime struct {
 	NewDumper         func(port int, database, username, password string, sshCfg command.SshConfig) (persistence.Dumper, error)
 	JsonFile          string
-	DeploymentsFile   string
-	DbEncryptionKey   string
 	SystemsInfo       map[string]SystemDump
 	PersistentSystems []SystemDump
 	RestRunner        RestAdapter
@@ -38,7 +36,7 @@ type ElasticRuntime struct {
 }
 
 // NewElasticRuntime initializes an ElasticRuntime intance
-func NewElasticRuntime(jsonFile, deploymentsFile, dbEncryptionKey string, target string) *ElasticRuntime {
+func NewElasticRuntime(jsonFile string, target string) *ElasticRuntime {
 	var (
 		uaadbInfo *PgInfo = &PgInfo{
 			SystemInfo: SystemInfo{
@@ -83,11 +81,9 @@ func NewElasticRuntime(jsonFile, deploymentsFile, dbEncryptionKey string, target
 	)
 
 	context := &ElasticRuntime{
-		NewDumper:       persistence.NewPgRemoteDump,
-		JsonFile:        jsonFile,
-		DeploymentsFile: deploymentsFile,
-		DbEncryptionKey: dbEncryptionKey,
-		RestRunner:      RestAdapter(invoke),
+		NewDumper:  persistence.NewPgRemoteDump,
+		JsonFile:   jsonFile,
+		RestRunner: RestAdapter(invoke),
 		BackupContext: BackupContext{
 			TargetDir: target,
 		},
@@ -120,8 +116,8 @@ func (context *ElasticRuntime) Backup() (err error) {
 
 		if ccJobs, err = context.getAllCloudControllerVMs(); err == nil {
 			directorInfo := context.SystemsInfo[ER_DIRECTOR]
-			ccStop = NewCloudController(directorInfo.GetIp(), directorInfo.GetUser(), directorInfo.GetPass(), context.InstallationName, "stopped")
-			ccStart = NewCloudController(directorInfo.GetIp(), directorInfo.GetUser(), directorInfo.GetPass(), context.InstallationName, "started")
+			ccStop = NewCloudController(directorInfo.Get(SD_IP), directorInfo.Get(SD_USER), directorInfo.Get(SD_PASS), context.InstallationName, "stopped")
+			ccStart = NewCloudController(directorInfo.Get(SD_IP), directorInfo.Get(SD_USER), directorInfo.Get(SD_PASS), context.InstallationName, "started")
 			defer ccStart.ToggleJobs(CloudControllerJobs(ccJobs))
 			ccStop.ToggleJobs(CloudControllerJobs(ccJobs))
 		}
@@ -141,9 +137,9 @@ func (context *ElasticRuntime) getAllCloudControllerVMs() (ccvms []string, err e
 	)
 
 	directorInfo := context.SystemsInfo[ER_DIRECTOR]
-	connectionURL := fmt.Sprintf(ER_VMS_URL, directorInfo.GetIp(), context.InstallationName)
+	connectionURL := fmt.Sprintf(ER_VMS_URL, directorInfo.Get(SD_IP), context.InstallationName)
 
-	if statusCode, body, err = context.RestRunner.Run("GET", connectionURL, directorInfo.GetUser(), directorInfo.GetPass(), false); err == nil && statusCode == 200 {
+	if statusCode, body, err = context.RestRunner.Run("GET", connectionURL, directorInfo.Get(SD_USER), directorInfo.Get(SD_PASS), false); err == nil && statusCode == 200 {
 
 		if jsonObj, err = ReadAndUnmarshalVMObjects(body); err == nil {
 			ccvms, err = GetCCVMs(jsonObj)
@@ -171,7 +167,7 @@ func (context *ElasticRuntime) openWriterAndDump(dbInfo SystemDump, databaseDir 
 	var (
 		outfile *os.File
 	)
-	filename := fmt.Sprintf(ER_BACKUP_FILE_FORMAT, dbInfo.GetComponent())
+	filename := fmt.Sprintf(ER_BACKUP_FILE_FORMAT, dbInfo.Get(SD_COMPONENT))
 
 	if outfile, err = osutils.SafeCreate(databaseDir, filename); err == nil {
 		err = context.dump(outfile, dbInfo)
@@ -220,14 +216,14 @@ func (context *ElasticRuntime) assignCredentials(jsonObj InstallationCompareObje
 			pass  string
 			vpass string
 		)
-		sysInfo.SetVcapUser(ER_DEFAULT_SYSTEM_USER)
-		sysInfo.SetUser(sysInfo.GetIdentity())
+		sysInfo.Set(SD_VCAPUSER, ER_DEFAULT_SYSTEM_USER)
+		sysInfo.Set(SD_USER, sysInfo.Get(SD_IDENTITY))
 
-		if ip, pass, err = GetPasswordAndIP(jsonObj, sysInfo.GetProduct(), sysInfo.GetComponent(), sysInfo.GetIdentity()); err == nil {
-			sysInfo.SetIp(ip)
-			sysInfo.SetPass(pass)
-			_, vpass, err = GetPasswordAndIP(jsonObj, sysInfo.GetProduct(), sysInfo.GetComponent(), sysInfo.GetVcapUser())
-			sysInfo.SetVcapPass(vpass)
+		if ip, pass, err = GetPasswordAndIP(jsonObj, sysInfo.Get(SD_PRODUCT), sysInfo.Get(SD_COMPONENT), sysInfo.Get(SD_IDENTITY)); err == nil {
+			sysInfo.Set(SD_IP, ip)
+			sysInfo.Set(SD_PASS, pass)
+			_, vpass, err = GetPasswordAndIP(jsonObj, sysInfo.Get(SD_PRODUCT), sysInfo.Get(SD_COMPONENT), sysInfo.Get(SD_VCAPUSER))
+			sysInfo.Set(SD_VCAPPASS, vpass)
 			context.SystemsInfo[name] = sysInfo
 		}
 	}
@@ -238,8 +234,8 @@ func (context *ElasticRuntime) directorCredentialsValid() (ok bool) {
 	var directorInfo SystemDump
 
 	if directorInfo, ok = context.SystemsInfo[ER_DIRECTOR]; ok {
-		connectionURL := fmt.Sprintf(ER_DIRECTOR_INFO_URL, directorInfo.GetIp())
-		statusCode, _, err := context.RestRunner.Run("GET", connectionURL, directorInfo.GetUser(), directorInfo.GetPass(), false)
+		connectionURL := fmt.Sprintf(ER_DIRECTOR_INFO_URL, directorInfo.Get(SD_IP))
+		statusCode, _, err := context.RestRunner.Run("GET", connectionURL, directorInfo.Get(SD_USER), directorInfo.Get(SD_PASS), false)
 		ok = (err == nil && statusCode == 200)
 	}
 	return
