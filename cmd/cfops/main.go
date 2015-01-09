@@ -58,17 +58,13 @@ func NewApp() *cli.App {
 				},
 			},
 			Action: func(c *cli.Context) {
-				var opsmanager *backup.OpsManager
 				var err error
 
 				if c.String("hostname") == "" || c.String("username") == "" || c.String("password") == "" || c.String("tempestpassword") == "" || c.String("destination") == "" {
 					cli.ShowCommandHelp(c, "backup")
 
 				} else {
-
-					if opsmanager, err = backup.NewOpsManager(c.String("hostname"), c.String("username"), c.String("password"), c.String("tempestpassword"), c.String("destination")); err == nil {
-						err = opsmanager.Backup()
-					}
+					err = backup.RunBackupPipeline(c.String("hostname"), c.String("username"), c.String("password"), c.String("tempestpassword"), c.String("destination"))
 				}
 
 				if err != nil {

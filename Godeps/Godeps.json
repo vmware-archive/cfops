@@ -1,6 +1,6 @@
 {
 	"ImportPath": "github.com/pivotalservices/cfops",
-	"GoVersion": "go1.3",
+	"GoVersion": "go1.3.3",
 	"Packages": [
 		"./..."
 	],
@@ -25,8 +25,8 @@
 			"Rev": "dc751ce5f266d83c26fae5c0a9093973b29cb61d"
 		},
 		{
-			"ImportPath": "github.com/xchapter7x/goutil/itertools",
-			"Rev": "3389fd056929dedfca1d7c1b4c5d8a6772baa806"
+			"ImportPath": "github.com/xchapter7x/goutil",
+			"Rev": "8d64b420bd483df51ba5ee0acb689e8341be18d9"
 		},
 		{
 			"ImportPath": "golang.org/x/crypto/ssh",

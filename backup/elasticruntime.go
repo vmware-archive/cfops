@@ -2,6 +2,7 @@ package backup
 
 import (
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/pivotalservices/cfops/backup/modules/persistence"
@@ -9,113 +10,150 @@ import (
 	"github.com/pivotalservices/cfops/osutils"
 )
 
+const (
+	ER_DEFAULT_SYSTEM_USER string = "vcap"
+	ER_DIRECTOR_INFO_URL   string = "https://%s:25555/info"
+	ER_BACKUP_DIR          string = "elasticruntime"
+	ER_VMS_URL             string = "https://%s:25555/deployments/%s/vms"
+	ER_DIRECTOR            string = "DirectorInfo"
+	ER_CONSOLE             string = "ConsoledbInfo"
+	ER_UAA                 string = "UaadbInfo"
+	ER_CC                  string = "CcdbInfo"
+	ER_MYSQL               string = "MysqldbInfo"
+	ER_NFS                 string = "NfsInfo"
+	ER_BACKUP_FILE_FORMAT  string = "%s.backup"
+)
+
 // ElasticRuntime contains information about a Pivotal Elastic Runtime deployment
 type ElasticRuntime struct {
-	NewDumper       func(port int, database, username, password string, sshCfg command.SshConfig) (persistence.Dumper, error)
-	JsonFile        string
-	DeploymentsFile string
-	DbEncryptionKey string
-	SystemsInfo     map[string]SystemInfo
-	DbSystems       []string
-	RestRunner      RestAdapter
+	NewDumper         func(port int, database, username, password string, sshCfg command.SshConfig) (persistence.Dumper, error)
+	JsonFile          string
+	SystemsInfo       map[string]SystemDump
+	PersistentSystems []SystemDump
+	RestRunner        RestAdapter
+	InstallationName  string
 	BackupContext
 }
 
-type SystemInfo struct {
-	Product   string
-	Component string
-	Identity  string
-	Ip        string
-	User      string
-	Pass      string
-	VcapUser  string
-	VcapPass  string
-}
-
-func (s *SystemInfo) Error() (err error) {
-	if s.Product == "" ||
-		s.Component == "" ||
-		s.Identity == "" ||
-		s.Ip == "" ||
-		s.User == "" ||
-		s.Pass == "" ||
-		s.VcapUser == "" ||
-		s.VcapPass == "" {
-		err = fmt.Errorf("invalid or incomplete system info object: %s", s)
-	}
-	return
-}
-
 // NewElasticRuntime initializes an ElasticRuntime intance
-func NewElasticRuntime(jsonFile, deploymentsFile, dbEncryptionKey string, target string) *ElasticRuntime {
-	context := &ElasticRuntime{
-		NewDumper:       persistence.NewPgRemoteDump,
-		JsonFile:        jsonFile,
-		DeploymentsFile: deploymentsFile,
-		DbEncryptionKey: dbEncryptionKey,
-		RestRunner:      RestAdapter(invoke),
-		BackupContext: BackupContext{
-			TargetDir: target,
-		},
-		SystemsInfo: map[string]SystemInfo{
-			"ConsoledbInfo": SystemInfo{
-				Product:   "cf",
-				Component: "consoledb",
-				Identity:  "root",
-			},
-			"UaadbInfo": SystemInfo{
+func NewElasticRuntime(jsonFile string, target string) *ElasticRuntime {
+	var (
+		uaadbInfo *PgInfo = &PgInfo{
+			SystemInfo: SystemInfo{
 				Product:   "cf",
 				Component: "uaadb",
 				Identity:  "root",
 			},
-			"CcdbInfo": SystemInfo{
+		}
+		consoledbInfo *PgInfo = &PgInfo{
+			SystemInfo: SystemInfo{
+				Product:   "cf",
+				Component: "consoledb",
+				Identity:  "root",
+			},
+		}
+		ccdbInfo *PgInfo = &PgInfo{
+			SystemInfo: SystemInfo{
 				Product:   "cf",
 				Component: "ccdb",
 				Identity:  "admin",
 			},
-			"DirectorInfo": SystemInfo{
-				Product:   "microbosh",
-				Component: "director",
-				Identity:  "director",
+		}
+		mysqldbInfo *MysqlInfo = &MysqlInfo{
+			SystemInfo: SystemInfo{
+				Product:   "cf",
+				Component: "mysql",
+				Identity:  "root",
 			},
+		}
+		directorInfo *SystemInfo = &SystemInfo{
+			Product:   "microbosh",
+			Component: "director",
+			Identity:  "director",
+		}
+		nfsInfo *NfsInfo = &NfsInfo{
+			SystemInfo: SystemInfo{
+				Product:   "cf",
+				Component: "nfs_server",
+				Identity:  "vcap",
+			},
+		}
+	)
+
+	context := &ElasticRuntime{
+		NewDumper:  persistence.NewPgRemoteDump,
+		JsonFile:   jsonFile,
+		RestRunner: RestAdapter(invoke),
+		BackupContext: BackupContext{
+			TargetDir: target,
 		},
-		DbSystems: []string{"ConsoledbInfo", "UaadbInfo", "CcdbInfo"},
+		PersistentSystems: []SystemDump{
+			consoledbInfo,
+			uaadbInfo,
+			ccdbInfo,
+			nfsInfo,
+			mysqldbInfo,
+		},
 	}
+	context.SystemsInfo[ER_DIRECTOR] = directorInfo
+	context.SystemsInfo[ER_CONSOLE] = consoledbInfo
+	context.SystemsInfo[ER_UAA] = uaadbInfo
+	context.SystemsInfo[ER_CC] = ccdbInfo
+	context.SystemsInfo[ER_MYSQL] = mysqldbInfo
+	context.SystemsInfo[ER_NFS] = nfsInfo
 	return context
 }
 
 // Backup performs a backup of a Pivotal Elastic Runtime deployment
 func (context *ElasticRuntime) Backup() (err error) {
-	var backupDbList []SystemInfo
+	var (
+		ccStop  *CloudController
+		ccStart *CloudController
+		ccJobs  []string
+	)
 
 	if err = context.ReadAllUserCredentials(); err == nil && context.directorCredentialsValid() {
-		// deploymentName := getElasticRuntimeDeploymentName(ip, username, password, backupDir)
-		// ccJobs := getAllCloudControllerVMs(ip, username, password, deploymentName, backupDir)
-		// cc := NewCloudController(ip, username, password, deploymentName, "stopped")
-		// cc.ToggleJobs(CloudControllerJobs(ccJobs))
 
-		for _, n := range context.DbSystems {
-			backupDbList = append(backupDbList, context.SystemsInfo[n])
+		if ccJobs, err = context.getAllCloudControllerVMs(); err == nil {
+			directorInfo := context.SystemsInfo[ER_DIRECTOR]
+			ccStop = NewCloudController(directorInfo.Get(SD_IP), directorInfo.Get(SD_USER), directorInfo.Get(SD_PASS), context.InstallationName, "stopped")
+			ccStart = NewCloudController(directorInfo.Get(SD_IP), directorInfo.Get(SD_USER), directorInfo.Get(SD_PASS), context.InstallationName, "started")
+			defer ccStart.ToggleJobs(CloudControllerJobs(ccJobs))
+			ccStop.ToggleJobs(CloudControllerJobs(ccJobs))
 		}
-		err = context.RunDbBackups(backupDbList)
-		//-       arguments := []string{jsonfile, "cf", "nfs_server", "vcap"}
-		//-       password := utils.GetPassword(arguments)
-		//-       ip := utils.GetIP(arguments)
-		// BackupNfs(password, ip, outfileref)
-		// toggleCCJobs(backupscript, ip, username, password, deploymentName, ccJobs, "started")
-		// backupMySqlDB(backupscript, jsonfile, databaseDir)
+		err = context.RunDbBackups(context.PersistentSystems)
+
 	} else if err == nil {
 		err = fmt.Errorf("invalid director credentials")
 	}
 	return
 }
 
-func (context *ElasticRuntime) RunDbBackups(dbInfoList []SystemInfo) (err error) {
+func (context *ElasticRuntime) getAllCloudControllerVMs() (ccvms []string, err error) {
+	var (
+		statusCode int
+		body       io.Reader
+		jsonObj    []VMObject
+	)
+
+	directorInfo := context.SystemsInfo[ER_DIRECTOR]
+	connectionURL := fmt.Sprintf(ER_VMS_URL, directorInfo.Get(SD_IP), context.InstallationName)
+
+	if statusCode, body, err = context.RestRunner.Run("GET", connectionURL, directorInfo.Get(SD_USER), directorInfo.Get(SD_PASS), false); err == nil && statusCode == 200 {
+
+		if jsonObj, err = ReadAndUnmarshalVMObjects(body); err == nil {
+			ccvms, err = GetCCVMs(jsonObj)
+		}
+	}
+	return
+}
+
+func (context *ElasticRuntime) RunDbBackups(dbInfoList []SystemDump) (err error) {
 
 	for _, info := range dbInfoList {
 
 		if err = info.Error(); err == nil {
-			err = context.runPostgresBackup(info, context.TargetDir)
+			err = context.openWriterAndDump(info, context.TargetDir)
 		}
 
 		if err != nil {
@@ -125,25 +163,23 @@ func (context *ElasticRuntime) RunDbBackups(dbInfoList []SystemInfo) (err error)
 	return
 }
 
-func (context *ElasticRuntime) runPostgresBackup(dbInfo SystemInfo, databaseDir string) (err error) {
+func (context *ElasticRuntime) openWriterAndDump(dbInfo SystemDump, databaseDir string) (err error) {
 	var (
-		outfile        *os.File
-		remotePGBackup persistence.Dumper
+		outfile *os.File
 	)
+	filename := fmt.Sprintf(ER_BACKUP_FILE_FORMAT, dbInfo.Get(SD_COMPONENT))
 
-	sshConfig := command.SshConfig{
-		Username: dbInfo.VcapUser,
-		Password: dbInfo.VcapPass,
-		Host:     dbInfo.Ip,
-		Port:     22,
+	if outfile, err = osutils.SafeCreate(databaseDir, filename); err == nil {
+		err = context.dump(outfile, dbInfo)
 	}
+	return
+}
 
-	if remotePGBackup, err = context.NewDumper(2544, dbInfo.Component, dbInfo.User, dbInfo.Pass, sshConfig); err == nil {
-		filename := fmt.Sprintf("%s.sql", dbInfo.Component)
+func (context *ElasticRuntime) dump(dest io.Writer, s SystemDump) (err error) {
+	var dumper persistence.Dumper
 
-		if outfile, err = osutils.SafeCreate(databaseDir, filename); err == nil {
-			err = remotePGBackup.Dump(outfile)
-		}
+	if dumper, err = s.GetDumper(); err == nil {
+		err = dumper.Dump(dest)
 	}
 	return
 }
@@ -158,8 +194,16 @@ func (context *ElasticRuntime) ReadAllUserCredentials() (err error) {
 	if fileRef, err = os.Open(context.JsonFile); err == nil {
 
 		if jsonObj, err = ReadAndUnmarshal(fileRef); err == nil {
-			err = context.assignCredentials(jsonObj)
+			err = context.assignCredentialsAndInstallationName(jsonObj)
 		}
+	}
+	return
+}
+
+func (context *ElasticRuntime) assignCredentialsAndInstallationName(jsonObj InstallationCompareObject) (err error) {
+
+	if err = context.assignCredentials(jsonObj); err == nil {
+		context.InstallationName, err = GetDeploymentName(jsonObj)
 	}
 	return
 }
@@ -167,11 +211,19 @@ func (context *ElasticRuntime) ReadAllUserCredentials() (err error) {
 func (context *ElasticRuntime) assignCredentials(jsonObj InstallationCompareObject) (err error) {
 
 	for name, sysInfo := range context.SystemsInfo {
-		sysInfo.VcapUser = "vcap"
-		sysInfo.User = sysInfo.Identity
+		var (
+			ip    string
+			pass  string
+			vpass string
+		)
+		sysInfo.Set(SD_VCAPUSER, ER_DEFAULT_SYSTEM_USER)
+		sysInfo.Set(SD_USER, sysInfo.Get(SD_IDENTITY))
 
-		if sysInfo.Ip, sysInfo.Pass, err = GetPasswordAndIP(jsonObj, sysInfo.Product, sysInfo.Component, sysInfo.Identity); err == nil {
-			_, sysInfo.VcapPass, err = GetPasswordAndIP(jsonObj, sysInfo.Product, sysInfo.Component, "vcap")
+		if ip, pass, err = GetPasswordAndIP(jsonObj, sysInfo.Get(SD_PRODUCT), sysInfo.Get(SD_COMPONENT), sysInfo.Get(SD_IDENTITY)); err == nil {
+			sysInfo.Set(SD_IP, ip)
+			sysInfo.Set(SD_PASS, pass)
+			_, vpass, err = GetPasswordAndIP(jsonObj, sysInfo.Get(SD_PRODUCT), sysInfo.Get(SD_COMPONENT), sysInfo.Get(SD_VCAPUSER))
+			sysInfo.Set(SD_VCAPPASS, vpass)
 			context.SystemsInfo[name] = sysInfo
 		}
 	}
@@ -179,8 +231,12 @@ func (context *ElasticRuntime) assignCredentials(jsonObj InstallationCompareObje
 }
 
 func (context *ElasticRuntime) directorCredentialsValid() (ok bool) {
-	connectionURL := fmt.Sprintf("https://%s:25555/info", context.SystemsInfo["DirectorInfo"].Ip)
-	statusCode, _, err := context.RestRunner.Run("GET", connectionURL, context.SystemsInfo["DirectorInfo"].User, context.SystemsInfo["DirectorInfo"].Pass, false)
-	ok = (err == nil && statusCode == 200)
+	var directorInfo SystemDump
+
+	if directorInfo, ok = context.SystemsInfo[ER_DIRECTOR]; ok {
+		connectionURL := fmt.Sprintf(ER_DIRECTOR_INFO_URL, directorInfo.Get(SD_IP))
+		statusCode, _, err := context.RestRunner.Run("GET", connectionURL, directorInfo.Get(SD_USER), directorInfo.Get(SD_PASS), false)
+		ok = (err == nil && statusCode == 200)
+	}
 	return
 }

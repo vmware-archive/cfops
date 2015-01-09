@@ -10,6 +10,52 @@ import (
 )
 
 var _ = Describe("get_password_ip", func() {
+	Describe("GetDeploymentName function", func() {
+		Context("when given a valid installation.json", func() {
+			var (
+				jsonObj InstallationCompareObject
+			)
+
+			BeforeEach(func() {
+				var fileRef *os.File
+				defer fileRef.Close()
+				fileRef, _ = os.Open("fixtures/installation.json")
+				jsonObj, _ = ReadAndUnmarshal(fileRef)
+			})
+
+			AfterEach(func() {
+			})
+
+			It("Should return the proper installation_name and nil error", func() {
+				name, err := GetDeploymentName(jsonObj)
+				Ω(err).Should(BeNil())
+				Ω(name).Should(Equal("cf-f21eea2dbdb8555f89fb"))
+			})
+		})
+
+		Context("when given a installation.json without a er install", func() {
+			var (
+				jsonObj InstallationCompareObject
+			)
+
+			BeforeEach(func() {
+				var fileRef *os.File
+				defer fileRef.Close()
+				fileRef, _ = os.Open("fixtures/config.json")
+				jsonObj, _ = ReadAndUnmarshal(fileRef)
+			})
+
+			AfterEach(func() {
+			})
+
+			It("Should return non nil error", func() {
+				_, err := GetDeploymentName(jsonObj)
+				Ω(err).ShouldNot(BeNil())
+			})
+		})
+
+	})
+
 	Describe("GetPasswordAndIP function", func() {
 		Context("when given a valid installation.json", func() {
 			var (

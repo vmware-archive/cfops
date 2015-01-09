@@ -42,9 +42,9 @@ var _ = Describe("OpsManager object", func() {
 
 			})
 
-			It("should return non nil error and not write installation.yml", func() {
+			It("should return non nil error and not write installation.json", func() {
 				err := opsManager.Backup()
-				filepath := path.Join(backupDir, "installation.yml")
+				filepath := path.Join(backupDir, "installation.json")
 				Ω(err).ShouldNot(BeNil())
 				Ω(osutils.Exists(filepath)).Should(BeFalse())
 			})
@@ -85,9 +85,9 @@ var _ = Describe("OpsManager object", func() {
 
 			})
 
-			It("should return nil error and write the proper information to the installation.yml", func() {
+			It("should return nil error and write the proper information to the installation.json", func() {
 				err := opsManager.Backup()
-				filepath := path.Join(backupDir, "installation.yml")
+				filepath := path.Join(backupDir, "installation.json")
 				b, _ := ioutil.ReadFile(filepath)
 				Ω(err).Should(BeNil())
 				Ω(b).Should(Equal([]byte(successString)))

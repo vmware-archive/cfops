@@ -23,9 +23,10 @@ type (
 	}
 
 	productCompareObject struct {
-		Type string
-		Jobs []jobCompare
-		IPs  ipCompare
+		Type              string
+		Installation_name string
+		Jobs              []jobCompare
+		IPs               ipCompare
 	}
 
 	ipCompare map[string][]string
@@ -47,6 +48,26 @@ type (
 		password  string
 	}
 )
+
+func filterERProducts(i, v interface{}) bool {
+	return v.(productCompareObject).Type == "cf"
+}
+
+func GetDeploymentName(jsonObj InstallationCompareObject) (deploymentName string, err error) {
+
+	if o := itertools.Filter(jsonObj.Products, filterERProducts); len(o) > 0 {
+		var (
+			idx  interface{}
+			prod productCompareObject
+		)
+		itertools.PairUnPack(<-o, &idx, &prod)
+		deploymentName = prod.Installation_name
+
+	} else {
+		err = fmt.Errorf("could not find a cf install to pull name from")
+	}
+	return
+}
 
 func GetPasswordAndIP(jsonObj InstallationCompareObject, product, component, username string) (ip, password string, err error) {
 	parser := &IpPasswordParser{
@@ -106,13 +127,16 @@ func (s *IpPasswordParser) setPassword(productObj productCompareObject) (err err
 	var property propertyCompare
 
 	if err = jsonFilter(productObj.Jobs, s.jobsFilter, &jobObj); err == nil {
-		err = jsonFilter(jobObj.Properties, s.propertiesFilter, &property)
-		switch v := property.Value.(type) {
-		case map[string]interface{}:
-			s.password = property.Value.(map[string]interface{})["password"].(string)
 
-		default:
-			err = fmt.Errorf("unable to cast: map[string]interface{}", v)
+		if err = jsonFilter(jobObj.Properties, s.propertiesFilter, &property); err == nil {
+
+			switch v := property.Value.(type) {
+			case map[string]interface{}:
+				s.password = property.Value.(map[string]interface{})["password"].(string)
+
+			default:
+				err = fmt.Errorf("unable to cast: map[string]interface{} :", v)
+			}
 		}
 	}
 	return
@@ -126,8 +150,14 @@ func (s *IpPasswordParser) jobsFilter(i, v interface{}) bool {
 	return v.(jobCompare).Type == s.Component
 }
 
-func (s *IpPasswordParser) propertiesFilter(i, v interface{}) bool {
-	return v.(propertyCompare).Value.(map[string]interface{})["identity"].(string) == s.Username
+func (s *IpPasswordParser) propertiesFilter(i, v interface{}) (ok bool) {
+	var identity interface{}
+	val := v.(propertyCompare).Value.(map[string]interface{})
+
+	if identity, ok = val["identity"]; ok {
+		ok = identity.(string) == s.Username
+	}
+	return
 }
 
 func (s *IpPasswordParser) ipsFilter(i, v interface{}) bool {
