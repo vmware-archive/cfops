@@ -87,6 +87,14 @@ func NewElasticRuntime(jsonFile string, target string) *ElasticRuntime {
 		BackupContext: BackupContext{
 			TargetDir: target,
 		},
+		SystemsInfo: map[string]SystemDump{
+			ER_DIRECTOR: directorInfo,
+			ER_CONSOLE:  consoledbInfo,
+			ER_UAA:      uaadbInfo,
+			ER_CC:       ccdbInfo,
+			ER_MYSQL:    mysqldbInfo,
+			ER_NFS:      nfsInfo,
+		},
 		PersistentSystems: []SystemDump{
 			consoledbInfo,
 			uaadbInfo,
@@ -95,12 +103,6 @@ func NewElasticRuntime(jsonFile string, target string) *ElasticRuntime {
 			mysqldbInfo,
 		},
 	}
-	context.SystemsInfo[ER_DIRECTOR] = directorInfo
-	context.SystemsInfo[ER_CONSOLE] = consoledbInfo
-	context.SystemsInfo[ER_UAA] = uaadbInfo
-	context.SystemsInfo[ER_CC] = ccdbInfo
-	context.SystemsInfo[ER_MYSQL] = mysqldbInfo
-	context.SystemsInfo[ER_NFS] = nfsInfo
 	return context
 }
 
