@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"path"
 
 	"github.com/codegangsta/cli"
 	"github.com/pivotalservices/cfops/backup"
@@ -59,19 +58,13 @@ func NewApp() *cli.App {
 				},
 			},
 			Action: func(c *cli.Context) {
-				var opsmanager *backup.OpsManager
 				var err error
 
 				if c.String("hostname") == "" || c.String("username") == "" || c.String("password") == "" || c.String("tempestpassword") == "" || c.String("destination") == "" {
 					cli.ShowCommandHelp(c, "backup")
 
 				} else {
-
-					if opsmanager, err = backup.NewOpsManager(c.String("hostname"), c.String("username"), c.String("password"), c.String("tempestpassword"), c.String("destination")); err == nil {
-						err = opsmanager.Backup()
-						installationFilePath := path.Join(c.String("destination"), backup.OPSMGR_BACKUP_DIR, backup.OPSMGR_INSTALLATION_FILENAME)
-						fmt.Println(installationFilePath)
-					}
+					err = backup.RunBackupPipeline(c.String("hostname"), c.String("username"), c.String("password"), c.String("tempestpassword"), c.String("destination"))
 				}
 
 				if err != nil {
