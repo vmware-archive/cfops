@@ -11,7 +11,6 @@ import (
 
 	. "github.com/pivotalservices/cfops/backup"
 	"github.com/pivotalservices/cfops/backup/modules/persistence"
-	"github.com/pivotalservices/cfops/command"
 	"github.com/pivotalservices/cfops/osutils"
 
 	. "github.com/onsi/ginkgo"
@@ -31,11 +30,6 @@ type mockDumper struct{}
 
 func (s mockDumper) Dump(i io.Writer) (err error) {
 	i.Write([]byte("sometext"))
-	return
-}
-
-func mockDumperFunc(port int, database, username, password string, sshCfg command.SshConfig) (dpr persistence.Dumper, err error) {
-	dpr = &mockDumper{}
 	return
 }
 
@@ -86,7 +80,6 @@ var _ = Describe("ElasticRuntime", func() {
 			BeforeEach(func() {
 				target, _ = ioutil.TempDir("/tmp", "spec")
 				er = ElasticRuntime{
-					NewDumper:  mockDumperFunc,
 					JsonFile:   "fixtures/installation.json",
 					RestRunner: RestAdapter(restSuccess),
 					BackupContext: BackupContext{
@@ -124,7 +117,6 @@ var _ = Describe("ElasticRuntime", func() {
 			BeforeEach(func() {
 				target, _ = ioutil.TempDir("/tmp", "spec")
 				er = ElasticRuntime{
-					NewDumper:  mockDumperFunc,
 					JsonFile:   "fixtures/installation.json",
 					RestRunner: RestAdapter(restFailure),
 					BackupContext: BackupContext{
@@ -174,8 +166,7 @@ var _ = Describe("ElasticRuntime", func() {
 			BeforeEach(func() {
 				target, _ = ioutil.TempDir("/tmp", "spec")
 				er = ElasticRuntime{
-					NewDumper: mockDumperFunc,
-					JsonFile:  "fixtures/installation.json",
+					JsonFile: "fixtures/installation.json",
 					BackupContext: BackupContext{
 						TargetDir: target,
 					},
@@ -225,8 +216,7 @@ var _ = Describe("ElasticRuntime", func() {
 			BeforeEach(func() {
 				target, _ = ioutil.TempDir("/tmp", "spec")
 				er = ElasticRuntime{
-					NewDumper: mockDumperFunc,
-					JsonFile:  "fixtures/installation.json",
+					JsonFile: "fixtures/installation.json",
 					BackupContext: BackupContext{
 						TargetDir: target,
 					},
@@ -276,8 +266,7 @@ var _ = Describe("ElasticRuntime", func() {
 			BeforeEach(func() {
 				target, _ = ioutil.TempDir("/tmp", "spec")
 				er = ElasticRuntime{
-					NewDumper: mockDumperFunc,
-					JsonFile:  "fixtures/installation.json",
+					JsonFile: "fixtures/installation.json",
 					BackupContext: BackupContext{
 						TargetDir: target,
 					},
@@ -325,8 +314,7 @@ var _ = Describe("ElasticRuntime", func() {
 			BeforeEach(func() {
 				target, _ = ioutil.TempDir("/tmp", "spec")
 				er = ElasticRuntime{
-					NewDumper: mockDumperFunc,
-					JsonFile:  "fixtures/installation.json",
+					JsonFile: "fixtures/installation.json",
 					BackupContext: BackupContext{
 						TargetDir: target,
 					},

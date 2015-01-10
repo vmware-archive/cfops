@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"github.com/pivotalservices/cfops/backup/modules/persistence"
-	"github.com/pivotalservices/cfops/command"
 	"github.com/pivotalservices/cfops/osutils"
 )
 
@@ -26,7 +25,6 @@ const (
 
 // ElasticRuntime contains information about a Pivotal Elastic Runtime deployment
 type ElasticRuntime struct {
-	NewDumper         func(port int, database, username, password string, sshCfg command.SshConfig) (persistence.Dumper, error)
 	JsonFile          string
 	SystemsInfo       map[string]SystemDump
 	PersistentSystems []SystemDump
@@ -81,7 +79,6 @@ func NewElasticRuntime(jsonFile string, target string) *ElasticRuntime {
 	)
 
 	context := &ElasticRuntime{
-		NewDumper:  persistence.NewPgRemoteDump,
 		JsonFile:   jsonFile,
 		RestRunner: RestAdapter(invoke),
 		BackupContext: BackupContext{
