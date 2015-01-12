@@ -47,6 +47,11 @@ build:
         code: |
           (cd cmd/cfops/ && goxc -env GOPATH=${WERCKER_SOURCE_DIR}/Godeps/_workspace:$GOPATH -d=${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/ -pv=${PRE_TAG}${NEXT_VERSION_TAG}) 
 
+    - script:
+        name: create artifacts
+        code: |
+          cp -R ./ ${WERCKER_OUTPUT_DIR}
+
   #after-steps:
     #- wantedly/pretty-slack-notify@0.2.0:
         #team: $SLACK_TEAM
