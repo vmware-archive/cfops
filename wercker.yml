@@ -1,4 +1,4 @@
-box: wercker/golang
+box: motemen/golang-goxc
 build:
   # The steps that will be executed on build
   steps:
@@ -27,13 +27,65 @@ build:
     - script:
         name: go test cover
         code: |
-          ./testCoverage ./... 0 
+          ./testCoverage ./... $COVERAGE_WATERMARK
 
     # lets make sure we can build
     # the main executable (later we can cross compile and upload)
     - script:
-        name: go build
+        name: go smoke build
         code: |
           godep go build ./cmd/cfops/main.go 
 
-    
+    - script:
+        name: add repo to artifact
+        code: |
+          cp -R ./ ${WERCKER_OUTPUT_DIR}
+
+    - xchapter7x/flowy-release:
+        action: "get-next"
+        tag_variable_name: "NEXT_VERSION_TAG"
+        git_name: $GITFLOW_NAME
+        git_email: $GITFLOW_EMAIL
+
+    - script:
+        name: cross platform build
+        code: |
+          echo ${NEXT_VERSION_TAG}
+          (cd cmd/cfops/ && goxc -env GOPATH=${WERCKER_SOURCE_DIR}/Godeps/_workspace:$GOPATH -d=${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/ -pv=${NEXT_VERSION_TAG}) 
+
+  #after-steps:
+    #- wantedly/pretty-slack-notify@0.2.0:
+        #team: $SLACK_TEAM
+        #token: $SLACK_API_TOKEN
+        #channel: $SLACK_CHANNEL
+        #username: $SLACK_USER
+        #webhook_url: $SLACK_WEBHOOK_URL 
+
+deploy:
+  steps:
+    - xchapter7x/flowy-release:
+        action: "complete-release"
+        tag_variable_name: "NEW_VERSION_TAG"
+        active: $GITFLOW_ACTIVE
+        git_name: $GITFLOW_NAME
+        git_email: $GITFLOW_EMAIL
+
+    - script:
+        name: check their is a tag matching commit hash for master deploys
+        code: |
+          ./checkHash
+
+    - s3sync:
+        key-id: $S3_KEY
+        key-secret: $S3_SECRET
+        bucket-url: ${S3_BUCKET}/${S3_FOLDER}
+        source-dir: ./${BUILD_DIR}
+        delete-removed: false
+  
+  #after-steps:
+    #- sherzberg/slack-notify:
+        #subdomain: $SLACK_SUBDOMAIN
+        #token: $SLACK_API_TOKEN
+        #channel: $SLACK_CHANNEL
+        #username: $SLACK_USER
+        #icon_url: $SLACK_DEPLOY_ICON
