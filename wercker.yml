@@ -63,6 +63,9 @@ build:
 
 deploy:
   steps:
+    - add-ssh-key:
+        keyname: PCF_GITHUB_KEY
+
     - xchapter7x/flowy-release:
         action: "complete-release"
         tag_variable_name: "NEW_VERSION_TAG"
