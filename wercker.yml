@@ -48,7 +48,7 @@ build:
         git_email: $GITFLOW_EMAIL
 
     - script:
-        name: go build
+        name: cross platform build
         code: |
           echo ${NEXT_VERSION_TAG}
           (cd cmd/cfops/ && goxc -env GOPATH=${WERCKER_SOURCE_DIR}/Godeps/_workspace:$GOPATH -d=${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/ -pv=${NEXT_VERSION_TAG}) 
