@@ -1,4 +1,4 @@
-box: wercker/golang
+box: motemen/golang-goxc
 build:
   # The steps that will be executed on build
   steps:
