@@ -32,7 +32,7 @@ build:
     # lets make sure we can build
     # the main executable (later we can cross compile and upload)
     - script:
-        name: go build
+        name: go smoke build
         code: |
           godep go build ./cmd/cfops/main.go 
 
@@ -45,7 +45,7 @@ build:
     - script:
         name: go build
         code: |
-          (cd cmd/cfops/ && goxc -d=${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/ -pv=${PRE_TAG}${NEXT_VERSION_TAG}) 
+          (cd cmd/cfops/ && goxc -env GOPATH=Godeps/_workspace:$GOPATH -d=${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/ -pv=${PRE_TAG}${NEXT_VERSION_TAG}) 
 
   #after-steps:
     #- wantedly/pretty-slack-notify@0.2.0:
