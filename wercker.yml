@@ -45,7 +45,7 @@ build:
     - script:
         name: go build
         code: |
-          (cd cmd/cfops/ && goxc -env GOPATH=Godeps/_workspace:$GOPATH -d=${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/ -pv=${PRE_TAG}${NEXT_VERSION_TAG}) 
+          (cd cmd/cfops/ && goxc -env GOPATH=${WERCKER_SOURCE_DIR}/Godeps/_workspace:$GOPATH -d=${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/ -pv=${PRE_TAG}${NEXT_VERSION_TAG}) 
 
   #after-steps:
     #- wantedly/pretty-slack-notify@0.2.0:
