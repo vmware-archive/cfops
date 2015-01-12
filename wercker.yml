@@ -39,6 +39,8 @@ build:
     - xchapter7x/flowy-release:
         action: "get-next"
         tag_variable_name: "NEXT_VERSION_TAG"
+        git_name: $GITFLOW_NAME
+        git_email: $GITFLOW_EMAIL
 
     - script:
         name: go build
