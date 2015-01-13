@@ -55,58 +55,38 @@ build:
         #webhook_url: $SLACK_WEBHOOK_URL 
 
 deploy:
-  steps:
-    - script:
-        name: sanity check
-        code: |
-          ls -la
-          pwd
-
+  steps: 
     - add-ssh-key:
         keyname: PCF_GITHUB_KEY
 
-    - script:
-        name: sanity check
-        code: |
-          ls -la
-          pwd
-    
     - xchapter7x/flowy-release:
         action: "get-next"
         tag_variable_name: "VERSION_TAG"
         git_name: $GITFLOW_NAME
         git_email: $GITFLOW_EMAIL
 
-    - script:
-        name: sanity check
-        code: |
-          ls -la
-          pwd
-
     - xchapter7x/flowy-release:
         action: "complete-release"
         active: $GITFLOW_ACTIVE
         git_name: $GITFLOW_NAME
         git_email: $GITFLOW_EMAIL
-
+    
+    #this is a workaround for the flowy-release not resetting
+    #its branch state... 
     - script:
-        name: sanity check
+        name: reset git to proper commit
         code: |
-          ls -la
-          pwd
+          git checkout -fq ${WERCKER_GIT_COMMIT}
+          git submodule update --init --recursive
 
     - script:
         name: check their is a tag matching commit hash for master deploys
         code: |
-          ls -la
-          pwd
           ./checkHash
 
     - script:
         name: name release folder
         code: |
-          ls -la
-          pwd
           ./setReleaseName
 
     - s3sync:
