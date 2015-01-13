@@ -8,7 +8,7 @@ if [ ${WERCKER_DEPLOYTARGET_NAME} == ${PROD_TARGET} ]; then
   mv ./${BUILD_DIR}/snapshot ./${BUILD_DIR}/${VERSION_TAG}
 
 elif [ ${WERCKER_DEPLOYTARGET_NAME} == ${RC_TARGET} ]; then
-  mv ./${BUILD_DIR}/snapshot ./${BUILD_DIR}/rc_${VERSION_TAG}_${WERCKER_GIT_COMMIT}
+  mv ./${BUILD_DIR}/snapshot ./${BUILD_DIR}/rc_${WERCKER_GIT_COMMIT}
 fi
 
 exit $exitcode
