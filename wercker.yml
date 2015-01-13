@@ -41,17 +41,10 @@ build:
         code: |
           cp -R ./ ${WERCKER_OUTPUT_DIR}
 
-    - xchapter7x/flowy-release:
-        action: "get-next"
-        tag_variable_name: "NEXT_VERSION_TAG"
-        git_name: $GITFLOW_NAME
-        git_email: $GITFLOW_EMAIL
-
     - script:
         name: cross platform build
         code: |
-          echo ${NEXT_VERSION_TAG}
-          (cd cmd/cfops/ && goxc -env GOPATH=${WERCKER_SOURCE_DIR}/Godeps/_workspace:$GOPATH -d=${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/ -pv=${NEXT_VERSION_TAG}) 
+          (cd cmd/cfops/ && goxc -env GOPATH=${WERCKER_SOURCE_DIR}/Godeps/_workspace:$GOPATH -d=${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/ ) 
 
   #after-steps:
     #- wantedly/pretty-slack-notify@0.2.0:
@@ -62,21 +55,39 @@ build:
         #webhook_url: $SLACK_WEBHOOK_URL 
 
 deploy:
-  steps:
+  steps: 
     - add-ssh-key:
         keyname: PCF_GITHUB_KEY
 
     - xchapter7x/flowy-release:
+        action: "get-next"
+        tag_variable_name: "VERSION_TAG"
+        git_name: $GITFLOW_NAME
+        git_email: $GITFLOW_EMAIL
+
+    - xchapter7x/flowy-release:
         action: "complete-release"
-        tag_variable_name: "NEW_VERSION_TAG"
         active: $GITFLOW_ACTIVE
         git_name: $GITFLOW_NAME
         git_email: $GITFLOW_EMAIL
+    
+    #this is a workaround for the flowy-release not resetting
+    #its branch state... 
+    - script:
+        name: reset git to proper commit
+        code: |
+          git checkout -fq ${WERCKER_GIT_COMMIT}
+          git submodule update --init --recursive
 
     - script:
         name: check their is a tag matching commit hash for master deploys
         code: |
           ./checkHash
+
+    - script:
+        name: name release folder
+        code: |
+          ./setReleaseName
 
     - s3sync:
         key-id: $S3_KEY
