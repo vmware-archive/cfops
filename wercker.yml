@@ -79,6 +79,7 @@ deploy:
     - script:
         name: name release folder
         code: |
+          ls
           ./setReleaseName
 
     - s3sync:
