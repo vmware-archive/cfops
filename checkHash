@@ -1,8 +1,8 @@
 #!/bin/bash
 exitcode=0
-branch="master"
+PROD_TARGET="Production"
 
-if [ ${WERCKER_GIT_BRANCH} == ${branch} ]; then
+if [ ${WERCKER_DEPLOYTARGET_NAME} == ${PROD_TARGET} ]; then
   MATCH_COUNT=$(for i in `git tag`; do git show $i | head -10;done | grep commit | sed s/commit\ //g | grep $WERCKER_GIT_COMMIT | wc -l)
   if [ $MATCH_COUNT -gt 0 ]; then
     echo 'SUCCESS: we found a matching tag';
