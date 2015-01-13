@@ -7,7 +7,7 @@ RC_TARGET="Release_Candidate"
 if [ ${WERCKER_DEPLOYTARGET_NAME} == ${PROD_TARGET} ]; then
   mv ./${BUILD_DIR}/snapshot ./${BUILD_DIR}/${VERSION_TAG}
 
-else if [ ${WERCKER_DEPLOYTARGET_NAME} == ${RC_TARGET} ]; then
+elif [ ${WERCKER_DEPLOYTARGET_NAME} == ${RC_TARGET} ]; then
   mv ./${BUILD_DIR}/snapshot ./${BUILD_DIR}/rc_${VERSION_TAG}_${WERCKER_GIT_COMMIT}
 fi
 
