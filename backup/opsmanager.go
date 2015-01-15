@@ -11,13 +11,15 @@ import (
 )
 
 const (
-	OPSMGR_INSTALLATION_FILENAME  string = "installation.json"
-	OPSMGR_DEPLOYMENTS_FILENAME   string = "deployments.tar.gz"
-	OPSMGR_ENCRYPTIONKEY_FILENAME string = "cc_db_encryption_key.txt"
-	OPSMGR_BACKUP_DIR             string = "opsmanager"
-	OPSMGR_DEPLOYMENTS_DIR        string = "deployments"
-	OPSMGR_DEFAULT_USER           string = "tempest"
-	OPSMGR_INSTALLATION_URL       string = "https://%s/api/installation_settings"
+	OPSMGR_INSTALLATION_SETTINGS_FILENAME string = "installation.json"
+	OPSMGR_INSTALLATION_ASSETS_FILENAME   string = "installation.zip"
+	OPSMGR_DEPLOYMENTS_FILENAME           string = "deployments.tar.gz"
+	OPSMGR_ENCRYPTIONKEY_FILENAME         string = "cc_db_encryption_key.txt"
+	OPSMGR_BACKUP_DIR                     string = "opsmanager"
+	OPSMGR_DEPLOYMENTS_DIR                string = "deployments"
+	OPSMGR_DEFAULT_USER                   string = "tempest"
+	OPSMGR_INSTALLATION_SETTINGS_URL      string = "https://%s/api/installation_settings"
+	OPSMGR_INSTALLATION_ASSETS_URL        string = "https://%s/api/installation_asset_collection"
 )
 
 // OpsManager contains the location and credentials of a Pivotal Ops Manager instance
@@ -50,11 +52,29 @@ func (context *OpsManager) exportAndExtract() (err error) {
 }
 
 func (context *OpsManager) export() (err error) {
+
+	if err = context.exportUrlToFile(OPSMGR_INSTALLATION_SETTINGS_URL, OPSMGR_INSTALLATION_SETTINGS_FILENAME); err == nil {
+		err = context.exportUrlToFile(OPSMGR_INSTALLATION_ASSETS_URL, OPSMGR_INSTALLATION_ASSETS_FILENAME)
+	}
+	return
+}
+
+func (context *OpsManager) exportUrlToFile(urlFormat string, filename string) (err error) {
 	var settingsFileRef *os.File
 	defer settingsFileRef.Close()
 
-	if settingsFileRef, err = osutils.SafeCreate(context.TargetDir, context.OpsmanagerBackupDir, OPSMGR_INSTALLATION_FILENAME); err == nil {
-		err = context.exportInstallationSettings(settingsFileRef)
+	if settingsFileRef, err = osutils.SafeCreate(context.TargetDir, context.OpsmanagerBackupDir, filename); err == nil {
+		err = context.exportUrlToWriter(urlFormat, settingsFileRef)
+	}
+	return
+}
+
+func (context *OpsManager) exportUrlToWriter(urlFormat string, dest io.Writer) (err error) {
+	var body io.Reader
+	connectionURL := fmt.Sprintf(urlFormat, context.Hostname)
+
+	if _, body, err = context.RestRunner.Run("GET", connectionURL, context.Username, context.Password, false); err == nil {
+		_, err = io.Copy(dest, body)
 	}
 	return
 }
@@ -103,16 +123,6 @@ func (context *OpsManager) copyDeployments() (err error) {
 	if file, err = osutils.SafeCreate(context.TargetDir, context.OpsmanagerBackupDir, OPSMGR_DEPLOYMENTS_FILENAME); err == nil {
 		command := "cd /var/tempest/workspaces/default && tar cz deployments"
 		err = context.Executer.Execute(file, command)
-	}
-	return
-}
-
-func (context *OpsManager) exportInstallationSettings(dest io.Writer) (err error) {
-	var body io.Reader
-	connectionURL := fmt.Sprintf(OPSMGR_INSTALLATION_URL, context.Hostname)
-
-	if _, body, err = context.RestRunner.Run("GET", connectionURL, context.Username, context.Password, false); err == nil {
-		_, err = io.Copy(dest, body)
 	}
 	return
 }
