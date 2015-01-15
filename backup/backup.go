@@ -16,7 +16,7 @@ func RunBackupPipeline(hostname, username, password, tempestpassword, destinatio
 		opsmanager     Tile
 		elasticRuntime Tile
 	)
-	installationFilePath := path.Join(destination, OPSMGR_BACKUP_DIR, OPSMGR_INSTALLATION_FILENAME)
+	installationFilePath := path.Join(destination, OPSMGR_BACKUP_DIR, OPSMGR_INSTALLATION_SETTINGS_FILENAME)
 
 	if opsmanager, err = NewOpsManager(hostname, username, password, tempestpassword, destination); err == nil {
 		elasticRuntime = NewElasticRuntime(installationFilePath, destination)
