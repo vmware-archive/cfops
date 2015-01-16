@@ -5,6 +5,7 @@ import "path"
 // Tile is a deployable component that can be backed up
 type Tile interface {
 	Backup() error
+	Restore() error
 }
 
 type BackupContext struct {

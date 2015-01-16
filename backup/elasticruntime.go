@@ -128,6 +128,11 @@ func (context *ElasticRuntime) Backup() (err error) {
 	return
 }
 
+// Restore performs a restore of a Pivotal Elastic Runtime deployment
+func (context *ElasticRuntime) Restore() (err error) {
+	return
+}
+
 func (context *ElasticRuntime) getAllCloudControllerVMs() (ccvms []string, err error) {
 	var (
 		statusCode int

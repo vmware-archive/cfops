@@ -52,6 +52,11 @@ func (context *OpsManager) Backup() (err error) {
 	return
 }
 
+// Restore performs a restore of a Pivotal Ops Manager instance
+func (context *OpsManager) Restore() (err error) {
+	return
+}
+
 func (context *OpsManager) exportAndExtract() (err error) {
 	if err = context.extract(); err == nil {
 		err = context.export()
