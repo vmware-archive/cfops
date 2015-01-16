@@ -48,7 +48,6 @@ var _ = Describe("OpsManager object", func() {
 			})
 
 			It("Should yield nil error", func() {
-				fmt.Println(opsManager)
 				err := opsManager.Restore()
 				Ω(err).Should(BeNil())
 			})
