@@ -21,13 +21,10 @@ var _ = Describe("OpsManager object", func() {
 		backupDir  string
 	)
 	Describe("Restore method", func() {
-		var (
-			gateway httpGateway
-		)
+
 		Context("calling restore successfully", func() {
 
 			BeforeEach(func() {
-				gateway = &successGateway{}
 				tmpDir, _ = ioutil.TempDir("/tmp", "test")
 				backupDir = path.Join(tmpDir, "backup", "opsmanager")
 				gw := &successGateway{}
@@ -194,17 +191,4 @@ func (s *successGateway) Upload(paramName, filename string, fileRef io.Reader, p
 
 func (s *successGateway) Execute(method string) (val interface{}, err error) {
 	return
-}
-
-type httpUploader interface {
-	Upload(paramName, filename string, fileRef io.Reader, params map[string]string) (res *http.Response, err error)
-}
-
-type httpExecuter interface {
-	Execute(method string) (val interface{}, err error)
-}
-
-type httpGateway interface {
-	httpUploader
-	httpExecuter
 }
