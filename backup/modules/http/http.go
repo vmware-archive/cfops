@@ -1,7 +1,10 @@
 package http
 
 import (
+	"bytes"
 	"crypto/tls"
+	"io"
+	"mime/multipart"
 	"net/http"
 )
 
@@ -42,4 +45,37 @@ func (gateway *HttpGateway) Execute(method string) (val interface{}, err error) 
 		return
 	}
 	return gateway.handler.Handle(resp)
+}
+
+func (gateway *HttpGateway) Upload(paramName, filename string, fileRef io.Reader, params map[string]string) (res *http.Response, err error) {
+	var part io.Writer
+
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+
+	if part, err = writer.CreateFormFile(paramName, filename); err == nil {
+
+		if _, err = io.Copy(part, fileRef); err == nil {
+
+			for key, val := range params {
+				_ = writer.WriteField(key, val)
+			}
+			writer.Close()
+			gateway.contentType = writer.FormDataContentType()
+			res, err = gateway.makeRequest(body)
+		}
+	}
+	return
+}
+
+func (gateway *HttpGateway) makeRequest(body *bytes.Buffer) (res *http.Response, err error) {
+	var req *http.Request
+	transport := NewRoundTripper()
+
+	if req, err = http.NewRequest("POST", gateway.endpoint, body); err == nil {
+		req.SetBasicAuth(gateway.username, gateway.password)
+		req.Header.Add("Content-Type", gateway.contentType)
+		res, err = transport.RoundTrip(req)
+	}
+	return
 }

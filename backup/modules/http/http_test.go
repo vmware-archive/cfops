@@ -1,8 +1,10 @@
 package http_test
 
 import (
+	"bytes"
 	"errors"
 	"net/http"
+	"os"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -11,22 +13,36 @@ import (
 
 var (
 	roundTripSuccess bool
-	mockResponse     *http.Response
 	requestCatcher   *http.Request
 	handlerSuccess   bool
+	successString    string = `{"state":"done"}`
+	failureString    string = `{"state":"notdone"}`
 )
+
+type ClosingBuffer struct {
+	*bytes.Buffer
+}
+
+func (cb *ClosingBuffer) Close() (err error) {
+	return
+}
 
 type MockRoundTripper struct {
 }
 
 func (roundTripper *MockRoundTripper) RoundTrip(request *http.Request) (resp *http.Response, err error) {
+	resp = &http.Response{
+		StatusCode: 200,
+	}
+	resp.Body = &ClosingBuffer{bytes.NewBufferString(successString)}
+
 	if !roundTripSuccess {
+		resp.StatusCode = 500
+		resp.Body = &ClosingBuffer{bytes.NewBufferString(failureString)}
 		err = errors.New("Mock error")
-		return
 	}
 	*requestCatcher = *request
-	resp = mockResponse
-	return resp, err
+	return
 }
 
 type MockHandler struct {
@@ -42,13 +58,13 @@ func (handler *MockHandler) Handle(resp *http.Response) (val interface{},
 
 var _ = Describe("Http", func() {
 	var (
-		handler  *MockHandler
-		executor *HttpGateway
+		handler *MockHandler
+		gateway *HttpGateway
 	)
 	BeforeEach(func() {
 		requestCatcher = &http.Request{}
 		handler = &MockHandler{}
-		executor = NewHttpGateway("http://endpoint/test", "username", "password", "contentType", handler)
+		gateway = NewHttpGateway("http://endpoint/test", "username", "password", "contentType", handler)
 		NewRoundTripper = func() http.RoundTripper {
 			return &MockRoundTripper{}
 		}
@@ -60,11 +76,11 @@ var _ = Describe("Http", func() {
 			handlerSuccess = true
 		})
 		It("Should return nil error on success", func() {
-			_, err := executor.Execute("Get")
+			_, err := gateway.Execute("Get")
 			Ω(err).Should(BeNil())
 		})
 		It("Should execute correct request", func() {
-			val, _ := executor.Execute("Get")
+			val, _ := gateway.Execute("Get")
 			Ω(requestCatcher.URL.Host).Should(Equal("endpoint"))
 			Ω(requestCatcher.Method).Should(Equal("Get"))
 			Ω(requestCatcher.Header["Content-Type"][0]).Should(Equal("contentType"))
@@ -79,7 +95,7 @@ var _ = Describe("Http", func() {
 			handlerSuccess = true
 		})
 		It("Should return error", func() {
-			_, err := executor.Execute("Get")
+			_, err := gateway.Execute("Get")
 			Ω(err).ShouldNot(BeNil())
 		})
 	})
@@ -90,9 +106,37 @@ var _ = Describe("Http", func() {
 			handlerSuccess = false
 		})
 		It("Should return error", func() {
-			_, err := executor.Execute("Get")
+			_, err := gateway.Execute("Get")
 			Ω(err).ShouldNot(BeNil())
 		})
 	})
+	Describe("Upload function", func() {
+		Context("called with valid arguments", func() {
+			BeforeEach(func() {
+				roundTripSuccess = true
+			})
 
+			It("Should return nil error and a valid response", func() {
+				fileRef, _ := os.Open("fixtures/installation.json")
+				res, err := gateway.Upload("installation[file]", "installation.json", fileRef, nil)
+				Ω(err).Should(BeNil())
+				Ω(res).ShouldNot(BeNil())
+				Ω(res.StatusCode).Should(Equal(200))
+			})
+		})
+
+		Context("called with invalid arguments", func() {
+			BeforeEach(func() {
+				roundTripSuccess = false
+			})
+
+			It("Should return non-nil error and a non 200 statuscode", func() {
+				fileRef, _ := os.Open("fixtures/installation.json")
+				res, err := gateway.Upload("installation[file]", "installation.json", fileRef, nil)
+				Ω(err).ShouldNot(BeNil())
+				Ω(res.StatusCode).ShouldNot(Equal(200))
+			})
+		})
+
+	})
 })
