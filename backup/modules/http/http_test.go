@@ -111,7 +111,7 @@ var _ = Describe("Http", func() {
 		})
 	})
 	Describe("Upload function", func() {
-		Context("called with valid arguments", func() {
+		Context("call to endpoint is successful", func() {
 			BeforeEach(func() {
 				roundTripSuccess = true
 			})
@@ -125,7 +125,7 @@ var _ = Describe("Http", func() {
 			})
 		})
 
-		Context("called with invalid arguments", func() {
+		Context("call to endpoint is not successful", func() {
 			BeforeEach(func() {
 				roundTripSuccess = false
 			})
@@ -137,6 +137,5 @@ var _ = Describe("Http", func() {
 				Ω(res.StatusCode).ShouldNot(Equal(200))
 			})
 		})
-
 	})
 })

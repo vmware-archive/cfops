@@ -3,9 +3,11 @@ package backup
 import (
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"path"
 
+	cfhttp "github.com/pivotalservices/cfops/backup/modules/http"
 	"github.com/pivotalservices/cfops/command"
 	"github.com/pivotalservices/cfops/osutils"
 )
@@ -22,6 +24,10 @@ const (
 	OPSMGR_INSTALLATION_ASSETS_URL        string = "https://%s/api/installation_asset_collection"
 )
 
+type httpUploader interface {
+	Upload(paramName, filename string, fileRef io.Reader, params map[string]string) (res *http.Response, err error)
+}
+
 // OpsManager contains the location and credentials of a Pivotal Ops Manager instance
 type OpsManager struct {
 	BackupContext
@@ -32,6 +38,8 @@ type OpsManager struct {
 	DbEncryptionKey     string
 	RestRunner          RestAdapter
 	Executer            command.Executer
+	SettingsUploader    httpUploader
+	AssetsUploader      httpUploader
 	DeploymentDir       string
 	OpsmanagerBackupDir string
 }
@@ -92,19 +100,16 @@ func (context *OpsManager) extract() (err error) {
 // NewOpsManager initializes an OpsManager instance
 func NewOpsManager(hostname string, username string, password string, tempestpassword string, target string) (context *OpsManager, err error) {
 	var remoteExecuter command.Executer
-	remoteExecuter, err = command.NewRemoteExecutor(command.SshConfig{
-		Username: OPSMGR_DEFAULT_USER,
-		Password: tempestpassword,
-		Host:     hostname,
-		Port:     22,
-	})
 
-	if err == nil {
+	if remoteExecuter, err = createExecuter(hostname, tempestpassword); err == nil {
+		settingsGateway, assetsGateway := createInstallationGateways(hostname, tempestpassword)
 		context = &OpsManager{
-			DeploymentDir: path.Join(target, OPSMGR_BACKUP_DIR, OPSMGR_DEPLOYMENTS_DIR),
-			Hostname:      hostname,
-			Username:      username,
-			Password:      password,
+			SettingsUploader: settingsGateway,
+			AssetsUploader:   assetsGateway,
+			DeploymentDir:    path.Join(target, OPSMGR_BACKUP_DIR, OPSMGR_DEPLOYMENTS_DIR),
+			Hostname:         hostname,
+			Username:         username,
+			Password:         password,
 			BackupContext: BackupContext{
 				TargetDir: target,
 			},
@@ -113,6 +118,24 @@ func NewOpsManager(hostname string, username string, password string, tempestpas
 			OpsmanagerBackupDir: OPSMGR_BACKUP_DIR,
 		}
 	}
+	return
+}
+
+func createExecuter(hostname, tempestpassword string) (remoteExecuter command.Executer, err error) {
+	remoteExecuter, err = command.NewRemoteExecutor(command.SshConfig{
+		Username: OPSMGR_DEFAULT_USER,
+		Password: tempestpassword,
+		Host:     hostname,
+		Port:     22,
+	})
+	return
+}
+
+func createInstallationGateways(hostname, tempestpassword string) (settingsGateway, assetsGateway *cfhttp.HttpGateway) {
+	settingsURL := fmt.Sprintf(OPSMGR_INSTALLATION_SETTINGS_URL, hostname)
+	assetsURL := fmt.Sprintf(OPSMGR_INSTALLATION_ASSETS_URL, hostname)
+	settingsGateway = cfhttp.NewHttpGateway(settingsURL, OPSMGR_DEFAULT_USER, tempestpassword, "application/octet-stream", nil)
+	assetsGateway = cfhttp.NewHttpGateway(assetsURL, OPSMGR_DEFAULT_USER, tempestpassword, "application/octet-stream", nil)
 	return
 }
 
