@@ -13,19 +13,29 @@ import (
 )
 
 const (
-	OPSMGR_INSTALLATION_SETTINGS_FILENAME string = "installation.json"
-	OPSMGR_INSTALLATION_ASSETS_FILENAME   string = "installation.zip"
-	OPSMGR_DEPLOYMENTS_FILENAME           string = "deployments.tar.gz"
-	OPSMGR_ENCRYPTIONKEY_FILENAME         string = "cc_db_encryption_key.txt"
-	OPSMGR_BACKUP_DIR                     string = "opsmanager"
-	OPSMGR_DEPLOYMENTS_DIR                string = "deployments"
-	OPSMGR_DEFAULT_USER                   string = "tempest"
-	OPSMGR_INSTALLATION_SETTINGS_URL      string = "https://%s/api/installation_settings"
-	OPSMGR_INSTALLATION_ASSETS_URL        string = "https://%s/api/installation_asset_collection"
+	OPSMGR_INSTALLATION_SETTINGS_FILENAME       string = "installation.json"
+	OPSMGR_INSTALLATION_SETTINGS_POSTFIELD_NAME string = "installation[file]"
+	OPSMGR_INSTALLATION_ASSETS_FILENAME         string = "installation.zip"
+	OPSMGR_DEPLOYMENTS_FILENAME                 string = "deployments.tar.gz"
+	OPSMGR_ENCRYPTIONKEY_FILENAME               string = "cc_db_encryption_key.txt"
+	OPSMGR_BACKUP_DIR                           string = "opsmanager"
+	OPSMGR_DEPLOYMENTS_DIR                      string = "deployments"
+	OPSMGR_DEFAULT_USER                         string = "tempest"
+	OPSMGR_INSTALLATION_SETTINGS_URL            string = "https://%s/api/installation_settings"
+	OPSMGR_INSTALLATION_ASSETS_URL              string = "https://%s/api/installation_asset_collection"
 )
 
 type httpUploader interface {
 	Upload(paramName, filename string, fileRef io.Reader, params map[string]string) (res *http.Response, err error)
+}
+
+type httpExecuter interface {
+	Execute(method string) (val interface{}, err error)
+}
+
+type httpGateway interface {
+	httpUploader
+	httpExecuter
 }
 
 // OpsManager contains the location and credentials of a Pivotal Ops Manager instance
@@ -44,6 +54,30 @@ type OpsManager struct {
 	OpsmanagerBackupDir string
 }
 
+// NewOpsManager initializes an OpsManager instance
+func NewOpsManager(hostname string, username string, password string, tempestpassword string, target string) (context *OpsManager, err error) {
+	var remoteExecuter command.Executer
+
+	if remoteExecuter, err = createExecuter(hostname, tempestpassword); err == nil {
+		settingsGateway, assetsGateway := createInstallationGateways(hostname, tempestpassword)
+		context = &OpsManager{
+			SettingsUploader: settingsGateway,
+			AssetsUploader:   assetsGateway,
+			DeploymentDir:    path.Join(target, OPSMGR_BACKUP_DIR, OPSMGR_DEPLOYMENTS_DIR),
+			Hostname:         hostname,
+			Username:         username,
+			Password:         password,
+			BackupContext: BackupContext{
+				TargetDir: target,
+			},
+			RestRunner:          RestAdapter(invoke),
+			Executer:            remoteExecuter,
+			OpsmanagerBackupDir: OPSMGR_BACKUP_DIR,
+		}
+	}
+	return
+}
+
 // Backup performs a backup of a Pivotal Ops Manager instance
 func (context *OpsManager) Backup() (err error) {
 	if err = context.copyDeployments(); err == nil {
@@ -54,6 +88,28 @@ func (context *OpsManager) Backup() (err error) {
 
 // Restore performs a restore of a Pivotal Ops Manager instance
 func (context *OpsManager) Restore() (err error) {
+	err = context.importInstallation()
+	return
+}
+
+func (context *OpsManager) importInstallation() (err error) {
+	err = context.importInstallationSettings()
+	return
+}
+
+func (context *OpsManager) importInstallationSettings() (err error) {
+	var (
+		fileRef *os.File
+		res     *http.Response
+	)
+	filePath := path.Join(context.TargetDir, context.OpsmanagerBackupDir, OPSMGR_INSTALLATION_SETTINGS_FILENAME)
+
+	if fileRef, err = os.Open(filePath); err == nil {
+
+		if res, err = context.SettingsUploader.Upload(OPSMGR_INSTALLATION_SETTINGS_POSTFIELD_NAME, OPSMGR_INSTALLATION_SETTINGS_FILENAME, fileRef, nil); err == nil && res.StatusCode != 200 {
+			err = fmt.Errorf(fmt.Sprintf("Bad Response from Gateway: %v", res))
+		}
+	}
 	return
 }
 
@@ -102,26 +158,13 @@ func (context *OpsManager) extract() (err error) {
 	return
 }
 
-// NewOpsManager initializes an OpsManager instance
-func NewOpsManager(hostname string, username string, password string, tempestpassword string, target string) (context *OpsManager, err error) {
-	var remoteExecuter command.Executer
+func (context *OpsManager) copyDeployments() (err error) {
+	var file *os.File
+	defer file.Close()
 
-	if remoteExecuter, err = createExecuter(hostname, tempestpassword); err == nil {
-		settingsGateway, assetsGateway := createInstallationGateways(hostname, tempestpassword)
-		context = &OpsManager{
-			SettingsUploader: settingsGateway,
-			AssetsUploader:   assetsGateway,
-			DeploymentDir:    path.Join(target, OPSMGR_BACKUP_DIR, OPSMGR_DEPLOYMENTS_DIR),
-			Hostname:         hostname,
-			Username:         username,
-			Password:         password,
-			BackupContext: BackupContext{
-				TargetDir: target,
-			},
-			RestRunner:          RestAdapter(invoke),
-			Executer:            remoteExecuter,
-			OpsmanagerBackupDir: OPSMGR_BACKUP_DIR,
-		}
+	if file, err = osutils.SafeCreate(context.TargetDir, context.OpsmanagerBackupDir, OPSMGR_DEPLOYMENTS_FILENAME); err == nil {
+		command := "cd /var/tempest/workspaces/default && tar cz deployments"
+		err = context.Executer.Execute(file, command)
 	}
 	return
 }
@@ -136,21 +179,10 @@ func createExecuter(hostname, tempestpassword string) (remoteExecuter command.Ex
 	return
 }
 
-func createInstallationGateways(hostname, tempestpassword string) (settingsGateway, assetsGateway *cfhttp.HttpGateway) {
+func createInstallationGateways(hostname, tempestpassword string) (settingsGateway, assetsGateway httpGateway) {
 	settingsURL := fmt.Sprintf(OPSMGR_INSTALLATION_SETTINGS_URL, hostname)
 	assetsURL := fmt.Sprintf(OPSMGR_INSTALLATION_ASSETS_URL, hostname)
 	settingsGateway = cfhttp.NewHttpGateway(settingsURL, OPSMGR_DEFAULT_USER, tempestpassword, "application/octet-stream", nil)
 	assetsGateway = cfhttp.NewHttpGateway(assetsURL, OPSMGR_DEFAULT_USER, tempestpassword, "application/octet-stream", nil)
-	return
-}
-
-func (context *OpsManager) copyDeployments() (err error) {
-	var file *os.File
-	defer file.Close()
-
-	if file, err = osutils.SafeCreate(context.TargetDir, context.OpsmanagerBackupDir, OPSMGR_DEPLOYMENTS_FILENAME); err == nil {
-		command := "cd /var/tempest/workspaces/default && tar cz deployments"
-		err = context.Executer.Execute(file, command)
-	}
 	return
 }

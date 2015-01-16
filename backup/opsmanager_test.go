@@ -15,12 +15,50 @@ import (
 )
 
 var _ = Describe("OpsManager object", func() {
-	Describe("Backup method", func() {
+	var (
+		opsManager *OpsManager
+		tmpDir     string
+		backupDir  string
+	)
+	Describe("Restore method", func() {
 		var (
-			opsManager *OpsManager
-			tmpDir     string
-			backupDir  string
+			gateway httpGateway
 		)
+		Context("calling restore successfully", func() {
+
+			BeforeEach(func() {
+				gateway = &successGateway{}
+				tmpDir, _ = ioutil.TempDir("/tmp", "test")
+				backupDir = path.Join(tmpDir, "backup", "opsmanager")
+				gw := &successGateway{}
+
+				opsManager = &OpsManager{
+					SettingsUploader: gw,
+					AssetsUploader:   gw,
+					Hostname:         "localhost",
+					Username:         "user",
+					Password:         "password",
+					BackupContext: BackupContext{
+						TargetDir: path.Join(tmpDir, "backup"),
+					},
+					RestRunner:          RestAdapter(restFailure),
+					Executer:            &failExecuter{},
+					DeploymentDir:       "fixtures/encryptionkey",
+					OpsmanagerBackupDir: "opsmanager",
+				}
+				f, _ := osutils.SafeCreate(opsManager.TargetDir, opsManager.OpsmanagerBackupDir, OPSMGR_INSTALLATION_SETTINGS_FILENAME)
+				f.Close()
+			})
+
+			It("Should yield nil error", func() {
+				fmt.Println(opsManager)
+				err := opsManager.Restore()
+				Ω(err).Should(BeNil())
+			})
+		})
+	})
+
+	Describe("Backup method", func() {
 
 		Context("called yeilding a error in the chain", func() {
 			BeforeEach(func() {
@@ -142,4 +180,31 @@ func (s *failExecuter) Execute(dest io.Writer, src string) (err error) {
 	dest.Write([]byte(src))
 	err = fmt.Errorf("error failure")
 	return
+}
+
+type successGateway struct{}
+
+func (s *successGateway) Upload(paramName, filename string, fileRef io.Reader, params map[string]string) (res *http.Response, err error) {
+	res = &http.Response{
+		StatusCode: 200,
+	}
+	res.Body = &ClosingBuffer{bytes.NewBufferString(successString)}
+	return
+}
+
+func (s *successGateway) Execute(method string) (val interface{}, err error) {
+	return
+}
+
+type httpUploader interface {
+	Upload(paramName, filename string, fileRef io.Reader, params map[string]string) (res *http.Response, err error)
+}
+
+type httpExecuter interface {
+	Execute(method string) (val interface{}, err error)
+}
+
+type httpGateway interface {
+	httpUploader
+	httpExecuter
 }
