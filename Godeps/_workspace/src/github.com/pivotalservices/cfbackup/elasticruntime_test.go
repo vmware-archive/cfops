@@ -1,4 +1,4 @@
-package backup_test
+package cfbackup_test
 
 import (
 	"bytes"
@@ -9,8 +9,8 @@ import (
 	"os"
 	"path"
 
-	. "github.com/pivotalservices/cfops/backup"
-	"github.com/pivotalservices/cfops/backup/modules/persistence"
+	. "github.com/pivotalservices/cfbackup"
+	"github.com/pivotalservices/cfbackup/modules/persistence"
 	"github.com/pivotalservices/cfops/osutils"
 
 	. "github.com/onsi/ginkgo"

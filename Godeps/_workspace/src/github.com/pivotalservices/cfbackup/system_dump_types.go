@@ -1,9 +1,9 @@
-package backup
+package cfbackup
 
 import (
 	"fmt"
 
-	"github.com/pivotalservices/cfops/backup/modules/persistence"
+	"github.com/pivotalservices/cfbackup/modules/persistence"
 	"github.com/pivotalservices/cfops/command"
 	"github.com/xchapter7x/goutil"
 )

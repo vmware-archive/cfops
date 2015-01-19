@@ -1,4 +1,4 @@
-package backup_test
+package cfbackup_test
 
 import (
 	. "github.com/onsi/ginkgo"

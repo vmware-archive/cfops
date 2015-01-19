@@ -1,11 +1,11 @@
-package backup_test
+package cfbackup_test
 
 import (
 	"io/ioutil"
 	"os"
 	"path"
 
-	. "github.com/pivotalservices/cfops/backup"
+	. "github.com/pivotalservices/cfbackup"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

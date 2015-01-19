@@ -1,4 +1,4 @@
-package backup_test
+package cfbackup_test
 
 import (
 	"bytes"
@@ -9,7 +9,7 @@ import (
 	"path"
 	"strings"
 
-	. "github.com/pivotalservices/cfops/backup"
+	. "github.com/pivotalservices/cfbackup"
 	"github.com/pivotalservices/cfops/command"
 	"github.com/pivotalservices/cfops/osutils"
 

@@ -1,4 +1,4 @@
-package backup_test
+package cfbackup_test
 
 import (
 	"bytes"
@@ -6,7 +6,7 @@ import (
 	"io"
 	"net/http"
 
-	. "github.com/pivotalservices/cfops/backup"
+	. "github.com/pivotalservices/cfbackup"
 	"github.com/pivotalservices/cfops/command"
 
 	. "github.com/onsi/ginkgo"
