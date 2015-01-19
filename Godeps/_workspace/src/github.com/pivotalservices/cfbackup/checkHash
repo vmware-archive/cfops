@@ -1,0 +1,26 @@
+#!/bin/bash
+exitcode=0
+PROD_TARGET="Production"
+MASTER_BRANCH="master"
+
+if [ ${WERCKER_GIT_BRANCH} -ne ${MASTER_BRANCH} ] && [ ${WERCKER_DEPLOYTARGET_NAME} == ${PROD_TARGET} ]; then
+  echo "FAILURE: you can not deploy to production from branch ${WERCKER_GIT_BRANCH}"
+  exitcode=1;
+
+else
+
+  if [ ${WERCKER_DEPLOYTARGET_NAME} == ${PROD_TARGET} ]; then
+    MATCH_COUNT=$(for i in `git tag`; do git show $i | head -10;done | grep commit | sed s/commit\ //g | grep $WERCKER_GIT_COMMIT | wc -l)
+    
+    if [ $MATCH_COUNT -gt 0 ]; then
+      echo 'SUCCESS: we found a matching tag';
+    
+    else
+      echo 'FAILURE: Tag not found';
+      exitcode=1;
+    fi
+  fi
+fi
+
+exit $exitcode
+

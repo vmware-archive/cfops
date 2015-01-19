@@ -1,19 +1,10 @@
 {
-	"ImportPath": "github.com/pivotalservices/cfops",
+	"ImportPath": "github.com/pivotalservices/cfbackup",
 	"GoVersion": "go1.3.3",
 	"Packages": [
 		"./..."
 	],
 	"Deps": [
-		{
-			"ImportPath": "github.com/cloudfoundry-community/gogobosh",
-			"Rev": "0f1d0aabf4902af10344c50df9237bfd59376871"
-		},
-		{
-			"ImportPath": "github.com/codegangsta/cli",
-			"Comment": "1.2.0-28-g61f43e7",
-			"Rev": "61f43e76957561f52674f48b7dc9a07f53c8f398"
-		},
 		{
 			"ImportPath": "github.com/onsi/ginkgo",
 			"Comment": "v1.1.0-30-g5ce32b7",
@@ -25,8 +16,14 @@
 			"Rev": "dc751ce5f266d83c26fae5c0a9093973b29cb61d"
 		},
 		{
-			"ImportPath": "github.com/pivotalservices/cfbackup",
-			"Rev": "fce0323e205beb463e0677387cf2a662a4eed281"
+			"ImportPath": "github.com/pivotalservices/cfops/command",
+			"Comment": "pre-refactor-for-backup-127-g2697d6f",
+			"Rev": "2697d6ff10ff4c680950cc8f82a5995636a787d8"
+		},
+		{
+			"ImportPath": "github.com/pivotalservices/cfops/osutils",
+			"Comment": "pre-refactor-for-backup-127-g2697d6f",
+			"Rev": "2697d6ff10ff4c680950cc8f82a5995636a787d8"
 		},
 		{
 			"ImportPath": "github.com/xchapter7x/goutil",
@@ -40,11 +37,6 @@
 		{
 			"ImportPath": "gopkg.in/yaml.v1",
 			"Rev": "feb4ca79644e8e7e39c06095246ee54b1282c118"
-		},
-		{
-			"ImportPath": "launchpad.net/goyaml",
-			"Comment": "51",
-			"Rev": "gustavo@niemeyer.net-20131114120802-abe042syx64z2m7s"
 		}
 	]
 }

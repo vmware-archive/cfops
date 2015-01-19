@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/codegangsta/cli"
-	"github.com/pivotalservices/cfops/backup"
+	"github.com/pivotalservices/cfbackup"
 )
 
 func main() {
@@ -64,7 +64,7 @@ func NewApp() *cli.App {
 					cli.ShowCommandHelp(c, "backup")
 
 				} else {
-					err = backup.RunBackupPipeline(c.String("hostname"), c.String("username"), c.String("password"), c.String("tempestpassword"), c.String("destination"))
+					err = cfbackup.RunBackupPipeline(c.String("hostname"), c.String("username"), c.String("password"), c.String("tempestpassword"), c.String("destination"))
 				}
 
 				if err != nil {
