@@ -1,6 +1,6 @@
 {
 	"ImportPath": "github.com/pivotalservices/cfbackup",
-	"GoVersion": "go1.3.3",
+	"GoVersion": "go1.4",
 	"Packages": [
 		"./..."
 	],
@@ -16,14 +16,20 @@
 			"Rev": "dc751ce5f266d83c26fae5c0a9093973b29cb61d"
 		},
 		{
-			"ImportPath": "github.com/pivotalservices/cfops/command",
-			"Comment": "pre-refactor-for-backup-127-g2697d6f",
-			"Rev": "2697d6ff10ff4c680950cc8f82a5995636a787d8"
+			"ImportPath": "github.com/pivotalservices/gtils/command",
+			"Rev": "1e0940c8215daa2c8bc927bdd9de275bad43704a"
 		},
 		{
-			"ImportPath": "github.com/pivotalservices/cfops/osutils",
-			"Comment": "pre-refactor-for-backup-127-g2697d6f",
-			"Rev": "2697d6ff10ff4c680950cc8f82a5995636a787d8"
+			"ImportPath": "github.com/pivotalservices/gtils/http",
+			"Rev": "1e0940c8215daa2c8bc927bdd9de275bad43704a"
+		},
+		{
+			"ImportPath": "github.com/pivotalservices/gtils/osutils",
+			"Rev": "1e0940c8215daa2c8bc927bdd9de275bad43704a"
+		},
+		{
+			"ImportPath": "github.com/pivotalservices/gtils/persistence",
+			"Rev": "1e0940c8215daa2c8bc927bdd9de275bad43704a"
 		},
 		{
 			"ImportPath": "github.com/xchapter7x/goutil",

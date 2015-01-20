@@ -5,8 +5,8 @@ import (
 	"io"
 	"os"
 
-	"github.com/pivotalservices/cfbackup/modules/persistence"
-	"github.com/pivotalservices/cfops/osutils"
+	"github.com/pivotalservices/gtils/persistence"
+	"github.com/pivotalservices/gtils/osutils"
 )
 
 const (
