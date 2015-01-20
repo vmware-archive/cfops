@@ -11,7 +11,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	. "github.com/pivotalservices/cfbackup"
-	"github.com/pivotalservices/cfops/osutils"
+	"github.com/pivotalservices/gtils/osutils"
 )
 
 var _ = Describe("OpsManager object", func() {
@@ -52,6 +52,37 @@ var _ = Describe("OpsManager object", func() {
 				Ω(err).Should(BeNil())
 			})
 		})
+
+		Context("calling restore unsuccessfully", func() {
+			BeforeEach(func() {
+				tmpDir, _ = ioutil.TempDir("/tmp", "test")
+				backupDir = path.Join(tmpDir, "backup", "opsmanager")
+				gw := &failGateway{}
+
+				opsManager = &OpsManager{
+					SettingsUploader: gw,
+					AssetsUploader:   gw,
+					Hostname:         "localhost",
+					Username:         "user",
+					Password:         "password",
+					BackupContext: BackupContext{
+						TargetDir: path.Join(tmpDir, "backup"),
+					},
+					RestRunner:          RestAdapter(restFailure),
+					Executer:            &failExecuter{},
+					DeploymentDir:       "fixtures/encryptionkey",
+					OpsmanagerBackupDir: "opsmanager",
+				}
+				f, _ := osutils.SafeCreate(opsManager.TargetDir, opsManager.OpsmanagerBackupDir, OPSMGR_INSTALLATION_SETTINGS_FILENAME)
+				f.Close()
+			})
+
+			It("Should yield a non-nil error", func() {
+				err := opsManager.Restore()
+				Ω(err).ShouldNot(BeNil())
+			})
+		})
+
 	})
 
 	Describe("Backup method", func() {
@@ -189,5 +220,19 @@ func (s *successGateway) Upload(paramName, filename string, fileRef io.Reader, p
 }
 
 func (s *successGateway) Execute(method string) (val interface{}, err error) {
+	return
+}
+
+type failGateway struct{}
+
+func (s *failGateway) Upload(paramName, filename string, fileRef io.Reader, params map[string]string) (res *http.Response, err error) {
+	res = &http.Response{
+		StatusCode: 500,
+	}
+	res.Body = &ClosingBuffer{bytes.NewBufferString(successString)}
+	return
+}
+
+func (s *failGateway) Execute(method string) (val interface{}, err error) {
 	return
 }

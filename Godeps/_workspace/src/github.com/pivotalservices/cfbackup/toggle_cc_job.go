@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/pivotalservices/cfops/command"
+	"github.com/pivotalservices/gtils/command"
 )
 
 type CloudControllerJobs []string
