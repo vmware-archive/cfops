@@ -10,8 +10,8 @@ import (
 	"strings"
 
 	. "github.com/pivotalservices/cfbackup"
-	"github.com/pivotalservices/cfops/command"
-	"github.com/pivotalservices/cfops/osutils"
+	"github.com/pivotalservices/gtils/command"
+	"github.com/pivotalservices/gtils/osutils"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
