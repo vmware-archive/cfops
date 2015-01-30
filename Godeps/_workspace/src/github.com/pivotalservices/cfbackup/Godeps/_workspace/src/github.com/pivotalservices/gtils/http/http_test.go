@@ -84,6 +84,22 @@ var _ = Describe("Http", func() {
 			Ω(requestCatcher.Header["Authorization"][0]).Should(Equal("Basic dXNlcm5hbWU6cGFzc3dvcmQ="))
 			Ω(val).Should(Equal("Success"))
 		})
+		It("Should return nil error on success", func() {
+			_, err := gateway.ExecuteFunc("Get", handler)
+			Ω(err).Should(BeNil())
+		})
+		It("Should not return error if handler is nil", func() {
+			_, err := gateway.ExecuteFunc("Get", nil)
+			Ω(err).Should(BeNil())
+		})
+		It("Should execute correct request", func() {
+			val, _ := gateway.ExecuteFunc("Get", handler)
+			Ω(requestCatcher.URL.Host).Should(Equal("endpoint"))
+			Ω(requestCatcher.Method).Should(Equal("Get"))
+			Ω(requestCatcher.Header["Content-Type"][0]).Should(Equal("contentType"))
+			Ω(requestCatcher.Header["Authorization"][0]).Should(Equal("Basic dXNlcm5hbWU6cGFzc3dvcmQ="))
+			Ω(val).Should(Equal("Success"))
+		})
 	})
 
 	Context("The round trip request failed", func() {

@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	. "github.com/pivotalservices/cfbackup"
-	"github.com/pivotalservices/gtils/command"
+	. "github.com/pivotalservices/gtils/http"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -16,23 +16,47 @@ import (
 var (
 	successControlOuput string = "successful execute"
 	failureControlOuput string = "failed to execute"
+	redirectUrl         string = "mysite.com"
 	successWaitCalled   int
 	failureWaitCalled   int
 )
 
-type MockSuccessCall struct{}
+type MockSuccessGateway struct{ Handler HandleRespFunc }
 
-func (s MockSuccessCall) Execute(destination io.Writer, command string) (err error) {
-	destination.Write([]byte(successControlOuput))
-	return
+func makeResponse(location string, statusCode int) *http.Response {
+	header := make(map[string][]string)
+	locations := []string{redirectUrl}
+	header["Location"] = locations
+	response := &http.Response{StatusCode: statusCode,
+		Header: header,
+	}
+	return response
 }
 
-type MockFailCall struct{}
+func (gateway *MockSuccessGateway) Execute(method string) (val interface{}, err error) {
+	return gateway.Handler(makeResponse(redirectUrl, 302))
+}
 
-func (s MockFailCall) Execute(destination io.Writer, command string) (err error) {
-	destination.Write([]byte(failureControlOuput))
-	err = fmt.Errorf("random mock error")
-	return
+func (gateway *MockSuccessGateway) Upload(paramName, filename string, fileRef io.Reader, params map[string]string) (res *http.Response, err error) {
+	return nil, nil
+}
+
+func (gateway *MockSuccessGateway) ExecuteFunc(method string, handler HandleRespFunc) (interface{}, error) {
+	return nil, nil
+}
+
+type MockFailerGateway struct{ Handler HandleRespFunc }
+
+func (gateway *MockFailerGateway) Execute(method string) (val interface{}, err error) {
+	return gateway.Handler(makeResponse(redirectUrl, 200))
+}
+
+func (gateway *MockFailerGateway) Upload(paramName, filename string, fileRef io.Reader, params map[string]string) (res *http.Response, err error) {
+	return nil, nil
+}
+
+func (gateway *MockFailerGateway) ExecuteFunc(method string, handler HandleRespFunc) (interface{}, error) {
+	return nil, nil
 }
 
 type ClosingBuffer struct {
@@ -55,8 +79,31 @@ type FailureMockEventTasker struct {
 }
 
 func (s FailureMockEventTasker) WaitForEventStateDone(contents bytes.Buffer, eventObject *EventObject) (err error) {
+	err = fmt.Errorf("this is an error")
 	failureWaitCalled++
 	return
+}
+
+type DefaultMockHttpGateway struct {
+	handler HandleRespFunc
+}
+
+func (m DefaultMockHttpGateway) Execute(method string) (interface{}, error) {
+	resp := &http.Response{
+		StatusCode: 200,
+	}
+	return m.handler(resp)
+}
+
+func (m DefaultMockHttpGateway) ExecuteFunc(method string, handler HandleRespFunc) (interface{}, error) {
+	resp := &http.Response{
+		StatusCode: 200,
+	}
+	return handler(resp)
+}
+
+func (m DefaultMockHttpGateway) Upload(paramName, filename string, fileRef io.Reader, params map[string]string) (*http.Response, error) {
+	return nil, nil
 }
 
 var _ = Describe("toggle cc job", func() {
@@ -71,29 +118,22 @@ var _ = Describe("toggle cc job", func() {
 		failureString        string = `{"state":"notdone"}`
 		failTryExitCount     int    = 5
 		endlessLoopFlag      bool   = false
+		mockHttpGateway             = DefaultMockHttpGateway{handler: func(resp *http.Response) (interface{}, error) {
+			return "success", nil
+		}}
 	)
-	restSuccess := func(method, connectionURL, username, password string, isYaml bool) (resp *http.Response, err error) {
-		resp = &http.Response{
-			StatusCode: 200,
-		}
+	restSuccess := func(resp *http.Response) (interface{}, error) {
 		resp.Body = &ClosingBuffer{bytes.NewBufferString(successString)}
 		restSuccessCalled++
-		return
+		return resp.Body, nil
 	}
-	restFailure := func(method, connectionURL, username, password string, isYaml bool) (resp *http.Response, err error) {
-		resp = &http.Response{
-			StatusCode: 500,
-		}
+	restFailure := func(resp *http.Response) (interface{}, error) {
 		resp.Body = &ClosingBuffer{bytes.NewBufferString(failureString)}
 		restFailureCalled++
-		err = fmt.Errorf("")
-		return
+		err := fmt.Errorf("")
+		return resp.Body, err
 	}
-
-	restNotDone := func(method, connectionURL, username, password string, isYaml bool) (resp *http.Response, err error) {
-		resp = &http.Response{
-			StatusCode: 200,
-		}
+	restNotDone := func(resp *http.Response) (interface{}, error) {
 		resp.Body = &ClosingBuffer{bytes.NewBufferString(failureString)}
 		restFailureCalled++
 		_ = failTryExitCount
@@ -101,26 +141,26 @@ var _ = Describe("toggle cc job", func() {
 			resp.Body = &ClosingBuffer{bytes.NewBufferString(successString)}
 			endlessLoopFlag = true
 		}
-		return
+		return resp.Body, nil
 	}
 
-	successJobToggleMock := func(serverUrl, username, password string, exec command.Executer) (res string, err error) {
+	successJobToggleMock := func(serverUrl, username, password string) (res string, err error) {
 		successToggleCalled++
 		return
 	}
 
-	failureJobToggleMock := func(serverUrl, username, password string, exec command.Executer) (res string, err error) {
+	failureJobToggleMock := func(serverUrl, username, password string) (res string, err error) {
 		failureToggleCalled++
 		return
 	}
 
-	successTaskCreater := func(method, url, username, password string, isYaml bool) (task EventTasker) {
+	successTaskCreater := func(method string, gateway HttpGateway, handleRespFunc HandleRespFunc) (task EventTasker) {
 		task = EventTasker(SuccessMockEventTasker{})
 		successCreaterCalled++
 		return
 	}
 
-	failureTaskCreater := func(method, url, username, password string, isYaml bool) (task EventTasker) {
+	failureTaskCreater := func(method string, gateway HttpGateway, handleRespFunc HandleRespFunc) (task EventTasker) {
 		task = &FailureMockEventTasker{}
 		failureCreaterCalled++
 		return
@@ -131,12 +171,9 @@ var _ = Describe("toggle cc job", func() {
 			var task EventTasker
 			BeforeEach(func() {
 				task = &Task{
-					Method:     "GET",
-					Url:        "someurl.com",
-					Username:   "user",
-					Password:   "pass",
-					IsYaml:     false,
-					RestRunner: RestAdapter(restSuccess),
+					Method:              "GET",
+					HttpGateway:         mockHttpGateway,
+					HttpResponseHandler: restSuccess,
 				}
 			})
 
@@ -161,12 +198,9 @@ var _ = Describe("toggle cc job", func() {
 				endlessLoopFlag = false
 
 				task = &Task{
-					Method:     "GET",
-					Url:        "someurl.com",
-					Username:   "user",
-					Password:   "pass",
-					IsYaml:     false,
-					RestRunner: RestAdapter(restNotDone),
+					Method:              "GET",
+					HttpGateway:         &DefaultMockHttpGateway{},
+					HttpResponseHandler: restNotDone,
 				}
 			})
 
@@ -185,12 +219,9 @@ var _ = Describe("toggle cc job", func() {
 				endlessLoopFlag = false
 
 				task = &Task{
-					Method:     "GET",
-					Url:        "someurl.com",
-					Username:   "user",
-					Password:   "pass",
-					IsYaml:     false,
-					RestRunner: RestAdapter(restFailure),
+					Method:              "GET",
+					HttpGateway:         mockHttpGateway,
+					HttpResponseHandler: restFailure,
 				}
 			})
 
@@ -214,7 +245,8 @@ var _ = Describe("toggle cc job", func() {
 		Context("successful call", func() {
 			var cc *CloudController
 			BeforeEach(func() {
-				cc = NewCloudController("", "", "", "", "")
+				resHandler := func(resp *http.Response) (val interface{}, err error) { return }
+				cc = NewCloudController("", "", "", "", "", resHandler)
 				cc.JobToggler = JobTogglerAdapter(successJobToggleMock)
 				cc.NewEventTaskCreater = EvenTaskCreaterAdapter(successTaskCreater)
 				successWaitCalled, failureWaitCalled, successToggleCalled, failureToggleCalled, successCreaterCalled, failureCreaterCalled, restSuccessCalled, restFailureCalled = 0, 0, 0, 0, 0, 0, 0, 0
@@ -233,6 +265,17 @@ var _ = Describe("toggle cc job", func() {
 			})
 
 			Context("ToggleJob method", func() {
+				Context("when a call to task.WaitForEventStateDone internally returns error", func() {
+					BeforeEach(func() {
+						cc.NewEventTaskCreater = EvenTaskCreaterAdapter(failureTaskCreater)
+					})
+
+					It("should return an error from ToggleJob", func() {
+						err := cc.ToggleJob("jobA", "someurl.com", 1)
+						Ω(err).ShouldNot(BeNil())
+					})
+				})
+
 				It("Should call through the entire chain if there is no error", func() {
 					cc.ToggleJob("jobA", "someurl.com", 1)
 					Ω(successToggleCalled).Should(BeNumerically(">", 0))
@@ -246,7 +289,7 @@ var _ = Describe("toggle cc job", func() {
 		Context("failed call", func() {
 			var cc *CloudController
 			BeforeEach(func() {
-				cc = NewCloudController("", "", "", "", "")
+				cc = NewCloudController("", "", "", "", "", func(resp *http.Response) (val interface{}, err error) { return })
 				cc.JobToggler = JobTogglerAdapter(failureJobToggleMock)
 				cc.NewEventTaskCreater = EvenTaskCreaterAdapter(failureTaskCreater)
 			})
@@ -271,7 +314,8 @@ var _ = Describe("toggle cc job", func() {
 		Context("partial failed call", func() {
 			var cc *CloudController
 			BeforeEach(func() {
-				cc = NewCloudController("", "", "", "", "")
+				resHandler := func(resp *http.Response) (val interface{}, err error) { return }
+				cc = NewCloudController("", "", "", "", "", resHandler)
 				cc.JobToggler = JobTogglerAdapter(successJobToggleMock)
 				cc.NewEventTaskCreater = EvenTaskCreaterAdapter(failureTaskCreater)
 			})
@@ -294,36 +338,6 @@ var _ = Describe("toggle cc job", func() {
 		})
 	})
 
-	Describe("RestAdapter", func() {
-		Context("Run method", func() {
-			Context("successful call", func() {
-				It("Should return an io.Reader a statusCode 200, a nil error and the correct body", func() {
-					r := RestAdapter(restSuccess)
-					statusCode, body, err := r.Run("", "", "", "", false)
-					buf := new(bytes.Buffer)
-					buf.ReadFrom(body)
-					s := buf.String()
-					Ω(err).Should(BeNil())
-					Ω(s).Should(Equal(successString))
-					Ω(statusCode).Should(Equal(200))
-				})
-			})
-
-			Context("successful call", func() {
-				It("Should return an io.Reader a statusCode != 200, a non nil error and the correct body", func() {
-					r := RestAdapter(restFailure)
-					statusCode, body, err := r.Run("", "", "", "", false)
-					buf := new(bytes.Buffer)
-					buf.ReadFrom(body)
-					s := buf.String()
-					Ω(err).ShouldNot(BeNil())
-					Ω(s).Should(Equal(failureString))
-					Ω(statusCode).ShouldNot(Equal(200))
-				})
-			})
-		})
-	})
-
 	Describe("ToggleCCJobRunner", func() {
 		Context("successful call", func() {
 			var (
@@ -331,10 +345,20 @@ var _ = Describe("toggle cc job", func() {
 				password  string = "passwrdtest"
 				serverUrl string = "someurl.com"
 			)
-			It("Should return nil error and pass through the cmd output", func() {
-				msg, err := ToggleCCJobRunner(username, password, serverUrl, &MockSuccessCall{})
+			It("Should return nil error", func() {
+				NewToggleGateway = func(serverUrl, username, password string) HttpGateway {
+					return &MockSuccessGateway{Handler: ToggleCCHandler}
+				}
+				_, err := ToggleCCJobRunner(username, password, serverUrl)
 				Ω(err).Should(BeNil())
-				Ω(msg).Should(Equal(successControlOuput))
+			})
+
+			It("Should return redirectUrl", func() {
+				NewToggleGateway = func(serverUrl, username, password string) HttpGateway {
+					return &MockSuccessGateway{Handler: ToggleCCHandler}
+				}
+				msg, _ := ToggleCCJobRunner(username, password, serverUrl)
+				Ω(msg).Should(Equal(redirectUrl))
 			})
 		})
 
@@ -344,10 +368,12 @@ var _ = Describe("toggle cc job", func() {
 				password  string = "passwrdtest"
 				serverUrl string = "someurl.com"
 			)
-			It("Should return non nil error and pass through the cmd output", func() {
-				msg, err := ToggleCCJobRunner(username, password, serverUrl, &MockFailCall{})
+			It("Should return error on non 302 http code", func() {
+				NewToggleGateway = func(serverUrl, username, password string) HttpGateway {
+					return &MockFailerGateway{Handler: ToggleCCHandler}
+				}
+				_, err := ToggleCCJobRunner(username, password, serverUrl)
 				Ω(err).ShouldNot(BeNil())
-				Ω(msg).Should(Equal(failureControlOuput))
 			})
 		})
 	})

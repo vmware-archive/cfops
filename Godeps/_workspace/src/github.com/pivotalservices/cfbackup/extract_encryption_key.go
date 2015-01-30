@@ -35,7 +35,7 @@ func (s yamlkey) EncryptionKey() (key string, err error) {
 
 func ExtractEncryptionKey(dest io.Writer, deploymentDir string) (err error) {
 	var flist []os.FileInfo
-	fmt.Printf("Reading deployment dir: %s", deploymentDir)
+
 	if flist, err = ioutil.ReadDir(deploymentDir); err == nil {
 		yamlfilename := getYamlFilename(flist)
 		yamlfilepath := path.Join(deploymentDir, yamlfilename)
@@ -47,13 +47,11 @@ func ExtractEncryptionKey(dest io.Writer, deploymentDir string) (err error) {
 func namefilter(i, v interface{}) (ok bool) {
 	file := v.(os.FileInfo)
 	filename := file.Name()
-	fmt.Printf("File name is %s", filename)
 	ok = (strings.HasPrefix(filename, "cf-") && strings.HasSuffix(filename, ".yml"))
 	return
 }
 
 func getYamlFilename(filelist []os.FileInfo) (filename string) {
-	fmt.Println("Getting yaml file name")
 	var (
 		file os.FileInfo
 		idx  int
