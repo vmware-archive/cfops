@@ -45,10 +45,7 @@ func (roundTripper *MockRoundTripper) RoundTrip(request *http.Request) (resp *ht
 	return
 }
 
-type MockHandler struct {
-}
-
-func (handler *MockHandler) Handle(resp *http.Response) (val interface{},
+func MockHandlerFunc(resp *http.Response) (val interface{},
 	err error) {
 	if !handlerSuccess {
 		return nil, errors.New("Mock error")
@@ -58,12 +55,12 @@ func (handler *MockHandler) Handle(resp *http.Response) (val interface{},
 
 var _ = Describe("Http", func() {
 	var (
-		handler *MockHandler
-		gateway *HttpGateway
+		handler func (resp *http.Response) (val interface{}, err error)
+		gateway HttpGateway
 	)
 	BeforeEach(func() {
 		requestCatcher = &http.Request{}
-		handler = &MockHandler{}
+		handler = MockHandlerFunc
 		gateway = NewHttpGateway("http://endpoint/test", "username", "password", "contentType", handler)
 		NewRoundTripper = func() http.RoundTripper {
 			return &MockRoundTripper{}
@@ -81,6 +78,22 @@ var _ = Describe("Http", func() {
 		})
 		It("Should execute correct request", func() {
 			val, _ := gateway.Execute("Get")
+			Ω(requestCatcher.URL.Host).Should(Equal("endpoint"))
+			Ω(requestCatcher.Method).Should(Equal("Get"))
+			Ω(requestCatcher.Header["Content-Type"][0]).Should(Equal("contentType"))
+			Ω(requestCatcher.Header["Authorization"][0]).Should(Equal("Basic dXNlcm5hbWU6cGFzc3dvcmQ="))
+			Ω(val).Should(Equal("Success"))
+		})
+		It("Should return nil error on success", func() {
+			_, err := gateway.ExecuteFunc("Get", handler)
+			Ω(err).Should(BeNil())
+		})
+		It("Should not return error if handler is nil", func() {
+			_, err := gateway.ExecuteFunc("Get", nil)
+			Ω(err).Should(BeNil())
+		})
+		It("Should execute correct request", func() {
+			val, _ := gateway.ExecuteFunc("Get", handler)
 			Ω(requestCatcher.URL.Host).Should(Equal("endpoint"))
 			Ω(requestCatcher.Method).Should(Equal("Get"))
 			Ω(requestCatcher.Header["Content-Type"][0]).Should(Equal("contentType"))

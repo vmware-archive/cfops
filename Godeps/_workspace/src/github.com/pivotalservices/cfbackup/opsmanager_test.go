@@ -22,7 +22,7 @@ var _ = Describe("OpsManager object", func() {
 	)
 	Describe("Restore method", func() {
 
-		Context("calling restore successfully", func() {
+		Context("calling restore with failed removal of deployment files", func() {
 
 			BeforeEach(func() {
 				tmpDir, _ = ioutil.TempDir("/tmp", "test")
@@ -44,6 +44,41 @@ var _ = Describe("OpsManager object", func() {
 					OpsmanagerBackupDir: "opsmanager",
 				}
 				f, _ := osutils.SafeCreate(opsManager.TargetDir, opsManager.OpsmanagerBackupDir, OPSMGR_INSTALLATION_SETTINGS_FILENAME)
+				f.Close()
+				f, _ = osutils.SafeCreate(opsManager.TargetDir, opsManager.OpsmanagerBackupDir, OPSMGR_INSTALLATION_ASSETS_FILENAME)
+				f.Close()
+			})
+
+			It("Should yield error", func() {
+				err := opsManager.Restore()
+				Ω(err).ShouldNot(BeNil())
+			})
+		})
+
+		Context("calling restore successfully", func() {
+
+			BeforeEach(func() {
+				tmpDir, _ = ioutil.TempDir("/tmp", "test")
+				backupDir = path.Join(tmpDir, "backup", "opsmanager")
+				gw := &successGateway{}
+
+				opsManager = &OpsManager{
+					SettingsUploader: gw,
+					AssetsUploader:   gw,
+					Hostname:         "localhost",
+					Username:         "user",
+					Password:         "password",
+					BackupContext: BackupContext{
+						TargetDir: path.Join(tmpDir, "backup"),
+					},
+					RestRunner:          RestAdapter(restFailure),
+					Executer:            &successExecuter{},
+					DeploymentDir:       "fixtures/encryptionkey",
+					OpsmanagerBackupDir: "opsmanager",
+				}
+				f, _ := osutils.SafeCreate(opsManager.TargetDir, opsManager.OpsmanagerBackupDir, OPSMGR_INSTALLATION_SETTINGS_FILENAME)
+				f.Close()
+				f, _ = osutils.SafeCreate(opsManager.TargetDir, opsManager.OpsmanagerBackupDir, OPSMGR_INSTALLATION_ASSETS_FILENAME)
 				f.Close()
 			})
 

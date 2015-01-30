@@ -1,6 +1,9 @@
 package cfbackup
 
-import "path"
+import (
+	"fmt"
+	"path"
+)
 
 // Tile is a deployable component that can be backed up
 type Tile interface {
@@ -25,6 +28,7 @@ func RunBackupPipeline(hostname, username, password, tempestpassword, destinatio
 			opsmanager,
 			elasticRuntime,
 		}
+		fmt.Print("Run backups...")
 		err = runBackups(tiles)
 	}
 	return

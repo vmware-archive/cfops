@@ -2,9 +2,10 @@ package cfbackup
 
 import (
 	"fmt"
+	"io"
 
-	"github.com/pivotalservices/gtils/persistence"
 	"github.com/pivotalservices/gtils/command"
+	"github.com/pivotalservices/gtils/persistence"
 	"github.com/xchapter7x/goutil"
 )
 
@@ -20,6 +21,11 @@ const (
 )
 
 type (
+	PersistanceBackup interface {
+		Dump(io.Writer) error
+		Import(io.Reader) error
+	}
+
 	stringGetterSetter interface {
 		Get(string) string
 		Set(string, string)
@@ -28,7 +34,7 @@ type (
 	SystemDump interface {
 		stringGetterSetter
 		Error() error
-		GetDumper() (dumper persistence.Dumper, err error)
+		GetPersistanceBackup() (dumper PersistanceBackup, err error)
 	}
 
 	SystemInfo struct {
@@ -64,11 +70,11 @@ func (s *SystemInfo) Set(name string, val string) {
 	s.GetSet.Set(s, name, val)
 }
 
-func (s *NfsInfo) GetDumper() (dumper persistence.Dumper, err error) {
+func (s *NfsInfo) GetPersistanceBackup() (dumper PersistanceBackup, err error) {
 	return NewNFSBackup(s.Pass, s.Ip)
 }
 
-func (s *MysqlInfo) GetDumper() (dumper persistence.Dumper, err error) {
+func (s *MysqlInfo) GetPersistanceBackup() (dumper PersistanceBackup, err error) {
 	sshConfig := command.SshConfig{
 		Username: s.VcapUser,
 		Password: s.VcapPass,
@@ -78,7 +84,7 @@ func (s *MysqlInfo) GetDumper() (dumper persistence.Dumper, err error) {
 	return persistence.NewRemoteMysqlDump(s.User, s.Pass, sshConfig)
 }
 
-func (s *PgInfo) GetDumper() (dumper persistence.Dumper, err error) {
+func (s *PgInfo) GetPersistanceBackup() (dumper PersistanceBackup, err error) {
 	sshConfig := command.SshConfig{
 		Username: s.VcapUser,
 		Password: s.VcapPass,
@@ -88,8 +94,8 @@ func (s *PgInfo) GetDumper() (dumper persistence.Dumper, err error) {
 	return persistence.NewPgRemoteDump(2544, s.Component, s.User, s.Pass, sshConfig)
 }
 
-func (s *SystemInfo) GetDumper() (dumper persistence.Dumper, err error) {
-	panic("you have to extend SystemInfo and implement GetDumper method on the child")
+func (s *SystemInfo) GetPersistanceBackup() (dumper PersistanceBackup, err error) {
+	panic("you have to extend SystemInfo and implement GetPersistanceBackup method on the child")
 	return
 }
 

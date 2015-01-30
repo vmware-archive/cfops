@@ -10,7 +10,6 @@ import (
 	"path"
 
 	. "github.com/pivotalservices/cfbackup"
-	"github.com/pivotalservices/gtils/persistence"
 	"github.com/pivotalservices/gtils/osutils"
 
 	. "github.com/onsi/ginkgo"
@@ -21,7 +20,7 @@ type PgInfoMock struct {
 	SystemInfo
 }
 
-func (s *PgInfoMock) GetDumper() (dumper persistence.Dumper, err error) {
+func (s *PgInfoMock) GetPersistanceBackup() (dumper PersistanceBackup, err error) {
 	dumper = &mockDumper{}
 	return
 }
@@ -30,6 +29,10 @@ type mockDumper struct{}
 
 func (s mockDumper) Dump(i io.Writer) (err error) {
 	i.Write([]byte("sometext"))
+	return
+}
+
+func (s mockDumper) Import(i io.Reader) (err error) {
 	return
 }
 
