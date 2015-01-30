@@ -6,6 +6,10 @@
 	],
 	"Deps": [
 		{
+			"ImportPath": "github.com/cloudfoundry-incubator/cf-lager",
+			"Rev": "94308c799cf61ac0818667ddcc25046c8c5659d1"
+		},
+		{
 			"ImportPath": "github.com/codegangsta/cli",
 			"Comment": "1.2.0-28-g61f43e7",
 			"Rev": "61f43e76957561f52674f48b7dc9a07f53c8f398"
@@ -23,6 +27,10 @@
 			"ImportPath": "github.com/onsi/gomega",
 			"Comment": "v1.0-26-gdc751ce",
 			"Rev": "dc751ce5f266d83c26fae5c0a9093973b29cb61d"
+		},
+		{
+			"ImportPath": "github.com/pivotal-golang/lager",
+			"Rev": "ce9effb2d1062e2d81333f942df0549706901b1b"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/cfbackup",
