@@ -69,6 +69,8 @@ func NewApp() *cli.App {
 
 				if err != nil {
 					fmt.Println(err)
+				} else {
+					fmt.Println("Backup complete successfully.")
 				}
 			},
 		},
