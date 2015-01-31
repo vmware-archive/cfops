@@ -1,7 +1,6 @@
 package cfbackup
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/pivotal-golang/lager"
@@ -125,7 +124,7 @@ func (context *ElasticRuntime) Backup() (err error) {
 			defer ccStart.ToggleJobs(CloudControllerJobs(ccJobs))
 			ccStop.ToggleJobs(CloudControllerJobs(ccJobs))
 		}
-		if err != nil {
+		if err == nil {
 			context.Logger.Debug("Running database backups")
 			err = context.RunDbBackups(context.PersistentSystems)
 		}
@@ -146,6 +145,7 @@ func (context *ElasticRuntime) getAllCloudControllerVMs() (ccvms []string, err e
 	context.Logger.Debug("Entering getAllCloudControllerVMs() function")
 	directorInfo := context.SystemsInfo[ER_DIRECTOR]
 	connectionURL := fmt.Sprintf(ER_VMS_URL, directorInfo.Get(SD_IP), context.InstallationName)
+	context.Logger.Debug("getAllCloudControllerVMs() function", lager.Data{"connectionURL": connectionURL, "directorInfo": directorInfo})
 	gateway := context.HttpGateway
 	if gateway == nil {
 		gateway = cfhttp.NewHttpGateway(connectionURL, directorInfo.Get(SD_USER), directorInfo.Get(SD_PASS), "application/json", nil)
@@ -156,8 +156,8 @@ func (context *ElasticRuntime) getAllCloudControllerVMs() (ccvms []string, err e
 		var jsonObj []VMObject
 
 		context.Logger.Debug("Unmarshalling CC vms")
-		contents := body.(*bytes.Buffer)
-		if err = json.Unmarshal(contents.Bytes(), &jsonObj); err == nil {
+		contents := body.([]byte)
+		if err = json.Unmarshal(contents, &jsonObj); err == nil {
 			ccvms, err = GetCCVMs(jsonObj)
 		}
 	}
@@ -174,9 +174,10 @@ func (context *ElasticRuntime) RunDbBackups(dbInfoList []SystemDump) (err error)
 		}
 
 		if err != nil {
-			break
+			return fmt.Errorf("db backup failed: %v", err)
 		}
 	}
+	context.Logger.Debug("RunDbBackups() function complete")
 	return
 }
 
