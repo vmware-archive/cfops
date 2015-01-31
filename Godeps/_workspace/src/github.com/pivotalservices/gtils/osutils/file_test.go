@@ -106,7 +106,7 @@ var _ = Describe("File", func() {
 		})
 
 		Context("local file", func() {
-			Context("With a path that does not exist and has missing directories", func() {
+			Context("a path that does not exist with missing parent directories", func() {
 				BeforeEach(func() {
 					file = path.Join(dir, "a", "nonexistent", "directory", "with", "af.ile")
 				})
@@ -122,7 +122,7 @@ var _ = Describe("File", func() {
 				})
 			})
 
-			Context("With a path that does not exist and has missing directories", func() {
+			Context("With a path that does not exist", func() {
 				BeforeEach(func() {
 					file = path.Join(dir, "af.ile")
 				})

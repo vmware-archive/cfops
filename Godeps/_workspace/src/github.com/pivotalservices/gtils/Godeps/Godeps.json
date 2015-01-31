@@ -27,6 +27,10 @@
 			"ImportPath": "golang.org/x/crypto/ssh",
 			"Comment": "null-234",
 			"Rev": "60a80aaa50ff0e8506f61b1fa35078a24941be50"
+		},
+		{
+			"ImportPath": "gopkg.in/yaml.v2",
+			"Rev": "5d6f7e02b7cdad63b06ab3877915532cd30073b4"
 		}
 	]
 }
