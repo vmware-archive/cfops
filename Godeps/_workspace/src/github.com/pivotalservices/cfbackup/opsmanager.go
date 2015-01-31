@@ -9,7 +9,7 @@ import (
 	"path"
 
 	"github.com/pivotalservices/gtils/command"
-	cfhttp "github.com/pivotalservices/gtils/http"
+	. "github.com/pivotalservices/gtils/http"
 	"github.com/pivotalservices/gtils/osutils"
 )
 
@@ -33,7 +33,7 @@ type httpUploader interface {
 
 type httpRequestor interface {
 	Execute(method string) (interface{}, error)
-	ExecuteFunc(method string, handler cfhttp.HandleRespFunc) (interface{}, error)
+	ExecuteFunc(method string, handler HandleRespFunc) (interface{}, error)
 }
 
 type httpGateway interface {
@@ -55,7 +55,7 @@ type OpsManager struct {
 	AssetsUploader      httpUploader
 	SettingsRequestor   httpRequestor
 	AssetsRequestor     httpRequestor
-	HttpResponseHandler cfhttp.HandleRespFunc
+	HttpResponseHandler HandleRespFunc
 	DeploymentDir       string
 	OpsmanagerBackupDir string
 }
@@ -225,7 +225,7 @@ func createInstallationGateways(hostname, tempestpassword string) (settingsGatew
 	defaultContentType := "application/octet-stream"
 	settingsURL := fmt.Sprintf(OPSMGR_INSTALLATION_SETTINGS_URL, hostname)
 	assetsURL := fmt.Sprintf(OPSMGR_INSTALLATION_ASSETS_URL, hostname)
-	settingsGateway = cfhttp.NewHttpGateway(settingsURL, "admin", "admin", defaultContentType, nil)
-	assetsGateway = cfhttp.NewHttpGateway(assetsURL, OPSMGR_DEFAULT_USER, tempestpassword, defaultContentType, nil)
+	settingsGateway = NewHttpGateway(settingsURL, "admin", "admin", defaultContentType, nil)
+	assetsGateway = NewHttpGateway(assetsURL, OPSMGR_DEFAULT_USER, tempestpassword, defaultContentType, nil)
 	return
 }
