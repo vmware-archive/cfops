@@ -20,12 +20,20 @@ type property struct {
 	Cc cc
 }
 
-type yamlkey struct {
+type job struct {
+	Name       string
 	Properties property
 }
 
+type yamlkey struct {
+	Jobs []job
+}
+
 func (s yamlkey) EncryptionKey() (key string, err error) {
-	key = s.Properties.Cc.Db_encryption_key
+	key = s.Jobs[6].Properties.Cc.Db_encryption_key
+	fmt.Println()
+	fmt.Printf("key : " + key)
+	fmt.Println()
 
 	if key == "" {
 		err = fmt.Errorf("empty key error")
@@ -39,6 +47,10 @@ func ExtractEncryptionKey(dest io.Writer, deploymentDir string) (err error) {
 	if flist, err = ioutil.ReadDir(deploymentDir); err == nil {
 		yamlfilename := getYamlFilename(flist)
 		yamlfilepath := path.Join(deploymentDir, yamlfilename)
+		fmt.Println()
+		fmt.Printf("yamlfilepath : " + yamlfilepath)
+		fmt.Println()
+		fmt.Printf("yamlfilename : " + yamlfilename)
 		err = writeKey(dest, yamlfilepath)
 	}
 	return
@@ -80,6 +92,9 @@ func getKeyFromFile(yamlfilepath string) (encryptionKey string, err error) {
 	if filebytes, err = ioutil.ReadFile(yamlfilepath); err == nil {
 		err = yaml.Unmarshal(filebytes, &keyparse)
 		encryptionKey, err = keyparse.EncryptionKey()
+		fmt.Println()
+		fmt.Printf("encryptionKey : " + encryptionKey)
+		fmt.Println()
 	}
 	return
 }

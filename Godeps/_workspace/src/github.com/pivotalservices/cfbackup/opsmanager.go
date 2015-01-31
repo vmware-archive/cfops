@@ -155,6 +155,9 @@ func (context *OpsManager) exportUrlToFile(urlFormat string, filename string) (e
 	var settingsFileRef *os.File
 	defer settingsFileRef.Close()
 
+	fmt.Println()
+	fmt.Printf("Exporting url '%s' to file '%s'", urlFormat, filename)
+
 	if settingsFileRef, err = osutils.SafeCreate(context.TargetDir, context.OpsmanagerBackupDir, filename); err == nil {
 		err = context.exportUrlToWriter(urlFormat, settingsFileRef, context.SettingsRequestor)
 	}
@@ -176,23 +179,23 @@ func (context *OpsManager) exportUrlToWriter(urlFormat string, dest io.Writer, r
 func (context *OpsManager) extract() (err error) {
 	var keyFileRef *os.File
 	defer keyFileRef.Close()
+	fmt.Println()
 	fmt.Print("Extracting Ops Manager")
+	fmt.Println()
 
-	if keyFileRef, err = osutils.SafeCreate(context.OpsmanagerBackupDir, OPSMGR_ENCRYPTIONKEY_FILENAME); err == nil {
+	if keyFileRef, err = osutils.SafeCreate(context.TargetDir, context.OpsmanagerBackupDir, OPSMGR_ENCRYPTIONKEY_FILENAME); err == nil {
+		fmt.Println()
 		fmt.Print("Extracting encryption key")
+		fmt.Println()
 		backupDir := path.Join(context.TargetDir, context.OpsmanagerBackupDir)
 		deployment := path.Join(backupDir, OPSMGR_DEPLOYMENTS_FILENAME)
 		cmd := "tar -xf " + deployment + " -C " + backupDir
+		fmt.Println()
 		fmt.Printf("Extracting : %s", cmd)
+		fmt.Println()
 		context.LocalExecuter.Execute(nil, cmd)
 
-		// err = ExtractEncryptionKey(keyFileRef, context.DeploymentDir)
-		command := "grep -E 'db_encryption_key' " + context.DeploymentDir + "/cf-*.yml | cut -d ':' -f 2 | sort -u | tr -d ' ' > " + backupDir + "/cc_db_encryption_key.txt"
-		fmt.Printf("Executing : %s", command)
-		context.LocalExecuter.Execute(nil, command)
-	}
-	if err != nil {
-		fmt.Printf("Error: %v", err)
+		err = ExtractEncryptionKey(keyFileRef, context.DeploymentDir)
 	}
 	return
 }
@@ -222,7 +225,7 @@ func createInstallationGateways(hostname, tempestpassword string) (settingsGatew
 	defaultContentType := "application/octet-stream"
 	settingsURL := fmt.Sprintf(OPSMGR_INSTALLATION_SETTINGS_URL, hostname)
 	assetsURL := fmt.Sprintf(OPSMGR_INSTALLATION_ASSETS_URL, hostname)
-	settingsGateway = cfhttp.NewHttpGateway(settingsURL, OPSMGR_DEFAULT_USER, tempestpassword, defaultContentType, nil)
+	settingsGateway = cfhttp.NewHttpGateway(settingsURL, "admin", "admin", defaultContentType, nil)
 	assetsGateway = cfhttp.NewHttpGateway(assetsURL, OPSMGR_DEFAULT_USER, tempestpassword, defaultContentType, nil)
 	return
 }
