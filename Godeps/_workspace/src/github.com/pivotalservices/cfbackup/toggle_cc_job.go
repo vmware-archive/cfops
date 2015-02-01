@@ -62,7 +62,7 @@ func ToggleCCHandler(response *http.Response) (redirectUrl interface{}, err erro
 }
 
 var NewToggleGateway = func(serverUrl, username, password string) HttpGateway {
-	return NewHttpGateway(serverUrl, username, password, "text/yaml", ToggleCCHandler)
+	return NewHttpGateway(serverUrl, username, password, "text/yaml", ToggleCCHandler, nil)
 }
 
 func ToggleCCJobRunner(serverUrl, username, password string) (redirectUrl string, err error) {
@@ -105,7 +105,7 @@ func (s *CloudController) ToggleJob(ccjob, serverURL string, ccjobindex int) (er
 	)
 
 	if originalUrl, err = s.JobToggler(connectionURL, s.username, s.password); err == nil {
-		gateway := NewHttpGateway(modifyUrl(s.ip, serverURL, originalUrl), s.username, s.password, "application/json", s.HttpResponseHandler)
+		gateway := NewHttpGateway(modifyUrl(s.ip, serverURL, originalUrl), s.username, s.password, "application/json", s.HttpResponseHandler, nil)
 		task := s.NewEventTaskCreater("GET", gateway, s.HttpResponseHandler)
 		err = task.WaitForEventStateDone(contents, &eventObject)
 	}

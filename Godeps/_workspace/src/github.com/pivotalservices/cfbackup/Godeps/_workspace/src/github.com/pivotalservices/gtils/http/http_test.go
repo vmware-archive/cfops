@@ -3,8 +3,10 @@ package http_test
 import (
 	"bytes"
 	"errors"
+	"io"
 	"net/http"
 	"os"
+	"strings"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -15,8 +17,9 @@ var (
 	roundTripSuccess bool
 	requestCatcher   *http.Request
 	handlerSuccess   bool
-	successString    string = `{"state":"done"}`
-	failureString    string = `{"state":"notdone"}`
+	successString    string    = `{"state":"done"}`
+	failureString    string    = `{"state":"notdone"}`
+	body             io.Reader = strings.NewReader("testString")
 )
 
 type ClosingBuffer struct {
@@ -55,13 +58,13 @@ func MockHandlerFunc(resp *http.Response) (val interface{},
 
 var _ = Describe("Http", func() {
 	var (
-		handler func (resp *http.Response) (val interface{}, err error)
+		handler func(resp *http.Response) (val interface{}, err error)
 		gateway HttpGateway
 	)
 	BeforeEach(func() {
 		requestCatcher = &http.Request{}
 		handler = MockHandlerFunc
-		gateway = NewHttpGateway("http://endpoint/test", "username", "password", "contentType", handler)
+		gateway = NewHttpGateway("http://endpoint/test", "username", "password", "contentType", handler, body)
 		NewRoundTripper = func() http.RoundTripper {
 			return &MockRoundTripper{}
 		}

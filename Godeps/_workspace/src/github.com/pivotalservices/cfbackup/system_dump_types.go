@@ -51,10 +51,12 @@ type (
 
 	PgInfo struct {
 		SystemInfo
+		Database string
 	}
 
 	MysqlInfo struct {
 		SystemInfo
+		Database string
 	}
 
 	NfsInfo struct {
@@ -91,7 +93,7 @@ func (s *PgInfo) GetPersistanceBackup() (dumper PersistanceBackup, err error) {
 		Host:     s.Ip,
 		Port:     22,
 	}
-	return persistence.NewPgRemoteDump(2544, s.Component, s.User, s.Pass, sshConfig)
+	return persistence.NewPgRemoteDump(2544, s.Database, s.User, s.Pass, sshConfig)
 }
 
 func (s *SystemInfo) GetPersistanceBackup() (dumper PersistanceBackup, err error) {

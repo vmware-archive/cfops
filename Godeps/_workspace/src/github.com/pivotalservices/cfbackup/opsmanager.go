@@ -225,7 +225,7 @@ func createInstallationGateways(hostname, tempestpassword string) (settingsGatew
 	defaultContentType := "application/octet-stream"
 	settingsURL := fmt.Sprintf(OPSMGR_INSTALLATION_SETTINGS_URL, hostname)
 	assetsURL := fmt.Sprintf(OPSMGR_INSTALLATION_ASSETS_URL, hostname)
-	settingsGateway = NewHttpGateway(settingsURL, "admin", "admin", defaultContentType, nil)
-	assetsGateway = NewHttpGateway(assetsURL, OPSMGR_DEFAULT_USER, tempestpassword, defaultContentType, nil)
+	settingsGateway = NewHttpGateway(settingsURL, "admin", "admin", defaultContentType, nil, nil)
+	assetsGateway = NewHttpGateway(assetsURL, OPSMGR_DEFAULT_USER, tempestpassword, defaultContentType, nil, nil)
 	return
 }

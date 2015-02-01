@@ -1,0 +1,3 @@
+manifest:
+  compilation: test
+  job: test

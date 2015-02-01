@@ -20,12 +20,13 @@ type DefaultHttpGateway struct {
 	username       string
 	password       string
 	contentType    string
+	body           io.Reader
 	HandleResponse HandleRespFunc
 }
 
 type HandleRespFunc func(response *http.Response) (interface{}, error)
 
-func NewHttpGateway(endpoint, username, password, contentType string, handler HandleRespFunc) HttpGateway {
+func NewHttpGateway(endpoint, username, password, contentType string, handler HandleRespFunc, body io.Reader) HttpGateway {
 	if handler == nil {
 		handler = func(resp *http.Response) (interface{}, error) {
 			defer resp.Body.Close()
@@ -38,6 +39,7 @@ func NewHttpGateway(endpoint, username, password, contentType string, handler Ha
 		password:       password,
 		contentType:    contentType,
 		HandleResponse: handler,
+		body:           body,
 	}
 }
 
@@ -76,9 +78,9 @@ func (gateway *DefaultHttpGateway) Upload(paramName, filename string, fileRef io
 	return
 }
 
-func (gateway *DefaultHttpGateway) makeResponse(method string, handleResponse HandleRespFunc)  (val interface{}, err error) {
- 	transport := NewRoundTripper()
-	req, err := http.NewRequest(method, gateway.endpoint, nil)
+func (gateway *DefaultHttpGateway) makeResponse(method string, handleResponse HandleRespFunc) (val interface{}, err error) {
+	transport := NewRoundTripper()
+	req, err := http.NewRequest(method, gateway.endpoint, gateway.body)
 	if err != nil {
 		return
 	}
@@ -90,9 +92,9 @@ func (gateway *DefaultHttpGateway) makeResponse(method string, handleResponse Ha
 	}
 	if handleResponse == nil {
 		handleResponse = gateway.HandleResponse
-	  }
+	}
 	return handleResponse(resp)
- }
+}
 
 func (gateway *DefaultHttpGateway) makeRequest(body *bytes.Buffer) (res *http.Response, err error) {
 	var req *http.Request
