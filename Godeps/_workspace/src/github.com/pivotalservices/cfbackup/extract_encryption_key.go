@@ -32,9 +32,9 @@ type yamlkey struct {
 }
 
 func (s yamlkey) EncryptionKey() (key string, err error) {
-	job, err := s.Jobs.Contains("cloud_controller")
-	key = job.Properties.Cc.Db_encryption_key
-
+	if job, err := s.Jobs.Contains("cloud_controller"); err == nil {
+		key = job.Properties.Cc.Db_encryption_key
+	}
 	if key == "" {
 		err = fmt.Errorf("empty key error")
 	}

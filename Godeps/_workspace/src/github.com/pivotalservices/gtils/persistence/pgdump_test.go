@@ -56,7 +56,7 @@ var _ = Describe("Mysql", func() {
 
 		It("Should execute the pg command", func() {
 			pgDumpInstance.Dump(&writer)
-			Ω(pgCatchCommand).Should(Equal("PGPASSWORD=testpass && /var/vcap/packages/postgres/bin/pg_dump -h 0.0.0.0 -U testuser -p 0 "))
+			Ω(pgCatchCommand).Should(Equal("PGPASSWORD=testpass /var/vcap/packages/postgres/bin/pg_dump -h 0.0.0.0 -U testuser -p 0 "))
 		})
 
 		It("Should return nil error", func() {

@@ -29,19 +29,19 @@
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/command",
-			"Rev": "0a037fc35f26be05bf6fe2bf9eab403d8fd593e4"
+			"Rev": "d1669c4c733377ada1af49538d5a345eca44d3ac"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/http",
-			"Rev": "0a037fc35f26be05bf6fe2bf9eab403d8fd593e4"
+			"Rev": "d1669c4c733377ada1af49538d5a345eca44d3ac"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/osutils",
-			"Rev": "0a037fc35f26be05bf6fe2bf9eab403d8fd593e4"
+			"Rev": "d1669c4c733377ada1af49538d5a345eca44d3ac"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/persistence",
-			"Rev": "0a037fc35f26be05bf6fe2bf9eab403d8fd593e4"
+			"Rev": "d1669c4c733377ada1af49538d5a345eca44d3ac"
 		},
 		{
 			"ImportPath": "github.com/pkg/sftp",
