@@ -3,45 +3,14 @@ package cfbackup_test
 import (
 	"bytes"
 	"fmt"
-	"io"
 	"net/http"
 
 	. "github.com/pivotalservices/cfbackup"
-	"github.com/pivotalservices/gtils/command"
+	. "github.com/pivotalservices/gtils/http"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
-
-var (
-	successControlOuput string = "successful execute"
-	failureControlOuput string = "failed to execute"
-	successWaitCalled   int
-	failureWaitCalled   int
-)
-
-type MockSuccessCall struct{}
-
-func (s MockSuccessCall) Execute(destination io.Writer, command string) (err error) {
-	destination.Write([]byte(successControlOuput))
-	return
-}
-
-type MockFailCall struct{}
-
-func (s MockFailCall) Execute(destination io.Writer, command string) (err error) {
-	destination.Write([]byte(failureControlOuput))
-	err = fmt.Errorf("random mock error")
-	return
-}
-
-type ClosingBuffer struct {
-	*bytes.Buffer
-}
-
-func (cb *ClosingBuffer) Close() (err error) {
-	return
-}
 
 type SuccessMockEventTasker struct {
 }
@@ -55,6 +24,7 @@ type FailureMockEventTasker struct {
 }
 
 func (s FailureMockEventTasker) WaitForEventStateDone(contents bytes.Buffer, eventObject *EventObject) (err error) {
+	err = fmt.Errorf("this is an error")
 	failureWaitCalled++
 	return
 }
@@ -72,28 +42,21 @@ var _ = Describe("toggle cc job", func() {
 		failTryExitCount     int    = 5
 		endlessLoopFlag      bool   = false
 	)
-	restSuccess := func(method, connectionURL, username, password string, isYaml bool) (resp *http.Response, err error) {
-		resp = &http.Response{
-			StatusCode: 200,
-		}
+	restSuccess := func() (*http.Response, error) {
+		resp := &http.Response{}
 		resp.Body = &ClosingBuffer{bytes.NewBufferString(successString)}
 		restSuccessCalled++
-		return
+		return resp, nil
 	}
-	restFailure := func(method, connectionURL, username, password string, isYaml bool) (resp *http.Response, err error) {
-		resp = &http.Response{
-			StatusCode: 500,
-		}
+	restFailure := func() (*http.Response, error) {
+		resp := &http.Response{}
 		resp.Body = &ClosingBuffer{bytes.NewBufferString(failureString)}
 		restFailureCalled++
-		err = fmt.Errorf("")
-		return
+		err := fmt.Errorf("")
+		return resp, err
 	}
-
-	restNotDone := func(method, connectionURL, username, password string, isYaml bool) (resp *http.Response, err error) {
-		resp = &http.Response{
-			StatusCode: 200,
-		}
+	restNotDone := func() (*http.Response, error) {
+		resp := &http.Response{}
 		resp.Body = &ClosingBuffer{bytes.NewBufferString(failureString)}
 		restFailureCalled++
 		_ = failTryExitCount
@@ -101,26 +64,26 @@ var _ = Describe("toggle cc job", func() {
 			resp.Body = &ClosingBuffer{bytes.NewBufferString(successString)}
 			endlessLoopFlag = true
 		}
-		return
+		return resp, nil
 	}
 
-	successJobToggleMock := func(serverUrl, username, password string, exec command.Executer) (res string, err error) {
+	successJobToggleMock := func(serverUrl, username, password string) (res string, err error) {
 		successToggleCalled++
 		return
 	}
 
-	failureJobToggleMock := func(serverUrl, username, password string, exec command.Executer) (res string, err error) {
+	failureJobToggleMock := func(serverUrl, username, password string) (res string, err error) {
 		failureToggleCalled++
 		return
 	}
 
-	successTaskCreater := func(method, url, username, password string, isYaml bool) (task EventTasker) {
+	successTaskCreater := func(method string, requestAdapter RequestAdaptor) (task EventTasker) {
 		task = EventTasker(SuccessMockEventTasker{})
 		successCreaterCalled++
 		return
 	}
 
-	failureTaskCreater := func(method, url, username, password string, isYaml bool) (task EventTasker) {
+	failureTaskCreater := func(method string, requestAdapter RequestAdaptor) (task EventTasker) {
 		task = &FailureMockEventTasker{}
 		failureCreaterCalled++
 		return
@@ -131,12 +94,8 @@ var _ = Describe("toggle cc job", func() {
 			var task EventTasker
 			BeforeEach(func() {
 				task = &Task{
-					Method:     "GET",
-					Url:        "someurl.com",
-					Username:   "user",
-					Password:   "pass",
-					IsYaml:     false,
-					RestRunner: RestAdapter(restSuccess),
+					Method:         "GET",
+					RequestAdaptor: restSuccess,
 				}
 			})
 
@@ -161,22 +120,18 @@ var _ = Describe("toggle cc job", func() {
 				endlessLoopFlag = false
 
 				task = &Task{
-					Method:     "GET",
-					Url:        "someurl.com",
-					Username:   "user",
-					Password:   "pass",
-					IsYaml:     false,
-					RestRunner: RestAdapter(restNotDone),
+					Method:         "GET",
+					RequestAdaptor: restNotDone,
 				}
 			})
 
-			It("Should loop endlessly if done is never returned", func() {
-				eventObject := &EventObject{}
-				bbf := bytes.NewBuffer([]byte(failureString))
-				err := task.WaitForEventStateDone(*bbf, eventObject)
-				Ω(err).Should(BeNil())
-				Ω(endlessLoopFlag).Should(BeTrue())
-			})
+			// It("Should loop endlessly if done is never returned", func() {
+			// 	eventObject := &EventObject{}
+			// 	bbf := bytes.NewBuffer([]byte(failureString))
+			// 	err := task.WaitForEventStateDone(*bbf, eventObject)
+			// 	Ω(err).Should(BeNil())
+			// 	Ω(endlessLoopFlag).Should(BeTrue())
+			// })
 		})
 
 		Context("failed call", func() {
@@ -185,12 +140,8 @@ var _ = Describe("toggle cc job", func() {
 				endlessLoopFlag = false
 
 				task = &Task{
-					Method:     "GET",
-					Url:        "someurl.com",
-					Username:   "user",
-					Password:   "pass",
-					IsYaml:     false,
-					RestRunner: RestAdapter(restFailure),
+					Method:         "GET",
+					RequestAdaptor: restFailure,
 				}
 			})
 
@@ -200,12 +151,12 @@ var _ = Describe("toggle cc job", func() {
 				Ω(err).ShouldNot(BeNil())
 			})
 
-			It("Should loop endlessly if done is never returned", func() {
-				eventObject := &EventObject{}
-				bbf := bytes.NewBuffer([]byte(failureString))
-				err := task.WaitForEventStateDone(*bbf, eventObject)
-				Ω(err).ShouldNot(BeNil())
-			})
+			// It("Should loop endlessly if done is never returned", func() {
+			// 	eventObject := &EventObject{}
+			// 	bbf := bytes.NewBuffer([]byte(failureString))
+			// 	err := task.WaitForEventStateDone(*bbf, eventObject)
+			// 	Ω(err).ShouldNot(BeNil())
+			// })
 		})
 
 	})
@@ -233,6 +184,17 @@ var _ = Describe("toggle cc job", func() {
 			})
 
 			Context("ToggleJob method", func() {
+				Context("when a call to task.WaitForEventStateDone internally returns error", func() {
+					BeforeEach(func() {
+						cc.NewEventTaskCreater = EvenTaskCreaterAdapter(failureTaskCreater)
+					})
+
+					It("should return an error from ToggleJob", func() {
+						err := cc.ToggleJob("jobA", "someurl.com", 1)
+						Ω(err).ShouldNot(BeNil())
+					})
+				})
+
 				It("Should call through the entire chain if there is no error", func() {
 					cc.ToggleJob("jobA", "someurl.com", 1)
 					Ω(successToggleCalled).Should(BeNumerically(">", 0))
@@ -240,7 +202,6 @@ var _ = Describe("toggle cc job", func() {
 					Ω(successWaitCalled).Should(BeNumerically(">", 0))
 				})
 			})
-
 		})
 
 		Context("failed call", func() {
@@ -294,36 +255,6 @@ var _ = Describe("toggle cc job", func() {
 		})
 	})
 
-	Describe("RestAdapter", func() {
-		Context("Run method", func() {
-			Context("successful call", func() {
-				It("Should return an io.Reader a statusCode 200, a nil error and the correct body", func() {
-					r := RestAdapter(restSuccess)
-					statusCode, body, err := r.Run("", "", "", "", false)
-					buf := new(bytes.Buffer)
-					buf.ReadFrom(body)
-					s := buf.String()
-					Ω(err).Should(BeNil())
-					Ω(s).Should(Equal(successString))
-					Ω(statusCode).Should(Equal(200))
-				})
-			})
-
-			Context("successful call", func() {
-				It("Should return an io.Reader a statusCode != 200, a non nil error and the correct body", func() {
-					r := RestAdapter(restFailure)
-					statusCode, body, err := r.Run("", "", "", "", false)
-					buf := new(bytes.Buffer)
-					buf.ReadFrom(body)
-					s := buf.String()
-					Ω(err).ShouldNot(BeNil())
-					Ω(s).Should(Equal(failureString))
-					Ω(statusCode).ShouldNot(Equal(200))
-				})
-			})
-		})
-	})
-
 	Describe("ToggleCCJobRunner", func() {
 		Context("successful call", func() {
 			var (
@@ -331,10 +262,26 @@ var _ = Describe("toggle cc job", func() {
 				password  string = "passwrdtest"
 				serverUrl string = "someurl.com"
 			)
-			It("Should return nil error and pass through the cmd output", func() {
-				msg, err := ToggleCCJobRunner(username, password, serverUrl, &MockSuccessCall{})
+			It("Should return nil error", func() {
+				NewToggleGateway = func(method, serverUrl, username, password string) func() (interface{}, error) {
+					return func() (interface{}, error) {
+						resp, _ := makeResponse(HttpRequestEntity{}, "", 302, false, "success", nil)
+						return ToggleCCHandler(resp)
+					}
+				}
+				_, err := ToggleCCJobRunner(username, password, serverUrl)
 				Ω(err).Should(BeNil())
-				Ω(msg).Should(Equal(successControlOuput))
+			})
+
+			It("Should return redirectUrl", func() {
+				NewToggleGateway = func(method, serverUrl, username, password string) func() (interface{}, error) {
+					return func() (interface{}, error) {
+						resp, _ := makeResponse(HttpRequestEntity{}, "", 302, false, "success", nil)
+						return ToggleCCHandler(resp)
+					}
+				}
+				msg, _ := ToggleCCJobRunner(username, password, serverUrl)
+				Ω(msg).Should(Equal(redirectUrl))
 			})
 		})
 
@@ -344,10 +291,15 @@ var _ = Describe("toggle cc job", func() {
 				password  string = "passwrdtest"
 				serverUrl string = "someurl.com"
 			)
-			It("Should return non nil error and pass through the cmd output", func() {
-				msg, err := ToggleCCJobRunner(username, password, serverUrl, &MockFailCall{})
+			It("Should return error on non 302 http code", func() {
+				NewToggleGateway = func(method, serverUrl, username, password string) func() (interface{}, error) {
+					return func() (interface{}, error) {
+						resp, _ := makeResponse(HttpRequestEntity{}, "", 500, true, "failure", nil)
+						return ToggleCCHandler(resp)
+					}
+				}
+				_, err := ToggleCCJobRunner(username, password, serverUrl)
 				Ω(err).ShouldNot(BeNil())
-				Ω(msg).Should(Equal(failureControlOuput))
 			})
 		})
 	})
