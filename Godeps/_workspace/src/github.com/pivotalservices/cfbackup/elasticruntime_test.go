@@ -1,16 +1,13 @@
 package cfbackup_test
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"io/ioutil"
-	"net/http"
 	"os"
 	"path"
 
 	. "github.com/pivotalservices/cfbackup"
-	cfhttp "github.com/pivotalservices/gtils/http"
 	"github.com/pivotalservices/gtils/osutils"
 
 	. "github.com/onsi/ginkgo"
@@ -35,40 +32,6 @@ func (s mockDumper) Dump(i io.Writer) (err error) {
 
 func (s mockDumper) Import(i io.Reader) (err error) {
 	return
-}
-
-var (
-	restSuccessCalled int
-	restFailureCalled int
-)
-
-type mockHttpGateway struct {
-	CheckFailureCondition bool
-}
-
-func (s *mockHttpGateway) Upload(paramName, filename string, fileRef io.Reader, params map[string]string) (*http.Response, error) {
-	return nil, nil
-}
-
-func (s *mockHttpGateway) Execute(method string) (interface{}, error) {
-	if s.CheckFailureCondition {
-		restFailureCalled++
-		return &ClosingBuffer{bytes.NewBufferString(`{"state":"notdone"}`)}, nil
-	}
-	restSuccessCalled++
-	return bytes.NewBufferString(`[{
-		"agent_id": "d4131496-4cdf-4309-907b-e2ce327be029",
-		"cid": "vm-8dfe3b38-6e31-4d9a-aeef-74cbf2143bd8",
-		"job": "cloud_controller-partition-7bc61fd2fa9d654696df",
- 		"index": 0
-	}]`), nil
-}
-
-func (s *mockHttpGateway) ExecuteFunc(method string, handler cfhttp.HandleRespFunc) (interface{}, error) {
-	resp := &http.Response{
-		StatusCode: 200,
-	}
-	return handler(resp)
 }
 
 var _ = Describe("ElasticRuntime", func() {
@@ -101,7 +64,7 @@ var _ = Describe("ElasticRuntime", func() {
 				target, _ = ioutil.TempDir("/tmp", "spec")
 				er = ElasticRuntime{
 					JsonFile:    "fixtures/installation.json",
-					HttpGateway: &mockHttpGateway{},
+					HttpGateway: &MockHttpGateway{},
 					BackupContext: BackupContext{
 						TargetDir: target,
 					},
@@ -140,7 +103,7 @@ var _ = Describe("ElasticRuntime", func() {
 				target, _ = ioutil.TempDir("/tmp", "spec")
 				er = ElasticRuntime{
 					JsonFile:    "fixtures/installation.json",
-					HttpGateway: &mockHttpGateway{true},
+					HttpGateway: &MockHttpGateway{true, 500, `{"state":"notdone"}`},
 					BackupContext: BackupContext{
 						TargetDir: target,
 					},
@@ -190,7 +153,7 @@ var _ = Describe("ElasticRuntime", func() {
 				target, _ = ioutil.TempDir("/tmp", "spec")
 				er = ElasticRuntime{
 					JsonFile:    "fixtures/installation.json",
-					HttpGateway: &mockHttpGateway{},
+					HttpGateway: &MockHttpGateway{},
 					BackupContext: BackupContext{
 						TargetDir: target,
 					},
@@ -242,7 +205,7 @@ var _ = Describe("ElasticRuntime", func() {
 				target, _ = ioutil.TempDir("/tmp", "spec")
 				er = ElasticRuntime{
 					JsonFile:    "fixtures/installation.json",
-					HttpGateway: &mockHttpGateway{},
+					HttpGateway: &MockHttpGateway{},
 					BackupContext: BackupContext{
 						TargetDir: target,
 					},
@@ -294,7 +257,7 @@ var _ = Describe("ElasticRuntime", func() {
 				target, _ = ioutil.TempDir("/tmp", "spec")
 				er = ElasticRuntime{
 					JsonFile:    "fixtures/installation.json",
-					HttpGateway: &mockHttpGateway{},
+					HttpGateway: &MockHttpGateway{},
 					BackupContext: BackupContext{
 						TargetDir: target,
 					},
@@ -344,7 +307,7 @@ var _ = Describe("ElasticRuntime", func() {
 				target, _ = ioutil.TempDir("/tmp", "spec")
 				er = ElasticRuntime{
 					JsonFile:    "fixtures/installation.json",
-					HttpGateway: &mockHttpGateway{},
+					HttpGateway: &MockHttpGateway{},
 					BackupContext: BackupContext{
 						TargetDir: target,
 					},

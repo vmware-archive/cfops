@@ -1,45 +1,65 @@
 package http
 
 import (
-	"bytes"
 	"crypto/tls"
 	"io"
-	"io/ioutil"
-	"mime/multipart"
 	"net/http"
 )
 
-type HttpGateway interface {
-	Execute(method string) (interface{}, error)
-	ExecuteFunc(method string, handler HandleRespFunc) (interface{}, error)
-	Upload(paramName, filename string, fileRef io.Reader, params map[string]string) (*http.Response, error)
+const NO_CONTENT_TYPE string = ""
+
+type HttpRequestEntity struct {
+	Url         string
+	Username    string
+	Password    string
+	ContentType string
 }
 
-type DefaultHttpGateway struct {
-	endpoint       string
-	username       string
-	password       string
-	contentType    string
-	body           io.Reader
-	HandleResponse HandleRespFunc
-}
+type RequestFunc func(HttpRequestEntity, string, io.Reader) (*http.Response, error)
 
-type HandleRespFunc func(response *http.Response) (interface{}, error)
-
-func NewHttpGateway(endpoint, username, password, contentType string, handler HandleRespFunc, body io.Reader) HttpGateway {
-	if handler == nil {
-		handler = func(resp *http.Response) (interface{}, error) {
-			defer resp.Body.Close()
-			return ioutil.ReadAll(resp.Body)
-		}
+func Request(entity HttpRequestEntity, method string, body io.Reader) (response *http.Response, err error) {
+	transport := NewRoundTripper()
+	req, err := http.NewRequest(method, entity.Url, body)
+	req.SetBasicAuth(entity.Username, entity.Password)
+	if entity.ContentType != NO_CONTENT_TYPE {
+		req.Header.Add("Content-Type", entity.ContentType)
 	}
-	return &DefaultHttpGateway{
-		endpoint:       endpoint,
-		username:       username,
-		password:       password,
-		contentType:    contentType,
-		HandleResponse: handler,
-		body:           body,
+
+	if err != nil {
+		return
+	}
+	return transport.RoundTrip(req)
+}
+
+type RequestAdaptor func() (*http.Response, error)
+
+type HttpGateway interface {
+	Get(HttpRequestEntity) RequestAdaptor
+	Post(HttpRequestEntity, io.Reader) RequestAdaptor
+	Put(HttpRequestEntity, io.Reader) RequestAdaptor
+}
+
+func NewHttpGateway() HttpGateway {
+	return &DefaultHttpGateway{}
+}
+
+type DefaultHttpGateway struct{}
+
+func (gateway *DefaultHttpGateway) Get(entity HttpRequestEntity) RequestAdaptor {
+	return func() (*http.Response, error) {
+		return Request(entity, "GET", nil)
+	}
+}
+
+func (gateway *DefaultHttpGateway) Post(entity HttpRequestEntity, body io.Reader) RequestAdaptor {
+	return func() (*http.Response, error) {
+		return Request(entity, "POST", body)
+	}
+}
+
+func (gateway *DefaultHttpGateway) Put(entity HttpRequestEntity, body io.Reader) RequestAdaptor {
+	return func() (*http.Response, error) {
+		return Request(entity, "PUT", body)
 	}
 }
 
@@ -47,63 +67,4 @@ var NewRoundTripper = func() http.RoundTripper {
 	return &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
-}
-
-func (gateway *DefaultHttpGateway) ExecuteFunc(method string, handler HandleRespFunc) (val interface{}, err error) {
-	return gateway.makeResponse(method, handler)
-}
-
-func (gateway *DefaultHttpGateway) Execute(method string) (val interface{}, err error) {
-	return gateway.makeResponse(method, nil)
-}
-
-func (gateway *DefaultHttpGateway) Upload(paramName, filename string, fileRef io.Reader, params map[string]string) (res *http.Response, err error) {
-	var part io.Writer
-
-	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
-
-	if part, err = writer.CreateFormFile(paramName, filename); err == nil {
-
-		if _, err = io.Copy(part, fileRef); err == nil {
-
-			for key, val := range params {
-				_ = writer.WriteField(key, val)
-			}
-			writer.Close()
-			gateway.contentType = writer.FormDataContentType()
-			res, err = gateway.makeRequest(body)
-		}
-	}
-	return
-}
-
-func (gateway *DefaultHttpGateway) makeResponse(method string, handleResponse HandleRespFunc) (val interface{}, err error) {
-	transport := NewRoundTripper()
-	req, err := http.NewRequest(method, gateway.endpoint, gateway.body)
-	if err != nil {
-		return
-	}
-	req.SetBasicAuth(gateway.username, gateway.password)
-	req.Header.Set("Content-Type", gateway.contentType)
-	resp, err := transport.RoundTrip(req)
-	if err != nil {
-		return
-	}
-	if handleResponse == nil {
-		handleResponse = gateway.HandleResponse
-	}
-	return handleResponse(resp)
-}
-
-func (gateway *DefaultHttpGateway) makeRequest(body *bytes.Buffer) (res *http.Response, err error) {
-	var req *http.Request
-	transport := NewRoundTripper()
-
-	if req, err = http.NewRequest("POST", gateway.endpoint, body); err == nil {
-		req.SetBasicAuth(gateway.username, gateway.password)
-		req.Header.Add("Content-Type", gateway.contentType)
-		res, err = transport.RoundTrip(req)
-	}
-	return
 }

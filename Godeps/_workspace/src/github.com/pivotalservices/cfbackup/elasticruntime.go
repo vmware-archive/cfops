@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/pivotal-golang/lager"
-	cfhttp "github.com/pivotalservices/gtils/http"
+	. "github.com/pivotalservices/gtils/http"
 	"github.com/pivotalservices/gtils/osutils"
 	"io"
+	"io/ioutil"
 	"os"
 )
 
@@ -29,7 +30,7 @@ type ElasticRuntime struct {
 	JsonFile          string
 	SystemsInfo       map[string]SystemDump
 	PersistentSystems []SystemDump
-	HttpGateway       cfhttp.HttpGateway
+	HttpGateway       HttpGateway
 	InstallationName  string
 	BackupContext
 	Logger lager.Logger
@@ -123,8 +124,8 @@ func (context *ElasticRuntime) Backup() (err error) {
 		if ccJobs, err = context.getAllCloudControllerVMs(); err == nil {
 			context.Logger.Debug("Setting up CC jobs")
 			directorInfo := context.SystemsInfo[ER_DIRECTOR]
-			ccStop = NewCloudController(directorInfo.Get(SD_IP), directorInfo.Get(SD_USER), directorInfo.Get(SD_PASS), context.InstallationName, "stopped", nil)
-			ccStart = NewCloudController(directorInfo.Get(SD_IP), directorInfo.Get(SD_USER), directorInfo.Get(SD_PASS), context.InstallationName, "started", nil)
+			ccStop = NewCloudController(directorInfo.Get(SD_IP), directorInfo.Get(SD_USER), directorInfo.Get(SD_PASS), context.InstallationName, "stopped")
+			ccStart = NewCloudController(directorInfo.Get(SD_IP), directorInfo.Get(SD_USER), directorInfo.Get(SD_PASS), context.InstallationName, "started")
 			defer ccStart.ToggleJobs(CloudControllerJobs(ccJobs))
 			ccStop.ToggleJobs(CloudControllerJobs(ccJobs))
 		}
@@ -152,16 +153,21 @@ func (context *ElasticRuntime) getAllCloudControllerVMs() (ccvms []string, err e
 	context.Logger.Debug("getAllCloudControllerVMs() function", lager.Data{"connectionURL": connectionURL, "directorInfo": directorInfo})
 	gateway := context.HttpGateway
 	if gateway == nil {
-		gateway = cfhttp.NewHttpGateway(connectionURL, directorInfo.Get(SD_USER), directorInfo.Get(SD_PASS), "application/json", nil, nil)
+		gateway = NewHttpGateway()
 	}
-
 	context.Logger.Debug("Retrieving CC vms")
-	if body, err := gateway.Execute("GET"); err == nil {
+	if resp, err := gateway.Get(HttpRequestEntity{
+		Url:         connectionURL,
+		Username:    directorInfo.Get(SD_USER),
+		Password:    directorInfo.Get(SD_PASS),
+		ContentType: "application/json",
+	})(); err == nil {
 		var jsonObj []VMObject
 
 		context.Logger.Debug("Unmarshalling CC vms")
-		contents := body.([]byte)
-		if err = json.Unmarshal(contents, &jsonObj); err == nil {
+		defer resp.Body.Close()
+		body, err := ioutil.ReadAll(resp.Body)
+		if err = json.Unmarshal(body, &jsonObj); err == nil {
 			ccvms, err = GetCCVMs(jsonObj)
 		}
 	}
@@ -262,9 +268,14 @@ func (context *ElasticRuntime) directorCredentialsValid() (ok bool) {
 		connectionURL := fmt.Sprintf(ER_DIRECTOR_INFO_URL, directorInfo.Get(SD_IP))
 		gateway := context.HttpGateway
 		if gateway == nil {
-			gateway = cfhttp.NewHttpGateway(connectionURL, directorInfo.Get(SD_USER), directorInfo.Get(SD_PASS), "application/json", nil, nil)
+			gateway = NewHttpGateway()
 		}
-		_, err := gateway.Execute("GET")
+		_, err := gateway.Get(HttpRequestEntity{
+			Url:         connectionURL,
+			Username:    directorInfo.Get(SD_USER),
+			Password:    directorInfo.Get(SD_PASS),
+			ContentType: "application/json",
+		})()
 		ok = (err == nil)
 	}
 	return

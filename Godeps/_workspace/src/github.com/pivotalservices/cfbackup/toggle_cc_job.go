@@ -17,7 +17,7 @@ type CloudControllerJobs []string
 
 type JobTogglerAdapter func(serverUrl, username, password string) (res string, err error)
 
-type EvenTaskCreaterAdapter func(method string, httpGateway HttpGateway, handleRespFunc HandleRespFunc) (task EventTasker)
+type EvenTaskCreaterAdapter func(method string, requestAdaptor RequestAdaptor) (task EventTasker)
 
 type EventTasker interface {
 	WaitForEventStateDone(contents bytes.Buffer, eventObject *EventObject) (err error)
@@ -39,13 +39,11 @@ type CloudController struct {
 	JobToggler          JobTogglerAdapter
 	NewEventTaskCreater EvenTaskCreaterAdapter
 	httpGateway         HttpGateway
-	HttpResponseHandler HandleRespFunc
 }
 
 type Task struct {
-	Method              string
-	HttpGateway         HttpGateway
-	HttpResponseHandler HandleRespFunc
+	Method         string
+	RequestAdaptor RequestAdaptor
 }
 
 func ToggleCCHandler(response *http.Response) (redirectUrl interface{}, err error) {
@@ -61,20 +59,35 @@ func ToggleCCHandler(response *http.Response) (redirectUrl interface{}, err erro
 	return redirectUrls[0], nil
 }
 
-var NewToggleGateway = func(serverUrl, username, password string) HttpGateway {
-	return NewHttpGateway(serverUrl, username, password, "text/yaml", ToggleCCHandler, nil)
+var NewToggleGateway = func(method, serverUrl, username, password string) func() (interface{}, error) {
+	var (
+		err  error
+		resp *http.Response
+	)
+	if resp, err = Request(HttpRequestEntity{
+		Url:         serverUrl,
+		Username:    username,
+		Password:    password,
+		ContentType: "text/yaml",
+	}, method, nil); err == nil {
+		return func() (interface{}, error) {
+			return ToggleCCHandler(resp)
+		}
+	}
+	return func() (interface{}, error) {
+		return nil, err
+	}
 }
 
 func ToggleCCJobRunner(serverUrl, username, password string) (redirectUrl string, err error) {
-	httpGateway := NewToggleGateway(serverUrl, username, password)
-	ret, err := httpGateway.Execute("PUT")
+	ret, err := NewToggleGateway("PUT", serverUrl, username, password)()
 	if err != nil {
 		return
 	}
 	return ret.(string), err
 }
 
-func NewCloudController(ip, username, password, deploymentName, state string, handleRespFunc HandleRespFunc) *CloudController {
+func NewCloudController(ip, username, password, deploymentName, state string) *CloudController {
 	return &CloudController{
 		ip:                  ip,
 		username:            username,
@@ -83,7 +96,6 @@ func NewCloudController(ip, username, password, deploymentName, state string, ha
 		state:               state,
 		JobToggler:          ToggleCCJobRunner,
 		NewEventTaskCreater: EvenTaskCreaterAdapter(NewTask),
-		HttpResponseHandler: handleRespFunc,
 	}
 }
 
@@ -105,37 +117,37 @@ func (s *CloudController) ToggleJob(ccjob, serverURL string, ccjobindex int) (er
 	)
 
 	if originalUrl, err = s.JobToggler(connectionURL, s.username, s.password); err == nil {
-		gateway := NewHttpGateway(modifyUrl(s.ip, serverURL, originalUrl), s.username, s.password, "application/json", s.HttpResponseHandler, nil)
-		task := s.NewEventTaskCreater("GET", gateway, s.HttpResponseHandler)
+		gateway := s.httpGateway
+		if gateway == nil {
+			gateway = NewHttpGateway()
+		}
+		requestAdapter := gateway.Get(HttpRequestEntity{
+			Url:         modifyUrl(s.ip, serverURL, originalUrl),
+			Username:    s.username,
+			Password:    s.password,
+			ContentType: "application/json",
+		})
+		task := s.NewEventTaskCreater("GET", requestAdapter)
 		err = task.WaitForEventStateDone(contents, &eventObject)
 	}
 	return
 }
 
-func NewTask(method string, httpGateway HttpGateway, handleRespFunc HandleRespFunc) (task EventTasker) {
+func NewTask(method string, requestAdaptor RequestAdaptor) (task EventTasker) {
 	task = &Task{
-		Method:              method,
-		HttpGateway:         httpGateway,
-		HttpResponseHandler: handleRespFunc,
+		Method:         method,
+		RequestAdaptor: requestAdaptor,
 	}
 	return
 }
 
 func (s *Task) getEvents(dest io.Writer) (err error) {
-	var responseHandler = s.HttpResponseHandler
-	if responseHandler == nil {
-		responseHandler = func(resp *http.Response) (interface{}, error) {
-			defer resp.Body.Close()
-			return io.Copy(dest, resp.Body)
-		}
-	}
-	contents, err := s.HttpGateway.ExecuteFunc("GET", responseHandler)
+	resp, err := s.RequestAdaptor()
+	defer resp.Body.Close()
 	if err != nil {
 		err = fmt.Errorf("Invalid Bosh Director Credentials")
 	}
-	if responseHandler != nil {
-		io.Copy(dest, contents.(io.Reader))
-	}
+	_, err = io.Copy(dest, resp.Body)
 	return
 }
 

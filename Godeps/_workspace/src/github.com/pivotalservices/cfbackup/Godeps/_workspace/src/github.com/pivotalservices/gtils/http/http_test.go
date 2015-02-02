@@ -1,12 +1,8 @@
 package http_test
 
 import (
-	"bytes"
 	"errors"
-	"io"
 	"net/http"
-	"os"
-	"strings"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -14,21 +10,15 @@ import (
 )
 
 var (
-	roundTripSuccess bool
 	requestCatcher   *http.Request
-	handlerSuccess   bool
-	successString    string    = `{"state":"done"}`
-	failureString    string    = `{"state":"notdone"}`
-	body             io.Reader = strings.NewReader("testString")
+	roundTripSuccess bool
+	httpEntity       HttpRequestEntity = HttpRequestEntity{
+		Url:         "http://endpoint/test",
+		Username:    "username",
+		Password:    "password",
+		ContentType: "contentType",
+	}
 )
-
-type ClosingBuffer struct {
-	*bytes.Buffer
-}
-
-func (cb *ClosingBuffer) Close() (err error) {
-	return
-}
 
 type MockRoundTripper struct {
 }
@@ -37,121 +27,86 @@ func (roundTripper *MockRoundTripper) RoundTrip(request *http.Request) (resp *ht
 	resp = &http.Response{
 		StatusCode: 200,
 	}
-	resp.Body = &ClosingBuffer{bytes.NewBufferString(successString)}
-
 	if !roundTripSuccess {
-		resp.StatusCode = 500
-		resp.Body = &ClosingBuffer{bytes.NewBufferString(failureString)}
 		err = errors.New("Mock error")
 	}
 	*requestCatcher = *request
 	return
 }
 
-func MockHandlerFunc(resp *http.Response) (val interface{},
-	err error) {
-	if !handlerSuccess {
-		return nil, errors.New("Mock error")
-	}
-	return "Success", nil
-}
-
 var _ = Describe("Http", func() {
-	var (
-		handler func(resp *http.Response) (val interface{}, err error)
-		gateway HttpGateway
-	)
-	BeforeEach(func() {
-		requestCatcher = &http.Request{}
-		handler = MockHandlerFunc
-		gateway = NewHttpGateway("http://endpoint/test", "username", "password", "contentType", handler, body)
-		NewRoundTripper = func() http.RoundTripper {
-			return &MockRoundTripper{}
-		}
-	})
-
-	Context("The http is request and handled successfully", func() {
+	var _ = Describe("Request Function", func() {
 		BeforeEach(func() {
-			roundTripSuccess = true
-			handlerSuccess = true
+			requestCatcher = &http.Request{}
+			NewRoundTripper = func() http.RoundTripper {
+				return &MockRoundTripper{}
+			}
 		})
-		It("Should return nil error on success", func() {
-			_, err := gateway.Execute("Get")
-			Ω(err).Should(BeNil())
-		})
-		It("Should execute correct request", func() {
-			val, _ := gateway.Execute("Get")
-			Ω(requestCatcher.URL.Host).Should(Equal("endpoint"))
-			Ω(requestCatcher.Method).Should(Equal("Get"))
-			Ω(requestCatcher.Header["Content-Type"][0]).Should(Equal("contentType"))
-			Ω(requestCatcher.Header["Authorization"][0]).Should(Equal("Basic dXNlcm5hbWU6cGFzc3dvcmQ="))
-			Ω(val).Should(Equal("Success"))
-		})
-		It("Should return nil error on success", func() {
-			_, err := gateway.ExecuteFunc("Get", handler)
-			Ω(err).Should(BeNil())
-		})
-		It("Should not return error if handler is nil", func() {
-			_, err := gateway.ExecuteFunc("Get", nil)
-			Ω(err).Should(BeNil())
-		})
-		It("Should execute correct request", func() {
-			val, _ := gateway.ExecuteFunc("Get", handler)
-			Ω(requestCatcher.URL.Host).Should(Equal("endpoint"))
-			Ω(requestCatcher.Method).Should(Equal("Get"))
-			Ω(requestCatcher.Header["Content-Type"][0]).Should(Equal("contentType"))
-			Ω(requestCatcher.Header["Authorization"][0]).Should(Equal("Basic dXNlcm5hbWU6cGFzc3dvcmQ="))
-			Ω(val).Should(Equal("Success"))
-		})
-	})
 
-	Context("The round trip request failed", func() {
-		BeforeEach(func() {
-			roundTripSuccess = false
-			handlerSuccess = true
-		})
-		It("Should return error", func() {
-			_, err := gateway.Execute("Get")
-			Ω(err).ShouldNot(BeNil())
-		})
-	})
-
-	Context("The handler failed", func() {
-		BeforeEach(func() {
-			roundTripSuccess = true
-			handlerSuccess = false
-		})
-		It("Should return error", func() {
-			_, err := gateway.Execute("Get")
-			Ω(err).ShouldNot(BeNil())
-		})
-	})
-	Describe("Upload function", func() {
-		Context("call to endpoint is successful", func() {
+		Context("The http request successfully", func() {
 			BeforeEach(func() {
 				roundTripSuccess = true
 			})
-
-			It("Should return nil error and a valid response", func() {
-				fileRef, _ := os.Open("fixtures/installation.json")
-				res, err := gateway.Upload("installation[file]", "installation.json", fileRef, nil)
+			It("Should return nil error on success", func() {
+				_, err := Request(httpEntity, "Get", nil)
 				Ω(err).Should(BeNil())
-				Ω(res).ShouldNot(BeNil())
-				Ω(res.StatusCode).Should(Equal(200))
+			})
+			It("Should execute correct request", func() {
+				resp, _ := Request(httpEntity, "Get", nil)
+				Ω(requestCatcher.URL.Host).Should(Equal("endpoint"))
+				Ω(requestCatcher.Method).Should(Equal("Get"))
+				Ω(requestCatcher.Header["Content-Type"][0]).Should(Equal("contentType"))
+				Ω(requestCatcher.Header["Authorization"][0]).Should(Equal("Basic dXNlcm5hbWU6cGFzc3dvcmQ="))
+				Ω(resp.StatusCode).Should(Equal(200))
+
 			})
 		})
 
-		Context("call to endpoint is not successful", func() {
+		Context("The round trip request failed", func() {
 			BeforeEach(func() {
 				roundTripSuccess = false
 			})
-
-			It("Should return non-nil error and a non 200 statuscode", func() {
-				fileRef, _ := os.Open("fixtures/installation.json")
-				res, err := gateway.Upload("installation[file]", "installation.json", fileRef, nil)
+			It("Should return error", func() {
+				_, err := Request(httpEntity, "Get", nil)
 				Ω(err).ShouldNot(BeNil())
-				Ω(res.StatusCode).ShouldNot(Equal(200))
 			})
 		})
+	})
+
+	var _ = Describe("Http Gateway", func() {
+		var (
+			gateway = NewHttpGateway()
+		)
+		BeforeEach(func() {
+			roundTripSuccess = true
+			requestCatcher = &http.Request{}
+			NewRoundTripper = func() http.RoundTripper {
+				return &MockRoundTripper{}
+			}
+		})
+
+		Context("Calling gateway get method", func() {
+			It("Http Request should call Get method", func() {
+				request := gateway.Get(httpEntity)
+				request()
+				Ω(requestCatcher.Method).Should(Equal("GET"))
+			})
+		})
+
+		Context("Calling gateway post method", func() {
+			It("Http Request should call post method", func() {
+				request := gateway.Post(httpEntity, nil)
+				request()
+				Ω(requestCatcher.Method).Should(Equal("POST"))
+			})
+		})
+		Context("Calling gateway put method", func() {
+			It("Http Request should call put method", func() {
+				request := gateway.Put(httpEntity, nil)
+				request()
+				Ω(requestCatcher.Method).Should(Equal("PUT"))
+			})
+		})
+
 	})
 })

@@ -6,13 +6,13 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"os"
+	"os/exec"
 	"path"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	. "github.com/pivotalservices/cfbackup"
-	cfhttp "github.com/pivotalservices/gtils/http"
+	. "github.com/pivotalservices/gtils/command"
 	"github.com/pivotalservices/gtils/osutils"
 )
 
@@ -29,16 +29,16 @@ var _ = Describe("OpsManager object", func() {
 			BeforeEach(func() {
 				tmpDir, _ = ioutil.TempDir("/tmp", "test")
 				backupDir = path.Join(tmpDir, "backup", "opsmanager")
-				gw := &successGateway{}
+				gw := &MockHttpGateway{}
 
 				opsManager = &OpsManager{
-					SettingsUploader: gw,
-					AssetsUploader:   gw,
+					SettingsUploader:  MockMultiPartBodyFunc,
+					AssetsUploader:    MockMultiPartBodyFunc,
 					SettingsRequestor: gw,
 					AssetsRequestor:   gw,
-					Hostname:         "localhost",
-					Username:         "user",
-					Password:         "password",
+					Hostname:          "localhost",
+					Username:          "user",
+					Password:          "password",
 					BackupContext: BackupContext{
 						TargetDir: path.Join(tmpDir, "backup"),
 					},
@@ -63,16 +63,16 @@ var _ = Describe("OpsManager object", func() {
 			BeforeEach(func() {
 				tmpDir, _ = ioutil.TempDir("/tmp", "test")
 				backupDir = path.Join(tmpDir, "backup", "opsmanager")
-				gw := &successGateway{}
+				gw := &MockHttpGateway{}
 
 				opsManager = &OpsManager{
-					SettingsUploader: gw,
-					AssetsUploader:   gw,
+					SettingsUploader:  MockMultiPartBodyFunc,
+					AssetsUploader:    MockMultiPartBodyFunc,
 					SettingsRequestor: gw,
 					AssetsRequestor:   gw,
-					Hostname:         "localhost",
-					Username:         "user",
-					Password:         "password",
+					Hostname:          "localhost",
+					Username:          "user",
+					Password:          "password",
 					BackupContext: BackupContext{
 						TargetDir: path.Join(tmpDir, "backup"),
 					},
@@ -96,16 +96,16 @@ var _ = Describe("OpsManager object", func() {
 			BeforeEach(func() {
 				tmpDir, _ = ioutil.TempDir("/tmp", "test")
 				backupDir = path.Join(tmpDir, "backup", "opsmanager")
-				gw := &failGateway{}
+				gw := &MockHttpGateway{StatusCode: 500, State: failureString}
 
 				opsManager = &OpsManager{
-					SettingsUploader: gw,
-					AssetsUploader:   gw,
+					SettingsUploader:  MockMultiPartBodyFunc,
+					AssetsUploader:    MockMultiPartBodyFunc,
 					SettingsRequestor: gw,
 					AssetsRequestor:   gw,
-					Hostname:         "localhost",
-					Username:         "user",
-					Password:         "password",
+					Hostname:          "localhost",
+					Username:          "user",
+					Password:          "password",
 					BackupContext: BackupContext{
 						TargetDir: path.Join(tmpDir, "backup"),
 					},
@@ -140,6 +140,7 @@ var _ = Describe("OpsManager object", func() {
 						TargetDir: path.Join(tmpDir, "backup"),
 					},
 					Executer:            &failExecuter{},
+					LocalExecuter:       NewLocalMockExecuter(),
 					DeploymentDir:       "fixtures/encryptionkey",
 					OpsmanagerBackupDir: "opsmanager",
 				}
@@ -173,28 +174,20 @@ var _ = Describe("OpsManager object", func() {
 			BeforeEach(func() {
 				tmpDir, _ = ioutil.TempDir("/tmp", "test")
 				backupDir = path.Join(tmpDir, "backup", "opsmanager")
-				gw := &successGateway{}
-				responseHandler := func(resp *http.Response) (interface{}, error) {
-					defer resp.Body.Close()
-					var settingsFileRef *os.File
-					defer settingsFileRef.Close()
-					settingsFileRef, _ = osutils.SafeCreate(path.Join(tmpDir, "backup"), "opsmanager", "installation.json");
-					return io.Copy(settingsFileRef, resp.Body)
-				}
+				gw := &MockHttpGateway{StatusCode: 200, State: successString}
 				opsManager = &OpsManager{
-					SettingsRequestor:    gw,
-					Hostname: "localhost",
-					Username: "user",
-					Password: "password",
+					SettingsRequestor: gw,
+					Hostname:          "localhost",
+					Username:          "user",
+					Password:          "password",
 					BackupContext: BackupContext{
 						TargetDir: path.Join(tmpDir, "backup"),
 					},
 					Executer:            &successExecuter{},
+					LocalExecuter:       NewLocalMockExecuter(),
 					DeploymentDir:       "fixtures/encryptionkey",
 					OpsmanagerBackupDir: "opsmanager",
-					HttpResponseHandler: responseHandler,
 				}
-
 			})
 
 			It("should return nil error and write the proper information to the installation.json", func() {
@@ -256,42 +249,12 @@ func (s *failExecuter) Execute(dest io.Writer, src string) (err error) {
 	return
 }
 
-type successGateway struct{}
+type mockLocalExecute func(name string, arg ...string) *exec.Cmd
 
-func (s *successGateway) Upload(paramName, filename string, fileRef io.Reader, params map[string]string) (res *http.Response, err error) {
-	res = &http.Response{
-		StatusCode: 200,
-	}
-	res.Body = &ClosingBuffer{bytes.NewBufferString(successString)}
+func (cmd mockLocalExecute) Execute(destination io.Writer, command string) (err error) {
 	return
 }
 
-func (s *successGateway) Execute(method string) (val interface{}, err error) {
-	return
-}
-
-func (s *successGateway) ExecuteFunc(method string, handler cfhttp.HandleRespFunc) (val interface{}, err error) {
-	res := &http.Response{
-		StatusCode: 200,
-	}
-	res.Body = &ClosingBuffer{bytes.NewBufferString(successString)}
-	return handler(res)
-}
-
-type failGateway struct{}
-
-func (s *failGateway) Upload(paramName, filename string, fileRef io.Reader, params map[string]string) (res *http.Response, err error) {
-	res = &http.Response{
-		StatusCode: 500,
-	}
-	res.Body = &ClosingBuffer{bytes.NewBufferString(successString)}
-	return
-}
-
-func (s *failGateway) Execute(method string) (val interface{}, err error) {
-	return
-}
-
-func (s *failGateway) ExecuteFunc(method string, handler cfhttp.HandleRespFunc) (val interface{}, err error) {
-	return
+func NewLocalMockExecuter() Executer {
+	return mockLocalExecute(exec.Command)
 }

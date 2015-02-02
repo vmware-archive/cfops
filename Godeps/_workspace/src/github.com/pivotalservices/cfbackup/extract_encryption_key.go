@@ -25,15 +25,15 @@ type job struct {
 	Properties property
 }
 
+type jobs []job
+
 type yamlkey struct {
-	Jobs []job
+	Jobs jobs
 }
 
 func (s yamlkey) EncryptionKey() (key string, err error) {
-	key = s.Jobs[6].Properties.Cc.Db_encryption_key
-	fmt.Println()
-	fmt.Printf("key : " + key)
-	fmt.Println()
+	job, err := s.Jobs.Contains("cloud_controller")
+	key = job.Properties.Cc.Db_encryption_key
 
 	if key == "" {
 		err = fmt.Errorf("empty key error")
@@ -47,13 +47,18 @@ func ExtractEncryptionKey(dest io.Writer, deploymentDir string) (err error) {
 	if flist, err = ioutil.ReadDir(deploymentDir); err == nil {
 		yamlfilename := getYamlFilename(flist)
 		yamlfilepath := path.Join(deploymentDir, yamlfilename)
-		fmt.Println()
-		fmt.Printf("yamlfilepath : " + yamlfilepath)
-		fmt.Println()
-		fmt.Printf("yamlfilename : " + yamlfilename)
 		err = writeKey(dest, yamlfilepath)
 	}
 	return
+}
+
+func (jobs jobs) Contains(value string) (job, error) {
+	for p, v := range jobs {
+		if strings.Contains(v.Name, value) {
+			return jobs[p], nil
+		}
+	}
+	return job{}, fmt.Errorf("job not found")
 }
 
 func namefilter(i, v interface{}) (ok bool) {
@@ -92,9 +97,6 @@ func getKeyFromFile(yamlfilepath string) (encryptionKey string, err error) {
 	if filebytes, err = ioutil.ReadFile(yamlfilepath); err == nil {
 		err = yaml.Unmarshal(filebytes, &keyparse)
 		encryptionKey, err = keyparse.EncryptionKey()
-		fmt.Println()
-		fmt.Printf("encryptionKey : " + encryptionKey)
-		fmt.Println()
 	}
 	return
 }

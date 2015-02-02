@@ -1,38 +1,32 @@
 package bosh
 
 import (
-	"bytes"
+	"encoding/json"
 	"errors"
+	"io"
 	"io/ioutil"
 	"net/http"
-
-	"gopkg.in/yaml.v2"
+	"strings"
 )
 
-func retrieveManifest(response *http.Response) (resp interface{}, err error) {
+type ManifestResponse struct {
+	Manifest string `json:"manifest"`
+}
+
+func retrieveManifest(response *http.Response) (manifest io.Reader, err error) {
 	if response.StatusCode != 200 {
 		err = errors.New("The retriveing bosh manifest API response code is not equal to 200")
 		return
 	}
-	m := make(map[string]interface{})
+	m := ManifestResponse{}
 	defer response.Body.Close()
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return
 	}
-	err = yaml.Unmarshal(body, &m)
+	err = json.Unmarshal(body, &m)
 	if err != nil {
 		return
 	}
-	data, err := yaml.Marshal(m["manifest"])
-	if err != nil {
-		return
-	}
-	return bytes.NewReader(data), nil
-}
-
-var retrieveManifestAPI API = API{
-	Path:           "deployments/{deployment}",
-	Method:         "GET",
-	HandleResponse: retrieveManifest,
+	return strings.NewReader(m.Manifest), nil
 }
