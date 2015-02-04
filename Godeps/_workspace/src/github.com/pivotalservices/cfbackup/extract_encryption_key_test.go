@@ -19,7 +19,7 @@ var _ = Describe("ExtractEncryptionKey", func() {
 			var keystring bytes.Buffer
 			err := ExtractEncryptionKey(&keystring, deploymentDir)
 			Ω(err).Should(BeNil())
-			Ω(keystring.String()).Should(Equal("b963127302433579"))
+			Ω(keystring.String()).Should(Equal("a5f5bc93ea6221499492"))
 		})
 	})
 

@@ -24,3 +24,4 @@ cfdeploy
 test/deployments/
 main
 .DS_Store
+out/

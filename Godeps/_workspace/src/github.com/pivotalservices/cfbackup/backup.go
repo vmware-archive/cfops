@@ -1,6 +1,9 @@
 package cfbackup
 
-import "path"
+import (
+	"github.com/cloudfoundry-incubator/cf-lager"
+	"path"
+)
 
 // Tile is a deployable component that can be backed up
 type Tile interface {
@@ -17,10 +20,11 @@ func RunBackupPipeline(hostname, username, password, tempestpassword, destinatio
 		opsmanager     Tile
 		elasticRuntime Tile
 	)
+	backupLogger := cf_lager.New("backup")
 	installationFilePath := path.Join(destination, OPSMGR_BACKUP_DIR, OPSMGR_INSTALLATION_SETTINGS_FILENAME)
 
 	if opsmanager, err = NewOpsManager(hostname, username, password, tempestpassword, destination); err == nil {
-		elasticRuntime = NewElasticRuntime(installationFilePath, destination)
+		elasticRuntime = NewElasticRuntime(installationFilePath, destination, backupLogger)
 		tiles := []Tile{
 			opsmanager,
 			elasticRuntime,

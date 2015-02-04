@@ -38,6 +38,11 @@ func NewNFSBackup(password, ip string) (nfs *NFSBackup, err error) {
 	return
 }
 
+func (s *NFSBackup) Import(io.Reader) (err error) {
+	panic("you need to implement this")
+	return
+}
+
 func (s *NFSBackup) Dump(dest io.Writer) (err error) {
 	command := "cd /var/vcap/store && tar cz shared"
 	err = s.Caller.Execute(dest, command)

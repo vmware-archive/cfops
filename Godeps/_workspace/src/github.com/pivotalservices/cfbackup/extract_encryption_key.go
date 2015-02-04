@@ -20,13 +20,21 @@ type property struct {
 	Cc cc
 }
 
-type yamlkey struct {
+type job struct {
+	Name       string
 	Properties property
 }
 
-func (s yamlkey) EncryptionKey() (key string, err error) {
-	key = s.Properties.Cc.Db_encryption_key
+type jobs []job
 
+type yamlkey struct {
+	Jobs jobs
+}
+
+func (s yamlkey) EncryptionKey() (key string, err error) {
+	if job, err := s.Jobs.Contains("cloud_controller"); err == nil {
+		key = job.Properties.Cc.Db_encryption_key
+	}
 	if key == "" {
 		err = fmt.Errorf("empty key error")
 	}
@@ -42,6 +50,15 @@ func ExtractEncryptionKey(dest io.Writer, deploymentDir string) (err error) {
 		err = writeKey(dest, yamlfilepath)
 	}
 	return
+}
+
+func (jobs jobs) Contains(value string) (job, error) {
+	for p, v := range jobs {
+		if strings.Contains(v.Name, value) {
+			return jobs[p], nil
+		}
+	}
+	return job{}, fmt.Errorf("job not found")
 }
 
 func namefilter(i, v interface{}) (ok bool) {
