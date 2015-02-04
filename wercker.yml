@@ -44,7 +44,7 @@ build:
     - script:
         name: cross platform build
         code: |
-          (cd cmd/cfops/ && goxc -env GOPATH=${WERCKER_SOURCE_DIR}/Godeps/_workspace:$GOPATH -d=${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/ -bc="linux windows" ) 
+          (cd cmd/cfops/ && goxc -env GOPATH=${WERCKER_SOURCE_DIR}/Godeps/_workspace:$GOPATH -d=${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/ -bc="darwin linux windows" ) 
 
   #after-steps:
     #- wantedly/pretty-slack-notify@0.2.0:
