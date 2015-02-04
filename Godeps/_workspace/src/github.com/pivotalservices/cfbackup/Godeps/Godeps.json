@@ -7,7 +7,7 @@
 	"Deps": [
 		{
 			"ImportPath": "github.com/cloudfoundry-incubator/cf-lager",
-			"Rev": "93f9029ea1eb99a976ed7acfd3fc2e50c615450a"
+			"Rev": "ea49f3b43c0a8f257faeb4bb8d87b474eefbe522"
 		},
 		{
 			"ImportPath": "github.com/kr/fs",
@@ -25,7 +25,7 @@
 		},
 		{
 			"ImportPath": "github.com/pivotal-golang/lager",
-			"Rev": "1baba58607e680b5659dddcad70d53abe5af039e"
+			"Rev": "ad0fea85471a401834f7eabfc15bf66a76d0e58d"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/command",

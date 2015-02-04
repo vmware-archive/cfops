@@ -34,7 +34,7 @@
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/cfbackup",
-			"Rev": "56199e27617f93d07f09819e55492f5f29aa87f2"
+			"Rev": "0ad686305691089830c082425de6ecc27d1c156f"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/command",
