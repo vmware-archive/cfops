@@ -2,11 +2,14 @@ package cfbackup_test
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"net/http"
+	"os/exec"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	. "github.com/pivotalservices/gtils/command"
 	. "github.com/pivotalservices/gtils/http"
 
 	"testing"
@@ -18,19 +21,36 @@ func TestBackup(t *testing.T) {
 }
 
 var (
-	successControlOuput string = "successful execute"
-	failureControlOuput string = "failed to execute"
-	redirectUrl         string = "mysite.com"
-	successWaitCalled   int
-	failureWaitCalled   int
-	restSuccessCalled   int
-	restFailureCalled   int
+	redirectUrl       string = "mysite.com"
+	successString     string = `{"state":"done"}`
+	failureString     string = `{"state":"notdone"}`
+	successWaitCalled int
+	failureWaitCalled int
+	restSuccessCalled int
+	restFailureCalled int
 )
 
 type MockHttpGateway struct {
 	CheckFailureCondition bool
 	StatusCode            int
 	State                 string
+}
+
+// Implements RequestAdaptor. Used to return a successful response
+var restSuccess = func() (*http.Response, error) {
+	resp := &http.Response{}
+	resp.Body = &ClosingBuffer{bytes.NewBufferString(successString)}
+	restSuccessCalled++
+	return resp, nil
+}
+
+// Implements RequestAdaptor. Used to return a failed response
+var restFailure = func() (*http.Response, error) {
+	resp := &http.Response{}
+	resp.Body = &ClosingBuffer{bytes.NewBufferString(failureString)}
+	restFailureCalled++
+	err := fmt.Errorf("")
+	return resp, err
 }
 
 func makeResponse(entity HttpRequestEntity, method string, statusCode int, checkFailure bool, state string, body io.Reader) (*http.Response, error) {
@@ -84,4 +104,29 @@ type ClosingBuffer struct {
 
 func (cb *ClosingBuffer) Close() (err error) {
 	return
+}
+
+type successExecuter struct{}
+
+func (s *successExecuter) Execute(dest io.Writer, src string) (err error) {
+	dest.Write([]byte(src))
+	return
+}
+
+type failExecuter struct{}
+
+func (s *failExecuter) Execute(dest io.Writer, src string) (err error) {
+	dest.Write([]byte(src))
+	err = fmt.Errorf("error failure")
+	return
+}
+
+type mockLocalExecute func(name string, arg ...string) *exec.Cmd
+
+func (cmd mockLocalExecute) Execute(destination io.Writer, command string) (err error) {
+	return
+}
+
+func NewLocalMockExecuter() Executer {
+	return mockLocalExecute(exec.Command)
 }

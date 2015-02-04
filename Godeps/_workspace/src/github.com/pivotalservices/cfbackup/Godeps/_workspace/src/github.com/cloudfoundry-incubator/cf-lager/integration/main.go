@@ -2,12 +2,16 @@ package main
 
 import (
 	"errors"
+	"flag"
 
 	"github.com/cloudfoundry-incubator/cf-lager"
 	"github.com/pivotal-golang/lager"
 )
 
 func main() {
+	cf_lager.AddFlags(flag.CommandLine)
+	flag.Parse()
+
 	logger := cf_lager.New("cf-lager-integration")
 
 	logger.Debug("component-does-action", lager.Data{"debug-detail": "foo"})
