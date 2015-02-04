@@ -10,7 +10,7 @@ import (
 
 const (
 	PGDMP_REMOTE_IMPORT_PATH string = "/tmp/pgdump.sql"
-	PGDMP_DUMP_BIN           string = "pg_dump"
+	PGDMP_DUMP_BIN           string = "/var/vcap/packages/postgres/bin/pg_dump"
 	PGDMP_SQL_BIN                   = "psql"
 	PGDMP_DROP_CMD                  = "drop schema public cascade;"
 	PGDMP_CREATE_CMD                = "create schema public;"
