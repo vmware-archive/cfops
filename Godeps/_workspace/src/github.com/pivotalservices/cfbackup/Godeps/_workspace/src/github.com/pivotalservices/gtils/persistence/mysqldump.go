@@ -7,6 +7,16 @@ import (
 	"github.com/pivotalservices/gtils/command"
 )
 
+const (
+	MSQLDMP_REMOTE_IMPORT_PATH string = "/tmp/mysqldump.sql"
+	MSQLDMP_DUMP_BIN                  = "mysqldump"
+	MSQLDMP_SQL_BIN                   = "mysql"
+	MSQLDMP_CONNECT_CMD               = "%s -u %s -h %s --password=%s"
+	MSQLDMP_CREATE_CMD                = "%s < %s"
+	MSQLDMP_FLUSH_CMD                 = "%s > flush privileges"
+	MSQLDMP_DUMP_CMD                  = "%s --all-databases"
+)
+
 type MysqlDump struct {
 	Ip         string
 	Username   string
@@ -14,6 +24,7 @@ type MysqlDump struct {
 	DbFile     string
 	ConfigFile string
 	Caller     command.Executer
+	RemoteOps  remoteOperationsInterface
 }
 
 func NewMysqlDump(ip, username, password string) *MysqlDump {
@@ -29,15 +40,19 @@ func NewMysqlDump(ip, username, password string) *MysqlDump {
 func NewRemoteMysqlDump(username, password string, sshCfg command.SshConfig) (*MysqlDump, error) {
 	remoteExecuter, err := command.NewRemoteExecutor(sshCfg)
 	return &MysqlDump{
-		Ip:       "localhost",
-		Username: username,
-		Password: password,
-		Caller:   remoteExecuter,
+		Ip:        "localhost",
+		Username:  username,
+		Password:  password,
+		Caller:    remoteExecuter,
+		RemoteOps: NewRemoteOperations(sshCfg),
 	}, err
 }
 
-func (s *MysqlDump) Import(io.Reader) (err error) {
-	panic("you need to implement this")
+func (s *MysqlDump) Import(lfile io.Reader) (err error) {
+
+	if err = s.RemoteOps.UploadFile(lfile); err == nil {
+		err = s.restore()
+	}
 	return
 }
 
@@ -46,8 +61,30 @@ func (s *MysqlDump) Dump(dest io.Writer) (err error) {
 	return
 }
 
+func (s *MysqlDump) restore() (err error) {
+	callList := []string{
+		s.getImportCommand(),
+		s.getFlushCommand(),
+	}
+	err = execute_list(callList, s.Caller)
+	return
+}
+
+func (s *MysqlDump) getImportCommand() string {
+	return fmt.Sprintf(MSQLDMP_CREATE_CMD, s.getConnectCommand(MSQLDMP_SQL_BIN), MSQLDMP_REMOTE_IMPORT_PATH)
+}
+
+func (s *MysqlDump) getFlushCommand() string {
+	return fmt.Sprintf(MSQLDMP_FLUSH_CMD, s.getConnectCommand(MSQLDMP_SQL_BIN))
+}
+
 func (s *MysqlDump) getDumpCommand() string {
-	return fmt.Sprintf("mysqldump -u %s -h %s --password=%s --all-databases",
+	return fmt.Sprintf(MSQLDMP_DUMP_CMD, s.getConnectCommand(MSQLDMP_DUMP_BIN))
+}
+
+func (s *MysqlDump) getConnectCommand(bin string) string {
+	return fmt.Sprintf(MSQLDMP_CONNECT_CMD,
+		bin,
 		s.Username,
 		s.Ip,
 		s.Password,

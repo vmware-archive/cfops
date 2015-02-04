@@ -23,7 +23,7 @@ func RunBackupPipeline(hostname, username, password, tempestpassword, destinatio
 	backupLogger := cf_lager.New("backup")
 	installationFilePath := path.Join(destination, OPSMGR_BACKUP_DIR, OPSMGR_INSTALLATION_SETTINGS_FILENAME)
 
-	if opsmanager, err = NewOpsManager(hostname, username, password, tempestpassword, destination); err == nil {
+	if opsmanager, err = NewOpsManager(hostname, username, password, tempestpassword, destination, backupLogger); err == nil {
 		elasticRuntime = NewElasticRuntime(installationFilePath, destination, backupLogger)
 		tiles := []Tile{
 			opsmanager,
