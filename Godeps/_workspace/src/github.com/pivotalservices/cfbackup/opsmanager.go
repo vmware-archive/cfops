@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 
+	"github.com/pivotal-golang/lager"
 	"github.com/pivotalservices/gtils/command"
 	. "github.com/pivotalservices/gtils/http"
 	"github.com/pivotalservices/gtils/osutils"
@@ -50,10 +51,11 @@ type OpsManager struct {
 	AssetsRequestor     httpRequestor
 	DeploymentDir       string
 	OpsmanagerBackupDir string
+	Logger              lager.Logger
 }
 
 // NewOpsManager initializes an OpsManager instance
-var NewOpsManager = func(hostname string, username string, password string, tempestpassword string, target string) (context *OpsManager, err error) {
+var NewOpsManager = func(hostname string, username string, password string, tempestpassword string, target string, logger lager.Logger) (context *OpsManager, err error) {
 	var remoteExecuter command.Executer
 
 	if remoteExecuter, err = createExecuter(hostname, tempestpassword); err == nil {
@@ -77,6 +79,7 @@ var NewOpsManager = func(hostname string, username string, password string, temp
 			Executer:            remoteExecuter,
 			LocalExecuter:       command.NewLocalExecuter(),
 			OpsmanagerBackupDir: OPSMGR_BACKUP_DIR,
+			Logger:              logger,
 		}
 	}
 	return
@@ -149,8 +152,7 @@ func (context *OpsManager) exportUrlToFile(urlFormat string, filename string) (e
 
 	url := fmt.Sprintf(urlFormat, context.Hostname)
 
-	fmt.Println()
-	fmt.Printf("Exporting url '%s' to file '%s'", url, filename)
+	context.Logger.Debug("Exporting url '%s' to file '%s'", lager.Data{"url": url, "filename": filename})
 
 	if settingsFileRef, err = osutils.SafeCreate(context.TargetDir, context.OpsmanagerBackupDir, filename); err == nil {
 		err = context.exportUrlToWriter(url, settingsFileRef, context.SettingsRequestor)
@@ -175,20 +177,14 @@ func (context *OpsManager) exportUrlToWriter(url string, dest io.Writer, request
 func (context *OpsManager) extract() (err error) {
 	var keyFileRef *os.File
 	defer keyFileRef.Close()
-	fmt.Println()
-	fmt.Print("Extracting Ops Manager")
-	fmt.Println()
+	context.Logger.Debug("Extracting Ops Manager")
 
 	if keyFileRef, err = osutils.SafeCreate(context.TargetDir, context.OpsmanagerBackupDir, OPSMGR_ENCRYPTIONKEY_FILENAME); err == nil {
-		fmt.Println()
-		fmt.Print("Extracting encryption key")
-		fmt.Println()
+		context.Logger.Debug("Extracting encryption key")
 		backupDir := path.Join(context.TargetDir, context.OpsmanagerBackupDir)
 		deployment := path.Join(backupDir, OPSMGR_DEPLOYMENTS_FILENAME)
 		cmd := "tar -xf " + deployment + " -C " + backupDir
-		fmt.Println()
-		fmt.Printf("Extracting : %s", cmd)
-		fmt.Println()
+		context.Logger.Debug("Extracting : %s", lager.Data{"command": cmd})
 		context.LocalExecuter.Execute(nil, cmd)
 
 		err = ExtractEncryptionKey(keyFileRef, context.DeploymentDir)

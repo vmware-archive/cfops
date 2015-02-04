@@ -120,7 +120,7 @@ var NewElasticRuntime = func(jsonFile string, target string, logger lager.Logger
 			uaadbInfo,
 			ccdbInfo,
 			// nfsInfo,
-			// mysqldbInfo,
+			mysqldbInfo,
 		},
 		Logger: logger,
 	}

@@ -4,12 +4,10 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 	"path"
 
-	"github.com/pivotalservices/gtils/command"
 	"github.com/pivotalservices/gtils/mock"
 	"github.com/pivotalservices/gtils/osutils"
 	. "github.com/pivotalservices/gtils/persistence"
@@ -21,20 +19,6 @@ import (
 var (
 	pgCatchCommand string
 )
-
-type pgMockSuccessCall struct{}
-
-func (s pgMockSuccessCall) Execute(destination io.Writer, command string) (err error) {
-	pgCatchCommand = command
-	return
-}
-
-type pgMockFailFirstCall struct{}
-
-func (s pgMockFailFirstCall) Execute(destination io.Writer, command string) (err error) {
-	err = fmt.Errorf("random mock error")
-	return
-}
 
 var _ = Describe("PgDump", func() {
 
@@ -62,7 +46,7 @@ var _ = Describe("PgDump", func() {
 				Ip:       ip,
 				Username: username,
 				Password: password,
-				Caller:   &pgMockSuccessCall{},
+				Caller:   &MockSuccessCall{},
 			}
 		})
 
@@ -71,10 +55,10 @@ var _ = Describe("PgDump", func() {
 		})
 
 		Context("called w/ successful sftp connection", func() {
+			var output bytes.Buffer
 			BeforeEach(func() {
-				pgDumpInstance.GetRemoteFile = func(command.SshConfig) (w io.WriteCloser, err error) {
-					w, err = osutils.SafeCreate(remoteFilePath)
-					return
+				pgDumpInstance.RemoteOps = &mockRemoteOps{
+					Writer: &output,
 				}
 			})
 
@@ -86,22 +70,20 @@ var _ = Describe("PgDump", func() {
 				l, _ = os.Open(localFilePath)
 				err := pgDumpInstance.Import(l)
 				l.Close()
-				rf, _ := os.Open(remoteFilePath)
-				defer rf.Close()
-				rarray, _ := ioutil.ReadAll(rf)
 				lf, _ := os.Open(localFilePath)
 				defer lf.Close()
 				larray, _ := ioutil.ReadAll(lf)
 				Ω(err).Should(BeNil())
-				Ω(rarray).Should(Equal(larray))
+				Ω(output.String()).Should(Equal(string(larray[:])))
 			})
 		})
 
 		Context("called w/ failed sftp connection", func() {
+			var output bytes.Buffer
 			BeforeEach(func() {
-				pgDumpInstance.GetRemoteFile = func(command.SshConfig) (w io.WriteCloser, err error) {
-					err = sftpFailErr
-					return
+				pgDumpInstance.RemoteOps = &mockRemoteOps{
+					Err:    sftpFailErr,
+					Writer: &output,
 				}
 			})
 
@@ -113,24 +95,20 @@ var _ = Describe("PgDump", func() {
 				l, _ = os.Open(localFilePath)
 				err := pgDumpInstance.Import(l)
 				l.Close()
-				rf, _ := os.Open(remoteFilePath)
-				defer rf.Close()
-				rarray, _ := ioutil.ReadAll(rf)
 				lf, _ := os.Open(localFilePath)
 				defer lf.Close()
 				larray, _ := ioutil.ReadAll(lf)
 
 				Ω(err).ShouldNot(BeNil())
 				Ω(err).Should(Equal(sftpFailErr))
-				Ω(rarray).ShouldNot(Equal(larray))
+				Ω(output.String()).ShouldNot(Equal(string(larray[:])))
 			})
 		})
 
 		Context("called w/ failed copy to remote", func() {
 			BeforeEach(func() {
-				pgDumpInstance.GetRemoteFile = func(command.SshConfig) (w io.WriteCloser, err error) {
-					w = mock.NewReadWriteCloser(mock.READ_FAIL_ERROR, nil, nil)
-					return
+				pgDumpInstance.RemoteOps = &mockRemoteOps{
+					Err: mock.READ_FAIL_ERROR,
 				}
 			})
 
@@ -144,11 +122,8 @@ var _ = Describe("PgDump", func() {
 
 		Context("remote call w/ failed result from first call", func() {
 			BeforeEach(func() {
-				pgDumpInstance.Caller = &pgMockFailFirstCall{}
-				pgDumpInstance.GetRemoteFile = func(command.SshConfig) (w io.WriteCloser, err error) {
-					w = mock.NewReadWriteCloser(nil, nil, nil)
-					return
-				}
+				pgDumpInstance.Caller = &MockFailCall{}
+				pgDumpInstance.RemoteOps = &mockRemoteOps{}
 			})
 
 			It("should return a call error", func() {
@@ -159,49 +134,53 @@ var _ = Describe("PgDump", func() {
 		})
 	})
 
-	Context("With caller successfully execute the command", func() {
-		BeforeEach(func() {
-			pgDumpInstance = &PgDump{
-				Ip:       ip,
-				Username: username,
-				Password: password,
-				Caller:   &pgMockSuccessCall{},
-			}
-			pgCatchCommand = ""
+	Context("Dump", func() {
+		Context("With caller successfully execute the command", func() {
+			BeforeEach(func() {
+				pgDumpInstance = &PgDump{
+					Ip:       ip,
+					Username: username,
+					Password: password,
+					Caller:   &MockSuccessCall{},
+				}
+				pgCatchCommand = ""
+			})
+
+			AfterEach(func() {
+				pgDumpInstance = nil
+			})
+
+			It("Should execute the pg command", func() {
+				var b bytes.Buffer
+				pgDumpInstance.Dump(&b)
+				cmd := fmt.Sprintf("PGPASSWORD=%s %s -h %s -U %s -p 0 ", password, PGDMP_DUMP_BIN, ip, username)
+				Ω(b.String()).Should(Equal(cmd))
+			})
+
+			It("Should return nil error", func() {
+				err := pgDumpInstance.Dump(&writer)
+				Ω(err).Should(BeNil())
+			})
 		})
 
-		AfterEach(func() {
-			pgDumpInstance = nil
-		})
+		Context("With caller failed to execute command", func() {
+			BeforeEach(func() {
+				pgDumpInstance = &PgDump{
+					Ip:       ip,
+					Username: username,
+					Password: password,
+					Caller:   &MockFailCall{},
+				}
+			})
 
-		It("Should execute the pg command", func() {
-			pgDumpInstance.Dump(&writer)
-			Ω(pgCatchCommand).Should(Equal("PGPASSWORD=testpass pg_dump -h 0.0.0.0 -U testuser -p 0 "))
-		})
+			AfterEach(func() {
+				pgDumpInstance = nil
+			})
 
-		It("Should return nil error", func() {
-			err := pgDumpInstance.Dump(&writer)
-			Ω(err).Should(BeNil())
-		})
-	})
-
-	Context("With caller failed to execute command", func() {
-		BeforeEach(func() {
-			pgDumpInstance = &PgDump{
-				Ip:       ip,
-				Username: username,
-				Password: password,
-				Caller:   &pgMockFailFirstCall{},
-			}
-		})
-
-		AfterEach(func() {
-			pgDumpInstance = nil
-		})
-
-		It("Should return non nil error", func() {
-			err := pgDumpInstance.Dump(&writer)
-			Ω(err).ShouldNot(BeNil())
+			It("Should return non nil error", func() {
+				err := pgDumpInstance.Dump(&writer)
+				Ω(err).ShouldNot(BeNil())
+			})
 		})
 	})
 })

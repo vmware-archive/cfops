@@ -20,13 +20,12 @@ type RequestFunc func(HttpRequestEntity, string, io.Reader) (*http.Response, err
 func Request(entity HttpRequestEntity, method string, body io.Reader) (response *http.Response, err error) {
 	transport := NewRoundTripper()
 	req, err := http.NewRequest(method, entity.Url, body)
+	if err != nil {
+		return
+	}
 	req.SetBasicAuth(entity.Username, entity.Password)
 	if entity.ContentType != NO_CONTENT_TYPE {
 		req.Header.Add("Content-Type", entity.ContentType)
-	}
-
-	if err != nil {
-		return
 	}
 	return transport.RoundTrip(req)
 }
