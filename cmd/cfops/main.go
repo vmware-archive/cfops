@@ -17,15 +17,15 @@ func main() {
 func NewApp() *cli.App {
 
 	app := cli.NewApp()
-	app.Flags = []cli.Flag{
+	app.Name = "cfops"
+	app.Usage = "Cloud Foundry Operations tool for IaaS installation, deployment, and management automation"
+	app.Flags = append(app.Flags,
 		cli.StringFlag{
 			Name:  "logLevel",
 			Value: "info",
 			Usage: "log level: debug, info, error or fatal",
 		},
-	}
-	app.Name = "cfops"
-	app.Usage = "Cloud Foundry Operations tool for IaaS installation, deployment, and management automation"
+	)
 	app.Commands = append(app.Commands, []cli.Command{
 		{
 			Name:        "backup",
