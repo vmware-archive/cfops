@@ -18,7 +18,7 @@ type Task struct {
 
 func retrieveTaskId(resp *http.Response) (taskId int, err error) {
 	if resp.StatusCode != 302 {
-		err = errors.New("The resp code from toggle request should return 302")
+		err = TaskRedirectStatusCodeError
 		return
 	}
 	redirectUrls := resp.Header["Location"]
@@ -33,7 +33,7 @@ func retrieveTaskId(resp *http.Response) (taskId int, err error) {
 
 func retrieveTaskStatus(resp *http.Response) (task *Task, err error) {
 	if resp.StatusCode != 200 {
-		err = errors.New("Retrieving Task status failed")
+		err = TaskStatusCodeError
 		return
 	}
 	task = &Task{}

@@ -1,12 +1,7 @@
 package cfbackup_test
 
 import (
-	"bytes"
-	"fmt"
-	"io"
 	"io/ioutil"
-	"net/http"
-	"os/exec"
 	"path"
 
 	. "github.com/onsi/ginkgo"
@@ -212,49 +207,3 @@ var _ = Describe("OpsManager object", func() {
 		})
 	})
 })
-
-var (
-	successString string = "successString"
-	failureString string = "failureString"
-)
-
-func restSuccess(method, connectionURL, username, password string, isYaml bool) (resp *http.Response, err error) {
-	resp = &http.Response{
-		StatusCode: 200,
-	}
-	resp.Body = &ClosingBuffer{bytes.NewBufferString(successString)}
-	return
-}
-
-func restFailure(method, connectionURL, username, password string, isYaml bool) (resp *http.Response, err error) {
-	resp = &http.Response{
-		StatusCode: 500,
-	}
-	resp.Body = &ClosingBuffer{bytes.NewBufferString(failureString)}
-	return
-}
-
-type successExecuter struct{}
-
-func (s *successExecuter) Execute(dest io.Writer, src string) (err error) {
-	dest.Write([]byte(src))
-	return
-}
-
-type failExecuter struct{}
-
-func (s *failExecuter) Execute(dest io.Writer, src string) (err error) {
-	dest.Write([]byte(src))
-	err = fmt.Errorf("error failure")
-	return
-}
-
-type mockLocalExecute func(name string, arg ...string) *exec.Cmd
-
-func (cmd mockLocalExecute) Execute(destination io.Writer, command string) (err error) {
-	return
-}
-
-func NewLocalMockExecuter() Executer {
-	return mockLocalExecute(exec.Command)
-}

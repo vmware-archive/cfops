@@ -2,27 +2,44 @@ package cfbackup
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
-	"github.com/pivotal-golang/lager"
-	. "github.com/pivotalservices/gtils/http"
-	"github.com/pivotalservices/gtils/osutils"
 	"io"
 	"io/ioutil"
 	"os"
+	"path"
+
+	"github.com/pivotal-golang/lager"
+	. "github.com/pivotalservices/gtils/http"
+	"github.com/pivotalservices/gtils/osutils"
 )
 
 const (
-	ER_DEFAULT_SYSTEM_USER string = "vcap"
-	ER_DIRECTOR_INFO_URL   string = "https://%s:25555/info"
-	ER_BACKUP_DIR          string = "elasticruntime"
-	ER_VMS_URL             string = "https://%s:25555/deployments/%s/vms"
-	ER_DIRECTOR            string = "DirectorInfo"
-	ER_CONSOLE             string = "ConsoledbInfo"
-	ER_UAA                 string = "UaadbInfo"
-	ER_CC                  string = "CcdbInfo"
-	ER_MYSQL               string = "MysqldbInfo"
-	ER_NFS                 string = "NfsInfo"
-	ER_BACKUP_FILE_FORMAT  string = "%s.backup"
+	ER_DEFAULT_SYSTEM_USER        string = "vcap"
+	ER_DIRECTOR_INFO_URL          string = "https://%s:25555/info"
+	ER_BACKUP_DIR                 string = "elasticruntime"
+	ER_VMS_URL                    string = "https://%s:25555/deployments/%s/vms"
+	ER_DIRECTOR                   string = "DirectorInfo"
+	ER_CONSOLE                    string = "ConsoledbInfo"
+	ER_UAA                        string = "UaadbInfo"
+	ER_CC                         string = "CcdbInfo"
+	ER_MYSQL                      string = "MysqldbInfo"
+	ER_NFS                        string = "NfsInfo"
+	ER_BACKUP_FILE_FORMAT         string = "%s.backup"
+	ER_INVALID_DIRECTOR_CREDS_MSG string = "invalid director credentials"
+	ER_NO_PERSISTENCE_ARCHIVES    string = "there are no persistence stores in the list"
+	ER_FILE_DOES_NOT_EXIST        string = "file does not exist"
+)
+
+const (
+	IMPORT_ARCHIVE = iota
+	EXPORT_ARCHIVE
+)
+
+var (
+	ER_ERROR_DIRECTOR_CREDS error         = errors.New(ER_INVALID_DIRECTOR_CREDS_MSG)
+	ER_ERROR_EMPTY_DB_LIST  error         = errors.New(ER_NO_PERSISTENCE_ARCHIVES)
+	ER_ERROR_INVALID_PATH   *os.PathError = &os.PathError{Err: errors.New(ER_FILE_DOES_NOT_EXIST)}
 )
 
 // ElasticRuntime contains information about a Pivotal Elastic Runtime deployment
@@ -112,7 +129,15 @@ var NewElasticRuntime = func(jsonFile string, target string, logger lager.Logger
 
 // Backup performs a backup of a Pivotal Elastic Runtime deployment
 func (context *ElasticRuntime) Backup() (err error) {
-	context.Logger.Debug("Entering Backup() function")
+	return context.backupRestore(EXPORT_ARCHIVE)
+}
+
+// Restore performs a restore of a Pivotal Elastic Runtime deployment
+func (context *ElasticRuntime) Restore() (err error) {
+	return context.backupRestore(IMPORT_ARCHIVE)
+}
+
+func (context *ElasticRuntime) backupRestore(action int) (err error) {
 	var (
 		ccStop  *CloudController
 		ccStart *CloudController
@@ -129,19 +154,11 @@ func (context *ElasticRuntime) Backup() (err error) {
 			defer ccStart.ToggleJobs(CloudControllerJobs(ccJobs))
 			ccStop.ToggleJobs(CloudControllerJobs(ccJobs))
 		}
-		if err == nil {
-			context.Logger.Debug("Running database backups")
-			err = context.RunDbBackups(context.PersistentSystems)
-		}
+		err = context.RunDbAction(context.PersistentSystems, action)
 
-	} else {
-		err = fmt.Errorf("invalid director credentials")
+	} else if err == nil {
+		err = ER_ERROR_DIRECTOR_CREDS
 	}
-	return
-}
-
-// Restore performs a restore of a Pivotal Elastic Runtime deployment
-func (context *ElasticRuntime) Restore() (err error) {
 	return
 }
 
@@ -174,43 +191,71 @@ func (context *ElasticRuntime) getAllCloudControllerVMs() (ccvms []string, err e
 	return
 }
 
-func (context *ElasticRuntime) RunDbBackups(dbInfoList []SystemDump) (err error) {
-	context.Logger.Debug("Entering RunDbBackups() function")
+func (context *ElasticRuntime) RunDbAction(dbInfoList []SystemDump, action int) (err error) {
 
 	for _, info := range dbInfoList {
 
 		if err = info.Error(); err == nil {
-			err = context.openWriterAndDump(info, context.TargetDir)
-		}
+			err = context.readWriterArchive(info, context.TargetDir, action)
 
-		if err != nil {
-			return fmt.Errorf("db backup failed: %v", err)
+		} else {
+			break
 		}
 	}
-	context.Logger.Debug("RunDbBackups() function complete")
+
+	if len(dbInfoList) <= 0 {
+		err = ER_ERROR_EMPTY_DB_LIST
+	}
 	return
 }
 
-func (context *ElasticRuntime) openWriterAndDump(dbInfo SystemDump, databaseDir string) (err error) {
-	context.Logger.Debug("Entering openWriterAndDump() function")
+func (context *ElasticRuntime) getReadWriter(fpath string, action int) (rw io.ReadWriter, err error) {
+	switch action {
+	case IMPORT_ARCHIVE:
+		var exists bool
+
+		if exists, err = osutils.Exists(fpath); exists && err == nil {
+			rw, err = os.Open(fpath)
+
+		} else {
+			var pathError os.PathError
+			pathError = *ER_ERROR_INVALID_PATH
+			pathError.Path = fpath
+			err = &pathError
+		}
+
+	case EXPORT_ARCHIVE:
+		rw, err = osutils.SafeCreate(fpath)
+	}
+	return
+}
+
+func (context *ElasticRuntime) readWriterArchive(dbInfo SystemDump, databaseDir string, action int) (err error) {
 	var (
-		outfile *os.File
+		archivefile io.ReadWriter
 	)
 	filename := fmt.Sprintf(ER_BACKUP_FILE_FORMAT, dbInfo.Get(SD_COMPONENT))
-	context.Logger.Debug("openWriterAndDump() function", lager.Data{"filename": filename})
+	filepath := path.Join(databaseDir, filename)
 
-	if outfile, err = osutils.SafeCreate(databaseDir, filename); err == nil {
-		err = context.dump(outfile, dbInfo)
+	if archivefile, err = context.getReadWriter(filepath, action); err == nil {
+		err = context.importExport(archivefile, dbInfo, action)
 	}
 	return
 }
 
-func (context *ElasticRuntime) dump(dest io.Writer, s SystemDump) (err error) {
-	context.Logger.Debug("Entering dump() function")
-	var dumper PersistanceBackup
+func (context *ElasticRuntime) importExport(rw io.ReadWriter, s SystemDump, action int) (err error) {
+	var pb PersistanceBackup
 
-	if dumper, err = s.GetPersistanceBackup(); err == nil {
-		err = dumper.Dump(dest)
+	if pb, err = s.GetPersistanceBackup(); err == nil {
+
+		switch action {
+		case IMPORT_ARCHIVE:
+			fmt.Println("we are doing something here now")
+			err = pb.Import(rw)
+
+		case EXPORT_ARCHIVE:
+			err = pb.Dump(rw)
+		}
 	}
 	return
 }

@@ -2,7 +2,6 @@ package bosh
 
 import (
 	"encoding/json"
-	"errors"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -15,7 +14,7 @@ type ManifestResponse struct {
 
 func retrieveManifest(response *http.Response) (manifest io.Reader, err error) {
 	if response.StatusCode != 200 {
-		err = errors.New("The retriveing bosh manifest API response code is not equal to 200")
+		err = ManifestStatusCodeError
 		return
 	}
 	m := ManifestResponse{}

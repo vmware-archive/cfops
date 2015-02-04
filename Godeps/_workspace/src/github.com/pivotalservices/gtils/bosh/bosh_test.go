@@ -134,7 +134,6 @@ var _ = Describe("Bosh", func() {
 			})
 		})
 		Describe("Bosh Retrieve Task staus", func() {
-			var ()
 			Context("Http Request Failure", func() {
 				It("Should return error", func() {
 					httpRequestSuccessful = false

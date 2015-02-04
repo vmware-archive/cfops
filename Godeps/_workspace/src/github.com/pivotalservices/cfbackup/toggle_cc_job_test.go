@@ -37,35 +37,7 @@ var _ = Describe("toggle cc job", func() {
 		failureToggleCalled  int
 		successCreaterCalled int
 		failureCreaterCalled int
-		successString        string = `{"state":"done"}`
-		failureString        string = `{"state":"notdone"}`
-		failTryExitCount     int    = 5
-		endlessLoopFlag      bool   = false
 	)
-	restSuccess := func() (*http.Response, error) {
-		resp := &http.Response{}
-		resp.Body = &ClosingBuffer{bytes.NewBufferString(successString)}
-		restSuccessCalled++
-		return resp, nil
-	}
-	restFailure := func() (*http.Response, error) {
-		resp := &http.Response{}
-		resp.Body = &ClosingBuffer{bytes.NewBufferString(failureString)}
-		restFailureCalled++
-		err := fmt.Errorf("")
-		return resp, err
-	}
-	restNotDone := func() (*http.Response, error) {
-		resp := &http.Response{}
-		resp.Body = &ClosingBuffer{bytes.NewBufferString(failureString)}
-		restFailureCalled++
-		_ = failTryExitCount
-		if restFailureCalled > failTryExitCount {
-			resp.Body = &ClosingBuffer{bytes.NewBufferString(successString)}
-			endlessLoopFlag = true
-		}
-		return resp, nil
-	}
 
 	successJobToggleMock := func(serverUrl, username, password string) (res string, err error) {
 		successToggleCalled++
@@ -115,9 +87,25 @@ var _ = Describe("toggle cc job", func() {
 		})
 
 		Context("status not done call", func() {
-			var task EventTasker
+			var (
+				task              EventTasker
+				failTryExitCount  int  = 5
+				endlessLoopFlag   bool = false
+				restFailureCalled int
+			)
+			restNotDone := func() (*http.Response, error) {
+				resp := &http.Response{}
+				resp.Body = &ClosingBuffer{bytes.NewBufferString(failureString)}
+				restFailureCalled++
+				_ = failTryExitCount
+				if restFailureCalled > failTryExitCount {
+					resp.Body = &ClosingBuffer{bytes.NewBufferString(successString)}
+					endlessLoopFlag = true
+				}
+				return resp, nil
+			}
+
 			BeforeEach(func() {
-				endlessLoopFlag = false
 
 				task = &Task{
 					Method:         "GET",
@@ -125,19 +113,19 @@ var _ = Describe("toggle cc job", func() {
 				}
 			})
 
-			// It("Should loop endlessly if done is never returned", func() {
-			// 	eventObject := &EventObject{}
-			// 	bbf := bytes.NewBuffer([]byte(failureString))
-			// 	err := task.WaitForEventStateDone(*bbf, eventObject)
-			// 	Ω(err).Should(BeNil())
-			// 	Ω(endlessLoopFlag).Should(BeTrue())
-			// })
+			It("Should loop endlessly if done is never returned", func() {
+				endlessLoopFlag = false
+				eventObject := &EventObject{}
+				bbf := bytes.NewBuffer([]byte(failureString))
+				err := task.WaitForEventStateDone(*bbf, eventObject)
+				Ω(err).Should(BeNil())
+				Ω(endlessLoopFlag).Should(BeTrue())
+			})
 		})
 
 		Context("failed call", func() {
 			var task EventTasker
 			BeforeEach(func() {
-				endlessLoopFlag = false
 
 				task = &Task{
 					Method:         "GET",
@@ -150,13 +138,6 @@ var _ = Describe("toggle cc job", func() {
 				err := task.WaitForEventStateDone(*bbf, nil)
 				Ω(err).ShouldNot(BeNil())
 			})
-
-			// It("Should loop endlessly if done is never returned", func() {
-			// 	eventObject := &EventObject{}
-			// 	bbf := bytes.NewBuffer([]byte(failureString))
-			// 	err := task.WaitForEventStateDone(*bbf, eventObject)
-			// 	Ω(err).ShouldNot(BeNil())
-			// })
 		})
 
 	})
