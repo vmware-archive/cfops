@@ -134,28 +134,27 @@ func (context *ElasticRuntime) Backup() (err error) {
 
 // Restore performs a restore of a Pivotal Elastic Runtime deployment
 func (context *ElasticRuntime) Restore() (err error) {
-	return context.backupRestore(IMPORT_ARCHIVE)
+	err = context.backupRestore(IMPORT_ARCHIVE)
+	return
 }
 
 func (context *ElasticRuntime) backupRestore(action int) (err error) {
 	var (
-		ccStop  *CloudController
-		ccStart *CloudController
-		ccJobs  []string
+		//ccStop  *CloudController
+		//ccStart *CloudController
+		ccJobs []string
 	)
 
 	if err = context.ReadAllUserCredentials(); err == nil && context.directorCredentialsValid() {
 		context.Logger.Debug("Retrieving All CC VMs")
 		if ccJobs, err = context.getAllCloudControllerVMs(); err == nil {
-			context.Logger.Debug("Setting up CC jobs")
 			directorInfo := context.SystemsInfo[ER_DIRECTOR]
-			ccStop = NewCloudController(directorInfo.Get(SD_IP), directorInfo.Get(SD_USER), directorInfo.Get(SD_PASS), context.InstallationName, "stopped")
-			ccStart = NewCloudController(directorInfo.Get(SD_IP), directorInfo.Get(SD_USER), directorInfo.Get(SD_PASS), context.InstallationName, "started")
-			defer ccStart.ToggleJobs(CloudControllerJobs(ccJobs))
-			ccStop.ToggleJobs(CloudControllerJobs(ccJobs))
+			cloudController := NewCloudController(directorInfo.Get(SD_IP), directorInfo.Get(SD_USER), directorInfo.Get(SD_PASS), context.InstallationName, ccJobs)
+			context.Logger.Debug("Setting up CC jobs")
+			defer cloudController.Start()
+			cloudController.Stop()
 		}
 		err = context.RunDbAction(context.PersistentSystems, action)
-
 	} else if err == nil {
 		err = ER_ERROR_DIRECTOR_CREDS
 	}
