@@ -1,285 +1,105 @@
 package cfbackup_test
 
 import (
-	"bytes"
-	"fmt"
-	"net/http"
-
+	"errors"
 	. "github.com/pivotalservices/cfbackup"
-	. "github.com/pivotalservices/gtils/http"
+	"io"
+	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/pivotalservices/gtils/bosh"
 )
 
-type SuccessMockEventTasker struct {
+var (
+	getManifest             bool = true
+	getTaskStatus           bool = true
+	changeJobState          bool = true
+	manifest                io.Reader
+	ip                      string              = "10.10.10.10"
+	username                string              = "test"
+	password                string              = "test"
+	deploymentName          string              = "deployment"
+	ccjobs                  CloudControllerJobs = CloudControllerJobs{"job1", "job2", "job3"}
+	task                    bosh.Task
+	doneTask                bosh.Task = bosh.Task{}
+	changeJobStateCount     int       = 0
+	retrieveTaskStatusCount int       = 0
+)
+
+type mockDirector struct{}
+
+func (director *mockDirector) GetDeploymentManifest(deploymentName string) (io.Reader, error) {
+	if !getManifest {
+		return nil, errors.New("")
+	}
+	return manifest, nil
 }
 
-func (s SuccessMockEventTasker) WaitForEventStateDone(contents bytes.Buffer, eventObject *EventObject) (err error) {
-	successWaitCalled++
-	return
+func (director *mockDirector) ChangeJobState(deploymentName, jobName, state string, index int, manifest io.Reader) (int, error) {
+	changeJobStateCount++
+	if !changeJobState {
+		return 0, errors.New("")
+	}
+	return 1, nil
 }
 
-type FailureMockEventTasker struct {
+func (director *mockDirector) RetrieveTaskStatus(int) (*bosh.Task, error) {
+	if !getTaskStatus {
+		return nil, errors.New("")
+	}
+	retrieveTaskStatusCount++
+	if retrieveTaskStatusCount%2 == 0 {
+		return &bosh.Task{State: "processing"}, nil
+	}
+	return &task, nil
 }
 
-func (s FailureMockEventTasker) WaitForEventStateDone(contents bytes.Buffer, eventObject *EventObject) (err error) {
-	err = fmt.Errorf("this is an error")
-	failureWaitCalled++
-	return
-}
-
-var _ = Describe("toggle cc job", func() {
+var _ = Describe("ToggleCcJob", func() {
+	NewDirector = func(ip, username, password string, port int) bosh.Bosh {
+		return &mockDirector{}
+	}
+	TaskPingFreq = time.Millisecond
 	var (
-		restSuccessCalled    int
-		restFailureCalled    int
-		successToggleCalled  int
-		failureToggleCalled  int
-		successCreaterCalled int
-		failureCreaterCalled int
+		cloudController *CloudController = NewCloudController(ip, username, password, deploymentName, ccjobs)
 	)
-
-	successJobToggleMock := func(serverUrl, username, password string) (res string, err error) {
-		successToggleCalled++
-		return
-	}
-
-	failureJobToggleMock := func(serverUrl, username, password string) (res string, err error) {
-		failureToggleCalled++
-		return
-	}
-
-	successTaskCreater := func(method string, requestAdapter RequestAdaptor) (task EventTasker) {
-		task = EventTasker(SuccessMockEventTasker{})
-		successCreaterCalled++
-		return
-	}
-
-	failureTaskCreater := func(method string, requestAdapter RequestAdaptor) (task EventTasker) {
-		task = &FailureMockEventTasker{}
-		failureCreaterCalled++
-		return
-	}
-
-	Describe("Task", func() {
-		Context("successful call", func() {
-			var task EventTasker
+	Describe("Toggle All jobs", func() {
+		Context("Change Job State failed", func() {
 			BeforeEach(func() {
-				task = &Task{
-					Method:         "GET",
-					RequestAdaptor: restSuccess,
-				}
+				changeJobState = false
 			})
-
-			It("Should return nil error on valid arguments", func() {
-				eventObject := &EventObject{}
-				bbf := bytes.NewBuffer([]byte(successString))
-				err := task.WaitForEventStateDone(*bbf, eventObject)
-				Ω(err).Should(BeNil())
-			})
-
-			It("Should return nil error and return if rest endpoint returns done status", func() {
-				eventObject := &EventObject{}
-				bbf := bytes.NewBuffer([]byte(failureString))
-				err := task.WaitForEventStateDone(*bbf, eventObject)
-				Ω(err).Should(BeNil())
-			})
-		})
-
-		Context("status not done call", func() {
-			var (
-				task              EventTasker
-				failTryExitCount  int  = 5
-				endlessLoopFlag   bool = false
-				restFailureCalled int
-			)
-			restNotDone := func() (*http.Response, error) {
-				resp := &http.Response{}
-				resp.Body = &ClosingBuffer{bytes.NewBufferString(failureString)}
-				restFailureCalled++
-				_ = failTryExitCount
-				if restFailureCalled > failTryExitCount {
-					resp.Body = &ClosingBuffer{bytes.NewBufferString(successString)}
-					endlessLoopFlag = true
-				}
-				return resp, nil
-			}
-
-			BeforeEach(func() {
-
-				task = &Task{
-					Method:         "GET",
-					RequestAdaptor: restNotDone,
-				}
-			})
-
-			It("Should loop endlessly if done is never returned", func() {
-				endlessLoopFlag = false
-				eventObject := &EventObject{}
-				bbf := bytes.NewBuffer([]byte(failureString))
-				err := task.WaitForEventStateDone(*bbf, eventObject)
-				Ω(err).Should(BeNil())
-				Ω(endlessLoopFlag).Should(BeTrue())
-			})
-		})
-
-		Context("failed call", func() {
-			var task EventTasker
-			BeforeEach(func() {
-
-				task = &Task{
-					Method:         "GET",
-					RequestAdaptor: restFailure,
-				}
-			})
-
-			It("Should return non nil error for bad event object", func() {
-				bbf := bytes.NewBuffer([]byte(""))
-				err := task.WaitForEventStateDone(*bbf, nil)
+			It("Should return error", func() {
+				err := cloudController.Start()
 				Ω(err).ShouldNot(BeNil())
 			})
 		})
-
-	})
-
-	Describe("CloudController", func() {
-		Context("successful call", func() {
-			var cc *CloudController
+		Context("Toggle successfully", func() {
 			BeforeEach(func() {
-				cc = NewCloudController("", "", "", "", "")
-				cc.JobToggler = JobTogglerAdapter(successJobToggleMock)
-				cc.NewEventTaskCreater = EvenTaskCreaterAdapter(successTaskCreater)
-				successWaitCalled, failureWaitCalled, successToggleCalled, failureToggleCalled, successCreaterCalled, failureCreaterCalled, restSuccessCalled, restFailureCalled = 0, 0, 0, 0, 0, 0, 0, 0
+				changeJobState = true
+				changeJobStateCount = 0
+				task = bosh.Task{State: "done"}
+				retrieveTaskStatusCount = 0
 			})
-			AfterEach(func() {
-				successWaitCalled, failureWaitCalled, successToggleCalled, failureToggleCalled, successCreaterCalled, failureCreaterCalled, restSuccessCalled, restFailureCalled = 0, 0, 0, 0, 0, 0, 0, 0
-			})
-
-			Context("ToggleJobs (with an 's') method", func() {
-				It("Should call through the entire chain if there is no error", func() {
-					cc.ToggleJobs(CloudControllerJobs([]string{"jobA", "someurl.com"}))
-					Ω(successToggleCalled).Should(BeNumerically(">", 0))
-					Ω(successCreaterCalled).Should(BeNumerically(">", 0))
-					Ω(successWaitCalled).Should(BeNumerically(">", 0))
-				})
-			})
-
-			Context("ToggleJob method", func() {
-				Context("when a call to task.WaitForEventStateDone internally returns error", func() {
-					BeforeEach(func() {
-						cc.NewEventTaskCreater = EvenTaskCreaterAdapter(failureTaskCreater)
-					})
-
-					It("should return an error from ToggleJob", func() {
-						err := cc.ToggleJob("jobA", "someurl.com", 1)
-						Ω(err).ShouldNot(BeNil())
-					})
-				})
-
-				It("Should call through the entire chain if there is no error", func() {
-					cc.ToggleJob("jobA", "someurl.com", 1)
-					Ω(successToggleCalled).Should(BeNumerically(">", 0))
-					Ω(successCreaterCalled).Should(BeNumerically(">", 0))
-					Ω(successWaitCalled).Should(BeNumerically(">", 0))
-				})
-			})
-		})
-
-		Context("failed call", func() {
-			var cc *CloudController
-			BeforeEach(func() {
-				cc = NewCloudController("", "", "", "", "")
-				cc.JobToggler = JobTogglerAdapter(failureJobToggleMock)
-				cc.NewEventTaskCreater = EvenTaskCreaterAdapter(failureTaskCreater)
-			})
-			Context("ToggleJobs (with an 's') method", func() {
-				It("Should not call through the entire chain if there is an error", func() {
-					cc.ToggleJobs(CloudControllerJobs([]string{"jobA", "someurl.com"}))
-					Ω(successToggleCalled).ShouldNot(BeNumerically(">", 0))
-					Ω(successCreaterCalled).ShouldNot(BeNumerically(">", 0))
-					Ω(successWaitCalled).ShouldNot(BeNumerically(">", 0))
-				})
-			})
-			Context("ToggleJob method", func() {
-				It("Should not call through the entire chain if there is an error", func() {
-					cc.ToggleJob("jobA", "someurl.com", 1)
-					Ω(successToggleCalled).ShouldNot(BeNumerically(">", 0))
-					Ω(successCreaterCalled).ShouldNot(BeNumerically(">", 0))
-					Ω(successWaitCalled).ShouldNot(BeNumerically(">", 0))
-				})
-			})
-		})
-
-		Context("partial failed call", func() {
-			var cc *CloudController
-			BeforeEach(func() {
-				cc = NewCloudController("", "", "", "", "")
-				cc.JobToggler = JobTogglerAdapter(successJobToggleMock)
-				cc.NewEventTaskCreater = EvenTaskCreaterAdapter(failureTaskCreater)
-			})
-			Context("ToggleJobs (with an 's') method", func() {
-				It("Should not call through the entire chain if there is an error", func() {
-					cc.ToggleJobs(CloudControllerJobs([]string{"jobA", "someurl.com"}))
-					Ω(successToggleCalled).Should(BeNumerically(">", 0))
-					Ω(successCreaterCalled).ShouldNot(BeNumerically(">", 0))
-					Ω(successWaitCalled).ShouldNot(BeNumerically(">", 0))
-				})
-			})
-			Context("ToggleJob method", func() {
-				It("Should not call through the entire chain if there is an error", func() {
-					cc.ToggleJob("jobA", "someurl.com", 1)
-					Ω(successToggleCalled).Should(BeNumerically(">", 0))
-					Ω(successCreaterCalled).ShouldNot(BeNumerically(">", 0))
-					Ω(successWaitCalled).ShouldNot(BeNumerically(">", 0))
-				})
-			})
-		})
-	})
-
-	Describe("ToggleCCJobRunner", func() {
-		Context("successful call", func() {
-			var (
-				username  string = "usertest"
-				password  string = "passwrdtest"
-				serverUrl string = "someurl.com"
-			)
 			It("Should return nil error", func() {
-				NewToggleGateway = func(method, serverUrl, username, password string) func() (interface{}, error) {
-					return func() (interface{}, error) {
-						resp, _ := makeResponse(HttpRequestEntity{}, "", 302, false, "success", nil)
-						return ToggleCCHandler(resp)
-					}
-				}
-				_, err := ToggleCCJobRunner(username, password, serverUrl)
+				err := cloudController.Start()
 				Ω(err).Should(BeNil())
 			})
-
-			It("Should return redirectUrl", func() {
-				NewToggleGateway = func(method, serverUrl, username, password string) func() (interface{}, error) {
-					return func() (interface{}, error) {
-						resp, _ := makeResponse(HttpRequestEntity{}, "", 302, false, "success", nil)
-						return ToggleCCHandler(resp)
-					}
-				}
-				msg, _ := ToggleCCJobRunner(username, password, serverUrl)
-				Ω(msg).Should(Equal(redirectUrl))
+			It("Should Call changeJobState 3 times with 3 jobs", func() {
+				cloudController.Start()
+				Ω(changeJobStateCount).Should(Equal(3))
+			})
+			It("Should Call retriveTaskStatus 5 times with retries when task is processing", func() {
+				cloudController.Start()
+				Ω(retrieveTaskStatusCount).Should(Equal(5))
 			})
 		})
-
-		Context("failure call", func() {
-			var (
-				username  string = "usertest"
-				password  string = "passwrdtest"
-				serverUrl string = "someurl.com"
-			)
-			It("Should return error on non 302 http code", func() {
-				NewToggleGateway = func(method, serverUrl, username, password string) func() (interface{}, error) {
-					return func() (interface{}, error) {
-						resp, _ := makeResponse(HttpRequestEntity{}, "", 500, true, "failure", nil)
-						return ToggleCCHandler(resp)
-					}
-				}
-				_, err := ToggleCCJobRunner(username, password, serverUrl)
+		Context("Task status is error", func() {
+			BeforeEach(func() {
+				changeJobState = true
+				task = bosh.Task{State: "error"}
+			})
+			It("Should return error", func() {
+				err := cloudController.Start()
 				Ω(err).ShouldNot(BeNil())
 			})
 		})

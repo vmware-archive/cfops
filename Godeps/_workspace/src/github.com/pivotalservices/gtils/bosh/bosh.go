@@ -10,8 +10,8 @@ import (
 type Bosh interface {
 	GetDeploymentManifest(deploymentName string) (io.Reader, error)
 	//Currently there is a defect on bosh director we need to pass in the manifest file
-	ChangeVMState(string, string, string, int, io.Reader) (int, error)
-	RetrieveTaskStatus(int) (string, error)
+	ChangeJobState(string, string, string, int, io.Reader) (int, error)
+	RetrieveTaskStatus(int) (*Task, error)
 }
 
 type BoshDirector struct {
