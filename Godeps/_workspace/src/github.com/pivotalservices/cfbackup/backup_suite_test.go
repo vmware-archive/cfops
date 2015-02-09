@@ -12,7 +12,6 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	. "github.com/pivotalservices/cfbackup"
-	"github.com/pivotalservices/cfops/command"
 	. "github.com/pivotalservices/gtils/command"
 	. "github.com/pivotalservices/gtils/http"
 	"github.com/pivotalservices/gtils/mock"
@@ -182,7 +181,7 @@ func (s *mockRemoteOps) UploadFile(lfile io.Reader) error {
 	return s.Err
 }
 
-var getNfs = func(lf io.Writer, cmdexec command.Executer) *NFSBackup {
+var getNfs = func(lf io.Writer, cmdexec Executer) *NFSBackup {
 	return &NFSBackup{
 		Caller: cmdexec,
 		RemoteOps: &mockRemoteOps{

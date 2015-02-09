@@ -260,7 +260,7 @@ app.Commands = []cli.Command{
         return
       }
       for _, t := range tasks {
-        fmt.Println(t)
+        println(t)
       }
     },
   }
