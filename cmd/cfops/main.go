@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/codegangsta/cli"
@@ -32,54 +31,22 @@ func NewApp() *cli.App {
 			ShortName:   "b",
 			Usage:       "backup a Cloud Foundry deployment",
 			Description: "Backup a Cloud Foundry deployment, including Ops Manager configuration, databases, and blob store",
-			Flags: []cli.Flag{
-				cli.StringFlag{
-					Name:   "hostname, host",
-					Value:  "",
-					Usage:  "hostname for Ops Manager",
-					EnvVar: "",
-				},
-				cli.StringFlag{
-					Name:   "username, u",
-					Value:  "",
-					Usage:  "username for Ops Manager",
-					EnvVar: "",
-				},
-				cli.StringFlag{
-					Name:   "password, p",
-					Value:  "",
-					Usage:  "password for Ops Manager",
-					EnvVar: "",
-				},
-				cli.StringFlag{
-					Name:   "tempestpassword, tp",
-					Value:  "",
-					Usage:  "password for the Ops Manager tempest user",
-					EnvVar: "",
-				},
-				cli.StringFlag{
-					Name:   "destination, d",
-					Value:  "",
-					Usage:  "directory where the Cloud Foundry backup should be stored",
-					EnvVar: "",
-				},
-			},
-			Action: func(c *cli.Context) {
-				var err error
+			Flags:       backupFlags,
 
-				if c.String("hostname") == "" || c.String("username") == "" || c.String("password") == "" || c.String("tempestpassword") == "" || c.String("destination") == "" {
-					cli.ShowCommandHelp(c, "backup")
+			Action: runBackupRestore("backup", func(hostname, username, password, tempestpassword, destination string) error {
+				return cfbackup.RunBackupPipeline(hostname, username, password, tempestpassword, destination)
+			}),
+		},
+		{
+			Name:        "restore",
+			ShortName:   "r",
+			Usage:       "restore a Cloud Foundry deployment",
+			Description: "Restore a Cloud Foundry deployment, including Ops Manager configuration, databases, and blob store",
+			Flags:       backupFlags,
 
-				} else {
-					err = cfbackup.RunBackupPipeline(c.String("hostname"), c.String("username"), c.String("password"), c.String("tempestpassword"), c.String("destination"))
-				}
-
-				if err != nil {
-					fmt.Println(err)
-				} else {
-					fmt.Println("Backup complete successfully.")
-				}
-			},
+			Action: runBackupRestore("restore", func(hostname, username, password, tempestpassword, destination string) error {
+				return cfbackup.RunRestorePipeline(hostname, username, password, tempestpassword, destination)
+			}),
 		},
 	}...)
 

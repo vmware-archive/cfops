@@ -24,4 +24,4 @@ build:
     - script:
         name: go test cover
         code: |
-          ./testCoverage ./... 79
+          ./testCoverage ./... 90

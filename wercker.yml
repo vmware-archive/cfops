@@ -34,7 +34,7 @@ build:
     - script:
         name: go smoke build
         code: |
-          godep go build ./cmd/cfops/main.go 
+          godep go build ./cmd/cfops/*.go 
 
     - script:
         name: add repo to artifact
