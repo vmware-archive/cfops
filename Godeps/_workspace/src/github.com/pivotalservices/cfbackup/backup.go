@@ -15,29 +15,51 @@ type BackupContext struct {
 	TargetDir string
 }
 
+type action func() error
+
+type actionAdaptor func(t Tile) action
+
 func RunBackupPipeline(hostname, username, password, tempestpassword, destination string) (err error) {
+	backup := func(t Tile) action {
+		return func() error {
+			return t.Backup()
+		}
+	}
+	return runPipelines(hostname, username, password, tempestpassword, destination, "Backup", backup)
+}
+
+func RunRestorePipeline(hostname, username, password, tempestpassword, destination string) (err error) {
+	restore := func(t Tile) action {
+		return func() error {
+			return t.Restore()
+		}
+	}
+	return runPipelines(hostname, username, password, tempestpassword, destination, "Backup", restore)
+}
+
+func runPipelines(hostname, username, password, tempestpassword, destination, loggerName string, actionBuilder actionAdaptor) (err error) {
 	var (
 		opsmanager     Tile
 		elasticRuntime Tile
 	)
-	backupLogger := cf_lager.New("backup")
+	backupLogger := cf_lager.New(loggerName)
 	installationFilePath := path.Join(destination, OPSMGR_BACKUP_DIR, OPSMGR_INSTALLATION_SETTINGS_FILENAME)
 
 	if opsmanager, err = NewOpsManager(hostname, username, password, tempestpassword, destination, backupLogger); err == nil {
 		elasticRuntime = NewElasticRuntime(installationFilePath, destination, backupLogger)
-		tiles := []Tile{
-			opsmanager,
-			elasticRuntime,
+		tiles := []action{
+			actionBuilder(opsmanager),
+			actionBuilder(elasticRuntime),
 		}
-		err = runBackups(tiles)
+		err = runActions(tiles)
 	}
 	return
 }
 
-func runBackups(tiles []Tile) (err error) {
-	for _, tile := range tiles {
+func runActions(actions []action) (err error) {
+	for _, action := range actions {
 
-		if err = tile.Backup(); err != nil {
+		if err = action(); err != nil {
 			break
 		}
 	}
