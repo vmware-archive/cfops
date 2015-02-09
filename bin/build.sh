@@ -15,7 +15,7 @@ ln -s $ROOT_DIR $CLI_GOPATH/src/github.com/pivotalservices/cfops
 
 GODEP_GOPATH=$ROOT_DIR/Godeps/_workspace
 
-GOPATH=$CLI_GOPATH:$GODEP_GOPATH:$GOPATH go build -o $ROOT_DIR/out/cfops cmd/cfops/main.go
+GOPATH=$CLI_GOPATH:$GODEP_GOPATH:$GOPATH go build -o $ROOT_DIR/out/cfops cmd/cfops/*.go
 rm -rf $CLI_GOPATH
 
 CFOPS_HOME=~/.cfops
