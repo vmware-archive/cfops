@@ -2,7 +2,6 @@ package log
 
 import (
 	"flag"
-	"fmt"
 	"io"
 
 	"github.com/pivotal-golang/lager"
