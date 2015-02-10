@@ -26,31 +26,31 @@
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/cfbackup",
-			"Rev": "df12dcdecdde963cb3e564652466f3db84a4a589"
+			"Rev": "3f2c41ce5472a9692329c88bb37b047d7846251d"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/bosh",
-			"Rev": "909284d98a77f7c6716770b29f962cc4450f1291"
+			"Rev": "aff26e7e6534a1e832b01d5bf7e96d5251253bb7"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/command",
-			"Rev": "909284d98a77f7c6716770b29f962cc4450f1291"
+			"Rev": "aff26e7e6534a1e832b01d5bf7e96d5251253bb7"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/http",
-			"Rev": "909284d98a77f7c6716770b29f962cc4450f1291"
+			"Rev": "aff26e7e6534a1e832b01d5bf7e96d5251253bb7"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/log",
-			"Rev": "909284d98a77f7c6716770b29f962cc4450f1291"
+			"Rev": "aff26e7e6534a1e832b01d5bf7e96d5251253bb7"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/osutils",
-			"Rev": "909284d98a77f7c6716770b29f962cc4450f1291"
+			"Rev": "aff26e7e6534a1e832b01d5bf7e96d5251253bb7"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/persistence",
-			"Rev": "909284d98a77f7c6716770b29f962cc4450f1291"
+			"Rev": "aff26e7e6534a1e832b01d5bf7e96d5251253bb7"
 		},
 		{
 			"ImportPath": "github.com/pkg/sftp",

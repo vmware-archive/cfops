@@ -189,3 +189,14 @@ var getNfs = func(lf io.Writer, cmdexec Executer) *NFSBackup {
 		},
 	}
 }
+
+var logger = getLogger("debug")
+
+func Logger() log.Logger {
+	return logger
+}
+
+func getLogger(minLogLevel string) log.Logger {
+	log.SetLogLevel(minLogLevel)
+	return log.LogFactory("TestLogger", log.Lager, os.Stdout)
+}

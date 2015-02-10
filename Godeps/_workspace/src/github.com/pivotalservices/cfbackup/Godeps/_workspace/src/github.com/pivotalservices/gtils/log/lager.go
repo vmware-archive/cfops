@@ -1,21 +1,14 @@
 package log
 
 import (
-	"flag"
 	"fmt"
-	// "io"
 
 	"github.com/pivotal-golang/lager"
 )
 
-func init() {
-	AddFlags(flag.CommandLine)
-	flag.Parse()
-}
-
 func NewLager(log *logger) Logger {
 	var minLagerLogLevel lager.LogLevel
-	switch minLogLevel {
+	switch log.LogLevel {
 	case DEBUG:
 		minLagerLogLevel = lager.DEBUG
 	case INFO:
@@ -25,10 +18,11 @@ func NewLager(log *logger) Logger {
 	case FATAL:
 		minLagerLogLevel = lager.FATAL
 	default:
-		panic(fmt.Errorf("unknown log level: %s", minLogLevel))
+		panic(fmt.Errorf("unknown log level: %s", log.LogLevel))
 	}
 
 	logger := lager.NewLogger(log.Name)
+	fmt.Println()
 	logger.RegisterSink(lager.NewWriterSink(log.Writer, minLagerLogLevel))
 	log.Logger = logger
 

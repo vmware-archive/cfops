@@ -2,6 +2,7 @@ package log
 
 import (
 	"flag"
+	"fmt"
 	"io"
 
 	"github.com/pivotal-golang/lager"
@@ -18,8 +19,9 @@ type Logger interface {
 
 type logger struct {
 	lager.Logger
-	Name   string
-	Writer io.Writer
+	LogLevel string
+	Name     string
+	Writer   io.Writer
 }
 
 type LogType uint
@@ -40,6 +42,11 @@ var (
 	minLogLevel string
 )
 
+func init() {
+	AddFlags(flag.CommandLine)
+	flag.Parse()
+}
+
 func AddFlags(flagSet *flag.FlagSet) {
 	flagSet.StringVar(
 		&minLogLevel,
@@ -54,7 +61,7 @@ func SetLogLevel(level string) {
 }
 
 func LogFactory(name string, logType LogType, writer io.Writer) Logger {
-	log := &logger{Name: name, Writer: writer}
+	log := &logger{Name: name, LogLevel: minLogLevel, Writer: writer}
 	if logType == Lager {
 		return NewLager(log)
 	}
