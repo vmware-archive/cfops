@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"os/exec"
 	"strings"
 
@@ -14,6 +15,7 @@ import (
 	. "github.com/pivotalservices/cfbackup"
 	. "github.com/pivotalservices/gtils/command"
 	. "github.com/pivotalservices/gtils/http"
+	"github.com/pivotalservices/gtils/log"
 	"github.com/pivotalservices/gtils/mock"
 	"github.com/pivotalservices/gtils/osutils"
 

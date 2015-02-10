@@ -26,7 +26,7 @@
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/cfbackup",
-			"Rev": "8d5c504cd7176e529bf5c4bc78b85cc4010aa959"
+			"Rev": "b49719ed636b42c4cdb517fdfb358f23fc7ece5c"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/bosh",
