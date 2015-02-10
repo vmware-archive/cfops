@@ -12,7 +12,7 @@ func main() {
 	cf_lager.AddFlags(flag.CommandLine)
 	flag.Parse()
 
-	logger := cf_lager.New("cf-lager-integration")
+	logger, _ := cf_lager.New("cf-lager-integration")
 
 	logger.Debug("component-does-action", lager.Data{"debug-detail": "foo"})
 	logger.Info("another-component-action", lager.Data{"info-detail": "bar"})

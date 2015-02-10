@@ -1,0 +1,4030 @@
+{
+  "guid": "efacc5d26b472eed24d5",
+  "installation_version": "1.2",
+  "infrastructure": {
+    "type": "vsphere",
+    "director_configuration": {
+      "metrics_ip": "172.16.1.110",
+      "resurrector_enabled": true,
+      "ntp_servers": [
+        "165.193.126.229"
+      ]
+    },
+    "networks": [
+      {
+        "guid": "3c3d38f1762d5866ce9f",
+        "name": "PCF_NW",
+        "iaas_network_identifier": "PCF_NW",
+        "subnet": "172.16.0.1/23",
+        "dns": "172.16.0.91",
+        "gateway": "172.16.0.1",
+        "reserved_ip_ranges": "172.16.0.1-172.16.1.40"
+      }
+    ],
+    "availability_zones": [
+      {
+        "guid": "a0dfeb36f5be44588dee",
+        "name": "AZ_1",
+        "cluster": "PCF_CLUSTER_1",
+        "resource_pool": ""
+      },
+      {
+        "guid": "d225921e9f297268dcf8",
+        "name": "AZ_2",
+        "cluster": "PCF_CLUSTER_2",
+        "resource_pool": ""
+      }
+    ],
+    "iaas_configuration": {
+      "datacenter": "PCF_DC",
+      "vcenter_ip": "172.16.0.91",
+      "vcenter_username": "pivotal@vsphere.local",
+      "vcenter_password": "Welcome12#",
+      "datastores": [
+        "PCF_STORAGE_1",
+        "PCF_STORAGE_2"
+      ]
+    },
+    "file_system": {
+      "microbosh_vm_folder": "pivotal_cf_vms_efacc5d26b472eed24d5",
+      "microbosh_template_folder": "pivotal_cf_templates_efacc5d26b472eed24d5",
+      "microbosh_disk_path": "pivotal_cf_disk_efacc5d26b472eed24d5"
+    }
+  },
+  "products": [
+    {
+      "type": "microbosh",
+      "guid": "microbosh-0671cdd6ce6b60e9a2c6",
+      "installation_name": "microbosh-0671cdd6ce6b60e9a2c6",
+      "product_version": "1.3.2.0",
+      "singleton_availability_zone_reference": "a0dfeb36f5be44588dee",
+      "ips": {
+        "director-part-e108a5ed1c44cb9b82b1": [
+          "172.16.1.41"
+        ]
+      },
+      "jobs": [
+        {
+          "type": "director",
+          "guid": "director-55d27f406bfe079216ca",
+          "installation_name": "director",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 3072
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 16384
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 20480
+            },
+            {
+              "definition": "cpu",
+              "value": 4
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "698c84c8035e14dd",
+                "password": "a2392d3cf693622b"
+              }
+            },
+            {
+              "definition": "agent_credentials",
+              "value": {
+                "identity": "vcap",
+                "password": "d40b785f6a2bdc5d59be"
+              }
+            },
+            {
+              "definition": "director_credentials",
+              "value": {
+                "identity": "director",
+                "password": "de321cc4bf5bbbf64322"
+              }
+            },
+            {
+              "definition": "nats_credentials",
+              "value": {
+                "identity": "nats",
+                "password": "c453bb1ff6f7baa72d15"
+              }
+            },
+            {
+              "definition": "redis_credentials",
+              "value": {
+                "identity": "redis",
+                "password": "d4946fc91f16ae49630d"
+              }
+            },
+            {
+              "definition": "postgres_credentials",
+              "value": {
+                "identity": "postgres",
+                "password": "a7484fe5290767d36885"
+              }
+            },
+            {
+              "definition": "blobstore_credentials",
+              "value": {
+                "identity": "blobstore",
+                "password": "fe5a7335487f7c2fa02a"
+              }
+            },
+            {
+              "definition": "health_monitor_credentials",
+              "value": {
+                "identity": "health_monitor",
+                "password": "d8548e0a8e648f99d5c0"
+              }
+            },
+            {
+              "definition": "director_ssl",
+              "value": {
+                "private_key_pem": "-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEAwogUTH15nhNLyLStDbF/rZx4E3eqddIBXND8Q1ckV+/4LpUm\nMStXa6oAH98BPBtZcgPRgvXza8B7/tGK042y+ZuONaSL+TILpoe85j5UrYEdhPBW\nKoCIb497RitRbn89RcIjMDNHob2L67iJJaj+t2lh8Gcd3wtwvWGj8ZnSWxEB0ZqI\nSUsVNTjzjyVdYs4cPIyYaSvsmnV5bkFF/jB+EyEeAHv1CtQb/6jGww2rW8j5GhcU\ni4auL0CmATnmfg4owbpf8cyjRYQljYlI1YbuxZ0AY6Ae2yeZIZkEIwVSpN9S84rB\nIcdi7Z2LZrVyWI4prpZhhko2lmZdQLkUo9AG6QIDAQABAoIBAQDBkqOQUbN5Zv4c\nZB1n6N6CJZce2A8ZWrXcZGEBqW8SykmOIQB2IQjGq82f6UrTQuvIlqAezxtAd7Nr\nJ5wbU39q/i2Ol4RpnjEVrzB7dD7SwA5dwMIdXPVm/cHPWz+W0qpoBfz5860t9u2K\nzIA8p2N/oy/ABvwkfL/c05JN0aEO16fh/W9BiMQILgjXtod6/HGCO0plQL21OrCJ\nDhs8yb2fyFa7EmvAfCDdrfY0N/vD7Xeq0rNH2aUGYHjg7Z47qojTATfvpbdHh1Fe\nUGNuOIS4LxVFxSAYuU32yrEeMG/Lkrmr36G64ooSk///ZRvwC6JJ2kqlJa3QGC7G\nQHmzWuABAoGBAP1VHhotMlQ7wqFkw5FFxW975ghQUOv1MxwbZXunalgZG1aVbPXD\nRnagXQBVLvtpTccJ1igEgJ+g6gVozYDsRxpA/+y1D5YWAMYMjh56S4M0Cvs6ORPL\namzQ3bC0bRdOh5v6Srlz3L+r43xPd3Wh5zHZj5p0Yi4w3Ca6ZVSx0YzpAoGBAMSU\ndUPZ+ZAtI0ConTOjvC4KmMYgRTFAbSNcNOgjXICulu98CzWxFoIrNW5xBHV5BTAJ\nafQH6T9xzz8OVjaBS46sZ1fDUKvv8tLKW7QJzQvMaDkh6zt2xV3vC8y+TO6j3LL/\npsdQcMsKprYuA4XX+1GYcf9vXULjVnKLYt0AtmoBAoGBALpb6lgRVYvXpnb53FA7\nBmHbwD3vb4gVCfMsSDxtzPJgDddk9xHYBDbyA1hiUbyLG7dHCi7IGSLUyjMOhNbJ\negjbNimYjI25Q/ptdAMBrhknqMhlbWWdZ34DLIJ4SCQ0FdhtiJjincq2lRN2lgeI\nAb6PMG/MHAmk0d7/kdl7Mg85AoGAP9InBCFXeax93ncfmm1VIemE0gYWELhm9mzw\nLFGWrZyBGj0+cm8M7LPUhAejN/RTb9YOlRCgdF2huEoSSV3OxwJIBuE9ZqTfQ/o4\nrYnlDSiOycWuVj7oMufx/8XkujFu7Jo9bkY6aGEL4Oetcx281S/WCuT/9UBTh5qj\nPTcHAgECgYAWwzo5WPZAYM49MaNMsZz7GD0b5qmZKemysjzPzotSQhxc6SbcQbU/\nyIWMJ1HKCiZEpidcsF+MXXGLhUug1s2hNbmfiXFSmstrcpExSYl0VVLef4PzZNhE\ntMeC9KWMbZNFR4LqOJb8ewQVb+/7IcafQVwfUe9xx/7ayKhmeJccwA==\n-----END RSA PRIVATE KEY-----\n",
+                "csr_pem": "-----BEGIN CERTIFICATE REQUEST-----\nMIICezCCAWMCAQAwNjELMAkGA1UEBhMCVVMxEDAOBgNVBAoMB1Bpdm90YWwxFTAT\nBgNVBAMMDGRpcmVjdG9yX3NzbDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoC\nggEBAMKIFEx9eZ4TS8i0rQ2xf62ceBN3qnXSAVzQ/ENXJFfv+C6VJjErV2uqAB/f\nATwbWXID0YL182vAe/7RitONsvmbjjWki/kyC6aHvOY+VK2BHYTwViqAiG+Pe0Yr\nUW5/PUXCIzAzR6G9i+u4iSWo/rdpYfBnHd8LcL1ho/GZ0lsRAdGaiElLFTU4848l\nXWLOHDyMmGkr7Jp1eW5BRf4wfhMhHgB79QrUG/+oxsMNq1vI+RoXFIuGri9ApgE5\n5n4OKMG6X/HMo0WEJY2JSNWG7sWdAGOgHtsnmSGZBCMFUqTfUvOKwSHHYu2di2a1\ncliOKa6WYYZKNpZmXUC5FKPQBukCAwEAAaAAMA0GCSqGSIb3DQEBBQUAA4IBAQBP\nvhCxjMgOjhIjWc40qX6PePDU+gw9BacgkMnucWfbzDIOUxsYI8Cr8vdAZeDiA9HE\n9a4H8FPMG3Oyi+pHd+i14D7Vw3dx2qNORNJ/J0cr+RozA+WBx3sF93PmmEqHbL+n\noryQ592V4UqAUD/e8Mq0Wv/GmdFVmlZGwZIdz6/kDROv/cREE6NuyW2FUxRBshBg\n1Q0e7+SPQxs1y6jptiqRjcx0R2wbYWYX+rJmULeYRgvr/grWkvgTcKfw4mEkofCb\noDBguAVnd4pzfU7LQO4cwWz8jAcCihzNiqW8pL6Zot2dKfuJvqpW2ZoldZMunar4\nGcD3Xw5ugZ/u94EqXTKH\n-----END CERTIFICATE REQUEST-----\n",
+                "cert_pem": "-----BEGIN CERTIFICATE-----\nMIIC+TCCAeGgAwIBAgIVAOwEMogEYq7MropSMkUeXYcZfN/yMA0GCSqGSIb3DQEB\nBQUAMDYxCzAJBgNVBAYTAlVTMRAwDgYDVQQKDAdQaXZvdGFsMRUwEwYDVQQDDAxk\naXJlY3Rvcl9zc2wwHhcNMTQxMTExMDY0NDA0WhcNMTYxMTEwMDY0NDA0WjA2MQsw\nCQYDVQQGEwJVUzEQMA4GA1UECgwHUGl2b3RhbDEVMBMGA1UEAwwMZGlyZWN0b3Jf\nc3NsMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwogUTH15nhNLyLSt\nDbF/rZx4E3eqddIBXND8Q1ckV+/4LpUmMStXa6oAH98BPBtZcgPRgvXza8B7/tGK\n042y+ZuONaSL+TILpoe85j5UrYEdhPBWKoCIb497RitRbn89RcIjMDNHob2L67iJ\nJaj+t2lh8Gcd3wtwvWGj8ZnSWxEB0ZqISUsVNTjzjyVdYs4cPIyYaSvsmnV5bkFF\n/jB+EyEeAHv1CtQb/6jGww2rW8j5GhcUi4auL0CmATnmfg4owbpf8cyjRYQljYlI\n1YbuxZ0AY6Ae2yeZIZkEIwVSpN9S84rBIcdi7Z2LZrVyWI4prpZhhko2lmZdQLkU\no9AG6QIDAQABMA0GCSqGSIb3DQEBBQUAA4IBAQB5U/U0slzM58LpEq2mP5/HqLa5\n6/rUoDYufP7h350Q2KUzUm1aAYjDJxfU7T6P9SW3Bb0BHYV/PaxEbANxX1Cf5SCh\nhHQDbG1lhITS7mF08UE4nfcyKK2spCkoPkrqF4Oc9xVW/Y+o/ULAi8gey1NPALL/\ndg0r8BPF8M9YIshblxfbakSGhu79XlELUZ2usETVbZBW1BluSS1rDkYVCFxLp7KE\n3BZMNVhuiPRNlk9E9WBUmc9rQ5c4zVAEMSUStu1Jcn8BZz3vg82gTtmM1tFuanPT\nhwNqKWwmkw4MyPGQIY2hPWmA+xuPe2e+hKPiy/WllpSwcsqN+bB0h/gdFbVy\n-----END CERTIFICATE-----\n"
+              }
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "director-part-e108a5ed1c44cb9b82b1",
+              "installation_name": "director-partition-a0dfeb36f5be44588dee",
+              "instance_count": 1,
+              "availability_zone_reference": "a0dfeb36f5be44588dee"
+            }
+          ]
+        }
+      ],
+      "infrastructure_network_reference": "3c3d38f1762d5866ce9f",
+      "deployment_network_reference": "3c3d38f1762d5866ce9f"
+    },
+    {
+      "type": "cf",
+      "guid": "cf-f21eea2dbdb8555f89fb",
+      "installation_name": "cf-f21eea2dbdb8555f89fb",
+      "product_version": "1.3.3.0",
+      "singleton_availability_zone_reference": "a0dfeb36f5be44588dee",
+      "availability_zone_references": [
+        "a0dfeb36f5be44588dee"
+      ],
+      "disabled_post_deploy_errand_names": [
+        "push-console",
+        "push-app-usage-service",
+        "smoke-tests"
+      ],
+      "ips": {
+        "ha_proxy-part-f68ef75b015256952944": [
+          "172.16.1.250"
+        ],
+        "nats-part-9d9580a9f5a44797e98f": [
+          "172.16.1.42"
+        ],
+        "etcd_server-part-d2c64c05ee0e0e6b3842": [
+          "172.16.1.43"
+        ],
+        "health_manager-part-64ad09773d8818fea1bb": [
+          "172.16.1.44"
+        ],
+        "nfs_server-part-f6c854d5d64920210729": [
+          "172.16.1.45"
+        ],
+        "ccdb-part-9da75aa66bdeee25b0fc": [
+          "172.16.1.46"
+        ],
+        "cloud_controller-part-5b27f7d712277c15cb7a": [
+          "172.16.1.47"
+        ],
+        "clock_global-part-7fa6a08aafc81c2b5221": [
+          "172.16.1.48"
+        ],
+        "cloud_controller_worker-part-100a056984b7592d7bae": [
+          "172.16.1.49"
+        ],
+        "router-part-feb605b1568765622509": [
+          "172.16.1.252"
+        ],
+        "collector-part-659fadfd7f0e0faadf26": [
+          "172.16.1.50"
+        ],
+        "uaadb-part-ae454ad85ae318d03280": [
+          "172.16.1.51"
+        ],
+        "uaa-part-58b79a6dc5e319cf38c7": [
+          "172.16.1.52"
+        ],
+        "login-part-5d9d491e0b6a35b1b87b": [
+          "172.16.1.53"
+        ],
+        "consoledb-part-8430e87b5381a4868968": [
+          "172.16.1.54"
+        ],
+        "mysql-part-280b30dd83349346ae75": [
+          "172.16.1.55"
+        ],
+        "dea-part-37d9432b353d3a6bce03": [
+          "172.16.1.56"
+        ],
+        "loggregator-part-1f07c50d016cdc8248cf": [
+          "172.16.1.57"
+        ],
+        "loggregator_trafficcontroller-part-01d6ea1b3be5b1d2c6fd": [
+          "172.16.1.58"
+        ],
+        "push-console-part-03c49175ef0ac3ee91c6": [
+          "172.16.1.59"
+        ],
+        "push-app-usage-service-part-7593e9bfcb7c5b123130": [
+          "172.16.1.60"
+        ],
+        "smoke-tests-part-87952253c869e2c730e2": [
+          "172.16.1.61"
+        ],
+        "acceptance-tests-part-d0a2442ba73f591d21d8": [
+          "172.16.1.62"
+        ],
+        "compilation-part-0f1b6083b3dc44e136f8": [
+          "172.16.1.63",
+          "172.16.1.64",
+          "172.16.1.65",
+          "172.16.1.66"
+        ],
+        "dynamic_for_static": [
+          "172.16.1.67",
+          "172.16.1.68",
+          "172.16.1.69",
+          "172.16.1.70",
+          "172.16.1.71",
+          "172.16.1.72",
+          "172.16.1.73",
+          "172.16.1.74",
+          "172.16.1.75",
+          "172.16.1.76",
+          "172.16.1.77"
+        ]
+      },
+      "network_reference": "3c3d38f1762d5866ce9f",
+      "jobs": [
+        {
+          "type": "ha_proxy",
+          "guid": "ha_proxy-57cfef01d402bd00e3c0",
+          "installation_name": "ha_proxy",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 1024
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 2048
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "abb298152e6dcb47",
+                "password": "4345da44083d2837"
+              }
+            },
+            {
+              "definition": "static_ips",
+              "value": "172.16.1.250"
+            },
+            {
+              "definition": "ssl_rsa_certificate",
+              "value": {
+                "private_key_pem": "-----BEGIN RSA PRIVATE KEY-----\r\nMIIEpAIBAAKCAQEA1cPBPsxB41PD/A6bfOAiH+exROAafVg8XwCp9TlqOr0cBI3a\r\na1hZjqPijxXVO7zybyn+puQ7XRmSJlCh/UEJ+Hv58lD9ldHjDBeKIPuqnNxoVc21\r\nR+bcem0r3NM4D0Kw5l66piUwsRvRlw4jpQ4nFUUIZIK4qnLL4+WvR1G9skLKxOvL\r\n5c0XkhggKXEjKRnsUc3Gj1s1HfO0kUw4GFOSgjEbKt0FGa3F4HJGBdOlmnHoCLb0\r\n7Ym94dP2r5XINH5+dR7eJx/86BCsDajzvwKNy6Dm3Qap/V1P9j74EWIpn76JsTEW\r\nRFJV/94Om82nVpcsdxl9tcL0SBLZBWbXx/yowQIDAQABAoIBAGX6cllkFla94nR/\r\n/3uObZks7iu+gcSkcICeD3a2glAtYY1movms92SOGIpMTyKlnD6eGSdDIHLkvQ1c\r\nUDtCaOBLPM12B9QOgjOFk1by2MzmdTvh3AbGQw6AwHkjps3Y8g2kyYRzn4wOiml2\r\nzFh0rP5/pWZV2oUuKMi7DWiHvWiph035Bvv+FVpBNWNcWnjmCqv/ZDOMu/KLAm3b\r\n09DTBu75XlFRAcSiv3vFwhDI4PTDCQ6ztfiVf10O8wqNeytQJOA9QQEAFNDazWid\r\nXDWWXWoMZASwm7BaP6miJQBlH1KhlZK6Z5Xsm2j7lAadBjIWBSGQ3rV8am7U4Fq3\r\nAJRu8lUCgYEA8Aot8Q/ahjS7XAk0nbDy/pM1S1HBkyV6Te+hea2JNN+iZG3hqyyx\r\nnZRIuc9R0bKo65RWgBqg4QvgQbS9YL8U0WBn7IFe/B0ytAnEHj/E1pQ6mLQClfDF\r\nD1lsuWS9A8omOFXStf/1PsFDGi+zsvewNYk+M2g7MfFpWtpijEHw3CsCgYEA4/pV\r\n7IvemCRDKjn7WH+XP3o9uSSWCtEKc+nkTwFDkUsjoLszzqyU43TF7L7t1JzOmLF8\r\neoU1jXKnFyJjsZQoDBNlMTeyhzEjoXjaqnPpitVsO6FE2/YT+3DUDrAZdi1+o2pJ\r\nma/x8nmsk09o9GLdDAqWqe2r6xapXlYO/Hjw3MMCgYAKsPlg3krmZVze+Y39ZA8+\r\npYHfK/IKQsYSyJSRndgZochS3s4JWMFEeoFOvVwwkduSOpYruIPn4iaH5qv0ri4Y\r\nMUoPr6dyZT6H5FN24XI7+Hgvqvzefs3YJCyCiWkdzRgstC3ha1gaBnOdq/g+BWg0\r\nyjsaAQ955v3BTS7Mfndi5wKBgQC8p9dc9W4Rpshx9CNb29H0tJrJUE5dyxkETQQi\r\noOAiJvTnuKKpn8Vh6Ks1O9ah/9UzJITm+r8TO1KsYUfwlrMBMzelH/s7xt0+bT0+\r\nmscjnXOAcPcDs0Jb68WAFhgr5IAMiRM4/BGS3z+Bc9BdlEZqBYUiP8zpsQodR8gF\r\nA6wGcwKBgQDnkIkzphCrPxwQU0l9SH708YVGusMbCzqXCS6wP1xM4GDW8g7xhWQ6\r\nOTpEtScjy+2+SF15OyCXvjkWlhNlH2tFHg1BeGIEen2DiBdt4VZQ6YUBCwbBf4aR\r\nMZv4GabkXxhuSTArknvRJ8Fr9xEE9aBsQvNH6BdIi7eRo/oNT99ocA==\r\n-----END RSA PRIVATE KEY-----",
+                "csr_pem": "-----BEGIN CERTIFICATE REQUEST-----\nMIICgjCCAWoCAQAwPTELMAkGA1UEBhMCVVMxEDAOBgNVBAoMB1Bpdm90YWwxHDAa\nBgNVBAMME3NzbF9yc2FfY2VydGlmaWNhdGUwggEiMA0GCSqGSIb3DQEBAQUAA4IB\nDwAwggEKAoIBAQDVw8E+zEHjU8P8Dpt84CIf57FE4Bp9WDxfAKn1OWo6vRwEjdpr\nWFmOo+KPFdU7vPJvKf6m5DtdGZImUKH9QQn4e/nyUP2V0eMMF4og+6qc3GhVzbVH\n5tx6bSvc0zgPQrDmXrqmJTCxG9GXDiOlDicVRQhkgriqcsvj5a9HUb2yQsrE68vl\nzReSGCApcSMpGexRzcaPWzUd87SRTDgYU5KCMRsq3QUZrcXgckYF06WacegItvTt\nib3h0/avlcg0fn51Ht4nH/zoEKwNqPO/Ao3LoObdBqn9XU/2PvgRYimfvomxMRZE\nUlX/3g6bzadWlyx3GX21wvRIEtkFZtfH/KjBAgMBAAGgADANBgkqhkiG9w0BAQUF\nAAOCAQEAFP/xHKsX1Moto1YMynvz7CKe1aOg6Kogw5G1EuntOwuAOciUHT8XIj2O\nz5Wdx59dxwSwjt3LENXcRuJWwwNZSXsKsJ54wXk9a8Lpwh1aNE0J+PyhfO1xY+D+\nSYm4AWQlksFt6wTTnbWasBX3wcnohplVsc0iqW977uYYCH4eGgc2zdJB/EhqAOc5\nkEx3F6CxnqxRHLQ4Ci2YXcJSbe5Mx9qyvOzxKmZaLob48BmW8BIwwwyq0yyb+6U3\nU/hXjcaIxvIY9my3A1e1ZPnrN8X3wep85JH2kzZ9UvxPljENLU2uoJry1ptWfs6G\ny/mPf09UW6hxa5P/nVZ81fI1dnTgLg==\n-----END CERTIFICATE REQUEST-----\n",
+                "cert_pem": "-----BEGIN CERTIFICATE-----\r\nMIIDNzCCAh+gAwIBAgIVAIvCuYoPuQpVQumsnY6ei/16OM/fMA0GCSqGSIb3DQEB\r\nBQUAMDoxCzAJBgNVBAYTAlVTMRAwDgYDVQQKDAdQaXZvdGFsMRkwFwYDVQQDDBAq\r\nLnN5cy5ob21lbGFiLmlvMB4XDTE0MTExMTA2MzYxMFoXDTE2MTExMDA2MzYxMFow\r\nOjELMAkGA1UEBhMCVVMxEDAOBgNVBAoMB1Bpdm90YWwxGTAXBgNVBAMMECouc3lz\r\nLmhvbWVsYWIuaW8wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDVw8E+\r\nzEHjU8P8Dpt84CIf57FE4Bp9WDxfAKn1OWo6vRwEjdprWFmOo+KPFdU7vPJvKf6m\r\n5DtdGZImUKH9QQn4e/nyUP2V0eMMF4og+6qc3GhVzbVH5tx6bSvc0zgPQrDmXrqm\r\nJTCxG9GXDiOlDicVRQhkgriqcsvj5a9HUb2yQsrE68vlzReSGCApcSMpGexRzcaP\r\nWzUd87SRTDgYU5KCMRsq3QUZrcXgckYF06WacegItvTtib3h0/avlcg0fn51Ht4n\r\nH/zoEKwNqPO/Ao3LoObdBqn9XU/2PvgRYimfvomxMRZEUlX/3g6bzadWlyx3GX21\r\nwvRIEtkFZtfH/KjBAgMBAAGjNDAyMDAGA1UdEQQpMCeCECouc3lzLmhvbWVsYWIu\r\naW+CEyouY2ZhcHBzLmhvbWVsYWIuaW8wDQYJKoZIhvcNAQEFBQADggEBALBa5QZA\r\nCnTa8Q+OvAeH8OlY7IQWvFY6UUg3rpgEPsM1v4LQIr1IMp15CFUxMlXzhb5aXzI/\r\nL01iViqw/iZk9U6gHsvyg+iK7T0X+hh6Teca2xxvckjzNXdfqjY3r/YHuB3d7W41\r\nESEpu3djOrIhAN5w2CMucWUFktQMLdLgCit5W2hSi8ne+Uy/D1KQ52oj6nG5DFU3\r\npaUpRN7rOUl7v1fSwEPJCwRCB8tcxbTiOEiKoJRs390rDXxmZGQAyIIYLEenYtz7\r\nDb0l/ATcxjSf6arV0F8RmLLYJ+f+RFWB0NxE+93ThhAyh9XhNKHXZ8019/z1mvpG\r\nll7Ld4yoHse1AII=\r\n-----END CERTIFICATE-----"
+              }
+            },
+            {
+              "definition": "skip_cert_verify",
+              "value": true
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "ha_proxy-part-f68ef75b015256952944",
+              "installation_name": "ha_proxy-partition-a0dfeb36f5be44588dee",
+              "instance_count": 1,
+              "availability_zone_reference": "a0dfeb36f5be44588dee"
+            }
+          ]
+        },
+        {
+          "type": "nats",
+          "guid": "nats-d9cc853489ab2a5f861c",
+          "installation_name": "nats",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 1024
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 2048
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "33c3a8517ff62dca",
+                "password": "7a926040fe860683"
+              }
+            },
+            {
+              "definition": "credentials",
+              "value": {
+                "identity": "nats",
+                "password": "f87bc775ee8010987802"
+              }
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "nats-part-9d9580a9f5a44797e98f",
+              "installation_name": "nats-partition-a0dfeb36f5be44588dee",
+              "instance_count": 1,
+              "availability_zone_reference": "a0dfeb36f5be44588dee"
+            }
+          ]
+        },
+        {
+          "type": "etcd_server",
+          "guid": "etcd_server-2464522647310320568b",
+          "installation_name": "etcd_server",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 1024
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 2048
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 1024
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "62a2ceba5fd590ec",
+                "password": "9091f640a517fdf9"
+              }
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "etcd_server-part-d2c64c05ee0e0e6b3842",
+              "installation_name": "etcd_server-partition-a0dfeb36f5be44588dee",
+              "instance_count": 1,
+              "availability_zone_reference": "a0dfeb36f5be44588dee"
+            }
+          ]
+        },
+        {
+          "type": "health_manager",
+          "guid": "health_manager-92c0548f5a23aa3da11d",
+          "installation_name": "health_manager",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 1024
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 2048
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "391b82cccab7928c",
+                "password": "b9dd8934335b9343"
+              }
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "health_manager-part-64ad09773d8818fea1bb",
+              "installation_name": "health_manager-partition-a0dfeb36f5be44588dee",
+              "instance_count": 1,
+              "availability_zone_reference": "a0dfeb36f5be44588dee"
+            }
+          ]
+        },
+        {
+          "type": "nfs_server",
+          "guid": "nfs_server-479716b1bfcf6b9f6a2d",
+          "installation_name": "nfs_server",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 1024
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 2048
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 51200
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "b6f49a68f8afaada",
+                "password": "1b2a9bb04877b5a5"
+              }
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "nfs_server-part-f6c854d5d64920210729",
+              "installation_name": "nfs_server-partition-a0dfeb36f5be44588dee",
+              "instance_count": 1,
+              "availability_zone_reference": "a0dfeb36f5be44588dee"
+            }
+          ]
+        },
+        {
+          "type": "ccdb",
+          "guid": "ccdb-3bb93ae5dd376a759938",
+          "installation_name": "ccdb",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 1024
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 2048
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 2048
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "2c4c59481d0cea5a",
+                "password": "92f518ad25d83c90"
+              }
+            },
+            {
+              "definition": "credentials",
+              "value": {
+                "identity": "admin",
+                "password": "e3e89a528625d819160d"
+              }
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "ccdb-part-9da75aa66bdeee25b0fc",
+              "installation_name": "ccdb-partition-a0dfeb36f5be44588dee",
+              "instance_count": 1,
+              "availability_zone_reference": "a0dfeb36f5be44588dee"
+            }
+          ]
+        },
+        {
+          "type": "cloud_controller",
+          "guid": "cloud_controller-2fe02827b98294740ff0",
+          "installation_name": "cloud_controller",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 4096
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 10240
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "ca1de93c769f62b5",
+                "password": "e7d5cc6e5d13096a"
+              }
+            },
+            {
+              "definition": "staging_upload_credentials",
+              "value": {
+                "identity": "staging_upload_user",
+                "password": "c193dbe32c6714b39a6b"
+              }
+            },
+            {
+              "definition": "bulk_api_credentials",
+              "value": {
+                "identity": "bulk_api",
+                "password": "c9457bae3020bc1bded2"
+              }
+            },
+            {
+              "definition": "db_encryption_credentials",
+              "value": {
+                "identity": "db_encryption",
+                "password": "da82514f8339ba0613c3"
+              }
+            },
+            {
+              "definition": "encrypt_key"
+            },
+            {
+              "definition": "max_file_size",
+              "value": 1024
+            },
+            {
+              "definition": "disable_custom_buildpacks",
+              "value": false
+            },
+            {
+              "definition": "system_domain",
+              "value": "sys.homelab.io"
+            },
+            {
+              "definition": "apps_domain",
+              "value": "cfapps.homelab.io"
+            },
+            {
+              "definition": "default_quota_memory_limit_mb",
+              "value": 10240
+            },
+            {
+              "definition": "default_quota_max_number_services",
+              "value": 100
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "cloud_controller-part-5b27f7d712277c15cb7a",
+              "installation_name": "cloud_controller-partition-a0dfeb36f5be44588dee",
+              "instance_count": 1,
+              "availability_zone_reference": "a0dfeb36f5be44588dee"
+            }
+          ]
+        },
+        {
+          "type": "clock_global",
+          "guid": "clock_global-304191084f800be25b87",
+          "installation_name": "clock_global",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 1024
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 2048
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "d6dcbacfda22f8ed",
+                "password": "e39fe8d326c38e85"
+              }
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "clock_global-part-7fa6a08aafc81c2b5221",
+              "installation_name": "clock_global-partition-a0dfeb36f5be44588dee",
+              "instance_count": 1,
+              "availability_zone_reference": "a0dfeb36f5be44588dee"
+            }
+          ]
+        },
+        {
+          "type": "cloud_controller_worker",
+          "guid": "cloud_controller_worker-8dd4e33dcf3970366ed2",
+          "installation_name": "cloud_controller_worker",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 1024
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 2048
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "67f2384c98a266e2",
+                "password": "42f1d0c3fbddb9a9"
+              }
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "cloud_controller_worker-part-100a056984b7592d7bae",
+              "installation_name": "cloud_controller_worker-partition-a0dfeb36f5be44588dee",
+              "instance_count": 1,
+              "availability_zone_reference": "a0dfeb36f5be44588dee"
+            }
+          ]
+        },
+        {
+          "type": "router",
+          "guid": "router-1c343a47ffd3b3b65b3f",
+          "installation_name": "router",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 1024
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 2048
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "9e1ab834586aece9",
+                "password": "030a488eaa25a6c5"
+              }
+            },
+            {
+              "definition": "status_credentials",
+              "value": {
+                "identity": "router_status",
+                "password": "fd28eebf29de2e2d62a6"
+              }
+            },
+            {
+              "definition": "static_ips",
+              "value": "172.16.1.252"
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "router-part-feb605b1568765622509",
+              "installation_name": "router-partition-a0dfeb36f5be44588dee",
+              "instance_count": 1,
+              "availability_zone_reference": "a0dfeb36f5be44588dee"
+            }
+          ]
+        },
+        {
+          "type": "collector",
+          "guid": "collector-4e2d7054456252dd1820",
+          "installation_name": "collector",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 1024
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 2048
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "9193627bc241927d",
+                "password": "d84edc6e29d894c8"
+              }
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "collector-part-659fadfd7f0e0faadf26",
+              "installation_name": "collector-partition-a0dfeb36f5be44588dee",
+              "instance_count": 1,
+              "availability_zone_reference": "a0dfeb36f5be44588dee"
+            }
+          ]
+        },
+        {
+          "type": "uaadb",
+          "guid": "uaadb-d0bee356c5f0e4c21f9c",
+          "installation_name": "uaadb",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 1024
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 2048
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 8192
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "e6e9a76b79fb6c3b",
+                "password": "5c52623dcf33cb5c"
+              }
+            },
+            {
+              "definition": "credentials",
+              "value": {
+                "identity": "root",
+                "password": "dd680e746d936a7503f8"
+              }
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "uaadb-part-ae454ad85ae318d03280",
+              "installation_name": "uaadb-partition-a0dfeb36f5be44588dee",
+              "instance_count": 1,
+              "availability_zone_reference": "a0dfeb36f5be44588dee"
+            }
+          ]
+        },
+        {
+          "type": "uaa",
+          "guid": "uaa-b6889bbbdef5cec18001",
+          "installation_name": "uaa",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 1024
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 2048
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "e673477bdfbbad1b",
+                "password": "6dd0c17c340245e1"
+              }
+            },
+            {
+              "definition": "admin_credentials",
+              "value": {
+                "identity": "admin",
+                "password": "b7c4160b03fadb74a276"
+              }
+            },
+            {
+              "definition": "push_console_credentials",
+              "value": {
+                "identity": "push_console",
+                "password": "f5eed11e9bd80628cf8b"
+              }
+            },
+            {
+              "definition": "run_smoke_tests_credentials",
+              "value": {
+                "identity": "smoke_tests",
+                "password": "b35a2eac994cd4105ded"
+              }
+            },
+            {
+              "definition": "system_services_credentials",
+              "value": {
+                "identity": "system_services",
+                "password": "d33ff23272dbcf8d6ef2"
+              }
+            },
+            {
+              "definition": "system_verification_credentials",
+              "value": {
+                "identity": "system_verification",
+                "password": "c72a1eff53b49b20751d"
+              }
+            },
+            {
+              "definition": "system_passwords_client_credentials",
+              "value": {
+                "identity": "system_passwords",
+                "password": "df9839cb69dca7fa5fa1"
+              }
+            },
+            {
+              "definition": "login_client_credentials",
+              "value": {
+                "identity": "login",
+                "password": "ed0ecf41b313c54d8442"
+              }
+            },
+            {
+              "definition": "console_client_credentials",
+              "value": {
+                "identity": "portal",
+                "password": "fc88f00dd04852e52024"
+              }
+            },
+            {
+              "definition": "autoscale_client_credentials",
+              "value": {
+                "identity": "autoscaling_service",
+                "password": "a84f6b84f073dd2b7f7f"
+              }
+            },
+            {
+              "definition": "cc_service_broker_client_credentials",
+              "value": {
+                "identity": "cc_service_broker_client",
+                "password": "eb4190b8e4258b919a4c"
+              }
+            },
+            {
+              "definition": "cc_client_credentials",
+              "value": {
+                "identity": "cloud_controller",
+                "password": "fd2c37437fb385e8f202"
+              }
+            },
+            {
+              "definition": "admin_client_credentials",
+              "value": {
+                "identity": "admin",
+                "password": "e0ac8239daf4073ee2c9"
+              }
+            },
+            {
+              "definition": "jwt_signing_key_credentials",
+              "value": {
+                "private_key_pem": "-----BEGIN RSA PRIVATE KEY-----\nMIIEogIBAAKCAQEAuSovcr1CKmdcEX9NJOBo/PJmWvhODf9jjpBQ+m5ucqVHKYVi\nxStO8WE2Ti0nLa6rjI6pJBKacH6UpZF1vM7IpE+/7T6YnWsmWCFWcCfGk4KL+QuA\nBp0s86xeM7EhnQu1abrj2Zwc9p5WBpizqxA2lVB4cXbrU+SnMrLXDn1cW71LdcCr\ncJW6KuytDuwRmHSM5XJNqwt41gRTtn2lZDUuNhgbN4MN71IUgS2H+WR/ZGoByAMt\nJJuFN8yzJpxW3iW/g/BoTrZJ6K8OQBQ6zS57hI9bRZdmYWDFOmXxkd6bpp+DKsb4\nCIgzC28PdvzVUNxvXu5bh4dKkaAh5y74CVK+dQIDAQABAoIBAGi8UeZm4xw1JsDG\n7w3i2b/qJLdkKFKGmPu06fkdqd+zWVNFHZ9FZfvm7t69b6HJYUO6FjZPR4hGMTKN\n2rkXhipa6cb6Vz0DtMa45Lm/5fTeLOqL9LjJAvo6D3bRxJ+eVdkeW29lfISK/0Hv\n8gDaxOUkhVw41de4SFLHEhoiErHYpIO3YeawW+tJ5jMXBGz7oJYuxbxNCwI1ZfeW\nChSUidybe8Ih36sGA2c7Yfmp+UeLsC8rsMw1+yPxNmmQ1LQ2nZUXL1kkc36xVowe\n404kvgWbcZGrYgWU1sEK2qSfZZN8Tf22JpS7+j72LQxbL8b3h3n5Chxud+GFYtoF\nadqSukECgYEA4Cbfz7P0dCqFW7dZQZuUsel1rmUJ6gACmo2N3LBe5eEO8J7e3WSz\nRYE/U5C7iojwtk1LH5ObhhLB46j/DCKv5lgRktiJ9JcHDndVUWhGR4/Y6WN9lH6E\nqO3npKBbjG0dyTKmAwgAHuV7acUkPRKaghmY1wYIJNu2VPpJWKMn+y0CgYEA03k5\ny2kxEBxYjnrMeswTylev6ZnEyoyUtM1rlKRSfPl3/S+eo4ECdQWL4nh1/6I+xsjM\nIqvfR/z41sqs15AjQXcxtwEpaiOdtvVxv+kVspRIdEBKRgIjK2HLMUg8QmCKGZZs\nejlEJV1uMs4lBxvUaSbHbBObUi8y7k/3bUM/PWkCgYBi6qTP6vEQpocNT18TJc47\nqPPmzu3OFs0PWTJmVmq6dVP7eZCOENdP79Z7UR6B5yaavIdPWvtB8lsf1T8gItqP\nAwRWUjqm9lMF3kGHWEXTZLZrYB1V/3MZfUtBCgb8dFa1qCU8pzYubETHC1mPnfsT\nOKqLET1czpyq6XyeofmNzQKBgHY0FHH2Yk43CejaCuG4oHdBfDp+kNkGqzhEehWj\no9fnOYJz06BgxBbU+tOjsZEqBxzlr/TRTQTYCd9FekcjchFtpoQ8SgHh1o4ls2cp\nyc7/w1/3b4yiNTZSe1kYn1Ya0BZtVkUbLVQVXTtYrqnCjIAaBO4MJ41QhI9gc1TH\nednBAoGAIIo1DoHzXY79IVSq1W8tiqFV9PvNu0/rcT6cwe/2Q3gz1FxCQ2XI6mlr\nCK8ByUxRZgE2frFgTx3Cf63Xj1ywRsTwMiT9hWhOjlONulQSKiqsK7v+8RFRe9U0\nKbbEO3LTJAN6v2RurOWDjw1+k0pILIFmRAQR0XBTSUC/37l2ayA=\n-----END RSA PRIVATE KEY-----\n"
+              }
+            },
+            {
+              "definition": "ldap_url",
+              "value": "ldap://ldap.homelab.io"
+            },
+            {
+              "definition": "credentials",
+              "value": {
+                "identity": "cn=admin,dc=homelab,dc=io",
+                "password": "welcome"
+              }
+            },
+            {
+              "definition": "ldap_search_base",
+              "value": "dc=homelab,dc=io"
+            },
+            {
+              "definition": "ldap_search_filter",
+              "value": "mail={0}"
+            },
+            {
+              "definition": "ldap_server_ssl_cert"
+            },
+            {
+              "definition": "ldap_server_ssl_cert_alias"
+            },
+            {
+              "definition": "ldap_mail_attribute_name",
+              "value": "mail"
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "uaa-part-58b79a6dc5e319cf38c7",
+              "installation_name": "uaa-partition-a0dfeb36f5be44588dee",
+              "instance_count": 1,
+              "availability_zone_reference": "a0dfeb36f5be44588dee"
+            }
+          ]
+        },
+        {
+          "type": "login",
+          "guid": "login-51b257b1e88ae6a544ef",
+          "installation_name": "login",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 1024
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 2048
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "ace8ba7ead5cdc5f",
+                "password": "b3350e3918d67401"
+              }
+            },
+            {
+              "definition": "service_provider_key_credentials",
+              "value": {
+                "private_key_pem": "-----BEGIN RSA PRIVATE KEY-----\nMIIEowIBAAKCAQEAssKU+ZQF2Zvtyx8v/whnYNTtFSLyZoy5w3Ojy1nUwNYxd5Ce\n8aH4REgg2/MdGEqdpYfRUVFRnq6PP+r4DkCAA+iqzHA99a4xbjcbCQ9q45a5w2fV\n2txDTNsoWakNf0X8sKYKqhtuwzbx4xqvGlpiiPOYfFQgMjSEYHnLHMiIGxpYh2cw\nR17H8OoDA68LwKHbbHO5qpYB+/SYuMxFaMa7v4umoDxjV7vX60vMTbV7UUYucquS\niUkj4u2nQ/X9H8C3fFKRPOIiqJrziUbr0wKXkj53kZgotMQ57NCGFuWNMIseGXeP\n0NgzEPUPDMroFzL8jXWfkVoJLJEzKfuITDLmhQIDAQABAoIBAQCC3PHEd7mEoaMG\nRRGU6SkM+TOKeqfrrO+9BuYM0vluJh/WgNfq2oDuM8NiYWqWQuF/sZrppddTjESw\nLSpk/JD6y5Rlz3F8boYfQlYXXuMIM2pQg65J51+ZXwL+CEUqPCkNhLBf8W83l/yi\nHgG8EBj8Wx/xPIDJYCrcmay4qJEDDSAiXmXlwRW/Fg4I53TV/1+HG6BX1F/rK07M\nT7Kcbi3Mw9ULuOGflMZWMNhW6U58gAX4usekDYHeia0B29Nd9sSOVztH2Tm8J7GA\nkQ5VNoPOAqUvrqCzf0Xnca06sO3fBRcQmLLJTw3DujppiZoL8H02BghPAKCUYqlo\nOeJH3kohAoGBANqvjCO3xDYa0KOGevgLjQzDbSDKHGWWc8fBwcZWAsS7ia5P5dYJ\nCKktvOItQrP3IniivzOzWkT8/kU6nIsNtjW/RXzzNDB1ry5Fn/DJAzmjsnV8BQEG\nxmlroTGH4pNHAxVWVaa7gk6C/OSjnbo8CGWnIdyGWIkbhKs9jChnVPOZAoGBANFD\nCOuYUp4sB4Ncy8L/5QmeiNrBtFgrPUkRN1sKEw69RDSUaey8wt7bZqLtCfgTPSIZ\nnl5RqTHvYG/Xy76WmDF4WOjby3dpp30viHGgteb8mAoeTipMhVlqFoqgEHT+19e6\nIc/4/J4cfxPbd0ERWXblzDJNK9Zing7LTDE+X53NAoGACOjJ/tKHzeR9x4u9Csn9\nrx1vHrzdN05P3T2JlXj/l+BEFbPvmy63CZ1xao2JgCd7YgrPW13dOZ5NBakDo66l\nU789J4AJCkhhILN5dqfZ18lRhfPNiGMsRjM6V/g/RNzJxV7FEovlHSm8/9uim2nC\ntdF/UaqvhLZ4Szmwshyzm1ECgYATnWP1qWZ9GwVtQ8J5ucC/QRP05VlBNnRdJ/b3\nWp9kr0r4Xrz7Csp9VzVsqilYDn2Zd6tHjgH9A0IX2bNoXvdPE8fJs+iDfezMKCty\n8yx5xU1/DU4oWtnZAr+wKMbCIK0ctH683srXCzbCJr0r5TNsmKemQ2OLidzk6Btx\nNjaCNQKBgCbYwAmRrH69jBIwF3jjIX8wXY9pR0zii5+JD3tTFN4VmJhR8OUkYReS\nSe6ynRc2DeCShjpelgog1+n8cRSODXXzdvsOGQrPovOe2NzZTTisW6DwEJMa0RwJ\nyvOIqBw6GjEiCvz8Mn+Y3FPQSDGb4YxVvPcD3yj2llUriddUvpOI\n-----END RSA PRIVATE KEY-----\n",
+                "csr_pem": "-----BEGIN CERTIFICATE REQUEST-----\nMIICjzCCAXcCAQAwSjELMAkGA1UEBhMCVVMxEDAOBgNVBAoMB1Bpdm90YWwxKTAn\nBgNVBAMMIHNlcnZpY2VfcHJvdmlkZXJfa2V5X2NyZWRlbnRpYWxzMIIBIjANBgkq\nhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAssKU+ZQF2Zvtyx8v/whnYNTtFSLyZoy5\nw3Ojy1nUwNYxd5Ce8aH4REgg2/MdGEqdpYfRUVFRnq6PP+r4DkCAA+iqzHA99a4x\nbjcbCQ9q45a5w2fV2txDTNsoWakNf0X8sKYKqhtuwzbx4xqvGlpiiPOYfFQgMjSE\nYHnLHMiIGxpYh2cwR17H8OoDA68LwKHbbHO5qpYB+/SYuMxFaMa7v4umoDxjV7vX\n60vMTbV7UUYucquSiUkj4u2nQ/X9H8C3fFKRPOIiqJrziUbr0wKXkj53kZgotMQ5\n7NCGFuWNMIseGXeP0NgzEPUPDMroFzL8jXWfkVoJLJEzKfuITDLmhQIDAQABoAAw\nDQYJKoZIhvcNAQEFBQADggEBACQoJ3HobNW36vDGwgYrH/qx+Lum8xTh4MnLljSH\nxfyMR1iktCQVUD4sWxKEZPZsrkeuRFkSGaA3KZ83KlRHm1HoHub93luQIQcAkeJl\ng+WFGoFFt5Ly7MF9rLxukiOcdjFRTTuB/cVFIpl4Hyj6s9aDOOKYVsJTSoFC+gA/\nxIcGplKty6Kn8oaygfVflkEItgFk0OaVwHpTwaIzrzBp0rakeiOM3XYK3l5l5nwl\nUs0t4v2MAq7nB7JU3v/stPQAvBNifkAq0W6KwFPO50nk1sbtZ0HRutHpe1JZo5X+\nOrylxV5KUMGTi41ViO5O2hqZRf9RcA8iu6CjkPSC+S0MWtU=\n-----END CERTIFICATE REQUEST-----\n",
+                "cert_pem": "-----BEGIN CERTIFICATE-----\nMIIDITCCAgmgAwIBAgIVAIcKaYxSV8kk5q1YNi7w1iEANcQ3MA0GCSqGSIb3DQEB\nBQUAMEoxCzAJBgNVBAYTAlVTMRAwDgYDVQQKDAdQaXZvdGFsMSkwJwYDVQQDDCBz\nZXJ2aWNlX3Byb3ZpZGVyX2tleV9jcmVkZW50aWFsczAeFw0xNDExMTEwNjQ0MDRa\nFw0xNjExMTAwNjQ0MDRaMEoxCzAJBgNVBAYTAlVTMRAwDgYDVQQKDAdQaXZvdGFs\nMSkwJwYDVQQDDCBzZXJ2aWNlX3Byb3ZpZGVyX2tleV9jcmVkZW50aWFsczCCASIw\nDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALLClPmUBdmb7csfL/8IZ2DU7RUi\n8maMucNzo8tZ1MDWMXeQnvGh+ERIINvzHRhKnaWH0VFRUZ6ujz/q+A5AgAPoqsxw\nPfWuMW43GwkPauOWucNn1drcQ0zbKFmpDX9F/LCmCqobbsM28eMarxpaYojzmHxU\nIDI0hGB5yxzIiBsaWIdnMEdex/DqAwOvC8Ch22xzuaqWAfv0mLjMRWjGu7+LpqA8\nY1e71+tLzE21e1FGLnKrkolJI+Ltp0P1/R/At3xSkTziIqia84lG69MCl5I+d5GY\nKLTEOezQhhbljTCLHhl3j9DYMxD1DwzK6Bcy/I11n5FaCSyRMyn7iEwy5oUCAwEA\nATANBgkqhkiG9w0BAQUFAAOCAQEAaDpQHOE3Vk8ndKE14LMFtNu9o2fbEgRAYtnt\nJcYrx9Y9/9sFnXe0guNhQWIomCQmRGpxaKn8Wqac7mZKWDJmNMzaXLfqQCoBpr6E\nBkrzZ+bmsViXtL2ilKzyO8oYleCArMFx/Q6GBb+EDWA1ygIfyzZuMj96c1o2gIvk\nh0auQxdrs1Z42uwzuiS50ag/K+Yg604GG2vOpC8yC3kXvf+jPithfu48wshz3wrT\nZzJQy6hX4yaOfdbnd9nV9e2D/EQr4pRd9+EndIn8nlx+BbkzyCQZhiy7FusSJVD/\nwmjF3yV9RpJfKmTc2CEWb0jpxLXqnwb8ZiY2ozrNQxAvMAEKnA==\n-----END CERTIFICATE-----\n"
+              }
+            },
+            {
+              "definition": "sso_url"
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "login-part-5d9d491e0b6a35b1b87b",
+              "installation_name": "login-partition-a0dfeb36f5be44588dee",
+              "instance_count": 1,
+              "availability_zone_reference": "a0dfeb36f5be44588dee"
+            }
+          ]
+        },
+        {
+          "type": "consoledb",
+          "guid": "consoledb-38d5840812c08e8156e4",
+          "installation_name": "consoledb",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 1024
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 2048
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 1024
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "f47fcaeb744277d8",
+                "password": "139050ab31bc2230"
+              }
+            },
+            {
+              "definition": "credentials",
+              "value": {
+                "identity": "root",
+                "password": "a27c5382ab935e244844"
+              }
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "consoledb-part-8430e87b5381a4868968",
+              "installation_name": "consoledb-partition-a0dfeb36f5be44588dee",
+              "instance_count": 1,
+              "availability_zone_reference": "a0dfeb36f5be44588dee"
+            }
+          ]
+        },
+        {
+          "type": "mysql",
+          "guid": "mysql-a6733b1fcbf77d88034a",
+          "installation_name": "mysql",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 8192
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 30000
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 50000
+            },
+            {
+              "definition": "cpu",
+              "value": 2
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "2e18b8f56860da60",
+                "password": "775d3277c42254fe"
+              }
+            },
+            {
+              "definition": "mysql_admin_credentials",
+              "value": {
+                "identity": "root",
+                "password": "cf7f88fd1e28a4ffcc9e"
+              }
+            },
+            {
+              "definition": "app_usage_credentials",
+              "value": {
+                "identity": "app_usage",
+                "password": "a99aa9fb1bb1ce114485"
+              }
+            },
+            {
+              "definition": "max_user_connections",
+              "value": 40
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "mysql-part-280b30dd83349346ae75",
+              "installation_name": "mysql-partition-a0dfeb36f5be44588dee",
+              "instance_count": 1,
+              "availability_zone_reference": "a0dfeb36f5be44588dee"
+            }
+          ]
+        },
+        {
+          "type": "dea",
+          "guid": "dea-106725966c4340934236",
+          "installation_name": "dea",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 16384
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 32768
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 2
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "aef52bfe05fa539d",
+                "password": "0968617e118a2991"
+              }
+            },
+            {
+              "definition": "loggregator_agent_status_credentials",
+              "value": {
+                "identity": "b385363b63914b17928e",
+                "password": "e1638e5628801251a209"
+              }
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "dea-part-37d9432b353d3a6bce03",
+              "installation_name": "dea-partition-a0dfeb36f5be44588dee",
+              "instance_count": 1,
+              "availability_zone_reference": "a0dfeb36f5be44588dee"
+            }
+          ]
+        },
+        {
+          "type": "loggregator",
+          "guid": "loggregator-2b129e0a5fb39d81dcb7",
+          "installation_name": "loggregator",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 1024
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 2048
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "257a3077998bdfa2",
+                "password": "c7ddd8f82c737352"
+              }
+            },
+            {
+              "definition": "status_credentials",
+              "value": {
+                "identity": "c9f316256a716312cdd1",
+                "password": "de8b433b1e571df42c99"
+              }
+            },
+            {
+              "definition": "shared_secret_credentials",
+              "value": {
+                "identity": "f1701ea89c78586c5402",
+                "password": "abd957cf01d972fac184"
+              }
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "loggregator-part-1f07c50d016cdc8248cf",
+              "installation_name": "loggregator-partition-a0dfeb36f5be44588dee",
+              "instance_count": 1,
+              "availability_zone_reference": "a0dfeb36f5be44588dee"
+            }
+          ]
+        },
+        {
+          "type": "loggregator_trafficcontroller",
+          "guid": "loggregator_trafficcontroller-2d0de9d31176ede0b2e6",
+          "installation_name": "loggregator_trafficcontroller",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 1024
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 2048
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "4cf65df3d2fba740",
+                "password": "504d5fa83c0c3276"
+              }
+            },
+            {
+              "definition": "status_credentials",
+              "value": {
+                "identity": "ab0b8ee478d55ad20ca7",
+                "password": "e0992866017bc644f5f0"
+              }
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "loggregator_trafficcontroller-part-01d6ea1b3be5b1d2c6fd",
+              "installation_name": "loggregator_trafficcontroller-partition-a0dfeb36f5be44588dee",
+              "instance_count": 1,
+              "availability_zone_reference": "a0dfeb36f5be44588dee"
+            }
+          ]
+        },
+        {
+          "type": "push-console",
+          "guid": "push-console-d8a07291005e8cde6554",
+          "installation_name": "push-console",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 1024
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 1024
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "58994e0f935d7fc5",
+                "password": "2d739a10659d7d97"
+              }
+            },
+            {
+              "definition": "secret_token",
+              "value": {
+                "secret": "e661aeab567a605298b0"
+              }
+            },
+            {
+              "definition": "reply_to",
+              "value": "myworkemc@gmail.com"
+            },
+            {
+              "definition": "from",
+              "value": "lab-pcf@homelab.io"
+            },
+            {
+              "definition": "smtp_address",
+              "value": "smtp.gmail.com"
+            },
+            {
+              "definition": "smtp_port",
+              "value": 587
+            },
+            {
+              "definition": "smtp_helo_domain"
+            },
+            {
+              "definition": "smtp_credentials",
+              "value": {
+                "identity": "myworkemc",
+                "password": "Welcome12#"
+              }
+            },
+            {
+              "definition": "smtp_authentication",
+              "value": "plain"
+            },
+            {
+              "definition": "smtp_enable_starttls_auto",
+              "value": true
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "push-console-part-03c49175ef0ac3ee91c6",
+              "installation_name": "push-console",
+              "instance_count": 1,
+              "availability_zone_reference": "a0dfeb36f5be44588dee"
+            }
+          ]
+        },
+        {
+          "type": "push-app-usage-service",
+          "guid": "push-app-usage-service-ce2e8803b08f0681c48b",
+          "installation_name": "push-app-usage-service",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 1024
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 1024
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "4d38c7c1cf265618",
+                "password": "28c7c344433c5a47"
+              }
+            },
+            {
+              "definition": "secret_token",
+              "value": {
+                "secret": "f5fa9f17f6d9fae75309"
+              }
+            },
+            {
+              "definition": "reply_to"
+            },
+            {
+              "definition": "from"
+            },
+            {
+              "definition": "smtp_address"
+            },
+            {
+              "definition": "smtp_port"
+            },
+            {
+              "definition": "smtp_helo_domain"
+            },
+            {
+              "definition": "smtp_credentials"
+            },
+            {
+              "definition": "smtp_authentication"
+            },
+            {
+              "definition": "smtp_enable_starttls_auto",
+              "value": false
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "push-app-usage-service-part-7593e9bfcb7c5b123130",
+              "installation_name": "push-app-usage-service",
+              "instance_count": 1,
+              "availability_zone_reference": "a0dfeb36f5be44588dee"
+            }
+          ]
+        },
+        {
+          "type": "smoke-tests",
+          "guid": "smoke-tests-dca07be46da479b1e239",
+          "installation_name": "smoke-tests",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 1024
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 1024
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "ce86e8d8b4b56cba",
+                "password": "9a1aa31b92960c83"
+              }
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "smoke-tests-part-87952253c869e2c730e2",
+              "installation_name": "smoke-tests",
+              "instance_count": 1,
+              "availability_zone_reference": "a0dfeb36f5be44588dee"
+            }
+          ]
+        },
+        {
+          "type": "acceptance-tests",
+          "guid": "acceptance-tests-f64337810f358229d8ad",
+          "installation_name": "acceptance-tests",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 1024
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 1024
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "ce55728c41802daa",
+                "password": "af7b1904ed3da27c"
+              }
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "acceptance-tests-part-d0a2442ba73f591d21d8",
+              "installation_name": "acceptance-tests",
+              "instance_count": 1,
+              "availability_zone_reference": "a0dfeb36f5be44588dee"
+            }
+          ]
+        },
+        {
+          "type": "compilation",
+          "guid": "compilation-d60f598ef59654cd4768",
+          "installation_name": "compilation",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 4
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 1024
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 6144
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 2
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "compilation-part-0f1b6083b3dc44e136f8",
+              "installation_name": "compilation-partition-a0dfeb36f5be44588dee",
+              "instance_count": 4,
+              "availability_zone_reference": "a0dfeb36f5be44588dee"
+            }
+          ]
+        }
+      ],
+      "properties": [
+        {
+          "definition": "syslog_host",
+          "value": "splunk.homelab.io"
+        },
+        {
+          "definition": "syslog_port",
+          "value": 9999
+        },
+        {
+          "definition": "syslog_protocol",
+          "value": "tcp"
+        }
+      ]
+    },
+    {
+      "type": "p-mongodb",
+      "guid": "p-mongodb-fba672ddbf16f81f11af",
+      "installation_name": "p-mongodb-fba672ddbf16f81f11af",
+      "product_version": "1.3.2.0",
+      "singleton_availability_zone_reference": "d225921e9f297268dcf8",
+      "availability_zone_references": [
+        "d225921e9f297268dcf8"
+      ],
+      "disabled_post_deploy_errand_names": [
+        "broker-registrar"
+      ],
+      "ips": {
+        "cf-mongodb-part-26feedce857e7a7a4620": [
+          "172.16.1.78"
+        ],
+        "broker-registrar-part-5fc2ab64ccaec0e79ad0": [
+          "172.16.1.79"
+        ],
+        "broker-deregistrar-part-c2fb2dc1d0eafd362cd1": [
+          "172.16.1.80"
+        ],
+        "compilation-part-d5a05b792b0be0b6dc57": [
+          "172.16.1.81",
+          "172.16.1.82"
+        ],
+        "dynamic_for_static": [
+          "172.16.1.83"
+        ]
+      },
+      "network_reference": "3c3d38f1762d5866ce9f",
+      "jobs": [
+        {
+          "type": "cf-mongodb",
+          "guid": "cf-mongodb-a6dd14f12c80be901052",
+          "installation_name": "cf-mongodb",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 2048
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 4096
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 8192
+            },
+            {
+              "definition": "cpu",
+              "value": 2
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "1b6ddbccc463b471",
+                "password": "24a64671600e6a6f"
+              }
+            },
+            {
+              "definition": "service_instance_limit",
+              "value": 5
+            },
+            {
+              "definition": "broker_http_auth_credentials",
+              "value": {
+                "identity": "admin",
+                "password": "d232d529b45fdc6050db"
+              }
+            },
+            {
+              "definition": "broker_ssl_cert_and_key",
+              "value": {
+                "private_key_pem": "-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEAvR7+ylQLFj6x1lXrKcHA42FOxE/byI25/3xdXgPMgH5ggNN8\nFJZ+JswjdA1IFBq/Vjdrs08yqVrzte71jmO0ooMXyzXBn2APp336fFQibgvF/8hK\nFk7PyDvAiNVxujYRzdJWUqclR7RJgghjjumPLliH+F9CgfBLhezkDMP/8Xwm91JW\nhWSDLJ9kA7jKAgXTuEILMm48R42QhDBpekE1bMfdyGbXGbsII+vj7JvC3RuwxDc7\nV+uAgA0xpJ1LaWN8gVIrc5rzVydY49j6VN7Bj2JcfyaciSsSUM9TLM2UrSCvk10/\n5K8h/e+IR0uGm74Bg3mpPiq8qe+JjA+RfXlxyQIDAQABAoIBABdEe/Zqlp6bAggr\ns+4EP3X6H9W5OYIYJb0QEPCjKQLaCYdv/YEO7uBZFzeM9sQ6cjXqRZ7e7I23eep1\nRtLI441m8YN3zqWMDQD/V9T6CO5fFnIcszjBY4DwEQUEtaRCSLh421P56nVC8hRE\ncfNAOvRpwfjFx4nzBWepuHj1mESeWjaOdrsuEuw/qv1ie/5k831UXFxh+2cyoM1V\ngqShFPJJQmLRtyifekPjD59KNJoVrINv3FM/dRFJoqW5k7WaIu9CeuVjlGSWX57S\nldbcROwyX2PGJygi7XClY3JHWQbaoz9HZEmBuYB2t91vEaCI1oLgxCMkhtHfJReB\nNRWF5n0CgYEA9fCGe9kxPmPHxKBvr+2He470SIAB8f9kGWg7FdlcZstJjBQ4rkpU\ncq/0/pBOxI/5+umJqmhRFV4/+rqm8owKRS0sm5w6GY7f/Lrkf3OLgJCVOzShDdu9\n543laG/HzefQ6WOGUQwWPtA58Yh3eCaTe33Bg8krC/pUOhtwWDbzUjMCgYEAxNt3\nxWlXTThEEquY0GRo8taZjrr8D5ILDH538l+4RoHM6SYQcTB4z9Rg9Nfoqrnl+D1o\nlL4UhNNrnf6f2K8wXl5bZ6ZnntE9WidMJwOs2/O+MF4gPtEsmd45YlnfuvQO5+BR\nP2YjYWkTJUQmCHASQ91K9SsQVA8ENp9hUwiESBMCgYEAk4d6FLbfvE48mm2nMcBp\nwiupzAfFovYRhNAqiVu++wa9EqNasOpzp+x3KXFFXtIDIYmQBEHZSdkkxfHLjbmF\nu6Nym9HmZEh5gnBV+0JDj5arfj1+0wJa85kB4VkUYSbLAgWqn9mBSqK773BuQgvZ\n8n0oZTZ6dQ/wEH8/MBuecFMCgYAYB7JXJsTBaFzm6ot85MTq38de5PRf8jPnEokR\nzR1xfebFjx/ysTgOJp6vRKviK08nPlfF0G4wyJ4aazqX+MquulXuESIVAPW8S4/A\nM3KmZtqQjOziviXzomze1Jm6+I/ZPkistIsdGPZ9VhROc1/HaPv9cYRMvoiFIm9+\n80sygQKBgQDikzHwAqZR7P3PdkxaiTJeC885c93n06HKVLt1O5QrjUjGk5/z9pT+\n9BIBFxo6UewbDU9WZaQmbL/yXCF/vAyfMMkd+ha4mYIDZ8OCOufnOO8QgD4nf5B2\nD0UJmYTnGewrwL4hSoA+0q/cpTjOnHo1qmMQCZkWQOkwOCiyxllphw==\n-----END RSA PRIVATE KEY-----\n",
+                "csr_pem": "-----BEGIN CERTIFICATE REQUEST-----\nMIIChjCCAW4CAQAwQTELMAkGA1UEBhMCVVMxEDAOBgNVBAoMB1Bpdm90YWwxIDAe\nBgNVBAMMF2Jyb2tlcl9zc2xfY2VydF9hbmRfa2V5MIIBIjANBgkqhkiG9w0BAQEF\nAAOCAQ8AMIIBCgKCAQEAvR7+ylQLFj6x1lXrKcHA42FOxE/byI25/3xdXgPMgH5g\ngNN8FJZ+JswjdA1IFBq/Vjdrs08yqVrzte71jmO0ooMXyzXBn2APp336fFQibgvF\n/8hKFk7PyDvAiNVxujYRzdJWUqclR7RJgghjjumPLliH+F9CgfBLhezkDMP/8Xwm\n91JWhWSDLJ9kA7jKAgXTuEILMm48R42QhDBpekE1bMfdyGbXGbsII+vj7JvC3Ruw\nxDc7V+uAgA0xpJ1LaWN8gVIrc5rzVydY49j6VN7Bj2JcfyaciSsSUM9TLM2UrSCv\nk10/5K8h/e+IR0uGm74Bg3mpPiq8qe+JjA+RfXlxyQIDAQABoAAwDQYJKoZIhvcN\nAQEFBQADggEBAGBJ5TE/uDPYbb13RBtSeyrePu/mgv3lIamIP+8916FHwgr8WAnv\nTV9bUrDKQhBYU31JQRxL/mxmEkKpYpOOLM0biGO/5pT+0veoz3S77Rc0jiHknyFa\n4p98PJPKetA65yAFjZ3hVheV91lKvfsDGaAOuA68fXYc6kkbuCbwCmS8NfRyYmIP\noQ4Qikx2+4CZVpkkBDtTFXdvt/UgCzI5wOOY8clckJxYA3ltX1wGV+j2Jcd0QhL7\nGVqyRwkOYWKYnB+6PnK8LfZ+ynjvd6iQlZAiHcQUgN80uNmqt/aNzZVz6dgcd8eq\nvYZvpdxqtKdd0ke9q36Xjptlpn9aV/bGfDo=\n-----END CERTIFICATE REQUEST-----\n",
+                "cert_pem": "-----BEGIN CERTIFICATE-----\nMIIDDzCCAfegAwIBAgIVAPOeve32NWC1CKmQWt8lPBwjw6fQMA0GCSqGSIb3DQEB\nBQUAMEExCzAJBgNVBAYTAlVTMRAwDgYDVQQKDAdQaXZvdGFsMSAwHgYDVQQDDBdi\ncm9rZXJfc3NsX2NlcnRfYW5kX2tleTAeFw0xNDExMTEwNjQ0MDRaFw0xNjExMTAw\nNjQ0MDRaMEExCzAJBgNVBAYTAlVTMRAwDgYDVQQKDAdQaXZvdGFsMSAwHgYDVQQD\nDBdicm9rZXJfc3NsX2NlcnRfYW5kX2tleTCCASIwDQYJKoZIhvcNAQEBBQADggEP\nADCCAQoCggEBAL0e/spUCxY+sdZV6ynBwONhTsRP28iNuf98XV4DzIB+YIDTfBSW\nfibMI3QNSBQav1Y3a7NPMqla87Xu9Y5jtKKDF8s1wZ9gD6d9+nxUIm4Lxf/IShZO\nz8g7wIjVcbo2Ec3SVlKnJUe0SYIIY47pjy5Yh/hfQoHwS4Xs5AzD//F8JvdSVoVk\ngyyfZAO4ygIF07hCCzJuPEeNkIQwaXpBNWzH3chm1xm7CCPr4+ybwt0bsMQ3O1fr\ngIANMaSdS2ljfIFSK3Oa81cnWOPY+lTewY9iXH8mnIkrElDPUyzNlK0gr5NdP+Sv\nIf3viEdLhpu+AYN5qT4qvKnviYwPkX15cckCAwEAATANBgkqhkiG9w0BAQUFAAOC\nAQEAoYlWaPTt2PwPh1pwOSHMqYSjP0YU7LFRyklUzUQX9lk8IEQNZIcSN0b5FCpx\nI8urQCXnjB6Sf7SHxVti6xRsGSs+uPkuUHb9Zkl8m+DZieDljtNumWz3j8kyXTcW\n5cSUgEueY/7J1nHhxt6IClenvYcd9UoSFDTrc5jG3nS+mUFwrf7Wtyp2QVOS9F98\ncLUe+b5LFuhgoJl4sNAUhM5FArwfUlKwApjWPLfmbgUoGrUUNi1wmcrujrPhZxaH\nT9CqrAzbbyeT3d+a9RIQRTLEhM8INbqL96ZE1lfdaH9l9aU1eJsqaanH96IzWius\n8d0Dts9Qp3PWEceNllFP2wAnqQ==\n-----END CERTIFICATE-----\n"
+              }
+            },
+            {
+              "definition": "mongodb_admin_credentials",
+              "value": {
+                "identity": "admin",
+                "password": "ea4bbb42cede4e7e9e93"
+              }
+            },
+            {
+              "definition": "mongodb_quota_files",
+              "value": 8
+            },
+            {
+              "definition": "mongodb_quota",
+              "value": true
+            },
+            {
+              "definition": "mongodb_smallfiles",
+              "value": true
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "cf-mongodb-part-26feedce857e7a7a4620",
+              "installation_name": "cf-mongodb-partition-d225921e9f297268dcf8",
+              "instance_count": 1,
+              "availability_zone_reference": "d225921e9f297268dcf8"
+            }
+          ]
+        },
+        {
+          "type": "broker-registrar",
+          "guid": "broker-registrar-9d05fcd886b3a6f85c77",
+          "installation_name": "broker-registrar",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 1024
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 2048
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "4eb28ac0eaceea1b",
+                "password": "40924a7fd55f8f47"
+              }
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "broker-registrar-part-5fc2ab64ccaec0e79ad0",
+              "installation_name": "broker-registrar",
+              "instance_count": 1,
+              "availability_zone_reference": "d225921e9f297268dcf8"
+            }
+          ]
+        },
+        {
+          "type": "broker-deregistrar",
+          "guid": "broker-deregistrar-59d2a3454b463ed12b0d",
+          "installation_name": "broker-deregistrar",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 1024
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 2048
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "2ea2c393448b049d",
+                "password": "0ead32fe5bb41754"
+              }
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "broker-deregistrar-part-c2fb2dc1d0eafd362cd1",
+              "installation_name": "broker-deregistrar",
+              "instance_count": 1,
+              "availability_zone_reference": "d225921e9f297268dcf8"
+            }
+          ]
+        },
+        {
+          "type": "compilation",
+          "guid": "compilation-f9c76bb9d80248a1d538",
+          "installation_name": "compilation",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 2
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 2048
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 4096
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 2
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "compilation-part-d5a05b792b0be0b6dc57",
+              "installation_name": "compilation-partition-d225921e9f297268dcf8",
+              "instance_count": 2,
+              "availability_zone_reference": "d225921e9f297268dcf8"
+            }
+          ]
+        }
+      ],
+      "properties": [
+        {
+          "definition": "syslog_address",
+          "value": "syslog.homelab.io"
+        },
+        {
+          "definition": "syslog_port",
+          "value": 3333
+        }
+      ]
+    },
+    {
+      "type": "p-redis",
+      "guid": "p-redis-bf8ff6559b59025947ab",
+      "installation_name": "p-redis-bf8ff6559b59025947ab",
+      "product_version": "1.3.2.0",
+      "singleton_availability_zone_reference": "d225921e9f297268dcf8",
+      "availability_zone_references": [
+        "d225921e9f297268dcf8"
+      ],
+      "disabled_post_deploy_errand_names": [
+        "broker-registrar"
+      ],
+      "ips": {
+        "cf-redis-broker-part-70249d3afabd61c7d11e": [
+          "172.16.1.84"
+        ],
+        "broker-registrar-part-ca3ecfe12603eef1d175": [
+          "172.16.1.85"
+        ],
+        "broker-deregistrar-part-ebb21861e75195f937ca": [
+          "172.16.1.86"
+        ],
+        "compilation-part-028b42dc5f6ed7ce879f": [
+          "172.16.1.87",
+          "172.16.1.88"
+        ],
+        "dynamic_for_static": [
+          "172.16.1.89"
+        ]
+      },
+      "network_reference": "3c3d38f1762d5866ce9f",
+      "jobs": [
+        {
+          "type": "cf-redis-broker",
+          "guid": "cf-redis-broker-98689ac468ba2f7eee8b",
+          "installation_name": "cf-redis-broker",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 1024
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 4096
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 1024
+            },
+            {
+              "definition": "cpu",
+              "value": 2
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "319eb22a0235490e",
+                "password": "cbf130000bea86b3"
+              }
+            },
+            {
+              "definition": "service_instance_limit",
+              "value": 5
+            },
+            {
+              "definition": "redis_maxmemory",
+              "value": "512MB"
+            },
+            {
+              "definition": "broker_http_auth_credentials",
+              "value": {
+                "identity": "admin",
+                "password": "da9810e4a004492eea4a"
+              }
+            },
+            {
+              "definition": "redis_config_command",
+              "value": {
+                "secret": "b8d61bb4aea334fbe93b"
+              }
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "cf-redis-broker-part-70249d3afabd61c7d11e",
+              "installation_name": "cf-redis-broker-partition-d225921e9f297268dcf8",
+              "instance_count": 1,
+              "availability_zone_reference": "d225921e9f297268dcf8"
+            }
+          ]
+        },
+        {
+          "type": "broker-registrar",
+          "guid": "broker-registrar-19575791b0022df30a4b",
+          "installation_name": "broker-registrar",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 1024
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 2048
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "a0e7c6443449df05",
+                "password": "e531fd156d648269"
+              }
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "broker-registrar-part-ca3ecfe12603eef1d175",
+              "installation_name": "broker-registrar",
+              "instance_count": 1,
+              "availability_zone_reference": "d225921e9f297268dcf8"
+            }
+          ]
+        },
+        {
+          "type": "broker-deregistrar",
+          "guid": "broker-deregistrar-02d14f2763cbccbfecb0",
+          "installation_name": "broker-deregistrar",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 1024
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 2048
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "11da4726cf628c05",
+                "password": "64e500ae6893ca91"
+              }
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "broker-deregistrar-part-ebb21861e75195f937ca",
+              "installation_name": "broker-deregistrar",
+              "instance_count": 1,
+              "availability_zone_reference": "d225921e9f297268dcf8"
+            }
+          ]
+        },
+        {
+          "type": "compilation",
+          "guid": "compilation-f43471bb28c7afde4bb5",
+          "installation_name": "compilation",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 2
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 1024
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 4096
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 2
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "compilation-part-028b42dc5f6ed7ce879f",
+              "installation_name": "compilation-partition-d225921e9f297268dcf8",
+              "instance_count": 2,
+              "availability_zone_reference": "d225921e9f297268dcf8"
+            }
+          ]
+        }
+      ],
+      "properties": [
+        {
+          "definition": "syslog_address",
+          "value": "syslog.homelab.io"
+        },
+        {
+          "definition": "syslog_port",
+          "value": 3333
+        }
+      ]
+    },
+    {
+      "type": "p-rabbitmq",
+      "guid": "p-rabbitmq-d9c4e657e37e1f0836f9",
+      "installation_name": "p-rabbitmq-d9c4e657e37e1f0836f9",
+      "product_version": "1.3.3.1",
+      "singleton_availability_zone_reference": "d225921e9f297268dcf8",
+      "availability_zone_references": [
+        "d225921e9f297268dcf8"
+      ],
+      "disabled_post_deploy_errand_names": [
+        "broker-registrar"
+      ],
+      "ips": {
+        "rabbitmq-server-part-b505daa3ee7b824594bc": [
+          "172.16.1.90",
+          "172.16.1.91"
+        ],
+        "rabbitmq-haproxy-part-c81cb41222b177031b4b": [
+          "172.16.1.92"
+        ],
+        "rabbitmq-broker-part-16545957f79725e20af7": [
+          "172.16.1.93"
+        ],
+        "compilation-part-961f4b9ececde55c5faa": [
+          "172.16.1.94",
+          "172.16.1.95"
+        ],
+        "broker-registrar-part-7b30090250929e8597c8": [
+          "172.16.1.96"
+        ],
+        "broker-deregistrar-part-7a5beb862145b774ada8": [
+          "172.16.1.97"
+        ],
+        "dynamic_for_static": [
+          "172.16.1.98",
+          "172.16.1.99",
+          "172.16.1.100",
+          "172.16.1.101"
+        ]
+      },
+      "network_reference": "3c3d38f1762d5866ce9f",
+      "jobs": [
+        {
+          "type": "rabbitmq-server",
+          "guid": "rabbitmq-server-c62129d7b632ea3cf257",
+          "installation_name": "rabbitmq-server",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 2
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 8192
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 4096
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 8192
+            },
+            {
+              "definition": "cpu",
+              "value": 2
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "86f7f1fccb845cca",
+                "password": "d8d79b703f28bfd5"
+              }
+            },
+            {
+              "definition": "server_admin_credentials",
+              "value": {
+                "identity": "rabbitmq",
+                "password": "rabbitmq"
+              }
+            },
+            {
+              "definition": "plugins",
+              "value": [
+                "rabbitmq_amqp1_0",
+                "rabbitmq_management",
+                "rabbitmq_management_visualiser"
+              ]
+            },
+            {
+              "definition": "ssl_key"
+            },
+            {
+              "definition": "ssl_cert"
+            },
+            {
+              "definition": "ssl_cacert"
+            },
+            {
+              "definition": "cookie",
+              "value": "ERLANG"
+            },
+            {
+              "definition": "config"
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "rabbitmq-server-part-b505daa3ee7b824594bc",
+              "installation_name": "rabbitmq-server-partition-d225921e9f297268dcf8",
+              "instance_count": 2,
+              "availability_zone_reference": "d225921e9f297268dcf8"
+            }
+          ]
+        },
+        {
+          "type": "rabbitmq-haproxy",
+          "guid": "rabbitmq-haproxy-d7ed6aa3e3d378d3f01f",
+          "installation_name": "rabbitmq-haproxy",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 2048
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 4096
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "c96bc3c2f24df17d",
+                "password": "59f8f0eecf2deea7"
+              }
+            },
+            {
+              "definition": "ports",
+              "value": "15672, 5672, 5671, 1883, 8883, 61613, 61614, 15674"
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "rabbitmq-haproxy-part-c81cb41222b177031b4b",
+              "installation_name": "rabbitmq-haproxy-partition-d225921e9f297268dcf8",
+              "instance_count": 1,
+              "availability_zone_reference": "d225921e9f297268dcf8"
+            }
+          ]
+        },
+        {
+          "type": "rabbitmq-broker",
+          "guid": "rabbitmq-broker-0eee947f4c8899bb28e8",
+          "installation_name": "rabbitmq-broker",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 2048
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 4096
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "499a63fb272ad440",
+                "password": "0a2fcdaa8161e3b7"
+              }
+            },
+            {
+              "definition": "broker_http_auth_credentials",
+              "value": {
+                "identity": "admin",
+                "password": "dfc0e487bbef944a2e75"
+              }
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "rabbitmq-broker-part-16545957f79725e20af7",
+              "installation_name": "rabbitmq-broker-partition-d225921e9f297268dcf8",
+              "instance_count": 1,
+              "availability_zone_reference": "d225921e9f297268dcf8"
+            }
+          ]
+        },
+        {
+          "type": "compilation",
+          "guid": "compilation-26d1d77905f92b4fcaf7",
+          "installation_name": "compilation",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 2
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 2048
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 4096
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 2
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "compilation-part-961f4b9ececde55c5faa",
+              "installation_name": "compilation-partition-d225921e9f297268dcf8",
+              "instance_count": 2,
+              "availability_zone_reference": "d225921e9f297268dcf8"
+            }
+          ]
+        },
+        {
+          "type": "broker-registrar",
+          "guid": "broker-registrar-9a6a3c95b2a87cfb7e29",
+          "installation_name": "broker-registrar",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 1024
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 2048
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "53eba583fe1f5766",
+                "password": "306aa987c6e2169c"
+              }
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "broker-registrar-part-7b30090250929e8597c8",
+              "installation_name": "broker-registrar",
+              "instance_count": 1,
+              "availability_zone_reference": "d225921e9f297268dcf8"
+            }
+          ]
+        },
+        {
+          "type": "broker-deregistrar",
+          "guid": "broker-deregistrar-8b7fe544694aadc3048a",
+          "installation_name": "broker-deregistrar",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 1024
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 2048
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "920f605709c8cf9c",
+                "password": "33d3f5a6d4dd95d7"
+              }
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "broker-deregistrar-part-7a5beb862145b774ada8",
+              "installation_name": "broker-deregistrar",
+              "instance_count": 1,
+              "availability_zone_reference": "d225921e9f297268dcf8"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "p-jenkins",
+      "guid": "p-jenkins-1b65f8aba1b2aa8b0486",
+      "installation_name": "p-jenkins-1b65f8aba1b2aa8b0486",
+      "product_version": "1.3.2.0",
+      "singleton_availability_zone_reference": "d225921e9f297268dcf8",
+      "availability_zone_references": [
+        "d225921e9f297268dcf8"
+      ],
+      "disabled_post_deploy_errand_names": [
+        "jenkins_cf_bootstrap"
+      ],
+      "ips": {
+        "jenkins_master-part-e4d31f8764b04c25bb2b": [
+          "172.16.1.102"
+        ],
+        "jenkins_slave-part-f78eae1a72fadb4b9ef7": [
+          "172.16.1.103"
+        ],
+        "compilation-part-ee34742bc3b9720fc3b9": [
+          "172.16.1.104",
+          "172.16.1.105"
+        ],
+        "jenkins_cf_bootstrap-part-3dba69382b1ddd21020b": [
+          "172.16.1.106"
+        ],
+        "jenkins_cf_unbootstrap-part-e296c8c790da39a84d96": [
+          "172.16.1.107"
+        ],
+        "dynamic_for_static": [
+          "172.16.1.108",
+          "172.16.1.109"
+        ]
+      },
+      "network_reference": "3c3d38f1762d5866ce9f",
+      "jobs": [
+        {
+          "type": "jenkins_master",
+          "guid": "jenkins_master-4cb4c6932baacb5d3d15",
+          "installation_name": "jenkins_master",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 2048
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 4096
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 8192
+            },
+            {
+              "definition": "cpu",
+              "value": 2
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "96b5ff65da2cde11",
+                "password": "d526160451b5a8d7"
+              }
+            },
+            {
+              "definition": "jvm_args",
+              "value": "-XX:MaxPermSize=128m"
+            },
+            {
+              "definition": "ssl_rsa_certificate"
+            },
+            {
+              "definition": "licence_name",
+              "value": "Rahul Jain"
+            },
+            {
+              "definition": "licence_email",
+              "value": "rjain@pivotal.io"
+            },
+            {
+              "definition": "licence_company",
+              "value": "Pivotal"
+            },
+            {
+              "definition": "enable_ssl",
+              "value": false
+            },
+            {
+              "definition": "oauth_client_credentials",
+              "value": {
+                "identity": "jenkins",
+                "password": "b46c8c4ca1debaeff07f"
+              }
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "jenkins_master-part-e4d31f8764b04c25bb2b",
+              "installation_name": "jenkins_master-partition-d225921e9f297268dcf8",
+              "instance_count": 1,
+              "availability_zone_reference": "d225921e9f297268dcf8"
+            }
+          ]
+        },
+        {
+          "type": "jenkins_slave",
+          "guid": "jenkins_slave-9690b13fcc504e9542ca",
+          "installation_name": "jenkins_slave",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 2048
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 8192
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 8192
+            },
+            {
+              "definition": "cpu",
+              "value": 2
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "7826840f4c913df1",
+                "password": "47f01a3801b537c7"
+              }
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "jenkins_slave-part-f78eae1a72fadb4b9ef7",
+              "installation_name": "jenkins_slave-partition-d225921e9f297268dcf8",
+              "instance_count": 1,
+              "availability_zone_reference": "d225921e9f297268dcf8"
+            }
+          ]
+        },
+        {
+          "type": "compilation",
+          "guid": "compilation-26863f50e34e1eb58d1c",
+          "installation_name": "compilation",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 2
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 1024
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 8192
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 2
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "compilation-part-ee34742bc3b9720fc3b9",
+              "installation_name": "compilation-partition-d225921e9f297268dcf8",
+              "instance_count": 2,
+              "availability_zone_reference": "d225921e9f297268dcf8"
+            }
+          ]
+        },
+        {
+          "type": "jenkins_cf_bootstrap",
+          "guid": "jenkins_cf_bootstrap-689286d53fb66c46bd5c",
+          "installation_name": "jenkins_cf_bootstrap",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 1024
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 2048
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "6652dd7eefec75f4",
+                "password": "725e4fc4bedcc407"
+              }
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "jenkins_cf_bootstrap-part-3dba69382b1ddd21020b",
+              "installation_name": "jenkins_cf_bootstrap",
+              "instance_count": 1,
+              "availability_zone_reference": "d225921e9f297268dcf8"
+            }
+          ]
+        },
+        {
+          "type": "jenkins_cf_unbootstrap",
+          "guid": "jenkins_cf_unbootstrap-822b4ef7b062c772eb0b",
+          "installation_name": "jenkins_cf_unbootstrap",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 1024
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 2048
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "b25be6589f583a3d",
+                "password": "644062799960bd35"
+              }
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "jenkins_cf_unbootstrap-part-e296c8c790da39a84d96",
+              "installation_name": "jenkins_cf_unbootstrap",
+              "instance_count": 1,
+              "availability_zone_reference": "d225921e9f297268dcf8"
+            }
+          ]
+        }
+      ],
+      "properties": [
+        {
+          "definition": "cf_jenkins_user",
+          "value": {
+            "identity": "cf_jenkins_user",
+            "salt": "efbc95ccb13ef941",
+            "password": "a67d6e2d6df7f581"
+          }
+        },
+        {
+          "definition": "cf_jenkins_test_org",
+          "value": "jenkins-test-org"
+        },
+        {
+          "definition": "syslog_address",
+          "value": "syslog.homelab.io"
+        },
+        {
+          "definition": "syslog_port",
+          "value": 3333
+        }
+      ]
+    },
+    {
+      "type": "p-metrics",
+      "guid": "p-metrics-c7b582799d01691c32b3",
+      "installation_name": "p-metrics-c7b582799d01691c32b3",
+      "product_version": "1.3.2.0",
+      "singleton_availability_zone_reference": "a0dfeb36f5be44588dee",
+      "availability_zone_references": [
+        "a0dfeb36f5be44588dee"
+      ],
+      "ips": {
+        "maximus-part-0bc762014a0c1e466746": [
+          "172.16.1.110"
+        ],
+        "compilation-part-396861f1b823baa86a4f": [
+          "172.16.1.111"
+        ],
+        "dynamic_for_static": [
+          "172.16.1.112"
+        ]
+      },
+      "network_reference": "3c3d38f1762d5866ce9f",
+      "jobs": [
+        {
+          "type": "maximus",
+          "guid": "maximus-bfbdc041b90818fa34f2",
+          "installation_name": "maximus",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 4096
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 8192
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 1024
+            },
+            {
+              "definition": "cpu",
+              "value": 2
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "6075136a3610d34f",
+                "password": "877f39c683f5f7fe"
+              }
+            },
+            {
+              "definition": "credentials",
+              "value": {
+                "identity": "jmxadmin",
+                "password": "jmxadmin"
+              }
+            },
+            {
+              "definition": "use_ssl",
+              "value": false
+            },
+            {
+              "definition": "ssl_rsa_certificate"
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "maximus-part-0bc762014a0c1e466746",
+              "installation_name": "maximus-partition-a0dfeb36f5be44588dee",
+              "instance_count": 1,
+              "availability_zone_reference": "a0dfeb36f5be44588dee"
+            }
+          ]
+        },
+        {
+          "type": "compilation",
+          "guid": "compilation-7d4d4daa4558c0090586",
+          "installation_name": "compilation",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 1024
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 8192
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "compilation-part-396861f1b823baa86a4f",
+              "installation_name": "compilation-partition-a0dfeb36f5be44588dee",
+              "instance_count": 1,
+              "availability_zone_reference": "a0dfeb36f5be44588dee"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "p-riak-cs",
+      "guid": "p-riak-cs-096a5df0f15a911c70dc",
+      "installation_name": "p-riak-cs-096a5df0f15a911c70dc",
+      "product_version": "1.3.2.0",
+      "singleton_availability_zone_reference": "d225921e9f297268dcf8",
+      "availability_zone_references": [
+        "d225921e9f297268dcf8"
+      ],
+      "disabled_post_deploy_errand_names": [
+        "broker-registrar",
+        "acceptance-tests"
+      ],
+      "ips": {
+        "riak-cs-part-afb19b27ca8acdc50ea4": [
+          "172.16.1.113",
+          "172.16.1.114"
+        ],
+        "stanchion-part-7019d883d7ba02226ed3": [
+          "172.16.1.115"
+        ],
+        "cf-riak-cs-broker-part-468679be17ceaae7274c": [
+          "172.16.1.116"
+        ],
+        "broker-registrar-part-71a6ae751767309aef96": [
+          "172.16.1.117"
+        ],
+        "broker-deregistrar-part-0e901f4c3b2a1aad1e07": [
+          "172.16.1.118"
+        ],
+        "acceptance-tests-part-3c6e353ee741fa967dbc": [
+          "172.16.1.119"
+        ],
+        "compilation-part-c2565616cc0b69a0d2c5": [
+          "172.16.1.120"
+        ],
+        "dynamic_for_static": [
+          "172.16.1.121",
+          "172.16.1.122",
+          "172.16.1.123"
+        ]
+      },
+      "network_reference": "3c3d38f1762d5866ce9f",
+      "jobs": [
+        {
+          "type": "riak-cs",
+          "guid": "riak-cs-53392a3b9b21ccce46cf",
+          "installation_name": "riak-cs",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 2
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 4096
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 4096
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 10240
+            },
+            {
+              "definition": "cpu",
+              "value": 2
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "cbb799fccf3a9ba1",
+                "password": "e5a8293bbf4b00c6"
+              }
+            },
+            {
+              "definition": "admin_key",
+              "value": {
+                "identity": "ec4333ca51346472aca1",
+                "password": "f4e0793bf2e18e04ae01"
+              }
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "riak-cs-part-afb19b27ca8acdc50ea4",
+              "installation_name": "riak-cs-partition-d225921e9f297268dcf8",
+              "instance_count": 2,
+              "availability_zone_reference": "d225921e9f297268dcf8"
+            }
+          ]
+        },
+        {
+          "type": "stanchion",
+          "guid": "stanchion-e40e7ae3ec7db27b3f84",
+          "installation_name": "stanchion",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 1024
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 4096
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 1024
+            },
+            {
+              "definition": "cpu",
+              "value": 2
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "3f31a6db4b4a4de8",
+                "password": "698f9edc92f6fb64"
+              }
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "stanchion-part-7019d883d7ba02226ed3",
+              "installation_name": "stanchion-partition-d225921e9f297268dcf8",
+              "instance_count": 1,
+              "availability_zone_reference": "d225921e9f297268dcf8"
+            }
+          ]
+        },
+        {
+          "type": "cf-riak-cs-broker",
+          "guid": "cf-riak-cs-broker-ea2ce07dd0e095c2d284",
+          "installation_name": "cf-riak-cs-broker",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 512
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 1024
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "properties": [
+            {
+              "definition": "broker_name",
+              "value": "p-riakcs"
+            },
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "11d8724bc8d70d4c",
+                "password": "dac6d5378a5fb96d"
+              }
+            },
+            {
+              "definition": "broker_auth_credentials",
+              "value": {
+                "identity": "cc",
+                "salt": "65cde06c1d89b149",
+                "password": "632d2e59636add27"
+              }
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "cf-riak-cs-broker-part-468679be17ceaae7274c",
+              "installation_name": "cf-riak-cs-broker-partition-d225921e9f297268dcf8",
+              "instance_count": 1,
+              "availability_zone_reference": "d225921e9f297268dcf8"
+            }
+          ]
+        },
+        {
+          "type": "broker-registrar",
+          "guid": "broker-registrar-6a489a5391fc62c78cbb",
+          "installation_name": "broker-registrar",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 2048
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 2048
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "f8785edc9e1ffbd1",
+                "password": "576fb357105a9e2f"
+              }
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "broker-registrar-part-71a6ae751767309aef96",
+              "installation_name": "broker-registrar",
+              "instance_count": 1,
+              "availability_zone_reference": "d225921e9f297268dcf8"
+            }
+          ]
+        },
+        {
+          "type": "broker-deregistrar",
+          "guid": "broker-deregistrar-a8b435bf8ae5b738aa30",
+          "installation_name": "broker-deregistrar",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 2048
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 2048
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "82517d3e2c7517ab",
+                "password": "11bb9d2778942ec4"
+              }
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "broker-deregistrar-part-0e901f4c3b2a1aad1e07",
+              "installation_name": "broker-deregistrar",
+              "instance_count": 1,
+              "availability_zone_reference": "d225921e9f297268dcf8"
+            }
+          ]
+        },
+        {
+          "type": "acceptance-tests",
+          "guid": "acceptance-tests-9e00b87cdb5038e45457",
+          "installation_name": "acceptance-tests",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 2048
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 2048
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "6f2128e79fed5eda",
+                "password": "11cab66e47aea2a4"
+              }
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "acceptance-tests-part-3c6e353ee741fa967dbc",
+              "installation_name": "acceptance-tests",
+              "instance_count": 1,
+              "availability_zone_reference": "d225921e9f297268dcf8"
+            }
+          ]
+        },
+        {
+          "type": "compilation",
+          "guid": "compilation-f884e2a7d904454c8874",
+          "installation_name": "compilation",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 1024
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 2048
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "compilation-part-c2565616cc0b69a0d2c5",
+              "installation_name": "compilation-partition-d225921e9f297268dcf8",
+              "instance_count": 1,
+              "availability_zone_reference": "d225921e9f297268dcf8"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "app-autoscaling",
+      "guid": "app-autoscaling-11ad1a237f1124abea58",
+      "installation_name": "app-autoscaling-11ad1a237f1124abea58",
+      "product_version": "1.3.2.0",
+      "singleton_availability_zone_reference": "d225921e9f297268dcf8",
+      "availability_zone_references": [
+        "d225921e9f297268dcf8"
+      ],
+      "disabled_post_deploy_errand_names": [
+        "deploy-autoscaling",
+        "register-broker"
+      ],
+      "ips": {
+        "deploy-autoscaling-part-21230ecc66184c7d829c": [
+          "172.16.1.124"
+        ],
+        "register-broker-part-ad0b81c6a47ff711bf5e": [
+          "172.16.1.125"
+        ],
+        "destroy-broker-part-f2d9f70e5d8744b3094c": [
+          "172.16.1.126"
+        ],
+        "compilation-part-d7f7b937b0c9a8383c2c": [
+          "172.16.1.127"
+        ],
+        "dynamic_for_static": []
+      },
+      "network_reference": "3c3d38f1762d5866ce9f",
+      "jobs": [
+        {
+          "type": "deploy-autoscaling",
+          "guid": "deploy-autoscaling-7bddd5c6a79ffbc97ae8",
+          "installation_name": "deploy-autoscaling",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 512
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 1024
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "9b555164ad1e19da",
+                "password": "6b62b9bc7aa4ea70"
+              }
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "deploy-autoscaling-part-21230ecc66184c7d829c",
+              "installation_name": "deploy-autoscaling",
+              "instance_count": 1,
+              "availability_zone_reference": "d225921e9f297268dcf8"
+            }
+          ]
+        },
+        {
+          "type": "register-broker",
+          "guid": "register-broker-20e2efdabd44f5de7560",
+          "installation_name": "register-broker",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 512
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 1024
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "432aac0a41591e1e",
+                "password": "3c735d11d01eda7f"
+              }
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "register-broker-part-ad0b81c6a47ff711bf5e",
+              "installation_name": "register-broker",
+              "instance_count": 1,
+              "availability_zone_reference": "d225921e9f297268dcf8"
+            }
+          ]
+        },
+        {
+          "type": "destroy-broker",
+          "guid": "destroy-broker-13eb28f111d8880167a3",
+          "installation_name": "destroy-broker",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 512
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 1024
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "4aa559c5f89acd58",
+                "password": "b84710d689204a23"
+              }
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "destroy-broker-part-f2d9f70e5d8744b3094c",
+              "installation_name": "destroy-broker",
+              "instance_count": 1,
+              "availability_zone_reference": "d225921e9f297268dcf8"
+            }
+          ]
+        },
+        {
+          "type": "compilation",
+          "guid": "compilation-7caee3be67480d5d04f3",
+          "installation_name": "compilation",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 512
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 1024
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "compilation-part-d7f7b937b0c9a8383c2c",
+              "installation_name": "compilation-partition-d225921e9f297268dcf8",
+              "instance_count": 1,
+              "availability_zone_reference": "d225921e9f297268dcf8"
+            }
+          ]
+        }
+      ],
+      "properties": [
+        {
+          "definition": "broker_credentials",
+          "value": {
+            "identity": "0eecb03e6d2b907e",
+            "salt": "abf49bbdbc450538",
+            "password": "3aa943d896dda3da"
+          }
+        },
+        {
+          "definition": "encryption_key",
+          "value": {
+            "secret": "cd2d2e61833f6aba6966"
+          }
+        }
+      ]
+    },
+    {
+      "type": "p-mysql",
+      "guid": "p-mysql-ba608821250bc3228388",
+      "installation_name": "p-mysql-ba608821250bc3228388",
+      "product_version": "1.3.2.0",
+      "singleton_availability_zone_reference": "d225921e9f297268dcf8",
+      "availability_zone_references": [
+        "d225921e9f297268dcf8"
+      ],
+      "disabled_post_deploy_errand_names": [
+        "broker-registrar",
+        "acceptance-tests"
+      ],
+      "ips": {
+        "mysql-part-c9f71ad4100bc97fa4b1": [
+          "172.16.1.128"
+        ],
+        "cf-mysql-broker-part-d5e08a05094cc88bed65": [
+          "172.16.1.129"
+        ],
+        "broker-registrar-part-d2fa0406cc2fe5706574": [
+          "172.16.1.130"
+        ],
+        "broker-deregistrar-part-4df99ade2eacfa463672": [
+          "172.16.1.131"
+        ],
+        "acceptance-tests-part-132ad32a81468709f785": [
+          "172.16.1.132"
+        ],
+        "compilation-part-e0c27b9c141f5561759b": [
+          "172.16.1.133"
+        ],
+        "dynamic_for_static": [
+          "172.16.1.134",
+          "172.16.1.135"
+        ]
+      },
+      "network_reference": "3c3d38f1762d5866ce9f",
+      "jobs": [
+        {
+          "type": "mysql",
+          "guid": "mysql-610170f1d94e2847c6b7",
+          "installation_name": "mysql",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 8192
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 30000
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 100000
+            },
+            {
+              "definition": "cpu",
+              "value": 2
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "ded99afaf5b32706",
+                "password": "da60297dd524cee2"
+              }
+            },
+            {
+              "definition": "mysql_admin_password",
+              "value": {
+                "identity": "root",
+                "password": "d4ba1792a030253cdd5a"
+              }
+            },
+            {
+              "definition": "max_user_connections",
+              "value": 40
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "mysql-part-c9f71ad4100bc97fa4b1",
+              "installation_name": "mysql-partition-d225921e9f297268dcf8",
+              "instance_count": 1,
+              "availability_zone_reference": "d225921e9f297268dcf8"
+            }
+          ]
+        },
+        {
+          "type": "cf-mysql-broker",
+          "guid": "cf-mysql-broker-112d21caaea5565cda40",
+          "installation_name": "cf-mysql-broker",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 1024
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 10000
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "5f3f30cd6379d61b",
+                "password": "a3ebbd1ad2e08a86"
+              }
+            },
+            {
+              "definition": "broker_auth_credentials",
+              "value": {
+                "identity": "bb07400bad8d17003db2",
+                "password": "d0471944fc1b487079d6"
+              }
+            },
+            {
+              "definition": "plan_1_id",
+              "value": "17d793e6-6da6-4f0e-b58d-364a407166a0"
+            },
+            {
+              "definition": "plan_1_max_storage_mb",
+              "value": 100
+            },
+            {
+              "definition": "broker_name",
+              "value": "p-mysql"
+            },
+            {
+              "definition": "cookie_secret",
+              "value": {
+                "secret": "df7c74eecdaa102fc866"
+              }
+            },
+            {
+              "definition": "dashboard_client_credentials",
+              "value": {
+                "identity": "p-mysql",
+                "password": "ef87aaec2507c8bd590b"
+              }
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "cf-mysql-broker-part-d5e08a05094cc88bed65",
+              "installation_name": "cf-mysql-broker-partition-d225921e9f297268dcf8",
+              "instance_count": 1,
+              "availability_zone_reference": "d225921e9f297268dcf8"
+            }
+          ]
+        },
+        {
+          "type": "broker-registrar",
+          "guid": "broker-registrar-4f23a8df8f1ed4ca060a",
+          "installation_name": "broker-registrar",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 2048
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 2048
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "51fa84d073847613",
+                "password": "785648771da70ab2"
+              }
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "broker-registrar-part-d2fa0406cc2fe5706574",
+              "installation_name": "broker-registrar",
+              "instance_count": 1,
+              "availability_zone_reference": "d225921e9f297268dcf8"
+            }
+          ]
+        },
+        {
+          "type": "broker-deregistrar",
+          "guid": "broker-deregistrar-0a332889865db21e5327",
+          "installation_name": "broker-deregistrar",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 2048
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 2048
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "915e17b56a4e42ac",
+                "password": "40235433fbf7f361"
+              }
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "broker-deregistrar-part-4df99ade2eacfa463672",
+              "installation_name": "broker-deregistrar",
+              "instance_count": 1,
+              "availability_zone_reference": "d225921e9f297268dcf8"
+            }
+          ]
+        },
+        {
+          "type": "acceptance-tests",
+          "guid": "acceptance-tests-c424241ef695f0afd18a",
+          "installation_name": "acceptance-tests",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 2048
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 2048
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "properties": [
+            {
+              "definition": "vm_credentials",
+              "value": {
+                "identity": "vcap",
+                "salt": "ec0b0886de6ce6c0",
+                "password": "0bb0cb470c1c453f"
+              }
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "acceptance-tests-part-132ad32a81468709f785",
+              "installation_name": "acceptance-tests",
+              "instance_count": 1,
+              "availability_zone_reference": "d225921e9f297268dcf8"
+            }
+          ]
+        },
+        {
+          "type": "compilation",
+          "guid": "compilation-3b4f12e3ad59b892bc59",
+          "installation_name": "compilation",
+          "instances": [
+            {
+              "definition": "instances",
+              "value": 1
+            }
+          ],
+          "resources": [
+            {
+              "definition": "ram",
+              "value": 1024
+            },
+            {
+              "definition": "ephemeral_disk",
+              "value": 8192
+            },
+            {
+              "definition": "persistent_disk",
+              "value": 0
+            },
+            {
+              "definition": "cpu",
+              "value": 1
+            }
+          ],
+          "partitions": [
+            {
+              "guid": "compilation-part-e0c27b9c141f5561759b",
+              "installation_name": "compilation-partition-d225921e9f297268dcf8",
+              "instance_count": 1,
+              "availability_zone_reference": "d225921e9f297268dcf8"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
