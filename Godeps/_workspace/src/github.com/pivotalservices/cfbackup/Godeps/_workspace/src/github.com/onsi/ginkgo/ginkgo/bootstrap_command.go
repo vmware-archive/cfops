@@ -9,15 +9,12 @@ import (
 	"strings"
 	"text/template"
 
-	"go/build"
-
 	"github.com/onsi/ginkgo/ginkgo/nodot"
 )
 
 func BuildBootstrapCommand() *Command {
-	var agouti, noDot bool
+	var noDot bool
 	flagSet := flag.NewFlagSet("bootstrap", flag.ExitOnError)
-	flagSet.BoolVar(&agouti, "agouti", false, "If set, bootstrap will generate a bootstrap file for writing Agouti tests")
 	flagSet.BoolVar(&noDot, "nodot", false, "If set, bootstrap will generate a bootstrap file that does not . import ginkgo and gomega")
 
 	return &Command{
@@ -29,7 +26,7 @@ func BuildBootstrapCommand() *Command {
 			"Accepts the following flags:",
 		},
 		Command: func(args []string, additionalArgs []string) {
-			generateBootstrap(agouti, noDot)
+			generateBootstrap(noDot)
 		},
 	}
 }
@@ -43,79 +40,26 @@ import (
 	"testing"
 )
 
-func Test{{.FormattedName}}(t *testing.T) {
+func Test{{.FormattedPackage}}(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "{{.FormattedName}} Suite")
+	RunSpecs(t, "{{.FormattedPackage}} Suite")
 }
-`
-
-var agoutiBootstrapText = `package {{.Package}}_test
-
-import (
-	{{.GinkgoImport}}
-	{{.GomegaImport}}
-	. "github.com/sclevine/agouti/core"
-
-	"testing"
-)
-
-func Test{{.FormattedName}}(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "{{.FormattedName}} Suite")
-}
-
-var agoutiDriver WebDriver
-
-var _ = BeforeSuite(func() {
-	var err error
-
-	// Choose a WebDriver:
-
-	agoutiDriver, err = PhantomJS()
-	// agoutiDriver, err = Selenium()
-	// agoutiDriver, err = Chrome()
-
-	Expect(err).NotTo(HaveOccurred())
-	Expect(agoutiDriver.Start()).To(Succeed())
-})
-
-var _ = AfterSuite(func() {
-	agoutiDriver.Stop()
-})
 `
 
 type bootstrapData struct {
-	Package       string
-	FormattedName string
-	GinkgoImport  string
-	GomegaImport  string
+	Package          string
+	FormattedPackage string
+	GinkgoImport     string
+	GomegaImport     string
 }
 
-func getPackageAndFormattedName() (string, string, string) {
-	path, err := os.Getwd()
+func getPackage() string {
+	workingDir, err := os.Getwd()
 	if err != nil {
-		complainAndQuit("Could not get current working directory: \n" + err.Error())
+		complainAndQuit("Could not find package: " + err.Error())
 	}
-
-	dirName := strings.Replace(filepath.Base(path), "-", "_", -1)
-	dirName = strings.Replace(dirName, " ", "_", -1)
-
-	pkg, err := build.ImportDir(path, 0)
-	packageName := pkg.Name
-	if err != nil {
-		packageName = dirName
-	}
-
-	formattedName := prettifyPackageName(filepath.Base(path))
-	return packageName, dirName, formattedName
-}
-
-func prettifyPackageName(name string) string {
-	name = strings.Replace(name, "-", " ", -1)
-	name = strings.Replace(name, "_", " ", -1)
-	name = strings.Title(name)
-	name = strings.Replace(name, " ", "", -1)
-	return name
+	packageName := filepath.Base(workingDir)
+	return strings.Replace(packageName, "-", "_", -1)
 }
 
 func fileExists(path string) bool {
@@ -126,13 +70,14 @@ func fileExists(path string) bool {
 	return false
 }
 
-func generateBootstrap(agouti bool, noDot bool) {
-	packageName, bootstrapFilePrefix, formattedName := getPackageAndFormattedName()
+func generateBootstrap(noDot bool) {
+	packageName := getPackage()
+	formattedPackage := strings.Replace(strings.Title(strings.Replace(packageName, "_", " ", -1)), " ", "", -1)
 	data := bootstrapData{
-		Package:       packageName,
-		FormattedName: formattedName,
-		GinkgoImport:  `. "github.com/onsi/ginkgo"`,
-		GomegaImport:  `. "github.com/onsi/gomega"`,
+		Package:          packageName,
+		FormattedPackage: formattedPackage,
+		GinkgoImport:     `. "github.com/onsi/ginkgo"`,
+		GomegaImport:     `. "github.com/onsi/gomega"`,
 	}
 
 	if noDot {
@@ -140,7 +85,7 @@ func generateBootstrap(agouti bool, noDot bool) {
 		data.GomegaImport = `"github.com/onsi/gomega"`
 	}
 
-	targetFile := fmt.Sprintf("%s_suite_test.go", bootstrapFilePrefix)
+	targetFile := fmt.Sprintf("%s_suite_test.go", packageName)
 	if fileExists(targetFile) {
 		fmt.Printf("%s already exists.\n\n", targetFile)
 		os.Exit(1)
@@ -155,14 +100,7 @@ func generateBootstrap(agouti bool, noDot bool) {
 	}
 	defer f.Close()
 
-	var templateText string
-	if agouti {
-		templateText = agoutiBootstrapText
-	} else {
-		templateText = bootstrapText
-	}
-
-	bootstrapTemplate, err := template.New("bootstrap").Parse(templateText)
+	bootstrapTemplate, err := template.New("bootstrap").Parse(bootstrapText)
 	if err != nil {
 		panic(err.Error())
 	}

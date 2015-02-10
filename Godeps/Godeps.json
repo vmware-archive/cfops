@@ -6,10 +6,6 @@
 	],
 	"Deps": [
 		{
-			"ImportPath": "github.com/cloudfoundry-incubator/cf-lager",
-			"Rev": "94308c799cf61ac0818667ddcc25046c8c5659d1"
-		},
-		{
 			"ImportPath": "github.com/codegangsta/cli",
 			"Comment": "1.2.0-28-g61f43e7",
 			"Rev": "61f43e76957561f52674f48b7dc9a07f53c8f398"
@@ -34,23 +30,23 @@
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/cfbackup",
-			"Rev": "0ad686305691089830c082425de6ecc27d1c156f"
+			"Rev": "27197be649c88cff71d09b44ee7b17aaae14e699"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/command",
-			"Rev": "df45b5741eb5b924768ca95ec9e51c5520246f65"
+			"Rev": "909284d98a77f7c6716770b29f962cc4450f1291"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/http",
-			"Rev": "df45b5741eb5b924768ca95ec9e51c5520246f65"
+			"Rev": "909284d98a77f7c6716770b29f962cc4450f1291"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/osutils",
-			"Rev": "df45b5741eb5b924768ca95ec9e51c5520246f65"
+			"Rev": "909284d98a77f7c6716770b29f962cc4450f1291"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/persistence",
-			"Rev": "df45b5741eb5b924768ca95ec9e51c5520246f65"
+			"Rev": "909284d98a77f7c6716770b29f962cc4450f1291"
 		},
 		{
 			"ImportPath": "github.com/pkg/sftp",

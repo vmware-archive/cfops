@@ -1,25 +1,28 @@
-package persistence
+package osutils
 
 import (
 	"fmt"
 	"io"
 
 	"github.com/pivotalservices/gtils/command"
-	"github.com/pivotalservices/gtils/osutils"
 	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
 )
 
-type remoteOperationsInterface interface {
-	UploadFile(lfile io.Reader) (err error)
-}
+const (
+	REMOTE_IMPORT_PATH string = "/tmp/archive.backup"
+)
 
 func NewRemoteOperations(sshCfg command.SshConfig) *remoteOperations {
-	return &remoteOperations{sshCfg: sshCfg}
+	return &remoteOperations{
+		sshCfg:     sshCfg,
+		remotePath: REMOTE_IMPORT_PATH,
+	}
 }
 
 type remoteOperations struct {
-	sshCfg command.SshConfig
+	sshCfg     command.SshConfig
+	remotePath string
 }
 
 func (s *remoteOperations) UploadFile(lfile io.Reader) (err error) {
@@ -30,6 +33,14 @@ func (s *remoteOperations) UploadFile(lfile io.Reader) (err error) {
 		_, err = io.Copy(rfile, lfile)
 	}
 	return
+}
+
+func (s *remoteOperations) SetPath(p string) {
+	s.remotePath = p
+}
+
+func (s *remoteOperations) Path() string {
+	return s.remotePath
 }
 
 func (s *remoteOperations) GetRemoteFile() (rfile io.WriteCloser, err error) {
@@ -48,7 +59,7 @@ func (s *remoteOperations) GetRemoteFile() (rfile io.WriteCloser, err error) {
 	if sshconn, err = ssh.Dial("tcp", fmt.Sprintf("%s:%d", s.sshCfg.Host, s.sshCfg.Port), clientconfig); err == nil {
 
 		if sftpclient, err = sftp.NewClient(sshconn); err == nil {
-			rfile, err = osutils.SafeCreateSSH(sftpclient, PGDMP_REMOTE_IMPORT_PATH)
+			rfile, err = SafeCreateSSH(sftpclient, s.remotePath)
 		}
 	}
 	return

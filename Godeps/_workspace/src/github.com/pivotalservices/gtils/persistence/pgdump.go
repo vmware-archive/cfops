@@ -5,14 +5,17 @@ import (
 	"io"
 
 	"github.com/pivotalservices/gtils/command"
+	"github.com/pivotalservices/gtils/osutils"
 )
 
 const (
-	PGDMP_REMOTE_IMPORT_PATH string = "/tmp/pgdump.sql"
-	PGDMP_DUMP_BIN           string = "/var/vcap/packages/postgres/bin/pg_dump"
-	PGDMP_SQL_BIN                   = "psql"
-	PGDMP_DROP_CMD                  = "drop schema public cascade;"
-	PGDMP_CREATE_CMD                = "create schema public;"
+	PGDMP_DROP_CMD   string = "drop schema public cascade;"
+	PGDMP_CREATE_CMD        = "create schema public;"
+)
+
+var (
+	PGDMP_DUMP_BIN string = "/var/vcap/packages/postgres/bin/pg_dump"
+	PGDMP_SQL_BIN         = "/var/vcap/packages/postgres/bin/psql"
 )
 
 type PgDump struct {
@@ -48,7 +51,7 @@ func NewPgRemoteDump(port int, database, username, password string, sshCfg comma
 		Username:  username,
 		Password:  password,
 		Caller:    remoteExecuter,
-		RemoteOps: NewRemoteOperations(sshCfg),
+		RemoteOps: osutils.NewRemoteOperations(sshCfg),
 	}, err
 }
 
@@ -82,7 +85,7 @@ func (s *PgDump) getCreateCommand() string {
 
 func (s *PgDump) getImportCommand() string {
 	connect := s.getPostgresConnect(PGDMP_SQL_BIN)
-	return fmt.Sprintf("%s < %s", connect, PGDMP_REMOTE_IMPORT_PATH)
+	return fmt.Sprintf("%s < %s", connect, s.RemoteOps.Path())
 }
 
 func (s *PgDump) Dump(dest io.Writer) (err error) {

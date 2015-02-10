@@ -2,15 +2,20 @@ package cfbackup_test
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"os/exec"
+	"strings"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	. "github.com/pivotalservices/cfbackup"
 	. "github.com/pivotalservices/gtils/command"
 	. "github.com/pivotalservices/gtils/http"
+	"github.com/pivotalservices/gtils/mock"
+	"github.com/pivotalservices/gtils/osutils"
 
 	"testing"
 )
@@ -129,4 +134,58 @@ func (cmd mockLocalExecute) Execute(destination io.Writer, command string) (err 
 
 func NewLocalMockExecuter() Executer {
 	return mockLocalExecute(exec.Command)
+}
+
+var (
+	nfsSuccessString string = "success nfs"
+	nfsFailureString string = "failed nfs"
+)
+
+type SuccessMockNFSExecuter struct{}
+
+func (s *SuccessMockNFSExecuter) Execute(dest io.Writer, cmd string) (err error) {
+	io.Copy(dest, strings.NewReader(nfsSuccessString))
+	return
+}
+
+var (
+	mockNfsCommandError error = errors.New("error occurred")
+)
+
+type FailureMockNFSExecuter struct{}
+
+func (s *FailureMockNFSExecuter) Execute(dest io.Writer, cmd string) (err error) {
+	io.Copy(dest, strings.NewReader(nfsFailureString))
+	err = mockNfsCommandError
+	return
+}
+
+type mockRemoteOps struct {
+	Err    error
+	Writer io.Writer
+}
+
+func (s *mockRemoteOps) Path() string {
+	return osutils.REMOTE_IMPORT_PATH
+}
+
+func (s *mockRemoteOps) UploadFile(lfile io.Reader) error {
+
+	if s.Writer == nil {
+		s.Writer = mock.NewReadWriteCloser(nil, nil, nil)
+	}
+
+	if s.Err == nil {
+		_, s.Err = io.Copy(s.Writer, lfile)
+	}
+	return s.Err
+}
+
+var getNfs = func(lf io.Writer, cmdexec Executer) *NFSBackup {
+	return &NFSBackup{
+		Caller: cmdexec,
+		RemoteOps: &mockRemoteOps{
+			Writer: lf,
+		},
+	}
 }

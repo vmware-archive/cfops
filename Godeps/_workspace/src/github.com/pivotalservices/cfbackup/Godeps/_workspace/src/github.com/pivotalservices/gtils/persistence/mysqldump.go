@@ -5,16 +5,19 @@ import (
 	"io"
 
 	"github.com/pivotalservices/gtils/command"
+	"github.com/pivotalservices/gtils/osutils"
 )
 
 const (
-	MSQLDMP_REMOTE_IMPORT_PATH string = "/tmp/mysqldump.sql"
-	MSQLDMP_DUMP_BIN                  = "mysqldump"
-	MSQLDMP_SQL_BIN                   = "mysql"
-	MSQLDMP_CONNECT_CMD               = "%s -u %s -h %s --password=%s"
-	MSQLDMP_CREATE_CMD                = "%s < %s"
-	MSQLDMP_FLUSH_CMD                 = "%s > flush privileges"
-	MSQLDMP_DUMP_CMD                  = "%s --all-databases"
+	MSQLDMP_CONNECT_CMD string = "%s -u %s -h %s --password=%s"
+	MSQLDMP_CREATE_CMD         = "%s < %s"
+	MSQLDMP_FLUSH_CMD          = "%s > flush privileges"
+	MSQLDMP_DUMP_CMD           = "%s --all-databases"
+)
+
+var (
+	MSQLDMP_DUMP_BIN string = "mysqldump"
+	MSQLDMP_SQL_BIN         = "mysql"
 )
 
 type MysqlDump struct {
@@ -44,7 +47,7 @@ func NewRemoteMysqlDump(username, password string, sshCfg command.SshConfig) (*M
 		Username:  username,
 		Password:  password,
 		Caller:    remoteExecuter,
-		RemoteOps: NewRemoteOperations(sshCfg),
+		RemoteOps: osutils.NewRemoteOperations(sshCfg),
 	}, err
 }
 
@@ -71,7 +74,7 @@ func (s *MysqlDump) restore() (err error) {
 }
 
 func (s *MysqlDump) getImportCommand() string {
-	return fmt.Sprintf(MSQLDMP_CREATE_CMD, s.getConnectCommand(MSQLDMP_SQL_BIN), MSQLDMP_REMOTE_IMPORT_PATH)
+	return fmt.Sprintf(MSQLDMP_CREATE_CMD, s.getConnectCommand(MSQLDMP_SQL_BIN), s.RemoteOps.Path())
 }
 
 func (s *MysqlDump) getFlushCommand() string {

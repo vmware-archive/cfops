@@ -23,14 +23,6 @@ Improvements:
     - `ginkgo build <path-to-package>` will now compile the package, producing a file named `package.test`
     - The compiled `package.test` file can be run directly.  This runs the tests in series.
     - To run precompiled tests in parallel, you can run: `ginkgo -p package.test`
-- Support `bootstrap`ping and `generate`ing [Agouti](http://agouti.org) specs.
-- Fix tempfile leak when running in parallel
-- Fix incorrect failure message when a panic occurs during a parallel test run
-- `ginkgo generate` and `ginkgo bootstrap` now honor the package name already defined in a given directory
-
-Bug Fixes:
-
-- If --skipPackages is used and all packages are skipped, Ginkgo should exit 0.
 
 ## 1.1.0 (8/2/2014)
 

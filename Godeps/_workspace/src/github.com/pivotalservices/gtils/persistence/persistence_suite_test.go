@@ -9,6 +9,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/pivotalservices/gtils/mock"
+	"github.com/pivotalservices/gtils/osutils"
 
 	"testing"
 )
@@ -25,6 +26,10 @@ var (
 type mockRemoteOps struct {
 	Err    error
 	Writer io.Writer
+}
+
+func (s *mockRemoteOps) Path() string {
+	return osutils.REMOTE_IMPORT_PATH
 }
 
 func (s *mockRemoteOps) UploadFile(lfile io.Reader) error {

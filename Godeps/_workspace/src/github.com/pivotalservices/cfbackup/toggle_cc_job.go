@@ -1,179 +1,87 @@
 package cfbackup
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
-	"net/http"
-	"strconv"
-	"strings"
+	"time"
 
+	"github.com/pivotalservices/gtils/bosh"
 	. "github.com/pivotalservices/gtils/http"
 )
 
+// Not ping server so frequently and exausted the resources
+var TaskPingFreq time.Duration = 1000 * time.Millisecond
+
 type CloudControllerJobs []string
 
-type JobTogglerAdapter func(serverUrl, username, password string) (res string, err error)
-
-type EvenTaskCreaterAdapter func(method string, requestAdaptor RequestAdaptor) (task EventTasker)
-
-type EventTasker interface {
-	WaitForEventStateDone(contents bytes.Buffer, eventObject *EventObject) (err error)
-}
-
-type EventObject struct {
-	Id          int    `json:"id"`
-	State       string `json:"state"`
-	Description string `json:"description"`
-	Result      string `json:"result"`
-}
-
 type CloudController struct {
-	ip                  string
-	username            string
-	password            string
-	deploymentName      string
-	state               string
-	JobToggler          JobTogglerAdapter
-	NewEventTaskCreater EvenTaskCreaterAdapter
-	httpGateway         HttpGateway
+	deploymentName   string
+	director         bosh.Bosh
+	cloudControllers CloudControllerJobs
+	manifest         io.Reader
 }
 
-type Task struct {
-	Method         string
-	RequestAdaptor RequestAdaptor
+var NewDirector = func(ip, username, password string, port int) bosh.Bosh {
+	return bosh.NewBoshDirector(ip, username, password, port, NewHttpGateway())
 }
 
-func ToggleCCHandler(response *http.Response) (redirectUrl interface{}, err error) {
-	if response.StatusCode != 302 {
-		err = errors.New("The response code from toggle request should return 302")
-		return
-	}
-	redirectUrls := response.Header["Location"]
-	if redirectUrls == nil || len(redirectUrls) < 1 {
-		err = errors.New("Could not find redirect url for bosh tasks")
-		return
-	}
-	return redirectUrls[0], nil
-}
-
-var NewToggleGateway = func(method, serverUrl, username, password string) func() (interface{}, error) {
-	var (
-		err  error
-		resp *http.Response
-	)
-	if resp, err = Request(HttpRequestEntity{
-		Url:         serverUrl,
-		Username:    username,
-		Password:    password,
-		ContentType: "text/yaml",
-	}, method, nil); err == nil {
-		return func() (interface{}, error) {
-			return ToggleCCHandler(resp)
-		}
-	}
-	return func() (interface{}, error) {
-		return nil, err
-	}
-}
-
-func ToggleCCJobRunner(serverUrl, username, password string) (redirectUrl string, err error) {
-	ret, err := NewToggleGateway("PUT", serverUrl, username, password)()
+func NewCloudController(ip, username, password, deploymentName string, cloudControllers CloudControllerJobs) *CloudController {
+	director := NewDirector(ip, username, password, 25555)
+	manifest, err := director.GetDeploymentManifest(deploymentName)
 	if err != nil {
-		return
+		panic(err)
 	}
-	return ret.(string), err
-}
-
-func NewCloudController(ip, username, password, deploymentName, state string) *CloudController {
 	return &CloudController{
-		ip:                  ip,
-		username:            username,
-		password:            password,
-		deploymentName:      deploymentName,
-		state:               state,
-		JobToggler:          ToggleCCJobRunner,
-		NewEventTaskCreater: EvenTaskCreaterAdapter(NewTask),
+		deploymentName:   deploymentName,
+		director:         director,
+		cloudControllers: cloudControllers,
+		manifest:         manifest,
 	}
 }
 
-func (s *CloudController) ToggleJobs(ccjobs CloudControllerJobs) (err error) {
-	serverURL := serverUrlFromIp(s.ip)
-
-	for ccjobindex, ccjob := range ccjobs {
-		err = s.ToggleJob(ccjob, serverURL, ccjobindex)
-	}
-	return
+func (c *CloudController) Start() error {
+	return c.toggleController("started")
 }
 
-func (s *CloudController) ToggleJob(ccjob, serverURL string, ccjobindex int) (err error) {
-	var (
-		contents      bytes.Buffer
-		eventObject   EventObject
-		originalUrl   string
-		connectionURL string = newConnectionURL(serverURL, s.deploymentName, ccjob, s.state, ccjobindex)
-	)
+func (c *CloudController) Stop() error {
+	return c.toggleController("stopped")
+}
 
-	if originalUrl, err = s.JobToggler(connectionURL, s.username, s.password); err == nil {
-		gateway := s.httpGateway
-		if gateway == nil {
-			gateway = NewHttpGateway()
+func (c *CloudController) toggleController(state string) error {
+	for ccjobindex, ccjob := range c.cloudControllers {
+		taskId, err := c.director.ChangeJobState(c.deploymentName, ccjob, state, ccjobindex, c.manifest)
+		if err != nil {
+			return err
 		}
-		requestAdapter := gateway.Get(HttpRequestEntity{
-			Url:         modifyUrl(s.ip, serverURL, originalUrl),
-			Username:    s.username,
-			Password:    s.password,
-			ContentType: "application/json",
-		})
-		task := s.NewEventTaskCreater("GET", requestAdapter)
-		err = task.WaitForEventStateDone(contents, &eventObject)
+		err = c.waitUntilDone(taskId)
+		if err != nil {
+			return err
+		}
 	}
-	return
+	return nil
 }
 
-func NewTask(method string, requestAdaptor RequestAdaptor) (task EventTasker) {
-	task = &Task{
-		Method:         method,
-		RequestAdaptor: requestAdaptor,
-	}
-	return
-}
-
-func (s *Task) getEvents(dest io.Writer) (err error) {
-	resp, err := s.RequestAdaptor()
-	defer resp.Body.Close()
+func (c *CloudController) waitUntilDone(taskId int) (err error) {
+	time.Sleep(TaskPingFreq)
+	result, err := c.director.RetrieveTaskStatus(taskId)
 	if err != nil {
-		err = fmt.Errorf("Invalid Bosh Director Credentials")
+		return
 	}
-	_, err = io.Copy(dest, resp.Body)
-	return
-}
-
-func (s *Task) WaitForEventStateDone(contents bytes.Buffer, eventObject *EventObject) (err error) {
-
-	if err = json.Unmarshal(contents.Bytes(), eventObject); err == nil && eventObject.State != "done" {
-		contents.Reset()
-
-		if err = s.getEvents(&contents); err == nil {
-			s.WaitForEventStateDone(contents, eventObject)
-		}
+	switch bosh.TASKRESULT[result.State] {
+	case bosh.ERROR:
+		err = errors.New(fmt.Sprintf("Task %d process failed", taskId))
+		return
+	case bosh.QUEUED:
+		err = c.waitUntilDone(taskId)
+		return
+	case bosh.PROCESSING:
+		err = c.waitUntilDone(taskId)
+		return
+	case bosh.DONE:
+		return
+	default:
+		err = bosh.TaskResultUnknown
+		return
 	}
-	return
-}
-
-func modifyUrl(ip, serverURL, originalUrl string) (newUrl string) {
-	newUrl = strings.Replace(originalUrl, "https://"+ip+"/", serverURL, 1)
-	return
-}
-
-func serverUrlFromIp(ip string) (serverUrl string) {
-	serverUrl = "https://" + ip + ":25555/"
-	return
-}
-
-func newConnectionURL(serverURL, deploymentName, ccjob, state string, ccjobindex int) (connectionURL string) {
-	connectionURL = serverURL + "deployments/" + deploymentName + "/jobs/" + ccjob + "/" + strconv.Itoa(ccjobindex) + "?state=" + state
-	return
 }

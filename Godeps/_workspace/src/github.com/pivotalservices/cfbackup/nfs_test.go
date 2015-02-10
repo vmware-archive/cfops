@@ -11,33 +11,128 @@ import (
 
 	. "github.com/pivotalservices/cfbackup"
 	"github.com/pivotalservices/gtils/command"
+	"github.com/pivotalservices/gtils/mock"
 	"github.com/pivotalservices/gtils/osutils"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/gbytes"
 )
-
-var (
-	nfsSuccessString string = "success nfs"
-	nfsFailureString string = "failed nfs"
-)
-
-type SuccessMockNFSExecuter struct{}
-
-func (s *SuccessMockNFSExecuter) Execute(dest io.Writer, cmd string) (err error) {
-	io.Copy(dest, strings.NewReader(nfsSuccessString))
-	return
-}
-
-type FailureMockNFSExecuter struct{}
-
-func (s *FailureMockNFSExecuter) Execute(dest io.Writer, cmd string) (err error) {
-	io.Copy(dest, strings.NewReader(nfsFailureString))
-	err = fmt.Errorf("error occurred")
-	return
-}
 
 var _ = Describe("nfs", func() {
+	Describe("Import NFS Restore", func() {
+		var (
+			nfs           *NFSBackup
+			buffer        *gbytes.Buffer
+			controlString string = "test of local file"
+			err           error
+		)
+
+		BeforeEach(func() {
+			err = nil
+		})
+
+		AfterEach(func() {
+			err = nil
+		})
+
+		Context("successful call to import", func() {
+
+			BeforeEach(func() {
+				lf := strings.NewReader(controlString)
+				buffer = gbytes.NewBuffer()
+				nfs = getNfs(buffer, &SuccessMockNFSExecuter{})
+				err = nfs.Import(lf)
+			})
+
+			It("should return nil error", func() {
+				Ω(err).Should(BeNil())
+			})
+
+			It("should write the local file contents to the remote", func() {
+				Ω(buffer).Should(gbytes.Say(controlString))
+			})
+		})
+
+		Context("error on command execution", func() {
+
+			BeforeEach(func() {
+				lf := strings.NewReader(controlString)
+				buffer = gbytes.NewBuffer()
+				nfs = getNfs(buffer, &FailureMockNFSExecuter{})
+				err = nfs.Import(lf)
+			})
+
+			It("should return non-nil execution error", func() {
+				Ω(err).ShouldNot(BeNil())
+				Ω(err).Should(Equal(mockNfsCommandError))
+			})
+
+			It("should write the local file contents to the remote", func() {
+				Ω(buffer).Should(gbytes.Say(controlString))
+			})
+		})
+
+		Context("error on file upload", func() {
+			BeforeEach(func() {
+				buffer = gbytes.NewBuffer()
+				nfs = getNfs(buffer, &SuccessMockNFSExecuter{})
+			})
+
+			Context("Read failure", func() {
+				BeforeEach(func() {
+					lf := mock.NewReadWriteCloser(mock.READ_FAIL_ERROR, nil, nil)
+					err = nfs.Import(lf)
+				})
+
+				It("should return non-nil execution error", func() {
+					Ω(err).ShouldNot(BeNil())
+					Ω(err).Should(Equal(mock.READ_FAIL_ERROR))
+				})
+
+				It("should write the local file contents to the remote", func() {
+					Ω(buffer).ShouldNot(gbytes.Say(controlString))
+				})
+			})
+
+			Context("Writer related failure", func() {
+				Context("Write failure", func() {
+					BeforeEach(func() {
+						lf := mock.NewReadWriteCloser(nil, mock.WRITE_FAIL_ERROR, nil)
+						nfs = getNfs(lf, &SuccessMockNFSExecuter{})
+						err = nfs.Import(lf)
+					})
+
+					It("should return non-nil execution error", func() {
+						Ω(err).ShouldNot(BeNil())
+						Ω(err).Should(Equal(mock.WRITE_FAIL_ERROR))
+					})
+
+					It("should write the local file contents to the remote", func() {
+						Ω(buffer).ShouldNot(gbytes.Say(controlString))
+					})
+				})
+
+				Context("Close failure", func() {
+					BeforeEach(func() {
+						lf := mock.NewReadWriteCloser(nil, nil, mock.CLOSE_FAIL_ERROR)
+						nfs = getNfs(lf, &SuccessMockNFSExecuter{})
+						err = nfs.Import(lf)
+					})
+
+					It("should return non-nil execution error", func() {
+						Ω(err).ShouldNot(BeNil())
+						Ω(err).Should(Equal(io.ErrShortWrite))
+					})
+
+					It("should write the local file contents to the remote", func() {
+						Ω(buffer).ShouldNot(gbytes.Say(controlString))
+					})
+				})
+			})
+		})
+	})
+
 	Describe("BackupNfs", func() {
 		var origExecuterFunction func(command.SshConfig) (command.Executer, error)
 		var tmpfile *os.File
