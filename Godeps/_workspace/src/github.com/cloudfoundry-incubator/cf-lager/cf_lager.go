@@ -28,7 +28,7 @@ func AddFlags(flagSet *flag.FlagSet) {
 	)
 }
 
-func New(component string) lager.Logger {
+func New(component string) (lager.Logger, *lager.ReconfigurableSink) {
 	var minLagerLogLevel lager.LogLevel
 	switch minLogLevel {
 	case DEBUG:
@@ -44,7 +44,9 @@ func New(component string) lager.Logger {
 	}
 
 	logger := lager.NewLogger(component)
-	logger.RegisterSink(lager.NewWriterSink(os.Stdout, minLagerLogLevel))
 
-	return logger
+	sink := lager.NewReconfigurableSink(lager.NewWriterSink(os.Stdout, lager.DEBUG), minLagerLogLevel)
+	logger.RegisterSink(sink)
+
+	return logger, sink
 }

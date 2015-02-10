@@ -9,8 +9,8 @@ import (
 	"os"
 	"path"
 
-	"github.com/pivotal-golang/lager"
 	. "github.com/pivotalservices/gtils/http"
+	"github.com/pivotalservices/gtils/log"
 	"github.com/pivotalservices/gtils/osutils"
 )
 
@@ -50,11 +50,11 @@ type ElasticRuntime struct {
 	HttpGateway       HttpGateway
 	InstallationName  string
 	BackupContext
-	Logger lager.Logger
+	Logger log.Logger
 }
 
 // NewElasticRuntime initializes an ElasticRuntime intance
-var NewElasticRuntime = func(jsonFile string, target string, logger lager.Logger) *ElasticRuntime {
+var NewElasticRuntime = func(jsonFile string, target string, logger log.Logger) *ElasticRuntime {
 	var (
 		uaadbInfo *PgInfo = &PgInfo{
 			SystemInfo: SystemInfo{
@@ -166,7 +166,7 @@ func (context *ElasticRuntime) getAllCloudControllerVMs() (ccvms []string, err e
 	context.Logger.Debug("Entering getAllCloudControllerVMs() function")
 	directorInfo := context.SystemsInfo[ER_DIRECTOR]
 	connectionURL := fmt.Sprintf(ER_VMS_URL, directorInfo.Get(SD_IP), context.InstallationName)
-	context.Logger.Debug("getAllCloudControllerVMs() function", lager.Data{"connectionURL": connectionURL, "directorInfo": directorInfo})
+	context.Logger.Debug("getAllCloudControllerVMs() function", log.Data{"connectionURL": connectionURL, "directorInfo": directorInfo})
 	gateway := context.HttpGateway
 	if gateway == nil {
 		gateway = NewHttpGateway()

@@ -7,9 +7,9 @@ import (
 	"os"
 	"path"
 
-	"github.com/pivotal-golang/lager"
 	"github.com/pivotalservices/gtils/command"
 	. "github.com/pivotalservices/gtils/http"
+	"github.com/pivotalservices/gtils/log"
 	"github.com/pivotalservices/gtils/osutils"
 )
 
@@ -51,11 +51,11 @@ type OpsManager struct {
 	AssetsRequestor     httpRequestor
 	DeploymentDir       string
 	OpsmanagerBackupDir string
-	Logger              lager.Logger
+	Logger              log.Logger
 }
 
 // NewOpsManager initializes an OpsManager instance
-var NewOpsManager = func(hostname string, username string, password string, tempestpassword string, target string, logger lager.Logger) (context *OpsManager, err error) {
+var NewOpsManager = func(hostname string, username string, password string, tempestpassword string, target string, logger log.Logger) (context *OpsManager, err error) {
 	var remoteExecuter command.Executer
 
 	if remoteExecuter, err = createExecuter(hostname, tempestpassword); err == nil {
@@ -152,7 +152,7 @@ func (context *OpsManager) exportUrlToFile(urlFormat string, filename string) (e
 
 	url := fmt.Sprintf(urlFormat, context.Hostname)
 
-	context.Logger.Debug("Exporting url '%s' to file '%s'", lager.Data{"url": url, "filename": filename})
+	context.Logger.Debug("Exporting url '%s' to file '%s'", log.Data{"url": url, "filename": filename})
 
 	if settingsFileRef, err = osutils.SafeCreate(context.TargetDir, context.OpsmanagerBackupDir, filename); err == nil {
 		err = context.exportUrlToWriter(url, settingsFileRef, context.SettingsRequestor)
@@ -184,7 +184,7 @@ func (context *OpsManager) extract() (err error) {
 		backupDir := path.Join(context.TargetDir, context.OpsmanagerBackupDir)
 		deployment := path.Join(backupDir, OPSMGR_DEPLOYMENTS_FILENAME)
 		cmd := "tar -xf " + deployment + " -C " + backupDir
-		context.Logger.Debug("Extracting : %s", lager.Data{"command": cmd})
+		context.Logger.Debug("Extracting : %s", log.Data{"command": cmd})
 		context.LocalExecuter.Execute(nil, cmd)
 
 		err = ExtractEncryptionKey(keyFileRef, context.DeploymentDir)
