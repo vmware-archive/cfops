@@ -4,64 +4,37 @@ import (
 	"fmt"
 
 	"github.com/codegangsta/cli"
+	"github.com/pivotalservices/cfbackup"
 )
 
-var backupFlags []cli.Flag = []cli.Flag{
-	cli.StringFlag{
-		Name:   "hostname, host",
-		Value:  "",
-		Usage:  "hostname for Ops Manager",
-		EnvVar: "",
+const (
+	backup_full_name  string = "backup"
+	backup_short_name        = "b"
+	backup_usage             = "backup -host <host> -u <usr> -p <pass> -tp <tpass> -d <dir>"
+	backup_descr             = "backup a Cloud Foundry deployment, including Ops Manager configuration, databases, and blob store"
+)
+
+var backupCli = cli.Command{
+	Name:        backup_full_name,
+	ShortName:   backup_short_name,
+	Usage:       backup_usage,
+	Description: backup_descr,
+	Flags:       backupRestoreFlags,
+	Action: func(c *cli.Context) {
+		var err error
+
+		if hasValidBackupRestoreFlags(c) {
+			err = cfbackup.RunBackupPipeline(c.String(hostflag[0]), c.String(userflag[0]), c.String(passflag[0]), c.String(tpassflag[0]), c.String(destflag[0]))
+
+		} else {
+			cli.ShowCommandHelp(c, backup_full_name)
+		}
+
+		if err != nil {
+			fmt.Println(err)
+
+		} else {
+			fmt.Println(backup_full_name, " completed successfully.")
+		}
 	},
-	cli.StringFlag{
-		Name:   "username, u",
-		Value:  "",
-		Usage:  "username for Ops Manager",
-		EnvVar: "",
-	},
-	cli.StringFlag{
-		Name:   "password, p",
-		Value:  "",
-		Usage:  "password for Ops Manager",
-		EnvVar: "",
-	},
-	cli.StringFlag{
-		Name:   "tempestpassword, tp",
-		Value:  "",
-		Usage:  "password for the Ops Manager tempest user",
-		EnvVar: "",
-	},
-	cli.StringFlag{
-		Name:   "destination, d",
-		Value:  "",
-		Usage:  "directory where the Cloud Foundry backup should be stored",
-		EnvVar: "",
-	},
-}
-
-type commandFunc func(c *cli.Context)
-
-type runPipeline func(string, string, string, string, string) error
-
-func runBackupRestore(command string, run runPipeline) commandFunc {
-	return func(c *cli.Context) {
-		runBackupRestoreCmd(command, c, run)
-	}
-}
-
-func runBackupRestoreCmd(command string, c *cli.Context, run runPipeline) {
-	var err error
-
-	if c.String("hostname") == "" || c.String("username") == "" || c.String("password") == "" || c.String("tempestpassword") == "" || c.String("destination") == "" {
-		cli.ShowCommandHelp(c, command)
-
-	} else {
-		err = run(c.String("hostname"), c.String("username"), c.String("password"), c.String("tempestpassword"), c.String("destination"))
-	}
-
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		fmt.Println(fmt.Sprintf("%s compeleted successfully", command))
-	}
 }
