@@ -16,8 +16,8 @@ const (
 )
 
 var (
-	MSQLDMP_DUMP_BIN string = "/var/vcap/packages/mariadb/bin/mysqldump"
-	MSQLDMP_SQL_BIN         = "/var/vcap/packages/mariadb/bin/mysql"
+	MSQLDMP_DUMP_BIN string = "mysqldump"
+	MSQLDMP_SQL_BIN         = "mysql"
 )
 
 type MysqlDump struct {
