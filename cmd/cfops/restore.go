@@ -24,7 +24,7 @@ var restoreCli = cli.Command{
 		var err error
 
 		if hasValidBackupRestoreFlags(c) {
-			err = cfbackup.RunBackupPipeline(c.String(hostflag[0]), c.String(userflag[0]), c.String(passflag[0]), c.String(tpassflag[0]), c.String(destflag[0]))
+			err = cfbackup.RunRestorePipeline(c.String(hostflag[0]), c.String(userflag[0]), c.String(passflag[0]), c.String(tpassflag[0]), c.String(destflag[0]))
 
 		} else {
 			cli.ShowCommandHelp(c, backup_full_name)

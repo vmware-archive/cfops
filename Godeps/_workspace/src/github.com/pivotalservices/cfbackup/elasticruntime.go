@@ -15,20 +15,21 @@ import (
 )
 
 const (
-	ER_DEFAULT_SYSTEM_USER        string = "vcap"
-	ER_DIRECTOR_INFO_URL          string = "https://%s:25555/info"
-	ER_BACKUP_DIR                 string = "elasticruntime"
-	ER_VMS_URL                    string = "https://%s:25555/deployments/%s/vms"
-	ER_DIRECTOR                   string = "DirectorInfo"
-	ER_CONSOLE                    string = "ConsoledbInfo"
-	ER_UAA                        string = "UaadbInfo"
-	ER_CC                         string = "CcdbInfo"
-	ER_MYSQL                      string = "MysqldbInfo"
-	ER_NFS                        string = "NfsInfo"
-	ER_BACKUP_FILE_FORMAT         string = "%s.backup"
-	ER_INVALID_DIRECTOR_CREDS_MSG string = "invalid director credentials"
-	ER_NO_PERSISTENCE_ARCHIVES    string = "there are no persistence stores in the list"
-	ER_FILE_DOES_NOT_EXIST        string = "file does not exist"
+	ER_DEFAULT_SYSTEM_USER        = "vcap"
+	ER_DIRECTOR_INFO_URL          = "https://%s:25555/info"
+	ER_BACKUP_DIR                 = "elasticruntime"
+	ER_VMS_URL                    = "https://%s:25555/deployments/%s/vms"
+	ER_DIRECTOR                   = "DirectorInfo"
+	ER_CONSOLE                    = "ConsoledbInfo"
+	ER_UAA                        = "UaadbInfo"
+	ER_CC                         = "CcdbInfo"
+	ER_MYSQL                      = "MysqldbInfo"
+	ER_NFS                        = "NfsInfo"
+	ER_BACKUP_FILE_FORMAT         = "%s.backup"
+	ER_INVALID_DIRECTOR_CREDS_MSG = "invalid director credentials"
+	ER_NO_PERSISTENCE_ARCHIVES    = "there are no persistence stores in the list"
+	ER_FILE_DOES_NOT_EXIST        = "file does not exist"
+	ER_DB_BACKUP_FAILURE          = "failed to backup database"
 )
 
 const (
@@ -37,9 +38,10 @@ const (
 )
 
 var (
-	ER_ERROR_DIRECTOR_CREDS error         = errors.New(ER_INVALID_DIRECTOR_CREDS_MSG)
-	ER_ERROR_EMPTY_DB_LIST  error         = errors.New(ER_NO_PERSISTENCE_ARCHIVES)
-	ER_ERROR_INVALID_PATH   *os.PathError = &os.PathError{Err: errors.New(ER_FILE_DOES_NOT_EXIST)}
+	ER_ERROR_DIRECTOR_CREDS = errors.New(ER_INVALID_DIRECTOR_CREDS_MSG)
+	ER_ERROR_EMPTY_DB_LIST  = errors.New(ER_NO_PERSISTENCE_ARCHIVES)
+	ER_ERROR_INVALID_PATH   = &os.PathError{Err: errors.New(ER_FILE_DOES_NOT_EXIST)}
+	ER_DB_BACKUP            = errors.New(ER_DB_BACKUP_FAILURE)
 )
 
 // ElasticRuntime contains information about a Pivotal Elastic Runtime deployment
@@ -119,7 +121,7 @@ var NewElasticRuntime = func(jsonFile string, target string, logger log.Logger) 
 			consoledbInfo,
 			uaadbInfo,
 			ccdbInfo,
-			// nfsInfo,
+			nfsInfo,
 			mysqldbInfo,
 		},
 		Logger: logger,
@@ -140,8 +142,6 @@ func (context *ElasticRuntime) Restore() (err error) {
 
 func (context *ElasticRuntime) backupRestore(action int) (err error) {
 	var (
-		//ccStop  *CloudController
-		//ccStart *CloudController
 		ccJobs []string
 	)
 
@@ -154,7 +154,16 @@ func (context *ElasticRuntime) backupRestore(action int) (err error) {
 			defer cloudController.Start()
 			cloudController.Stop()
 		}
-		err = context.RunDbAction(context.PersistentSystems, action)
+		context.Logger.Debug("Running db action")
+		if len(context.PersistentSystems) > 0 {
+			err = context.RunDbAction(context.PersistentSystems, action)
+			if err != nil {
+				context.Logger.Error("Error backing up db", err)
+				err = ER_DB_BACKUP
+			}
+		} else {
+			err = ER_ERROR_EMPTY_DB_LIST
+		}
 	} else if err == nil {
 		err = ER_ERROR_DIRECTOR_CREDS
 	}
@@ -196,14 +205,10 @@ func (context *ElasticRuntime) RunDbAction(dbInfoList []SystemDump, action int) 
 
 		if err = info.Error(); err == nil {
 			err = context.readWriterArchive(info, context.TargetDir, action)
-
+			context.Logger.Debug("backed up db", log.Data{"info": info})
 		} else {
 			break
 		}
-	}
-
-	if len(dbInfoList) <= 0 {
-		err = ER_ERROR_EMPTY_DB_LIST
 	}
 	return
 }
@@ -249,10 +254,11 @@ func (context *ElasticRuntime) importExport(rw io.ReadWriter, s SystemDump, acti
 
 		switch action {
 		case IMPORT_ARCHIVE:
-			fmt.Println("we are doing something here now")
+			context.Logger.Debug("we are doing something here now")
 			err = pb.Import(rw)
 
 		case EXPORT_ARCHIVE:
+			context.Logger.Info("Dumping database to file")
 			err = pb.Dump(rw)
 		}
 	}
