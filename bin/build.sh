@@ -6,8 +6,6 @@ echo -e "\nGenerating Binary..."
 
 ROOT_DIR=$(cd $(dirname $(dirname $0)) && pwd)
 
-echo -e "\nROOT_DIR set to ${ROOT_DIR}"
-
 CLI_GOPATH=$ROOT_DIR/tmp/cli_gopath
 rm -rf $CLI_GOPATH
 mkdir -p $CLI_GOPATH/src/github.com/pivotalservices/
