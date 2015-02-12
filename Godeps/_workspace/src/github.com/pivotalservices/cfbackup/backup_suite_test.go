@@ -202,3 +202,25 @@ func getLogger(minLogLevel string) log.Logger {
 	log.SetLogLevel(minLogLevel)
 	return log.LogFactory("TestLogger", log.Lager, os.Stdout)
 }
+
+var (
+	mockTileErrBackup  = errors.New("backup tile error")
+	mockTileErrRestore = errors.New("restore tile error")
+)
+
+type mockTile struct {
+	ErrBackup     error
+	ErrRestore    error
+	RestoreCalled int
+	BackupCalled  int
+}
+
+func (s *mockTile) Backup() error {
+	s.BackupCalled++
+	return s.ErrBackup
+}
+
+func (s *mockTile) Restore() error {
+	s.RestoreCalled++
+	return s.ErrRestore
+}

@@ -7,10 +7,32 @@ import (
 	"github.com/pivotalservices/gtils/log"
 )
 
+const (
+	BACKUP_LOGGER_NAME  = "Backup"
+	RESTORE_LOGGER_NAME = "Restore"
+)
+
+var (
+	TILE_RESTORE_ACTION = func(t Tile) func() error {
+		return t.Restore
+	}
+	TILE_BACKUP_ACTION = func(t Tile) func() error {
+		return t.Backup
+	}
+)
+
 // Tile is a deployable component that can be backed up
 type Tile interface {
 	Backup() error
 	Restore() error
+}
+
+type connBucketInterface interface {
+	Host() string
+	User() string
+	Pass() string
+	TempestPass() string
+	Destination() string
 }
 
 type BackupContext struct {
@@ -21,40 +43,48 @@ type action func() error
 
 type actionAdaptor func(t Tile) action
 
+//Backup the list of all default tiles
 func RunBackupPipeline(hostname, username, password, tempestpassword, destination string) (err error) {
-	backup := func(t Tile) action {
-		return func() error {
-			return t.Backup()
-		}
+	var tiles []Tile
+	conn := connectionBucket{
+		hostname:        hostname,
+		username:        username,
+		password:        password,
+		tempestPassword: tempestpassword,
+		destination:     destination,
 	}
-	return runPipelines(hostname, username, password, tempestpassword, destination, "Backup", backup)
+
+	if tiles, err = fullTileList(conn, BACKUP_LOGGER_NAME); err == nil {
+		err = RunPipeline(TILE_BACKUP_ACTION, tiles)
+	}
+	return
 }
 
+//Restore the list of all default tiles
 func RunRestorePipeline(hostname, username, password, tempestpassword, destination string) (err error) {
-	restore := func(t Tile) action {
-		return func() error {
-			return t.Restore()
-		}
+	var tiles []Tile
+	conn := connectionBucket{
+		hostname:        hostname,
+		username:        username,
+		password:        password,
+		tempestPassword: tempestpassword,
+		destination:     destination,
 	}
-	return runPipelines(hostname, username, password, tempestpassword, destination, "Backup", restore)
+
+	if tiles, err = fullTileList(conn, RESTORE_LOGGER_NAME); err == nil {
+		err = RunPipeline(TILE_RESTORE_ACTION, tiles)
+	}
+	return
 }
 
-func runPipelines(hostname, username, password, tempestpassword, destination, loggerName string, actionBuilder actionAdaptor) (err error) {
-	var (
-		opsmanager     Tile
-		elasticRuntime Tile
-	)
-	backupLogger := log.LogFactory(loggerName, log.Lager, os.Stdout)
-	installationFilePath := path.Join(destination, OPSMGR_BACKUP_DIR, OPSMGR_INSTALLATION_SETTINGS_FILENAME)
+//Runs a pipeline action (restore/backup) on a list of tiles
+var RunPipeline = func(actionBuilder func(Tile) func() error, tiles []Tile) (err error) {
+	var pipeline []action
 
-	if opsmanager, err = NewOpsManager(hostname, username, password, tempestpassword, destination, backupLogger); err == nil {
-		elasticRuntime = NewElasticRuntime(installationFilePath, destination, backupLogger)
-		tiles := []action{
-			actionBuilder(opsmanager),
-			actionBuilder(elasticRuntime),
-		}
-		err = runActions(tiles)
+	for _, tile := range tiles {
+		pipeline = append(pipeline, actionBuilder(tile))
 	}
+	err = runActions(pipeline)
 	return
 }
 
@@ -63,6 +93,24 @@ func runActions(actions []action) (err error) {
 
 		if err = action(); err != nil {
 			break
+		}
+	}
+	return
+}
+
+func fullTileList(conn connBucketInterface, loggerName string) (tiles []Tile, err error) {
+	var (
+		opsmanager     Tile
+		elasticRuntime Tile
+	)
+	backupLogger := log.LogFactory(loggerName, log.Lager, os.Stdout)
+	installationFilePath := path.Join(conn.Destination(), OPSMGR_BACKUP_DIR, OPSMGR_INSTALLATION_SETTINGS_FILENAME)
+
+	if opsmanager, err = NewOpsManager(conn.Host(), conn.User(), conn.Pass(), conn.TempestPass(), conn.Destination(), backupLogger); err == nil {
+		elasticRuntime = NewElasticRuntime(installationFilePath, conn.Destination(), backupLogger)
+		tiles = []Tile{
+			opsmanager,
+			elasticRuntime,
 		}
 	}
 	return

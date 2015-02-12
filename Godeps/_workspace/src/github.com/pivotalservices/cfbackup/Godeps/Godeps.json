@@ -1,6 +1,9 @@
 {
 	"ImportPath": "github.com/pivotalservices/cfbackup",
 	"GoVersion": "go1.3.3",
+	"Packages": [
+		"./..."
+	],
 	"Deps": [
 		{
 			"ImportPath": "github.com/kr/fs",
@@ -8,41 +11,45 @@
 		},
 		{
 			"ImportPath": "github.com/onsi/ginkgo",
-			"Comment": "v1.1.0-20-g75d0cd9",
-			"Rev": "75d0cd9c7ee52e99b13e6ccfd9e58b4f92b7795e"
+			"Comment": "v1.1.0-30-g5ce32b7",
+			"Rev": "5ce32b7910cdddcdd8bac6d761e2de9f27f9377b"
 		},
 		{
 			"ImportPath": "github.com/onsi/gomega",
-			"Comment": "v1.0-19-g835b5e4",
-			"Rev": "835b5e4242c715976b98ed6bc6ece1d9c7879f66"
+			"Comment": "v1.0-26-gdc751ce",
+			"Rev": "dc751ce5f266d83c26fae5c0a9093973b29cb61d"
+		},
+		{
+			"ImportPath": "github.com/pivotal-golang/lager",
+			"Rev": "1baba58607e680b5659dddcad70d53abe5af039e"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/bosh",
-			"Rev": "1617b264041835b36690ee5bf4982d72503061df"
+			"Rev": "909284d98a77f7c6716770b29f962cc4450f1291"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/command",
-			"Rev": "1617b264041835b36690ee5bf4982d72503061df"
+			"Rev": "909284d98a77f7c6716770b29f962cc4450f1291"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/http",
-			"Rev": "1617b264041835b36690ee5bf4982d72503061df"
+			"Rev": "909284d98a77f7c6716770b29f962cc4450f1291"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/log",
-			"Rev": "1617b264041835b36690ee5bf4982d72503061df"
+			"Rev": "909284d98a77f7c6716770b29f962cc4450f1291"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/mock",
-			"Rev": "1617b264041835b36690ee5bf4982d72503061df"
+			"Rev": "909284d98a77f7c6716770b29f962cc4450f1291"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/osutils",
-			"Rev": "1617b264041835b36690ee5bf4982d72503061df"
+			"Rev": "909284d98a77f7c6716770b29f962cc4450f1291"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/persistence",
-			"Rev": "1617b264041835b36690ee5bf4982d72503061df"
+			"Rev": "909284d98a77f7c6716770b29f962cc4450f1291"
 		},
 		{
 			"ImportPath": "github.com/pkg/sftp",
@@ -50,15 +57,16 @@
 		},
 		{
 			"ImportPath": "github.com/xchapter7x/goutil",
-			"Rev": "189c9c150f54f5b0fe1de1a659e7ef20fa490cfb"
+			"Rev": "d11405d449b25127a32fab25ce8b1fc0388da5b3"
 		},
 		{
 			"ImportPath": "golang.org/x/crypto/ssh",
-			"Rev": "88b65fb66346493d43e735adad931bf69dee4297"
+			"Comment": "null-234",
+			"Rev": "60a80aaa50ff0e8506f61b1fa35078a24941be50"
 		},
 		{
 			"ImportPath": "gopkg.in/yaml.v1",
-			"Rev": "9f9df34309c04878acc86042b16630b0f696e1de"
+			"Rev": "feb4ca79644e8e7e39c06095246ee54b1282c118"
 		}
 	]
 }
