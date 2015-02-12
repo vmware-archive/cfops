@@ -163,8 +163,8 @@ func (context *OpsManager) exportUrlToFile(urlFormat string, filename string) (e
 func (context *OpsManager) exportUrlToWriter(url string, dest io.Writer, requestor httpRequestor) (err error) {
 	resp, err := requestor.Get(HttpRequestEntity{
 		Url:         url,
-		Username:    "admin",
-		Password:    "admin",
+		Username:    context.Username,
+		Password:    context.Password,
 		ContentType: "application/octet-stream",
 	})()
 	if err == nil {
