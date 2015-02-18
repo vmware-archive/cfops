@@ -6,11 +6,10 @@ import (
 
 	. "github.com/onsi/ginkgo/internal/leafnodes"
 
-	"time"
-
 	"github.com/onsi/ginkgo/internal/codelocation"
 	Failer "github.com/onsi/ginkgo/internal/failer"
 	"github.com/onsi/ginkgo/types"
+	"time"
 )
 
 var _ = Describe("SuiteNodes", func() {
@@ -68,7 +67,7 @@ var _ = Describe("SuiteNodes", func() {
 				Ω(summary.State).Should(Equal(types.SpecStateFailed))
 				Ω(summary.Failure.Message).Should(Equal("oops"))
 				Ω(summary.Failure.Location).Should(Equal(innerCodeLocation))
-				Ω(summary.Failure.ForwardedPanic).Should(BeEmpty())
+				Ω(summary.Failure.ForwardedPanic).Should(BeNil())
 				Ω(summary.Failure.ComponentIndex).Should(Equal(0))
 				Ω(summary.Failure.ComponentType).Should(Equal(types.SpecComponentTypeBeforeSuite))
 				Ω(summary.Failure.ComponentCodeLocation).Should(Equal(codeLocation))
@@ -90,7 +89,7 @@ var _ = Describe("SuiteNodes", func() {
 			It("should have the correct summary", func() {
 				summary := befSuite.Summary()
 				Ω(summary.State).Should(Equal(types.SpecStateTimedOut))
-				Ω(summary.Failure.ForwardedPanic).Should(BeEmpty())
+				Ω(summary.Failure.ForwardedPanic).Should(BeNil())
 				Ω(summary.Failure.ComponentIndex).Should(Equal(0))
 				Ω(summary.Failure.ComponentType).Should(Equal(types.SpecComponentTypeBeforeSuite))
 				Ω(summary.Failure.ComponentCodeLocation).Should(Equal(codeLocation))
@@ -175,7 +174,7 @@ var _ = Describe("SuiteNodes", func() {
 				Ω(summary.State).Should(Equal(types.SpecStateFailed))
 				Ω(summary.Failure.Message).Should(Equal("oops"))
 				Ω(summary.Failure.Location).Should(Equal(innerCodeLocation))
-				Ω(summary.Failure.ForwardedPanic).Should(BeEmpty())
+				Ω(summary.Failure.ForwardedPanic).Should(BeNil())
 				Ω(summary.Failure.ComponentIndex).Should(Equal(0))
 				Ω(summary.Failure.ComponentType).Should(Equal(types.SpecComponentTypeAfterSuite))
 				Ω(summary.Failure.ComponentCodeLocation).Should(Equal(codeLocation))
@@ -197,7 +196,7 @@ var _ = Describe("SuiteNodes", func() {
 			It("should have the correct summary", func() {
 				summary := aftSuite.Summary()
 				Ω(summary.State).Should(Equal(types.SpecStateTimedOut))
-				Ω(summary.Failure.ForwardedPanic).Should(BeEmpty())
+				Ω(summary.Failure.ForwardedPanic).Should(BeNil())
 				Ω(summary.Failure.ComponentIndex).Should(Equal(0))
 				Ω(summary.Failure.ComponentType).Should(Equal(types.SpecComponentTypeAfterSuite))
 				Ω(summary.Failure.ComponentCodeLocation).Should(Equal(codeLocation))

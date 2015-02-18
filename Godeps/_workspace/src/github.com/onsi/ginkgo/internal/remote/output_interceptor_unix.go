@@ -28,17 +28,17 @@ func (interceptor *outputInterceptor) StartInterceptingOutput() error {
 
 	var err error
 
-	interceptor.redirectFile, err = ioutil.TempFile("", "ginkgo-output")
+	interceptor.redirectFile, err = ioutil.TempFile("", "ginkgo")
 	if err != nil {
 		return err
 	}
 
-	interceptor.stdoutPlaceholder, err = ioutil.TempFile("", "ginkgo-output")
+	interceptor.stdoutPlaceholder, err = ioutil.TempFile("", "ginkgo")
 	if err != nil {
 		return err
 	}
 
-	interceptor.stderrPlaceholder, err = ioutil.TempFile("", "ginkgo-output")
+	interceptor.stderrPlaceholder, err = ioutil.TempFile("", "ginkgo")
 	if err != nil {
 		return err
 	}
