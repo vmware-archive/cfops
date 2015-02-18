@@ -16,7 +16,6 @@ type RunWatchAndBuildCommandFlags struct {
 
 	//for run and watch commands
 	NumCPU         int
-	NumCompilers   int
 	ParallelStream bool
 	Notify         bool
 	AutoNodes      bool
@@ -98,7 +97,6 @@ func (c *RunWatchAndBuildCommandFlags) flags(mode int) {
 	if mode == runMode || mode == watchMode {
 		config.Flags(c.FlagSet, "", false)
 		c.FlagSet.IntVar(&(c.NumCPU), "nodes", 1, "The number of parallel test nodes to run")
-		c.FlagSet.IntVar(&(c.NumCompilers), "compilers", 0, "The number of concurrent compilations to run (0 will autodetect)")
 		c.FlagSet.BoolVar(&(c.AutoNodes), "p", false, "Run in parallel with auto-detected number of nodes")
 		c.FlagSet.BoolVar(&(c.ParallelStream), "stream", onWindows, "stream parallel test output in real time: less coherent, but useful for debugging")
 		if onOSX {

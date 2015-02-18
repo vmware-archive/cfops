@@ -38,7 +38,7 @@ func NewSuiteRunner(notifier *Notifier, interruptHandler *InterruptHandler) *Sui
 	}
 }
 
-func (r *SuiteRunner) RunSuites(runners []*testrunner.TestRunner, numCompilers int, keepGoing bool, willCompile func(suite testsuite.TestSuite)) (testrunner.RunResult, int) {
+func (r *SuiteRunner) RunSuites(runners []*testrunner.TestRunner, keepGoing bool, willCompile func(suite testsuite.TestSuite)) (testrunner.RunResult, int) {
 	runResult := testrunner.PassingRunResult()
 
 	compilers := make([]*compiler, len(runners))
@@ -50,9 +50,7 @@ func (r *SuiteRunner) RunSuites(runners []*testrunner.TestRunner, numCompilers i
 	}
 
 	compilerChannel := make(chan *compiler)
-	if numCompilers == 0 {
-		numCompilers = runtime.NumCPU()
-	}
+	numCompilers := runtime.NumCPU()
 	for i := 0; i < numCompilers; i++ {
 		go func() {
 			for compiler := range compilerChannel {

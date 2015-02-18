@@ -3,11 +3,10 @@ package remote
 import (
 	"bytes"
 	"encoding/json"
-	"io"
-	"net/http"
-
 	"github.com/onsi/ginkgo/config"
 	"github.com/onsi/ginkgo/types"
+	"io"
+	"net/http"
 )
 
 //An interface to net/http's client to allow the injection of fakes under test
@@ -85,6 +84,5 @@ func (reporter *ForwardingReporter) AfterSuiteDidRun(setupSummary *types.SetupSu
 }
 
 func (reporter *ForwardingReporter) SpecSuiteDidEnd(summary *types.SuiteSummary) {
-	reporter.outputInterceptor.StopInterceptingAndReturnOutput()
 	reporter.post("/SpecSuiteDidEnd", summary)
 }
