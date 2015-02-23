@@ -41,7 +41,7 @@ func NewMysqlDump(ip, username, password string) *MysqlDump {
 }
 
 func NewRemoteMysqlDump(username, password string, sshCfg command.SshConfig) (*MysqlDump, error) {
-	remoteExecuter, err := command.NewRemoteExecutor(sshCfg)
+	remoteExecuter, err := command.NewSshExecutor(sshCfg)
 	return &MysqlDump{
 		Ip:        "localhost",
 		Username:  username,
@@ -65,6 +65,11 @@ func (s *MysqlDump) Dump(dest io.Writer) (err error) {
 }
 
 func (s *MysqlDump) restore() (err error) {
+	fmt.Println()
+	fmt.Printf("importing mysql %s", s.getImportCommand())
+	fmt.Println()
+	fmt.Printf("flushing mysql %s", s.getFlushCommand())
+	fmt.Println()
 	callList := []string{
 		s.getImportCommand(),
 		s.getFlushCommand(),

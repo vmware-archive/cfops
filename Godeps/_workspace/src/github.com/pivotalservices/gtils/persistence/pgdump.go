@@ -42,7 +42,7 @@ func NewPgDump(ip string, port int, database, username, password string) *PgDump
 }
 
 func NewPgRemoteDump(port int, database, username, password string, sshCfg command.SshConfig) (*PgDump, error) {
-	remoteExecuter, err := command.NewRemoteExecutor(sshCfg)
+	remoteExecuter, err := command.NewSshExecutor(sshCfg)
 	return &PgDump{
 		sshCfg:    sshCfg,
 		Ip:        "localhost",

@@ -4,8 +4,11 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"net/http"
+	"net/url"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/pivotalservices/gtils/command"
 	. "github.com/pivotalservices/gtils/http"
@@ -14,20 +17,21 @@ import (
 )
 
 const (
-	OPSMGR_INSTALLATION_SETTINGS_FILENAME       string = "installation.json"
-	OPSMGR_INSTALLATION_SETTINGS_POSTFIELD_NAME string = "installation[file]"
-	OPSMGR_INSTALLATION_ASSETS_FILENAME         string = "installation.zip"
-	OPSMGR_INSTALLATION_ASSETS_POSTFIELD_NAME   string = "installation[file]"
-	OPSMGR_DEPLOYMENTS_FILENAME                 string = "deployments.tar.gz"
-	OPSMGR_ENCRYPTIONKEY_FILENAME               string = "cc_db_encryption_key.txt"
-	OPSMGR_BACKUP_DIR                           string = "opsmanager"
-	OPSMGR_DEPLOYMENTS_DIR                      string = "deployments"
-	OPSMGR_DEFAULT_USER                         string = "tempest"
-	OPSMGR_INSTALLATION_SETTINGS_URL            string = "https://%s/api/installation_settings"
-	OPSMGR_INSTALLATION_ASSETS_URL              string = "https://%s/api/installation_asset_collection"
+	OPSMGR_INSTALLATION_SETTINGS_FILENAME       = "installation.json"
+	OPSMGR_INSTALLATION_SETTINGS_POSTFIELD_NAME = "installation[file]"
+	OPSMGR_INSTALLATION_ASSETS_FILENAME         = "installation.zip"
+	OPSMGR_INSTALLATION_ASSETS_POSTFIELD_NAME   = "installation[file]"
+	OPSMGR_DEPLOYMENTS_FILENAME                 = "deployments.tar.gz"
+	OPSMGR_ENCRYPTIONKEY_FILENAME               = "cc_db_encryption_key.txt"
+	OPSMGR_BACKUP_DIR                           = "opsmanager"
+	OPSMGR_DEPLOYMENTS_DIR                      = "deployments"
+	OPSMGR_DEFAULT_USER                         = "tempest"
+	OPSMGR_INSTALLATION_SETTINGS_URL            = "https://%s/api/installation_settings"
+	OPSMGR_INSTALLATION_ASSETS_URL              = "https://%s/api/installation_asset_collection"
+	OPSMGR_DEPLOYMENTS_FILE                     = "/var/tempest/workspaces/default/deployments/bosh-deployments.yml"
+	OPSMGR_MULTIPART_FORM_CONTENT_TYPE          = "multipart/form-data"
+	OPSMGR_URL_FORM_CONTENT_TYPE                = "application/x-www-form-urlencoded"
 )
-
-type httpUploader func(string, string, io.Reader, map[string]string) (io.Reader, error)
 
 type httpRequestor interface {
 	Get(HttpRequestEntity) RequestAdaptor
@@ -45,8 +49,8 @@ type OpsManager struct {
 	DbEncryptionKey     string
 	Executer            command.Executer
 	LocalExecuter       command.Executer
-	SettingsUploader    httpUploader
-	AssetsUploader      httpUploader
+	SettingsUploader    UploadFunc
+	AssetsUploader      MultiPartBodyFunc
 	SettingsRequestor   httpRequestor
 	AssetsRequestor     httpRequestor
 	DeploymentDir       string
@@ -60,13 +64,11 @@ var NewOpsManager = func(hostname string, username string, password string, temp
 
 	if remoteExecuter, err = createExecuter(hostname, tempestpassword); err == nil {
 		settingsHttpRequestor := NewHttpGateway()
-		settingsMultiHttpRequestor := MultiPartBody
 		assetsHttpRequestor := NewHttpGateway()
-		assetsMultiHttpRequestor := MultiPartBody
 
 		context = &OpsManager{
-			SettingsUploader:  settingsMultiHttpRequestor,
-			AssetsUploader:    assetsMultiHttpRequestor,
+			SettingsUploader:  Upload,
+			AssetsUploader:    MultiPartBody,
 			SettingsRequestor: settingsHttpRequestor,
 			AssetsRequestor:   assetsHttpRequestor,
 			DeploymentDir:     path.Join(target, OPSMGR_BACKUP_DIR, OPSMGR_DEPLOYMENTS_DIR),
@@ -106,28 +108,75 @@ func (context *OpsManager) importInstallation() (err error) {
 		}
 	}()
 
-	if err = context.importInstallationPart(OPSMGR_INSTALLATION_SETTINGS_FILENAME, OPSMGR_INSTALLATION_SETTINGS_POSTFIELD_NAME, context.SettingsUploader); err == nil {
-		err = context.importInstallationPart(OPSMGR_INSTALLATION_ASSETS_FILENAME, OPSMGR_INSTALLATION_ASSETS_POSTFIELD_NAME, context.AssetsUploader)
+	if err = context.importInstallationSettings(OPSMGR_INSTALLATION_SETTINGS_URL, OPSMGR_MULTIPART_FORM_CONTENT_TYPE,
+		OPSMGR_INSTALLATION_SETTINGS_FILENAME, OPSMGR_INSTALLATION_SETTINGS_POSTFIELD_NAME, context.SettingsUploader); err == nil {
+		// err = context.importInstallationAssets(OPSMGR_INSTALLATION_ASSETS_URL, OPSMGR_URL_FORM_CONTENT_TYPE,
+		// 	OPSMGR_INSTALLATION_ASSETS_FILENAME, OPSMGR_INSTALLATION_ASSETS_POSTFIELD_NAME, context.AssetsRequestor)
 	}
 	return
 }
 
 func (context *OpsManager) removeExistingDeploymentFiles() (err error) {
 	var w bytes.Buffer
-	command := "sudo rm /var/tempest/workspaces/default/deployments/bosh-deployments.yml"
+	command := fmt.Sprintf("if [ -f %s ]; then sudo rm %s;fi", OPSMGR_DEPLOYMENTS_FILE, OPSMGR_DEPLOYMENTS_FILE)
+	context.Logger.Debug("Removing bosh-deployments.yml")
 	err = context.Executer.Execute(&w, command)
 	return
 }
 
-func (context *OpsManager) importInstallationPart(filename, fieldname string, upload httpUploader) (err error) {
+func (context *OpsManager) importInstallationSettings(urlFormat, contentType, filename, fieldname string, upload UploadFunc) (err error) {
+
 	filePath := path.Join(context.TargetDir, context.OpsmanagerBackupDir, filename)
+
+	url := fmt.Sprintf(urlFormat, context.Hostname)
+
+	context.Logger.Debug("Importing opsmanager installation", log.Data{"url": url, "filePath": filePath, "filename": filename, "fieldname": fieldname})
 
 	if fileRef, err := os.Open(filePath); err == nil {
 
-		if res, err := upload(fieldname, filename, fileRef, nil); err == nil {
-			err = fmt.Errorf(fmt.Sprintf("Bad Response from Gateway: %v", res))
+		resp, err := upload(url, context.Username, context.Password, fieldname, filename, fileRef, nil)
+		if err != nil {
+			context.Logger.Error("Error uploading settings", err)
+			panic(err)
+			// return
 		}
+
+		if resp.StatusCode != http.StatusOK {
+			err = fmt.Errorf("import settings failed with status: %s", resp.Status)
+		}
+		context.Logger.Debug("Imported installation settings", log.Data{"StatusCode": resp.StatusCode, "Body": resp.Body})
 	}
+	return
+}
+
+func (context *OpsManager) importInstallationAssets(urlFormat, contentType, filename, fieldname string, requestor httpRequestor) (err error) {
+
+	filePath := path.Join(context.TargetDir, context.OpsmanagerBackupDir, filename)
+
+	assetsUrl := fmt.Sprintf(urlFormat, context.Hostname)
+
+	context.Logger.Debug("Importing opsmanager installation", log.Data{"url": assetsUrl})
+
+	body := strings.NewReader(url.QueryEscape(fmt.Sprint(fieldname + "=" + filePath)))
+
+	context.Logger.Debug("Importing opsmanager installation", log.Data{"body": url.QueryEscape(fmt.Sprint(fieldname + "=" + filePath))})
+
+	resp, err := requestor.Post(HttpRequestEntity{
+		Url:         assetsUrl,
+		Username:    context.Username,
+		Password:    context.Password,
+		ContentType: contentType,
+	}, body)()
+	if err != nil {
+		context.Logger.Error("Error uploading assets", err)
+		panic(err)
+		// return
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		err = fmt.Errorf("import assets failed with status: %s", resp.Status)
+	}
+	context.Logger.Debug("Imported installation settings", log.Data{"StatusCode": resp.StatusCode, "Body": resp.Body})
 	return
 }
 
@@ -140,13 +189,13 @@ func (context *OpsManager) exportAndExtract() (err error) {
 
 func (context *OpsManager) export() (err error) {
 
-	if err = context.exportUrlToFile(OPSMGR_INSTALLATION_SETTINGS_URL, OPSMGR_INSTALLATION_SETTINGS_FILENAME); err == nil {
-		err = context.exportUrlToFile(OPSMGR_INSTALLATION_ASSETS_URL, OPSMGR_INSTALLATION_ASSETS_FILENAME)
+	if err = context.exportUrlToFile(OPSMGR_INSTALLATION_SETTINGS_URL, "application/json", OPSMGR_INSTALLATION_SETTINGS_FILENAME); err == nil {
+		err = context.exportUrlToFile(OPSMGR_INSTALLATION_ASSETS_URL, "application/zip", OPSMGR_INSTALLATION_ASSETS_FILENAME)
 	}
 	return
 }
 
-func (context *OpsManager) exportUrlToFile(urlFormat string, filename string) (err error) {
+func (context *OpsManager) exportUrlToFile(urlFormat, contentType string, filename string) (err error) {
 	var settingsFileRef *os.File
 	defer settingsFileRef.Close()
 
@@ -155,17 +204,17 @@ func (context *OpsManager) exportUrlToFile(urlFormat string, filename string) (e
 	context.Logger.Debug("Exporting url '%s' to file '%s'", log.Data{"url": url, "filename": filename})
 
 	if settingsFileRef, err = osutils.SafeCreate(context.TargetDir, context.OpsmanagerBackupDir, filename); err == nil {
-		err = context.exportUrlToWriter(url, settingsFileRef, context.SettingsRequestor)
+		err = context.exportUrlToWriter(url, contentType, settingsFileRef, context.SettingsRequestor)
 	}
 	return
 }
 
-func (context *OpsManager) exportUrlToWriter(url string, dest io.Writer, requestor httpRequestor) (err error) {
+func (context *OpsManager) exportUrlToWriter(url, contentType string, dest io.Writer, requestor httpRequestor) (err error) {
 	resp, err := requestor.Get(HttpRequestEntity{
 		Url:         url,
 		Username:    context.Username,
 		Password:    context.Password,
-		ContentType: "application/octet-stream",
+		ContentType: contentType,
 	})()
 	if err == nil {
 		defer resp.Body.Close()

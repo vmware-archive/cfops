@@ -70,6 +70,7 @@ func GetDeploymentName(jsonObj InstallationCompareObject) (deploymentName string
 }
 
 func GetPasswordAndIP(jsonObj InstallationCompareObject, product, component, username string) (ip, password string, err error) {
+	fmt.Printf("GetPasswordAndIP() function product: %s, component: %s, username: %s", product, component, username)
 	parser := &IpPasswordParser{
 		Product:   product,
 		Component: component,

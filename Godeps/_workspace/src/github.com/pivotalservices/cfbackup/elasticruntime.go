@@ -30,6 +30,7 @@ const (
 	ER_NO_PERSISTENCE_ARCHIVES    = "there are no persistence stores in the list"
 	ER_FILE_DOES_NOT_EXIST        = "file does not exist"
 	ER_DB_BACKUP_FAILURE          = "failed to backup database"
+	ER_DB_RESTORE_FAILURE         = "failed to restore database"
 )
 
 const (
@@ -42,6 +43,7 @@ var (
 	ER_ERROR_EMPTY_DB_LIST  = errors.New(ER_NO_PERSISTENCE_ARCHIVES)
 	ER_ERROR_INVALID_PATH   = &os.PathError{Err: errors.New(ER_FILE_DOES_NOT_EXIST)}
 	ER_DB_BACKUP            = errors.New(ER_DB_BACKUP_FAILURE)
+	ER_DB_RESTORE           = errors.New(ER_DB_RESTORE_FAILURE)
 )
 
 // ElasticRuntime contains information about a Pivotal Elastic Runtime deployment
@@ -154,12 +156,16 @@ func (context *ElasticRuntime) backupRestore(action int) (err error) {
 			defer cloudController.Start()
 			cloudController.Stop()
 		}
-		context.Logger.Debug("Running db action")
 		if len(context.PersistentSystems) > 0 {
+			context.Logger.Debug("Running db action")
 			err = context.RunDbAction(context.PersistentSystems, action)
 			if err != nil {
-				context.Logger.Error("Error backing up db", err)
-				err = ER_DB_BACKUP
+				switch action {
+				case IMPORT_ARCHIVE:
+					err = ER_DB_RESTORE
+				case EXPORT_ARCHIVE:
+					err = ER_DB_BACKUP
+				}
 			}
 		} else {
 			err = ER_ERROR_EMPTY_DB_LIST
@@ -205,7 +211,7 @@ func (context *ElasticRuntime) RunDbAction(dbInfoList []SystemDump, action int) 
 
 		if err = info.Error(); err == nil {
 			err = context.readWriterArchive(info, context.TargetDir, action)
-			context.Logger.Debug("backed up db", log.Data{"info": info})
+			context.Logger.Debug("Ran db action", log.Data{"action": action, "info": info})
 		} else {
 			break
 		}
@@ -254,11 +260,11 @@ func (context *ElasticRuntime) importExport(rw io.ReadWriter, s SystemDump, acti
 
 		switch action {
 		case IMPORT_ARCHIVE:
-			context.Logger.Debug("we are doing something here now")
+			context.Logger.Debug("Importing db archive")
 			err = pb.Import(rw)
 
 		case EXPORT_ARCHIVE:
-			context.Logger.Info("Dumping database to file")
+			context.Logger.Info("Exporting db archive")
 			err = pb.Dump(rw)
 		}
 	}
@@ -272,6 +278,7 @@ func (context *ElasticRuntime) ReadAllUserCredentials() (err error) {
 	)
 	defer fileRef.Close()
 
+	context.Logger.Debug("ReadAllUserCredentials() function", log.Data{"JsonFile": context.JsonFile})
 	if fileRef, err = os.Open(context.JsonFile); err == nil {
 
 		if jsonObj, err = ReadAndUnmarshal(fileRef); err == nil {
@@ -285,6 +292,7 @@ func (context *ElasticRuntime) assignCredentialsAndInstallationName(jsonObj Inst
 
 	if err = context.assignCredentials(jsonObj); err == nil {
 		context.InstallationName, err = GetDeploymentName(jsonObj)
+		context.Logger.Debug("assignCredentialsAndInstallationName() function", log.Data{"InstallationName": context.InstallationName})
 	}
 	return
 }
@@ -320,6 +328,7 @@ func (context *ElasticRuntime) directorCredentialsValid() (ok bool) {
 		if gateway == nil {
 			gateway = NewHttpGateway()
 		}
+		context.Logger.Debug("directorCredentialsValid() function", log.Data{"connectionURL": connectionURL, "Username": directorInfo.Get(SD_USER), "Password": directorInfo.Get(SD_PASS)})
 		_, err := gateway.Get(HttpRequestEntity{
 			Url:         connectionURL,
 			Username:    directorInfo.Get(SD_USER),
@@ -327,6 +336,9 @@ func (context *ElasticRuntime) directorCredentialsValid() (ok bool) {
 			ContentType: "application/json",
 		})()
 		ok = (err == nil)
+		if err != nil {
+			context.Logger.Error("Error calling director", err)
+		}
 	}
 	return
 }
