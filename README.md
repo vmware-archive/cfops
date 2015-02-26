@@ -13,7 +13,7 @@ CF Ops (cfops) is a command line interface (cli) tool to enable targeting a give
 
 ### Current
 
-This initial version *only* provides a proposed set of cli functionality along with the "help" dialog.
+This initial version *only* provides backup and restore.
 
 The project is written in "Go".
 
@@ -21,55 +21,54 @@ For example you can try the various commands, args and flags (and --help documen
 
     $ ./cfops -help
 
-    $ ./cfops survey -h
+    $ ./cfops backup
 
-    $ ./cfops prepare -h
-
-    $ ./cfops install -help
-
-    $ ./cfops -iaas aws install add CF_FOUNDATION_I
-
-    $ ./cfops -iaas aws install destroy CF_FOUNDATION_II
-
-    $ ./cfops start CF_FOUNDATION_I
-
-    $ ./cfops shutdown CF_FOUNDATION_I --force
-
+    $ ./cfops restore
 
 etc.
 
 
 Sample help output:
 
-    mbp:cfops farmer$ ./cfops help
+    $ ./cfops
     NAME:
        cfops - Cloud Foundry Operations tool for IaaS installation, deployment, and management automation
-
+    
     USAGE:
        cfops [global options] command [command options] [arguments...]
-
+    
     VERSION:
        0.0.0
-
+    
     COMMANDS:
-       survey, sur		analyze and inspect the deployment environment
-       prepare, p		prepare the deployment environment
-       install, in		install cloud foundry to an iaas
-       start, s		    start up an entire cloud foundry foundation
-       restart, r		shutdown and restart an entire cloud foundry foundation
-       shutdown, stop	shutdown and stop an entire cloud foundry foundation
-       test, t		    test the Cloud Foundry deployment and underlying IaaS environment
-       help, h		    Shows a list of commands or help for one command
-
+       backup, b	backup a Cloud Foundry deployment
+       help, h	Shows a list of commands or help for one command
+    
     GLOBAL OPTIONS:
-       --iaas, -i 'aws, vsphere, vcloud, openstack'	set the IaaS type to target for deployment [$CF_IAAS]
-       --debug, -d 'true, false'			enable/disable debug output [$CF_TRACE]
-       --lang, -l 'en, es'				language for the cfops cli responses [$CF_LANG]
-       --help, -h					show help
-       --version, -v				print the version
+       --help, -h		show help
+       --version, -v	print the version
+    
+    
+    
+    $ ./cfops help backup
+    NAME:
+       backup - backup a Cloud Foundry deployment
+    
+    USAGE:
+       command backup [command options] [arguments...]
+    
+    DESCRIPTION:
+       Backup a Cloud Foundry deployment, including Ops Manager configuration, databases, and blob store
+    
+    OPTIONS:
+       --hostname, --host 		hostname for Ops Manager
+       --username, -u 		username for Ops Manager
+       --password, -p 		password for Ops Manager
+       --tempestpassword, --tp 	password for the Ops Manager tempest user
+       --destination, -d 		directory where the Cloud Foundry backup should be stored
 
 ### Install
 
-Run `./bin/build.sh` to build the binary. The binary will be built into the `./out` directory.
-This will also copy the `config/assets/config.json` to your `~/.cfops` directory unless it exists.
+download latest version for your system. details here:
+https://github.com/pivotalservices/cfops/wiki
 
