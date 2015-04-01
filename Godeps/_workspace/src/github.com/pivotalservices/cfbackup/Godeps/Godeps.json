@@ -1,6 +1,6 @@
 {
 	"ImportPath": "github.com/pivotalservices/cfbackup",
-	"GoVersion": "go1.3.3",
+	"GoVersion": "go1.4.2",
 	"Packages": [
 		"./..."
 	],
@@ -25,31 +25,31 @@
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/bosh",
-			"Rev": "909284d98a77f7c6716770b29f962cc4450f1291"
+			"Rev": "0c2265e3e1b705f0bcd4d385e0ec3e2eabe7ef36"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/command",
-			"Rev": "909284d98a77f7c6716770b29f962cc4450f1291"
+			"Rev": "0c2265e3e1b705f0bcd4d385e0ec3e2eabe7ef36"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/http",
-			"Rev": "909284d98a77f7c6716770b29f962cc4450f1291"
+			"Rev": "0c2265e3e1b705f0bcd4d385e0ec3e2eabe7ef36"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/log",
-			"Rev": "909284d98a77f7c6716770b29f962cc4450f1291"
+			"Rev": "0c2265e3e1b705f0bcd4d385e0ec3e2eabe7ef36"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/mock",
-			"Rev": "909284d98a77f7c6716770b29f962cc4450f1291"
+			"Rev": "0c2265e3e1b705f0bcd4d385e0ec3e2eabe7ef36"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/osutils",
-			"Rev": "909284d98a77f7c6716770b29f962cc4450f1291"
+			"Rev": "0c2265e3e1b705f0bcd4d385e0ec3e2eabe7ef36"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/persistence",
-			"Rev": "909284d98a77f7c6716770b29f962cc4450f1291"
+			"Rev": "0c2265e3e1b705f0bcd4d385e0ec3e2eabe7ef36"
 		},
 		{
 			"ImportPath": "github.com/pkg/sftp",

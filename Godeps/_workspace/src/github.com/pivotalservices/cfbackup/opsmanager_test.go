@@ -27,8 +27,8 @@ var _ = Describe("OpsManager object", func() {
 				gw := &MockHttpGateway{}
 
 				opsManager = &OpsManager{
-					SettingsUploader:  MockMultiPartBodyFunc,
-					AssetsUploader:    MockMultiPartBodyFunc,
+					SettingsUploader:  MockMultiPartUploadFunc,
+					AssetsUploader:    MockMultiPartUploadFunc,
 					SettingsRequestor: gw,
 					AssetsRequestor:   gw,
 					Hostname:          "localhost",
@@ -62,8 +62,8 @@ var _ = Describe("OpsManager object", func() {
 				gw := &MockHttpGateway{}
 
 				opsManager = &OpsManager{
-					SettingsUploader:  MockMultiPartBodyFunc,
-					AssetsUploader:    MockMultiPartBodyFunc,
+					SettingsUploader:  MockMultiPartUploadFunc,
+					AssetsUploader:    MockMultiPartUploadFunc,
 					SettingsRequestor: gw,
 					AssetsRequestor:   gw,
 					Hostname:          "localhost",
@@ -96,8 +96,8 @@ var _ = Describe("OpsManager object", func() {
 				gw := &MockHttpGateway{StatusCode: 500, State: failureString}
 
 				opsManager = &OpsManager{
-					SettingsUploader:  MockMultiPartBodyFunc,
-					AssetsUploader:    MockMultiPartBodyFunc,
+					SettingsUploader:  MockMultiPartUploadFunc,
+					AssetsUploader:    MockMultiPartUploadFunc,
 					SettingsRequestor: gw,
 					AssetsRequestor:   gw,
 					Hostname:          "localhost",

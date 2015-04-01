@@ -84,6 +84,24 @@
     "index": 0
   },
   {
+    "agent_id": "d4131496-4cdf-4309-907b-e2ce327be029",
+    "cid": "vm-8dfe3b38-6e31-4d9a-aeef-74cbf2143bd8",
+    "job": "cloud_controller-partition-7bc61fd2fa9d654696df",
+    "index": 1
+  },
+  {
+    "agent_id": "d4131496-4cdf-4309-907b-e2ce327be029",
+    "cid": "vm-8dfe3b38-6e31-4d9a-aeef-74cbf2143bd8",
+    "job": "cloud_controller-partition-6bc61fd2fa9d654696d",
+    "index": 0
+  },
+  {
+    "agent_id": "d4131496-4cdf-4309-907b-e2ce327be029",
+    "cid": "vm-8dfe3b38-6e31-4d9a-aeef-74cbf2143bd8",
+    "job": "cloud_controller-partition-6bc61fd2fa9d654696d",
+    "index": 1
+  },
+  {
     "agent_id": "7c0c1044-16d7-4009-93a2-b05eaa9ee0f2",
     "cid": "vm-457d505c-f5fd-4061-976d-14cd5903c823",
     "job": "cloud_controller_worker-partition-7bc61fd2fa9d654696df",

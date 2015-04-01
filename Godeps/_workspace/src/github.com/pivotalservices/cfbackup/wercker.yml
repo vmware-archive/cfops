@@ -34,3 +34,14 @@ build:
         code: |
           cp -R ./ ${WERCKER_OUTPUT_DIR}
 
+deploy:
+  steps: 
+    - add-ssh-key:
+        keyname: PCF_GITHUB_KEY
+  
+    - xchapter7x/flowy-release:
+        action: "complete-release"
+        tag_variable_name: "VERSION_TAG"
+        active: $GITFLOW_ACTIVE
+        git_name: $GITFLOW_NAME
+        git_email: $GITFLOW_EMAIL

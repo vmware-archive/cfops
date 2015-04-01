@@ -23,10 +23,17 @@ var _ = Describe("get_cc_vms", func() {
 			})
 
 			It("Should return nil error, correct cc jobs", func() {
-				vms, err := GetCCVMs(jsonObj)
+				_, err := GetCCVMs(jsonObj)
 				Ω(err).Should(BeNil())
-				Ω(vms).Should(HaveLen(1))
-				Ω(vms[0]).Should(Equal("cloud_controller-partition-7bc61fd2fa9d654696df"))
+			})
+
+			It("Should have 4 cc correct jobs", func() {
+				vms, _ := GetCCVMs(jsonObj)
+				Ω(vms).Should(HaveLen(4))
+				Ω(vms[0].Index).Should(Equal(0))
+				Ω(vms[1].Index).Should(Equal(1))
+				Ω(vms[2].Index).Should(Equal(0))
+				Ω(vms[3].Index).Should(Equal(1))
 			})
 
 			It("Should not panic on complete real world dataset", func() {
@@ -70,11 +77,14 @@ var _ = Describe("get_cc_vms", func() {
 			AfterEach(func() {
 			})
 
-			It("Should return nil error, correct cc job", func() {
-				vms, err := parser.Parse(jsonObj)
+			It("Should return nil error", func() {
+				_, err := parser.Parse(jsonObj)
 				Ω(err).Should(BeNil())
-				Ω(vms).Should(HaveLen(1))
-				Ω(vms[0]).Should(Equal("cloud_controller-partition-7bc61fd2fa9d654696df"))
+			})
+
+			It("Should return 4 jobs", func() {
+				vms, _ := parser.Parse(jsonObj)
+				Ω(vms).Should(HaveLen(4))
 			})
 
 			It("Should not panic on complete real world dataset", func() {

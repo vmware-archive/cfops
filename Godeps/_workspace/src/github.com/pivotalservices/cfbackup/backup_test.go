@@ -95,13 +95,13 @@ var _ = Describe("Backup / Restore", func() {
 
 			Context("failed backup call", func() {
 				BeforeEach(func() {
-					tile = &mockTile{ErrBackup: mockTileErrBackup}
+					tile = &mockTile{ErrBackup: mockTileBackupError}
 					controlBackupCount = tile.BackupCalled
 					err = RunPipeline(TILE_BACKUP_ACTION, []Tile{tile})
 				})
 
 				It("should return backup error and successfully call Backup function", func() {
-					Ω(err).Should(Equal(mockTileErrBackup))
+					Ω(err).Should(Equal(mockTileBackupError))
 					Ω(tile.BackupCalled).Should(BeNumerically(">", controlBackupCount))
 				})
 			})
@@ -125,13 +125,13 @@ var _ = Describe("Backup / Restore", func() {
 
 			Context("failed restore call", func() {
 				BeforeEach(func() {
-					tile = &mockTile{ErrRestore: mockTileErrRestore}
+					tile = &mockTile{ErrRestore: mockTileRestoreError}
 					controlRestoreCount = tile.RestoreCalled
 					err = RunPipeline(TILE_RESTORE_ACTION, []Tile{tile})
 				})
 
 				It("should return restore error and successfully call Restore function", func() {
-					Ω(err).Should(Equal(mockTileErrRestore))
+					Ω(err).Should(Equal(mockTileRestoreError))
 					Ω(tile.RestoreCalled).Should(BeNumerically(">", controlRestoreCount))
 				})
 			})
