@@ -10,31 +10,36 @@ import (
 
 type (
 	VMObject struct {
-		Job string
+		Job   string
+		Index int
 	}
 
 	CloudControllerDeploymentParser struct {
-		vms []string
+		vms []CCJob
 	}
 )
 
-func GetCCVMs(jsonObj []VMObject) ([]string, error) {
+func GetCCVMs(jsonObj []VMObject) ([]CCJob, error) {
 	parser := &CloudControllerDeploymentParser{}
 	return parser.Parse(jsonObj)
 }
 
-func (s *CloudControllerDeploymentParser) Parse(jsonObj []VMObject) ([]string, error) {
+func (s *CloudControllerDeploymentParser) Parse(jsonObj []VMObject) ([]CCJob, error) {
 	err := s.setupAndRun(jsonObj)
 	return s.vms, err
 }
 
 func (s *CloudControllerDeploymentParser) setupAndRun(jsonObj []VMObject) (err error) {
 
-	var ccjobs = make([]string, 0)
+	var ccjobs = make([]CCJob, 0)
 
 	for _, vmObject := range jsonObj {
 		if strings.Contains(vmObject.Job, "cloud_controller-partition") {
-			ccjobs = append(ccjobs, vmObject.Job)
+			ccJob := CCJob{
+				Job:   vmObject.Job,
+				Index: vmObject.Index,
+			}
+			ccjobs = append(ccjobs, ccJob)
 		}
 	}
 
