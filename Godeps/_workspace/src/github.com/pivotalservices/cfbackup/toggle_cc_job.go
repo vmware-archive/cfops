@@ -3,6 +3,7 @@ package cfbackup
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/pivotalservices/gtils/bosh"
@@ -12,24 +13,26 @@ import (
 // Not ping server so frequently and exausted the resources
 var TaskPingFreq time.Duration = 1000 * time.Millisecond
 
-type CloudControllerJobs []string
+type CloudControllerJobs []CCJob
 
 type CloudController struct {
 	deploymentName   string
 	director         bosh.Bosh
 	cloudControllers CloudControllerJobs
+	manifest         string
 }
 
 var NewDirector = func(ip, username, password string, port int) bosh.Bosh {
 	return bosh.NewBoshDirector(ip, username, password, port, NewHttpGateway())
 }
 
-func NewCloudController(ip, username, password, deploymentName string, cloudControllers CloudControllerJobs) *CloudController {
+func NewCloudController(ip, username, password, deploymentName, manifest string, cloudControllers CloudControllerJobs) *CloudController {
 	director := NewDirector(ip, username, password, 25555)
 	return &CloudController{
 		deploymentName:   deploymentName,
 		director:         director,
 		cloudControllers: cloudControllers,
+		manifest:         manifest,
 	}
 }
 
@@ -42,12 +45,8 @@ func (c *CloudController) Stop() error {
 }
 
 func (c *CloudController) toggleController(state string) error {
-	manifest, err := c.director.GetDeploymentManifest(c.deploymentName)
-	if err != nil {
-		return err
-	}
-	for ccjobindex, ccjob := range c.cloudControllers {
-		taskId, err := c.director.ChangeJobState(c.deploymentName, ccjob, state, ccjobindex, manifest)
+	for _, ccjob := range c.cloudControllers {
+		taskId, err := c.director.ChangeJobState(c.deploymentName, ccjob.Job, state, ccjob.Index, strings.NewReader(c.manifest))
 		if err != nil {
 			return err
 		}

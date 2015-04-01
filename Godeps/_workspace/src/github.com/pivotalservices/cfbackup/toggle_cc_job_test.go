@@ -2,9 +2,11 @@ package cfbackup_test
 
 import (
 	"errors"
-	. "github.com/pivotalservices/cfbackup"
 	"io"
+	"strings"
 	"time"
+
+	. "github.com/pivotalservices/cfbackup"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -12,15 +14,19 @@ import (
 )
 
 var (
-	getManifest             bool = true
-	getTaskStatus           bool = true
-	changeJobState          bool = true
-	manifest                io.Reader
-	ip                      string              = "10.10.10.10"
-	username                string              = "test"
-	password                string              = "test"
-	deploymentName          string              = "deployment"
-	ccjobs                  CloudControllerJobs = CloudControllerJobs{"job1", "job2", "job3"}
+	getManifest    bool                = true
+	getTaskStatus  bool                = true
+	changeJobState bool                = true
+	manifest       io.Reader           = strings.NewReader("manifest")
+	ip             string              = "10.10.10.10"
+	username       string              = "test"
+	password       string              = "test"
+	deploymentName string              = "deployment"
+	ccjobs         CloudControllerJobs = CloudControllerJobs{
+		CCJob{Job: "job1", Index: 0},
+		CCJob{Job: "job2", Index: 1},
+		CCJob{Job: "job3", Index: 0},
+	}
 	task                    bosh.Task
 	doneTask                bosh.Task = bosh.Task{}
 	changeJobStateCount     int       = 0
@@ -61,7 +67,7 @@ var _ = Describe("ToggleCcJob", func() {
 	}
 	TaskPingFreq = time.Millisecond
 	var (
-		cloudController *CloudController = NewCloudController(ip, username, password, deploymentName, ccjobs)
+		cloudController *CloudController = NewCloudController(ip, username, password, deploymentName, "manifest", ccjobs)
 	)
 	Describe("Toggle All jobs", func() {
 		Context("Change Job State failed", func() {

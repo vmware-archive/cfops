@@ -55,6 +55,11 @@ type ElasticRuntime struct {
 	Logger log.Logger
 }
 
+type CCJob struct {
+	Job   string
+	Index int
+}
+
 // NewElasticRuntime initializes an ElasticRuntime intance
 var NewElasticRuntime = func(jsonFile string, target string, logger log.Logger) *ElasticRuntime {
 	var (
@@ -142,14 +147,18 @@ func (context *ElasticRuntime) Restore() (err error) {
 
 func (context *ElasticRuntime) backupRestore(action int) (err error) {
 	var (
-		ccJobs []string
+		ccJobs []CCJob
 	)
 
 	if err = context.ReadAllUserCredentials(); err == nil && context.directorCredentialsValid() {
 		context.Logger.Debug("Retrieving All CC VMs")
+		manifest, erro := context.getManifest()
+		if err != nil {
+			return erro
+		}
 		if ccJobs, err = context.getAllCloudControllerVMs(); err == nil {
 			directorInfo := context.SystemsInfo[ER_DIRECTOR]
-			cloudController := NewCloudController(directorInfo.Get(SD_IP), directorInfo.Get(SD_USER), directorInfo.Get(SD_PASS), context.InstallationName, ccJobs)
+			cloudController := NewCloudController(directorInfo.Get(SD_IP), directorInfo.Get(SD_USER), directorInfo.Get(SD_PASS), context.InstallationName, manifest, ccJobs)
 			context.Logger.Debug("Setting up CC jobs")
 			defer cloudController.Start()
 			cloudController.Stop()
@@ -170,7 +179,7 @@ func (context *ElasticRuntime) backupRestore(action int) (err error) {
 	return
 }
 
-func (context *ElasticRuntime) getAllCloudControllerVMs() (ccvms []string, err error) {
+func (context *ElasticRuntime) getAllCloudControllerVMs() (ccvms []CCJob, err error) {
 
 	context.Logger.Debug("Entering getAllCloudControllerVMs() function")
 	directorInfo := context.SystemsInfo[ER_DIRECTOR]
@@ -329,4 +338,18 @@ func (context *ElasticRuntime) directorCredentialsValid() (ok bool) {
 		ok = (err == nil)
 	}
 	return
+}
+
+func (context *ElasticRuntime) getManifest() (manifest string, err error) {
+	directorInfo, _ := context.SystemsInfo[ER_DIRECTOR]
+	director := NewDirector(directorInfo.Get(SD_IP), directorInfo.Get(SD_USER), directorInfo.Get(SD_PASS), 25555)
+	mfs, err := director.GetDeploymentManifest(context.InstallationName)
+	if err != nil {
+		return
+	}
+	data, err := ioutil.ReadAll(mfs)
+	if err != nil {
+		return
+	}
+	return string(data), nil
 }

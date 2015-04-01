@@ -105,6 +105,10 @@ var MockMultiPartBodyFunc = func(string, string, io.Reader, map[string]string) (
 	return &ClosingBuffer{bytes.NewBufferString("success")}, nil
 }
 
+var MockMultiPartUploadFunc = func(ConnAuth, string, string, io.Reader, map[string]string) (*http.Response, error) {
+	return &http.Response{}, nil
+}
+
 type ClosingBuffer struct {
 	*bytes.Buffer
 }
@@ -204,8 +208,8 @@ func getLogger(minLogLevel string) log.Logger {
 }
 
 var (
-	mockTileErrBackup  = errors.New("backup tile error")
-	mockTileErrRestore = errors.New("restore tile error")
+	mockTileBackupError  = errors.New("backup tile error")
+	mockTileRestoreError = errors.New("restore tile error")
 )
 
 type mockTile struct {
