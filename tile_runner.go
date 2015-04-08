@@ -90,7 +90,6 @@ func getSupportedTile(tilename string) (tile Tile, err error) {
 	)
 
 	if tileFactory, ok = SupportedTiles[tilename]; !ok {
-		fmt.Println(SupportedTiles)
 		err = ErrUnsupportedTile(tilename)
 
 	} else {
