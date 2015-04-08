@@ -34,6 +34,7 @@ var restoreCli = cli.Command{
 		)
 
 		if hasValidBackupRestoreFlags(fs) {
+			cfops.SetupSupportedTiles(fs)
 			err = cfops.RunPipeline(fs, cfops.Restore)
 
 		} else {

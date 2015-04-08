@@ -24,7 +24,6 @@ func testPipelineExecutionError(action string) {
 				ErrReturned: errMock,
 			}
 			BuiltinPipelineExecution[action] = m.action
-
 			fs = &mockFlagSet{
 				tileListFlag: "",
 			}
@@ -38,20 +37,68 @@ func testPipelineExecutionError(action string) {
 
 }
 
-func testWithTilelist(action string) {
-	Context("with tile list flag", func() {
-		var fs *mockFlagSet
+func testWithValidTilelist(action string) {
+	Context("with invalid tile list flag", func() {
+		var (
+			fs    *mockFlagSet
+			mTile *mockTile
+		)
+
 		BeforeEach(func() {
+			mTile = &mockTile{}
+			SupportedTiles = map[string]func() (Tile, error){
+				"TESTFLAG": func() (Tile, error) {
+					return mTile, nil
+				},
+			}
 			m := mockBuiltinPipeline{}
 			BuiltinPipelineExecution[action] = m.action
 
 			fs = &mockFlagSet{
-				tileListFlag: "opsmanager, er",
+				tileListFlag: "badflag",
 			}
 		})
 
-		It("should return a not implemented yet error", func() {
+		It("should return an error", func() {
 			Ω(RunPipeline(fs, action)).ShouldNot(BeNil())
+		})
+
+		It("should not call the action on the tiles in your list", func() {
+			RunPipeline(fs, action)
+			Ω(mTile.RunCount).Should(Equal(0))
+		})
+	})
+}
+
+func testWithInvalidTileList(action string) {
+	Context("with valid tile list flag", func() {
+		var (
+			fs    *mockFlagSet
+			mTile *mockTile
+		)
+
+		BeforeEach(func() {
+			mTile = &mockTile{}
+			SupportedTiles = map[string]func() (Tile, error){
+				"TESTFLAG": func() (Tile, error) {
+					return mTile, nil
+				},
+			}
+			m := mockBuiltinPipeline{}
+			BuiltinPipelineExecution[action] = m.action
+
+			fs = &mockFlagSet{
+				tileListFlag: "testflag",
+			}
+		})
+
+		It("should not return an error", func() {
+			Ω(RunPipeline(fs, action)).Should(BeNil())
+		})
+
+		It("should call the action on the tiles in your list", func() {
+			RunPipeline(fs, action)
+			Ω(mTile.RunCount).Should(BeNumerically(">", 0))
 		})
 	})
 }
@@ -109,4 +156,19 @@ type mockBuiltinPipeline struct {
 
 func (s *mockBuiltinPipeline) action(string, string, string, string, string) error {
 	return s.ErrReturned
+}
+
+type mockTile struct {
+	ErrReturned error
+	RunCount    int
+}
+
+func (s *mockTile) Restore() (err error) {
+	s.RunCount++
+	return
+}
+
+func (s *mockTile) Backup() (err error) {
+	s.RunCount++
+	return
 }
