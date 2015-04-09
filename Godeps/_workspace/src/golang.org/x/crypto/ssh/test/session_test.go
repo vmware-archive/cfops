@@ -11,11 +11,10 @@ package test
 import (
 	"bytes"
 	"errors"
+	"golang.org/x/crypto/ssh"
 	"io"
 	"strings"
 	"testing"
-
-	"golang.org/x/crypto/ssh"
 )
 
 func TestRunCommandSuccess(t *testing.T) {

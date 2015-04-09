@@ -4,7 +4,28 @@ import (
 	"os"
 
 	"github.com/codegangsta/cli"
+	"github.com/pivotalservices/cfops"
+	"github.com/pivotalservices/gtils/log"
 )
+
+const (
+	logLevelEnv = "LOG_LEVEL"
+)
+
+var (
+	logLevel string
+	logger   log.Logger
+)
+
+func init() {
+
+	if logLevel = os.Getenv(logLevelEnv); logLevel != "" {
+		log.SetLogLevel(logLevel)
+		logger = log.LogFactory("cfops cli", log.Lager, os.Stdout)
+		logger.Debug("log level set", log.Data{"level": logLevel})
+		cfops.SetLogger(logger)
+	}
+}
 
 func main() {
 	app := NewApp()
