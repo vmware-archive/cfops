@@ -25,3 +25,4 @@ test/deployments/
 main
 .DS_Store
 out/
+coverage.out
