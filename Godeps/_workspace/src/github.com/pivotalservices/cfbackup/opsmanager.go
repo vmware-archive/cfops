@@ -124,17 +124,22 @@ func (context *OpsManager) removeExistingDeploymentFiles() (err error) {
 }
 
 func (context *OpsManager) importInstallationPart(url, filename, fieldname string, upload httpUploader) (err error) {
+	var (
+		fileRef io.Reader
+	)
 	filePath := path.Join(context.TargetDir, context.OpsmanagerBackupDir, filename)
 
-	if fileRef, err := os.Open(filePath); err == nil {
+	if fileRef, err = os.Open(filePath); err == nil {
+		var res *http.Response
 		conn := ghttp.ConnAuth{
 			Url:      url,
 			Username: context.Username,
 			Password: context.Password,
 		}
 
-		if res, err := upload(conn, fieldname, filename, fileRef, nil); err == nil {
-			err = fmt.Errorf(fmt.Sprintf("Bad Response from Gateway: %v", res))
+		if res, err = upload(conn, fieldname, filename, fileRef, nil); err != nil {
+			err = fmt.Errorf(fmt.Sprintf("ERROR:%s - %v", err.Error(), res))
+			context.Logger.Debug("upload failed", log.Data{"err": err, "response": res})
 		}
 	}
 	return
