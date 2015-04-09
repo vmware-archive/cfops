@@ -1,10 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/codegangsta/cli"
+	"github.com/pivotalservices/cfops"
 	"github.com/pivotalservices/gtils/log"
 )
 
@@ -12,11 +12,18 @@ const (
 	logLevelEnv = "LOG_LEVEL"
 )
 
+var (
+	logLevel string
+	logger   log.Logger
+)
+
 func init() {
 
-	if loglevel := os.Getenv(logLevelEnv); loglevel != "" {
-		fmt.Println("Loglevel set: ", loglevel)
-		log.SetLogLevel(loglevel)
+	if logLevel = os.Getenv(logLevelEnv); logLevel != "" {
+		log.SetLogLevel(logLevel)
+		logger = log.LogFactory("cfops cli", log.Lager, os.Stdout)
+		logger.Debug("log level set", log.Data{"level": logLevel})
+		cfops.SetLogger(logger)
 	}
 }
 
