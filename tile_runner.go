@@ -61,7 +61,7 @@ func SetupSupportedTiles(fs flagSet) {
 	SupportedTiles = map[string]func() (Tile, error){
 		OpsMgr: func() (opsmgr Tile, err error) {
 			opsmgr, err = cfbackup.NewOpsManager(fs.Host(), fs.User(), fs.Pass(), fs.Tpass(), fs.Dest(), backupLogger)
-			backupLogger.Debug("Creating a new OpsManager object", log.Data{"err": err.Error(), "opsmgr": opsmgr})
+			backupLogger.Debug("Creating a new OpsManager object", log.Data{"err": err, "opsmgr": opsmgr})
 			return
 		},
 		ER: func() (er Tile, err error) {
