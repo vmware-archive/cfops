@@ -25,6 +25,7 @@ var (
 		Backup:  cfbackup.RunBackupPipeline,
 	}
 	SupportedTiles map[string]func() (Tile, error)
+	backupLogger   log.Logger = log.LogFactory("cfops default logger", log.Lager, os.Stdout)
 )
 
 func ErrUnsupportedTile(errString string) error {
@@ -57,22 +58,23 @@ func formatArray(a []string) []string {
 }
 
 func SetupSupportedTiles(fs flagSet) {
-	backupLogger := log.LogFactory(loggerName, log.Lager, os.Stdout)
-
 	SupportedTiles = map[string]func() (Tile, error){
 		OpsMgr: func() (opsmgr Tile, err error) {
 			opsmgr, err = cfbackup.NewOpsManager(fs.Host(), fs.User(), fs.Pass(), fs.Tpass(), fs.Dest(), backupLogger)
+			backupLogger.Debug("Creating a new OpsManager object", log.Data{"err": err.Error(), "opsmgr": opsmgr})
 			return
 		},
 		ER: func() (er Tile, err error) {
 			installationFilePath := path.Join(fs.Dest(), cfbackup.OPSMGR_BACKUP_DIR, cfbackup.OPSMGR_INSTALLATION_SETTINGS_FILENAME)
 			er = cfbackup.NewElasticRuntime(installationFilePath, fs.Dest(), backupLogger)
+			backupLogger.Debug("Creating a new ElasticRuntime object", log.Data{"er": er})
 			return
 		},
 	}
 }
 
 func runTileUsingAction(t Tile, action string) (err error) {
+	backupLogger.Debug("Running on tile", log.Data{"tile": t, "action": action})
 	switch action {
 	case Restore:
 		err = t.Restore()
@@ -80,6 +82,7 @@ func runTileUsingAction(t Tile, action string) (err error) {
 	case Backup:
 		err = t.Backup()
 	}
+	backupLogger.Debug("Action complete", log.Data{"tile": t, "action": action, "err": err})
 	return
 }
 
@@ -115,12 +118,18 @@ func runTileListUsingAction(fs flagSet, action string) (err error) {
 	return
 }
 
+func SetLogger(logger log.Logger) {
+	backupLogger = logger
+}
+
 func RunPipeline(fs flagSet, action string) (err error) {
 
 	if hasTilelistFlag(fs) {
+		backupLogger.Debug("Running a tile list action", nil)
 		err = runTileListUsingAction(fs, action)
 
 	} else {
+		cfbackup.SetLogger(backupLogger)
 		err = BuiltinPipelineExecution[action](fs.Host(), fs.User(), fs.Pass(), fs.Tpass(), fs.Dest())
 	}
 	return

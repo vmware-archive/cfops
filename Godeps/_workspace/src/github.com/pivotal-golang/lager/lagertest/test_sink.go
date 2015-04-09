@@ -18,7 +18,7 @@ type TestLogger struct {
 
 type TestSink struct {
 	lager.Sink
-	buffer *gbytes.Buffer
+	*gbytes.Buffer
 }
 
 func NewTestLogger(component string) *TestLogger {
@@ -36,18 +36,14 @@ func NewTestSink() *TestSink {
 
 	return &TestSink{
 		Sink:   lager.NewWriterSink(buffer, lager.DEBUG),
-		buffer: buffer,
+		Buffer: buffer,
 	}
-}
-
-func (s *TestSink) Buffer() *gbytes.Buffer {
-	return s.buffer
 }
 
 func (s *TestSink) Logs() []lager.LogFormat {
 	logs := []lager.LogFormat{}
 
-	decoder := json.NewDecoder(bytes.NewBuffer(s.buffer.Contents()))
+	decoder := json.NewDecoder(bytes.NewBuffer(s.Buffer.Contents()))
 	for {
 		var log lager.LogFormat
 		if err := decoder.Decode(&log); err == io.EOF {
