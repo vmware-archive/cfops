@@ -82,7 +82,7 @@ func runTileUsingAction(t Tile, action string) (err error) {
 	case Backup:
 		err = t.Backup()
 	}
-	backupLogger.Debug("Action complete", log.Data{"tile": t, "action": action, "err": err.Error()})
+	backupLogger.Debug("Action complete", log.Data{"tile": t, "action": action, "err": err})
 	return
 }
 
