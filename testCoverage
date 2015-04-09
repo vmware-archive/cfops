@@ -19,3 +19,4 @@ godep go test -cover ${TESTDIR} | {
   done
   exit ${EXITCODE}
 }
+
