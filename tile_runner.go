@@ -61,20 +61,20 @@ func SetupSupportedTiles(fs flagSet) {
 	SupportedTiles = map[string]func() (Tile, error){
 		OpsMgr: func() (opsmgr Tile, err error) {
 			opsmgr, err = cfbackup.NewOpsManager(fs.Host(), fs.User(), fs.Pass(), fs.Tpass(), fs.Dest(), backupLogger)
-			backupLogger.Debug("Creating a new OpsManager object", log.Data{"err": err, "opsmgr": opsmgr})
+			backupLogger.Debug("Creating a new OpsManager object", nil)
 			return
 		},
 		ER: func() (er Tile, err error) {
 			installationFilePath := path.Join(fs.Dest(), cfbackup.OPSMGR_BACKUP_DIR, cfbackup.OPSMGR_INSTALLATION_SETTINGS_FILENAME)
 			er = cfbackup.NewElasticRuntime(installationFilePath, fs.Dest(), backupLogger)
-			backupLogger.Debug("Creating a new ElasticRuntime object", log.Data{"er": er})
+			backupLogger.Debug("Creating a new ElasticRuntime object", nil)
 			return
 		},
 	}
 }
 
 func runTileUsingAction(t Tile, action string) (err error) {
-	backupLogger.Debug("Running on tile", log.Data{"tile": t, "action": action})
+	backupLogger.Debug("Running on tile", nil)
 	switch action {
 	case Restore:
 		err = t.Restore()
@@ -82,7 +82,7 @@ func runTileUsingAction(t Tile, action string) (err error) {
 	case Backup:
 		err = t.Backup()
 	}
-	backupLogger.Debug("Action complete", log.Data{"tile": t, "action": action, "err": err})
+	backupLogger.Debug("Action complete", nil)
 	return
 }
 
