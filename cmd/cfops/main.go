@@ -1,10 +1,24 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/codegangsta/cli"
+	"github.com/pivotalservices/gtils/log"
 )
+
+const (
+	logLevelEnv = "LOG_LEVEL"
+)
+
+func init() {
+
+	if loglevel := os.Getenv(logLevelEnv); loglevel != "" {
+		fmt.Println("Loglevel set: ", loglevel)
+		log.SetLogLevel(loglevel)
+	}
+}
 
 func main() {
 	app := NewApp()
