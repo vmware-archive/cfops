@@ -5,8 +5,8 @@ import (
 	"io"
 
 	"github.com/pivotalservices/gtils/command"
-	"github.com/pkg/sftp"
-	"golang.org/x/crypto/ssh"
+	"github.com/pivotalservices/sftp"
+	"gopkg.in/datianshi/crypto.v1/ssh"
 )
 
 const (

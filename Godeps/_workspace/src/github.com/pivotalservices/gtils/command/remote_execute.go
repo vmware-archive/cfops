@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	"golang.org/x/crypto/ssh"
+	"gopkg.in/datianshi/crypto.v1/ssh"
 )
 
 // Config for the SSH connection
