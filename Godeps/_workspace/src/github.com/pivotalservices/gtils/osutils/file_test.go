@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	. "github.com/pivotalservices/gtils/osutils"
-	"github.com/pkg/sftp"
+	"github.com/pivotalservices/sftp"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
