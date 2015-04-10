@@ -5,7 +5,7 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/pkg/sftp"
+	"github.com/pivotalservices/sftp"
 )
 
 type sftpClient interface {
