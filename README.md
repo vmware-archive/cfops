@@ -6,9 +6,6 @@
 CF Ops
 ======
 
-A Cloud Foundry Operations tool for IaaS installation, deployment, and management automation
-
-
 ### Background
 
 This is simply an automation that is based on the supported way to back up Pivotal Cloud Foundry (http://docs.pivotal.io/pivotalcf/customizing/backup-settings.html).
