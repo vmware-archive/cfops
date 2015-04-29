@@ -60,7 +60,6 @@ COMMANDS:
    help, h	Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
-   --logLevel "info"	log level: debug, info, error or fatal
    --help, -h		show help
    --version, -v	print the version
     
