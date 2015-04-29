@@ -10,7 +10,6 @@ This is simply an automation that is based on the supported way to back up Pivot
 
 It may be extended in the future to support greater breadth of functionality.
 
-PRs welcome.
 
 ### Install
 
