@@ -65,6 +65,7 @@ func (s *PgDump) Import(lfile io.Reader) (err error) {
 
 func (s *PgDump) restore() (err error) {
 	callList := []string{
+		s.getAddSuperUserCommand(),
 		s.getDropCommand(),
 		s.getCreateCommand(),
 		s.getImportCommand(),
@@ -91,6 +92,14 @@ func (s *PgDump) getImportCommand() string {
 func (s *PgDump) Dump(dest io.Writer) (err error) {
 	err = s.Caller.Execute(dest, s.getDumpCommand())
 	return
+}
+
+func (s *PgDump) getAddSuperUserCommand() string {
+	return fmt.Sprintf("echo \"%s\" | sudo -u postgres %s -c 'alter role %s superuser;'",
+		s.Password,
+		PGDMP_SQL_BIN,
+		s.Username,
+	)
 }
 
 func (s *PgDump) getPostgresConnect(command string) string {

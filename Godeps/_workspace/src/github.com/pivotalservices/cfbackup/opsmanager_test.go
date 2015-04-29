@@ -8,6 +8,7 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/pivotalservices/cfbackup"
 	. "github.com/pivotalservices/gtils/command"
+	ghttp "github.com/pivotalservices/gtils/http"
 	"github.com/pivotalservices/gtils/osutils"
 )
 
@@ -27,8 +28,8 @@ var _ = Describe("OpsManager object", func() {
 				gw := &MockHttpGateway{}
 
 				opsManager = &OpsManager{
-					SettingsUploader:  MockMultiPartBodyFunc,
-					AssetsUploader:    MockMultiPartBodyFunc,
+					SettingsUploader:  MockMultiPartUploadFunc,
+					AssetsUploader:    MockMultiPartUploadFunc,
 					SettingsRequestor: gw,
 					AssetsRequestor:   gw,
 					Hostname:          "localhost",
@@ -62,8 +63,8 @@ var _ = Describe("OpsManager object", func() {
 				gw := &MockHttpGateway{}
 
 				opsManager = &OpsManager{
-					SettingsUploader:  MockMultiPartBodyFunc,
-					AssetsUploader:    MockMultiPartBodyFunc,
+					SettingsUploader:  MockMultiPartUploadFunc,
+					AssetsUploader:    MockMultiPartUploadFunc,
 					SettingsRequestor: gw,
 					AssetsRequestor:   gw,
 					Hostname:          "localhost",
@@ -89,6 +90,38 @@ var _ = Describe("OpsManager object", func() {
 			})
 		})
 
+		Context("calling restore when unable to upload", func() {
+			BeforeEach(func() {
+				tmpDir, _ = ioutil.TempDir("/tmp", "test")
+				backupDir = path.Join(tmpDir, "backup", "opsmanager")
+				gw := &MockHttpGateway{StatusCode: 500, State: failureString}
+
+				opsManager = &OpsManager{
+					SettingsUploader:  ghttp.MultiPartUpload,
+					AssetsUploader:    ghttp.MultiPartUpload,
+					SettingsRequestor: gw,
+					AssetsRequestor:   gw,
+					Hostname:          "localhost",
+					Username:          "user",
+					Password:          "password",
+					BackupContext: BackupContext{
+						TargetDir: path.Join(tmpDir, "backup"),
+					},
+					Executer:            &failExecuter{},
+					DeploymentDir:       "fixtures/encryptionkey",
+					OpsmanagerBackupDir: "opsmanager",
+					Logger:              Logger(),
+				}
+				f, _ := osutils.SafeCreate(opsManager.TargetDir, opsManager.OpsmanagerBackupDir, OPSMGR_INSTALLATION_SETTINGS_FILENAME)
+				f.Close()
+			})
+
+			It("Should yield a non-nil error", func() {
+				err := opsManager.Restore()
+				Ω(err).ShouldNot(BeNil())
+			})
+		})
+
 		Context("calling restore unsuccessfully", func() {
 			BeforeEach(func() {
 				tmpDir, _ = ioutil.TempDir("/tmp", "test")
@@ -96,8 +129,8 @@ var _ = Describe("OpsManager object", func() {
 				gw := &MockHttpGateway{StatusCode: 500, State: failureString}
 
 				opsManager = &OpsManager{
-					SettingsUploader:  MockMultiPartBodyFunc,
-					AssetsUploader:    MockMultiPartBodyFunc,
+					SettingsUploader:  MockMultiPartUploadFunc,
+					AssetsUploader:    MockMultiPartUploadFunc,
 					SettingsRequestor: gw,
 					AssetsRequestor:   gw,
 					Hostname:          "localhost",
