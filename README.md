@@ -1,4 +1,4 @@
-CF Ops [![wercker status](https://app.wercker.com/status/d0a50d426b77a9f73da0fe4f383ad624/m/master "wercker status")](https://app.wercker.com/project/bykey/d0a50d426b77a9f73da0fe4f383ad624) [![GoDoc](http://godoc.org/github.com/pivotalservices/cfops?status.png)](http://godoc.org/github.com/pivotalservices/cfops)
+CF Ops [![wercker status](https://app.wercker.com/status/d0a50d426b77a9f73da0fe4f383ad624/s/master "wercker status")](https://app.wercker.com/project/bykey/d0a50d426b77a9f73da0fe4f383ad624) [![GoDoc](http://godoc.org/github.com/pivotalservices/cfops?status.png)](http://godoc.org/github.com/pivotalservices/cfops)
 ======
 
 
