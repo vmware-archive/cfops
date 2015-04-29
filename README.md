@@ -1,12 +1,10 @@
-[![wercker status](https://app.wercker.com/status/d0a50d426b77a9f73da0fe4f383ad624/m/master "wercker status")](https://app.wercker.com/project/bykey/d0a50d426b77a9f73da0fe4f383ad624)
-
-[![GoDoc](http://godoc.org/github.com/pivotalservices/cfops?status.png)](http://godoc.org/github.com/pivotalservices/cfops)
-
-
 CF Ops
 ======
 
-### Background
+[![wercker status](https://app.wercker.com/status/d0a50d426b77a9f73da0fe4f383ad624/m/master "wercker status")](https://app.wercker.com/project/bykey/d0a50d426b77a9f73da0fe4f383ad624)
+[![GoDoc](http://godoc.org/github.com/pivotalservices/cfops?status.png)](http://godoc.org/github.com/pivotalservices/cfops)
+
+### Overview
 
 This is simply an automation that is based on the supported way to back up Pivotal Cloud Foundry (http://docs.pivotal.io/pivotalcf/customizing/backup-settings.html).
 
@@ -16,15 +14,14 @@ PRs welcome.
 
 ### Install
 
-download latest version for your system. details here:
-https://github.com/pivotalservices/cfops/wiki
+Download the latest version here:
+https://github.com/pivotalservices/cfops/releases
 
+### Contributing
 
-### Current
+PRs welcome.
 
-This initial version *only* provides backup and restore.
-
-The project is written in "Go".
+### Usage
 
 For example you can try the various commands, args and flags (and --help documentation) that are currently proposed, such as:
 
