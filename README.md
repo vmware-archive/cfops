@@ -11,7 +11,16 @@ A Cloud Foundry Operations tool for IaaS installation, deployment, and managemen
 
 ### Background
 
-CF Ops (cfops) is a command line interface (cli) tool to enable targeting a given IaaS (initially AWS) and automate the installation and deployment of Cloud Foundry.  The purpose is to reduce the complexity associated with standing up and managing a typical Cloud Foundry foundation from the command line.  The goal is to enable Cloud Foundry installations to be more easily repeatable and manageable at the IaaS level such that they are not treated as unique "snowflakes" and instead reflect the principles behind Infrastructure as Code.
+This is simply an automation that is based on the supported way to back up Pivotal Cloud Foundry (http://docs.pivotal.io/pivotalcf/customizing/backup-settings.html).
+
+It may be extended in the future to support greater breadth of functionality.
+
+PRs welcome.
+
+### Install
+
+download latest version for your system. details here:
+https://github.com/pivotalservices/cfops/wiki
 
 
 ### Current
@@ -32,46 +41,69 @@ etc.
 
 
 Sample help output:
-
+```
     $ ./cfops
-    NAME:
-       cfops - Cloud Foundry Operations tool for IaaS installation, deployment, and management automation
-    
-    USAGE:
-       cfops [global options] command [command options] [arguments...]
-    
-    VERSION:
-       0.0.0
-    
-    COMMANDS:
-       backup, b	backup a Cloud Foundry deployment
-       help, h	Shows a list of commands or help for one command
-    
-    GLOBAL OPTIONS:
-       --help, -h		show help
-       --version, -v	print the version
+NAME:
+   cfops - Cloud Foundry Operations tool for IaaS installation, deployment, and management automation
+
+USAGE:
+   cfops [global options] command [command options] [arguments...]
+
+VERSION:
+   0.0.0
+
+AUTHOR(S):
+
+COMMANDS:
+   backup, b	backup -host <host> -u <usr> -p <pass> --tp <tpass> -d <dir> --tl 'opsmanager, er'
+   restore, r	restore --host <host> -u <usr> -p <pass> --tp <tpass> -d <dir>  --tl 'opsmanager, er'
+   help, h	Shows a list of commands or help for one command
+
+GLOBAL OPTIONS:
+   --help, -h		show help
+   --version, -v	print the version
     
     
     
     $ ./cfops help backup
-    NAME:
-       backup - backup a Cloud Foundry deployment
-    
-    USAGE:
-       command backup [command options] [arguments...]
-    
-    DESCRIPTION:
-       Backup a Cloud Foundry deployment, including Ops Manager configuration, databases, and blob store
-    
-    OPTIONS:
-       --hostname, --host 		hostname for Ops Manager
-       --username, -u 		username for Ops Manager
-       --password, -p 		password for Ops Manager
-       --tempestpassword, --tp 	password for the Ops Manager tempest user
-       --destination, -d 		directory where the Cloud Foundry backup should be stored
+NAME:
+   backup - backup -host <host> -u <usr> -p <pass> --tp <tpass> -d <dir> --tl 'opsmanager, er'
 
-### Install
+USAGE:
+   command backup [command options] [arguments...]
 
-download latest version for your system. details here:
-https://github.com/pivotalservices/cfops/wiki
+DESCRIPTION:
+   backup a Cloud Foundry deployment, including Ops Manager configuration, databases, and blob store
+
+OPTIONS:
+   --hostname, --host 		hostname for Ops Manager
+   --username, -u 		username for Ops Manager
+   --password, -p 		password for Ops Manager
+   --tempestpassword, --tp 	password for the Ops Manager tempest user
+   --destination, -d 		directory of the Cloud Foundry backup archive
+   --tilelist, --tl 		a csv list of the tiles you would like to run the operation on
+   
+   $ ./cfops help restore
+NAME:
+   restore - restore -host <host> -u <usr> -p <pass> --tp <tpass> -d <dir> --tl 'opsmanager, er'
+
+USAGE:
+   command restore [command options] [arguments...]
+
+DESCRIPTION:
+   restore a Cloud Foundry deployment, including Ops Manager configuration, databases, and blob store
+
+OPTIONS:
+   --hostname, --host 		hostname for Ops Manager
+   --username, -u 		username for Ops Manager
+   --password, -p 		password for Ops Manager
+   --tempestpassword, --tp 	password for the Ops Manager tempest user
+   --destination, -d 		directory of the Cloud Foundry backup archive
+   --tilelist, --tl 		a csv list of the tiles you would like to run the operation on
+
+```
+
+
+
+
 
