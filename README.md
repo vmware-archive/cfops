@@ -1,7 +1,10 @@
 cfops [![wercker status](https://app.wercker.com/status/d0a50d426b77a9f73da0fe4f383ad624/s/master "wercker status")](https://app.wercker.com/project/bykey/d0a50d426b77a9f73da0fe4f383ad624) [![GoDoc](http://godoc.org/github.com/pivotalservices/cfops?status.png)](http://godoc.org/github.com/pivotalservices/cfops)
 ======
 
+### Version Compatibility
+This is tested and known to work for **Ops Manager v1.4**
 
+This is tested and known to work for **ER v1.3** (does **not** yet support 1.4 Elastic Runtime)
 
 ### Overview
 
