@@ -52,7 +52,7 @@ func (e *Specs) ApplyFocus(description string, focusString string, skipString st
 func (e *Specs) applyProgrammaticFocus() {
 	e.hasProgrammaticFocus = false
 	for _, spec := range e.specs {
-		if spec.Focused() && !spec.Pending() {
+		if spec.Focused() {
 			e.hasProgrammaticFocus = true
 			break
 		}

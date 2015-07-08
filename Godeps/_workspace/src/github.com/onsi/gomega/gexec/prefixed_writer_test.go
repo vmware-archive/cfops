@@ -2,7 +2,6 @@ package gexec_test
 
 import (
 	"bytes"
-
 	. "github.com/onsi/gomega/gexec"
 
 	. "github.com/onsi/ginkgo"
@@ -37,7 +36,6 @@ var _ = Describe("PrefixedWriter", func() {
 [p]nopqrs
 [p]tuv
 [p]wxyz
-[p]
-`))
+[p]`))
 	})
 })

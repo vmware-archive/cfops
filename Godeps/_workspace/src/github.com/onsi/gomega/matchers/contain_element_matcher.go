@@ -2,9 +2,8 @@ package matchers
 
 import (
 	"fmt"
-	"reflect"
-
 	"github.com/onsi/gomega/format"
+	"reflect"
 )
 
 type ContainElementMatcher struct {
@@ -26,7 +25,6 @@ func (matcher *ContainElementMatcher) Match(actual interface{}) (success bool, e
 	if isMap(actual) {
 		keys = value.MapKeys()
 	}
-	var lastError error
 	for i := 0; i < value.Len(); i++ {
 		var success bool
 		var err error
@@ -36,15 +34,14 @@ func (matcher *ContainElementMatcher) Match(actual interface{}) (success bool, e
 			success, err = elemMatcher.Match(value.Index(i).Interface())
 		}
 		if err != nil {
-			lastError = err
-			continue
+			return false, fmt.Errorf("ContainElement's element matcher failed with:\n\t%s", err.Error())
 		}
 		if success {
 			return true, nil
 		}
 	}
 
-	return false, lastError
+	return false, nil
 }
 
 func (matcher *ContainElementMatcher) FailureMessage(actual interface{}) (message string) {

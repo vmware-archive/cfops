@@ -54,7 +54,7 @@ var agoutiBootstrapText = `package {{.Package}}_test
 import (
 	{{.GinkgoImport}}
 	{{.GomegaImport}}
-	"github.com/sclevine/agouti"
+	. "github.com/sclevine/agouti/core"
 
 	"testing"
 )
@@ -64,20 +64,23 @@ func Test{{.FormattedName}}(t *testing.T) {
 	RunSpecs(t, "{{.FormattedName}} Suite")
 }
 
-var agoutiDriver *agouti.WebDriver
+var agoutiDriver WebDriver
 
 var _ = BeforeSuite(func() {
+	var err error
+
 	// Choose a WebDriver:
 
-	agoutiDriver = agouti.PhantomJS()
-	// agoutiDriver = agouti.Selenium()
-	// agoutiDriver = agouti.ChromeDriver()
+	agoutiDriver, err = PhantomJS()
+	// agoutiDriver, err = Selenium()
+	// agoutiDriver, err = Chrome()
 
+	Expect(err).NotTo(HaveOccurred())
 	Expect(agoutiDriver.Start()).To(Succeed())
 })
 
 var _ = AfterSuite(func() {
-	Expect(agoutiDriver.Stop()).To(Succeed())
+	agoutiDriver.Stop()
 })
 `
 

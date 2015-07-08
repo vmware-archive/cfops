@@ -10,6 +10,19 @@ import (
 )
 
 var _ = Describe("get_password_ip", func() {
+
+	Describe("Ops Manager Elastic Runtime v1.3", func() {
+		var installationSettingsFilePath = "fixtures/installation-settings-1-3.json"
+		testGetPasswordWithVersionSpecificFile(installationSettingsFilePath)
+	})
+
+	Describe("Ops Manager Elastic Runtime v1.4", func() {
+		var installationSettingsFilePath = "fixtures/installation-settings-1-4.json"
+		testGetPasswordWithVersionSpecificFile(installationSettingsFilePath)
+	})
+})
+
+func testGetPasswordWithVersionSpecificFile(installationSettingsFilePath string) {
 	Describe("GetDeploymentName function", func() {
 		Context("when given a valid installation.json", func() {
 			var (
@@ -19,7 +32,7 @@ var _ = Describe("get_password_ip", func() {
 			BeforeEach(func() {
 				var fileRef *os.File
 				defer fileRef.Close()
-				fileRef, _ = os.Open("fixtures/installation.json")
+				fileRef, _ = os.Open(installationSettingsFilePath)
 				jsonObj, _ = ReadAndUnmarshal(fileRef)
 			})
 
@@ -70,7 +83,7 @@ var _ = Describe("get_password_ip", func() {
 			BeforeEach(func() {
 				var fileRef *os.File
 				defer fileRef.Close()
-				fileRef, _ = os.Open("fixtures/installation.json")
+				fileRef, _ = os.Open(installationSettingsFilePath)
 				jsonObj, _ = ReadAndUnmarshal(fileRef)
 			})
 
@@ -107,7 +120,7 @@ var _ = Describe("get_password_ip", func() {
 			BeforeEach(func() {
 				var fileRef *os.File
 				defer fileRef.Close()
-				fileRef, _ = os.Open("fixtures/installation.json")
+				fileRef, _ = os.Open(installationSettingsFilePath)
 				jsonObj, _ = ReadAndUnmarshal(fileRef)
 
 				parser = &IpPasswordParser{
@@ -146,7 +159,7 @@ var _ = Describe("get_password_ip", func() {
 			BeforeEach(func() {
 				var fileRef *os.File
 				defer fileRef.Close()
-				fileRef, _ = os.Open("fixtures/installation.json")
+				fileRef, _ = os.Open(installationSettingsFilePath)
 				jsonObj, _ = ReadAndUnmarshal(fileRef)
 
 				parser = &IpPasswordParser{
@@ -185,7 +198,7 @@ var _ = Describe("get_password_ip", func() {
 			BeforeEach(func() {
 				var fileRef *os.File
 				defer fileRef.Close()
-				fileRef, _ = os.Open("fixtures/installation.json")
+				fileRef, _ = os.Open(installationSettingsFilePath)
 				jsonObj, _ = ReadAndUnmarshal(fileRef)
 
 				parser = &IpPasswordParser{
@@ -224,7 +237,7 @@ var _ = Describe("get_password_ip", func() {
 			BeforeEach(func() {
 				var fileRef *os.File
 				defer fileRef.Close()
-				fileRef, _ = os.Open("fixtures/installation.json")
+				fileRef, _ = os.Open(installationSettingsFilePath)
 				jsonObj, _ = ReadAndUnmarshal(fileRef)
 
 				parser = &IpPasswordParser{
@@ -250,6 +263,5 @@ var _ = Describe("get_password_ip", func() {
 				}).ShouldNot(Panic())
 			})
 		})
-
 	})
-})
+}

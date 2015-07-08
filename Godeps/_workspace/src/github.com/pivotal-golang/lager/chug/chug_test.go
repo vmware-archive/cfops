@@ -44,7 +44,7 @@ var _ = Describe("Chug", func() {
 			Ω(entry.Log).Should(MatchLogEntry(LogEntry{
 				LogLevel: lager.DEBUG,
 				Source:   "chug-test",
-				Message:  "chug-test.chug",
+				Message:  "chug",
 				Data:     data,
 			}))
 
@@ -53,7 +53,7 @@ var _ = Describe("Chug", func() {
 			Ω(entry.Log).Should(MatchLogEntry(LogEntry{
 				LogLevel: lager.INFO,
 				Source:   "chug-test",
-				Message:  "chug-test.again",
+				Message:  "again",
 				Data:     data,
 			}))
 		})
@@ -71,23 +71,9 @@ var _ = Describe("Chug", func() {
 				Ω((<-stream).Log).Should(MatchLogEntry(LogEntry{
 					LogLevel: lager.ERROR,
 					Source:   "chug-test",
-					Message:  "chug-test.chug",
+					Message:  "chug",
 					Error:    errors.New("some-error"),
 					Data:     lager.Data{"some-float": 3.0, "some-string": "foo"},
-				}))
-			})
-		})
-
-		Context("when parsing an info message with an error", func() {
-			It("should not take the error out of the data map", func() {
-				data := lager.Data{"some-float": 3.0, "some-string": "foo", "error": "some-error"}
-				logger.Info("chug", data)
-				Ω((<-stream).Log).Should(MatchLogEntry(LogEntry{
-					LogLevel: lager.INFO,
-					Source:   "chug-test",
-					Message:  "chug-test.chug",
-					Error:    nil,
-					Data:     lager.Data{"some-float": 3.0, "some-string": "foo", "error": "some-error"},
 				}))
 			})
 		})
@@ -106,7 +92,7 @@ var _ = Describe("Chug", func() {
 				Ω((<-stream).Log).Should(MatchLogEntry(LogEntry{
 					LogLevel: lager.INFO,
 					Source:   "chug-test",
-					Message:  "chug-test.first-session.encabulate",
+					Message:  "first-session.encabulate",
 					Session:  "1",
 					Data:     lager.Data{},
 				}))
@@ -114,7 +100,7 @@ var _ = Describe("Chug", func() {
 				Ω((<-stream).Log).Should(MatchLogEntry(LogEntry{
 					LogLevel: lager.INFO,
 					Source:   "chug-test",
-					Message:  "chug-test.first-session.nested-session-1.baconize",
+					Message:  "first-session.nested-session-1.baconize",
 					Session:  "1.1",
 					Data:     lager.Data{},
 				}))
@@ -122,7 +108,7 @@ var _ = Describe("Chug", func() {
 				Ω((<-stream).Log).Should(MatchLogEntry(LogEntry{
 					LogLevel: lager.INFO,
 					Source:   "chug-test",
-					Message:  "chug-test.first-session.remodulate",
+					Message:  "first-session.remodulate",
 					Session:  "1",
 					Data:     lager.Data{},
 				}))
@@ -130,7 +116,7 @@ var _ = Describe("Chug", func() {
 				Ω((<-stream).Log).Should(MatchLogEntry(LogEntry{
 					LogLevel: lager.INFO,
 					Source:   "chug-test",
-					Message:  "chug-test.first-session.nested-session-1.ergonomize",
+					Message:  "first-session.nested-session-1.ergonomize",
 					Session:  "1.1",
 					Data:     lager.Data{},
 				}))
@@ -138,7 +124,7 @@ var _ = Describe("Chug", func() {
 				Ω((<-stream).Log).Should(MatchLogEntry(LogEntry{
 					LogLevel: lager.INFO,
 					Source:   "chug-test",
-					Message:  "chug-test.first-session.nested-session-2.modernify",
+					Message:  "first-session.nested-session-2.modernify",
 					Session:  "1.2",
 					Data:     lager.Data{},
 				}))
@@ -218,6 +204,14 @@ var _ = Describe("Chug", func() {
 			Context("when the session does not parse", func() {
 				BeforeEach(func() {
 					input = []byte(`{"timestamp":"1407102779.028711081","source":"chug-test","message":"chug-test.chug","log_level":3,"data":{"some-float":3,"some-string":"foo","session":7}}`)
+				})
+
+				itReturnsRawData()
+			})
+
+			Context("when there aren't enough message components", func() {
+				BeforeEach(func() {
+					input = []byte(`{"timestamp":"1407102779.028711081","source":"chug-test","message":"chug-test","log_level":1,"data":{}}`)
 				})
 
 				itReturnsRawData()
