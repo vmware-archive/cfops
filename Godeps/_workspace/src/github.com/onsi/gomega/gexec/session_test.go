@@ -4,7 +4,6 @@ import (
 	"os/exec"
 	"syscall"
 	"time"
-
 	. "github.com/onsi/gomega/gbytes"
 	. "github.com/onsi/gomega/gexec"
 

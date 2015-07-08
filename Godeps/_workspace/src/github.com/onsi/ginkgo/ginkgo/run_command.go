@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/onsi/ginkgo/config"
-	"github.com/onsi/ginkgo/ginkgo/interrupthandler"
 	"github.com/onsi/ginkgo/ginkgo/testrunner"
 	"github.com/onsi/ginkgo/types"
 )
@@ -16,7 +15,7 @@ import (
 func BuildRunCommand() *Command {
 	commandFlags := NewRunCommandFlags(flag.NewFlagSet("ginkgo", flag.ExitOnError))
 	notifier := NewNotifier(commandFlags)
-	interruptHandler := interrupthandler.NewInterruptHandler()
+	interruptHandler := NewInterruptHandler()
 	runner := &SpecRunner{
 		commandFlags:     commandFlags,
 		notifier:         notifier,
@@ -40,7 +39,7 @@ func BuildRunCommand() *Command {
 type SpecRunner struct {
 	commandFlags     *RunWatchAndBuildCommandFlags
 	notifier         *Notifier
-	interruptHandler *interrupthandler.InterruptHandler
+	interruptHandler *InterruptHandler
 	suiteRunner      *SuiteRunner
 }
 

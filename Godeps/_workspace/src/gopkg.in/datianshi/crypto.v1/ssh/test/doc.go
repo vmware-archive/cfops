@@ -4,4 +4,4 @@
 
 // This package contains integration tests for the
 // code.google.com/p/go.crypto/ssh package.
-package test
+package test // import "gopkg.in/datianshi/crypto.v1/ssh/test"

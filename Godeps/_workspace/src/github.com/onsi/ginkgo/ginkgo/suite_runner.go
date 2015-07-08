@@ -5,14 +5,13 @@ import (
 	"runtime"
 
 	"github.com/onsi/ginkgo/config"
-	"github.com/onsi/ginkgo/ginkgo/interrupthandler"
 	"github.com/onsi/ginkgo/ginkgo/testrunner"
 	"github.com/onsi/ginkgo/ginkgo/testsuite"
 )
 
 type SuiteRunner struct {
 	notifier         *Notifier
-	interruptHandler *interrupthandler.InterruptHandler
+	interruptHandler *InterruptHandler
 }
 
 type compiler struct {
@@ -32,7 +31,7 @@ func (c *compiler) compile() {
 	c.compilationError <- err
 }
 
-func NewSuiteRunner(notifier *Notifier, interruptHandler *interrupthandler.InterruptHandler) *SuiteRunner {
+func NewSuiteRunner(notifier *Notifier, interruptHandler *InterruptHandler) *SuiteRunner {
 	return &SuiteRunner{
 		notifier:         notifier,
 		interruptHandler: interruptHandler,

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 	"regexp"
 
 	. "github.com/onsi/ginkgo"
@@ -221,18 +220,6 @@ var _ = Describe("TestServer", func() {
 				It("should also be possible to verify the rawQuery", func() {
 					s.SetHandler(0, VerifyRequest("GET", "/foo", "baz=bar"))
 					resp, err = http.Get(s.URL() + "/foo?baz=bar")
-					Ω(err).ShouldNot(HaveOccurred())
-				})
-
-				It("should match irregardless of query parameter ordering", func() {
-					s.SetHandler(0, VerifyRequest("GET", "/foo", "type=get&name=money"))
-					u, _ := url.Parse(s.URL() + "/foo")
-					u.RawQuery = url.Values{
-						"type": []string{"get"},
-						"name": []string{"money"},
-					}.Encode()
-
-					resp, err = http.Get(u.String())
 					Ω(err).ShouldNot(HaveOccurred())
 				})
 			})

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/types"
@@ -37,10 +36,7 @@ func VerifyRequest(method string, path interface{}, rawQuery ...string) http.Han
 			Ω(req.URL.Path).Should(Equal(path), "Path mismatch")
 		}
 		if len(rawQuery) > 0 {
-			values, err := url.ParseQuery(rawQuery[0])
-			Ω(err).ShouldNot(HaveOccurred(), "Expected RawQuery is malformed")
-
-			Ω(req.URL.Query()).Should(Equal(values), "RawQuery mismatch")
+			Ω(req.URL.RawQuery).Should(Equal(rawQuery[0]), "RawQuery mismatch")
 		}
 	}
 }

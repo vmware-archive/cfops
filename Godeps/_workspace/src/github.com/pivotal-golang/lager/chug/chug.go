@@ -76,16 +76,14 @@ func convertLagerLog(lagerLog lager.LogFormat) (LogEntry, bool) {
 	data := lagerLog.Data
 
 	var logErr error
-	if lagerLog.LogLevel == lager.ERROR || lagerLog.LogLevel == lager.FATAL {
-		dataErr, ok := lagerLog.Data["error"]
-		if ok {
-			errorString, ok := dataErr.(string)
-			if !ok {
-				return LogEntry{}, false
-			}
-			logErr = errors.New(errorString)
-			delete(lagerLog.Data, "error")
+	dataErr, ok := lagerLog.Data["error"]
+	if ok {
+		errorString, ok := dataErr.(string)
+		if !ok {
+			return LogEntry{}, false
 		}
+		logErr = errors.New(errorString)
+		delete(lagerLog.Data, "error")
 	}
 
 	var logTrace string
@@ -108,11 +106,19 @@ func convertLagerLog(lagerLog lager.LogFormat) (LogEntry, bool) {
 		delete(lagerLog.Data, "session")
 	}
 
+	messageComponents := strings.Split(lagerLog.Message, ".")
+
+	n := len(messageComponents)
+	if n <= 1 {
+		return LogEntry{}, false
+	}
+	logMessage := strings.Join(messageComponents[1:], ".")
+
 	return LogEntry{
 		Timestamp: time.Unix(0, int64(timestamp*1e9)),
 		LogLevel:  lagerLog.LogLevel,
 		Source:    lagerLog.Source,
-		Message:   lagerLog.Message,
+		Message:   logMessage,
 		Session:   logSession,
 
 		Error: logErr,

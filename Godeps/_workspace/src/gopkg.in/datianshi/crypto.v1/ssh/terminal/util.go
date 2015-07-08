@@ -14,7 +14,7 @@
 // 	        panic(err)
 // 	}
 // 	defer terminal.Restore(0, oldState)
-package terminal
+package terminal // import "gopkg.in/datianshi/crypto.v1/ssh/terminal"
 
 import (
 	"io"

@@ -58,6 +58,18 @@ func (s mockDumper) Import(i io.Reader) (err error) {
 }
 
 var _ = Describe("ElasticRuntime", func() {
+	Describe("ElasticRuntime Version 1.3", func() {
+		var installationSettingsFilePath = "fixtures/installation-settings-1-3.json"
+		testERWithVersionSpecificFile(installationSettingsFilePath)
+	})
+
+	Describe("ElasticRuntime Version 1.4", func() {
+		var installationSettingsFilePath = "fixtures/installation-settings-1-4.json"
+		testERWithVersionSpecificFile(installationSettingsFilePath)
+	})
+})
+
+func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 	Describe("Backup / Restore", func() {
 		Context("with valid properties (DirectorInfo)", func() {
 			var (
@@ -86,7 +98,7 @@ var _ = Describe("ElasticRuntime", func() {
 			BeforeEach(func() {
 				target, _ = ioutil.TempDir("/tmp", "spec")
 				er = ElasticRuntime{
-					JsonFile:    "fixtures/installation.json",
+					JsonFile:    installationSettingsFilePath,
 					HttpGateway: &MockHttpGateway{},
 					BackupContext: BackupContext{
 						TargetDir: target,
@@ -219,7 +231,7 @@ var _ = Describe("ElasticRuntime", func() {
 			BeforeEach(func() {
 				target, _ = ioutil.TempDir("/tmp", "spec")
 				er = ElasticRuntime{
-					JsonFile:    "fixtures/installation.json",
+					JsonFile:    installationSettingsFilePath,
 					HttpGateway: &MockHttpGateway{true, 500, `{"state":"notdone"}`},
 					BackupContext: BackupContext{
 						TargetDir: target,
@@ -289,7 +301,7 @@ var _ = Describe("ElasticRuntime", func() {
 			BeforeEach(func() {
 				target, _ = ioutil.TempDir("/tmp", "spec")
 				er = ElasticRuntime{
-					JsonFile:    "fixtures/installation.json",
+					JsonFile:    installationSettingsFilePath,
 					HttpGateway: &MockHttpGateway{},
 					BackupContext: BackupContext{
 						TargetDir: target,
@@ -396,7 +408,7 @@ var _ = Describe("ElasticRuntime", func() {
 			BeforeEach(func() {
 				target, _ = ioutil.TempDir("/tmp", "spec")
 				er = ElasticRuntime{
-					JsonFile:    "fixtures/installation.json",
+					JsonFile:    installationSettingsFilePath,
 					HttpGateway: &MockHttpGateway{},
 					BackupContext: BackupContext{
 						TargetDir: target,
@@ -451,7 +463,7 @@ var _ = Describe("ElasticRuntime", func() {
 			BeforeEach(func() {
 				target, _ = ioutil.TempDir("/tmp", "spec")
 				er = ElasticRuntime{
-					JsonFile:    "fixtures/installation.json",
+					JsonFile:    installationSettingsFilePath,
 					HttpGateway: &MockHttpGateway{},
 					BackupContext: BackupContext{
 						TargetDir: target,
@@ -508,7 +520,7 @@ var _ = Describe("ElasticRuntime", func() {
 			BeforeEach(func() {
 				target, _ = ioutil.TempDir("/tmp", "spec")
 				er = ElasticRuntime{
-					JsonFile:    "fixtures/installation.json",
+					JsonFile:    installationSettingsFilePath,
 					HttpGateway: &MockHttpGateway{},
 					BackupContext: BackupContext{
 						TargetDir: target,
@@ -552,4 +564,4 @@ var _ = Describe("ElasticRuntime", func() {
 			})
 		})
 	})
-})
+}
