@@ -27,6 +27,37 @@ var _ = Describe("get_password_ip", func() {
 	})
 })
 
+func testGetPasswordAndIP(product, component, username, controlIP, controlPass, installationSettingsFilePath string) {
+	Context("when given a valid installation.json", func() {
+		var (
+			jsonObj InstallationCompareObject
+		)
+
+		BeforeEach(func() {
+			var fileRef *os.File
+			defer fileRef.Close()
+			fileRef, _ = os.Open(installationSettingsFilePath)
+			jsonObj, _ = ReadAndUnmarshal(fileRef)
+		})
+
+		AfterEach(func() {
+		})
+
+		It("Should return nil error, correct ip & password", func() {
+			ip, password, err := GetPasswordAndIP(jsonObj, product, component, username)
+			Ω(err).Should(BeNil())
+			Ω(ip).Should(Equal(controlIP))
+			Ω(password).Should(Equal(controlPass))
+		})
+
+		It("Should not panic on complete real world dataset", func() {
+			Ω(func() {
+				GetPasswordAndIP(jsonObj, product, component, username)
+			}).ShouldNot(Panic())
+		})
+	})
+}
+
 func testGetPasswordWithVersionSpecificFile(installationSettingsFilePath string) {
 	Describe("GetDeploymentName function", func() {
 		Context("when given a valid installation.json", func() {
@@ -77,36 +108,24 @@ func testGetPasswordWithVersionSpecificFile(installationSettingsFilePath string)
 	Describe("GetPasswordAndIP function", func() {
 		Context("when given a valid installation.json", func() {
 			var (
-				jsonObj     InstallationCompareObject
 				product     string = "cf"
 				component   string = "ccdb"
 				username    string = "admin"
-				controlIp   string = "172.16.1.46"
+				controlIP   string = "172.16.1.46"
 				controlPass string = "e3e89a528625d819160d"
 			)
+			testGetPasswordAndIP(product, component, username, controlIP, controlPass, installationSettingsFilePath)
+		})
 
-			BeforeEach(func() {
-				var fileRef *os.File
-				defer fileRef.Close()
-				fileRef, _ = os.Open(installationSettingsFilePath)
-				jsonObj, _ = ReadAndUnmarshal(fileRef)
-			})
-
-			AfterEach(func() {
-			})
-
-			It("Should return nil error, correct ip & password", func() {
-				ip, password, err := GetPasswordAndIP(jsonObj, product, component, username)
-				Ω(err).Should(BeNil())
-				Ω(ip).Should(Equal(controlIp))
-				Ω(password).Should(Equal(controlPass))
-			})
-
-			It("Should not panic on complete real world dataset", func() {
-				Ω(func() {
-					GetPasswordAndIP(jsonObj, product, component, username)
-				}).ShouldNot(Panic())
-			})
+		Context("when given a valid installation.json with 2 elements of a equal prefix (mysql & mysql_proxy)", func() {
+			var (
+				product     string = "cf"
+				component   string = "mysql"
+				username    string = "root"
+				controlIP   string = "192.168.8.33"
+				controlPass string = "d71c9716b5d7ff1add45"
+			)
+			testGetPasswordAndIP(product, component, username, controlIP, controlPass, installationSettingsFilePath)
 		})
 	})
 

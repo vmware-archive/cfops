@@ -188,7 +188,7 @@ func (s *IpPasswordParser) propertiesFilter(i, v interface{}) (ok bool) {
 func (s *IpPasswordParser) ipsFilter(i, v interface{}) bool {
 	name := i.(string)
 	val := v.([]string)
-	return strings.Contains(name, s.Component) && len(val) > 0
+	return strings.Contains(name, fmt.Sprintf("%s-", s.Component)) && len(val) > 0
 }
 
 func (s *IpPasswordParser) modifyProductTypeName(typeval string) {
