@@ -256,7 +256,7 @@
                     "192.168.10.24"
                 ],
                 "mysql-part-0c3bd824865b8c8e7ddc": [
-                    "192.168.10.26"
+                    "192.168.8.33"
                 ],
                 "mysql_proxy-part-776f9b467ccb5a29045c": [
                     "192.168.10.25"
@@ -1386,7 +1386,7 @@
                             "identifier": "mysql_admin_credentials",
                             "value": {
                                 "identity": "root",
-                                "password": "b0a3fe4dcaeea18ad8db"
+                                "password": "d71c9716b5d7ff1add45"
                             }
                         },
                         {

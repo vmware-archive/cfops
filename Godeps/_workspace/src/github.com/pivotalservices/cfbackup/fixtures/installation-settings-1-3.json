@@ -233,7 +233,7 @@
           "172.16.1.54"
         ],
         "mysql-part-280b30dd83349346ae75": [
-          "172.16.1.55"
+          "192.168.8.33"
         ],
         "dea-part-37d9432b353d3a6bce03": [
           "172.16.1.56"
@@ -1257,7 +1257,7 @@
               "definition": "mysql_admin_credentials",
               "value": {
                 "identity": "root",
-                "password": "cf7f88fd1e28a4ffcc9e"
+                "password": "d71c9716b5d7ff1add45"
               }
             },
             {
