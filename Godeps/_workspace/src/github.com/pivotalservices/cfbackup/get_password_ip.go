@@ -136,6 +136,7 @@ func (s *IpPasswordParser) setIp(productObj productCompareObject) (err error) {
 	var iplist []string
 
 	if err = jsonFilter(productObj.IPs, s.ipsFilter, &iplist); err == nil {
+
 		s.ip = iplist[0]
 	}
 	return
@@ -185,7 +186,9 @@ func (s *IpPasswordParser) propertiesFilter(i, v interface{}) (ok bool) {
 }
 
 func (s *IpPasswordParser) ipsFilter(i, v interface{}) bool {
-	return strings.Contains(i.(string), s.Component)
+	name := i.(string)
+	val := v.([]string)
+	return strings.Contains(name, s.Component) && len(val) > 0
 }
 
 func (s *IpPasswordParser) modifyProductTypeName(typeval string) {
