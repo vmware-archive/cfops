@@ -63,6 +63,11 @@ var _ = Describe("ElasticRuntime", func() {
 		testERWithVersionSpecificFile(installationSettingsFilePath)
 	})
 
+	Describe("Elastic Runtime v1.4 file variant with getpassword IP index error", func() {
+		var installationSettingsFilePath = "fixtures/installation-settings-1-4-variant.json"
+		testERWithVersionSpecificFile(installationSettingsFilePath)
+	})
+
 	Describe("ElasticRuntime Version 1.4", func() {
 		var installationSettingsFilePath = "fixtures/installation-settings-1-4.json"
 		testERWithVersionSpecificFile(installationSettingsFilePath)
