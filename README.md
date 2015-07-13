@@ -2,6 +2,8 @@ cfops [![wercker status](https://app.wercker.com/status/d0a50d426b77a9f73da0fe4f
 ======
 
 ### Version Compatibility
+(as of release v0.0.61 - https://s3.amazonaws.com/pivotal-cfops/release/v0.0.61)
+
 This is tested and known to work for **Ops Manager v1.4**
 
 This is tested and known to work for **ER v1.4**
