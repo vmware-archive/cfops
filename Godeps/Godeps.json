@@ -30,6 +30,7 @@
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/cfbackup",
+			"Comment": "v0.1.0-20-g150881f",
 			"Rev": "150881ffd6c8b4fa762a92500d44866986d1007c"
 		},
 		{
