@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/codegangsta/cli"
@@ -65,7 +66,17 @@ func (s *flagSet) Tilelist() string {
 }
 
 func hasValidBackupRestoreFlags(fs *flagSet) bool {
-	return (fs.Host() != "" && fs.DirectorUser() != "" && fs.DirectorPass() != "" && fs.OpsManagerUser() != "" && fs.OpsManagerPass() != "" && fs.Dest() != "")
+	res := (fs.Host() != "" && fs.DirectorUser() != "" && fs.DirectorPass() != "" && fs.OpsManagerUser() != "" && fs.OpsManagerPass() != "" && fs.Dest() != "")
+
+	if res == false {
+		fmt.Println("OpsManagerHost: ", fs.Host())
+		fmt.Println("DirectorUser: ", fs.DirectorUser())
+		fmt.Println("DirectorPass: ", fs.DirectorPass())
+		fmt.Println("OpsManagerUser: ", fs.OpsManagerUser())
+		fmt.Println("OpsManagerPass: ", fs.OpsManagerPass())
+		fmt.Println("Destination: ", fs.Dest())
+	}
+	return res
 }
 
 var backupRestoreFlags = []cli.Flag{
@@ -85,6 +96,12 @@ var backupRestoreFlags = []cli.Flag{
 		Name:   strings.Join(directorPassFlag, ", "),
 		Value:  "",
 		Usage:  directorPassDescr,
+		EnvVar: "",
+	},
+	cli.StringFlag{
+		Name:   strings.Join(opsManagerUserFlag, ", "),
+		Value:  "",
+		Usage:  opsManagerUserDescr,
 		EnvVar: "",
 	},
 	cli.StringFlag{
