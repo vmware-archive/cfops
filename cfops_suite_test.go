@@ -129,15 +129,19 @@ func (s *mockFlagSet) Host() (r string) {
 	return
 }
 
-func (s *mockFlagSet) User() (r string) {
+func (s *mockFlagSet) DirectorUser() (r string) {
 	return
 }
 
-func (s *mockFlagSet) Pass() (r string) {
+func (s *mockFlagSet) DirectorPass() (r string) {
 	return
 }
 
-func (s *mockFlagSet) Tpass() (r string) {
+func (s *mockFlagSet) OpsManagerUser() (r string) {
+	return
+}
+
+func (s *mockFlagSet) OpsManagerPass() (r string) {
 	return
 }
 
@@ -154,7 +158,7 @@ type mockBuiltinPipeline struct {
 	ErrReturned error
 }
 
-func (s *mockBuiltinPipeline) action(string, string, string, string, string) error {
+func (s *mockBuiltinPipeline) action(string, string, string, string, string, string) error {
 	return s.ErrReturned
 }
 

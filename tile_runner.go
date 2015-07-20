@@ -20,7 +20,7 @@ const (
 )
 
 var (
-	BuiltinPipelineExecution = map[string]func(string, string, string, string, string) error{
+	BuiltinPipelineExecution = map[string]func(string, string, string, string, string, string) error{
 		Restore: cfbackup.RunRestorePipeline,
 		Backup:  cfbackup.RunBackupPipeline,
 	}
@@ -43,9 +43,10 @@ func hasTilelistFlag(fs flagSet) bool {
 
 type flagSet interface {
 	Host() string
-	User() string
-	Pass() string
-	Tpass() string
+	DirectorUser() string
+	DirectorPass() string
+	OpsManagerUser() string
+	OpsManagerPass() string
 	Dest() string
 	Tilelist() string
 }
@@ -60,7 +61,7 @@ func formatArray(a []string) []string {
 func SetupSupportedTiles(fs flagSet) {
 	SupportedTiles = map[string]func() (Tile, error){
 		OpsMgr: func() (opsmgr Tile, err error) {
-			opsmgr, err = cfbackup.NewOpsManager(fs.Host(), fs.User(), fs.Pass(), fs.Tpass(), fs.Dest(), backupLogger)
+			opsmgr, err = cfbackup.NewOpsManager(fs.Host(), fs.DirectorUser(), fs.DirectorPass(), fs.OpsManagerUser(), fs.OpsManagerPass(), fs.Dest(), backupLogger)
 			backupLogger.Debug("Creating a new OpsManager object", nil)
 			return
 		},
@@ -130,7 +131,7 @@ func RunPipeline(fs flagSet, action string) (err error) {
 
 	} else {
 		cfbackup.SetLogger(backupLogger)
-		err = BuiltinPipelineExecution[action](fs.Host(), fs.User(), fs.Pass(), fs.Tpass(), fs.Dest())
+		err = BuiltinPipelineExecution[action](fs.Host(), fs.DirectorUser(), fs.DirectorPass(), fs.OpsManagerUser(), fs.OpsManagerPass(), fs.Dest())
 	}
 	return
 }

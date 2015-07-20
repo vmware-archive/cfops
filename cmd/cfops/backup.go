@@ -10,7 +10,7 @@ import (
 const (
 	backup_full_name  string = "backup"
 	backup_short_name        = "b"
-	backup_usage             = "backup -host <host> -u <usr> -p <pass> --tp <tpass> -d <dir> --tl 'opsmanager, er'"
+	backup_usage             = "backup --opsmanagerhost <host> --directoruser <usr> --directorpass <pass> --opsmanageruser <opsuser> --opsmanagerpass <opspass> -d <dir> --tl 'opsmanager, er'"
 	backup_descr             = "backup a Cloud Foundry deployment, including Ops Manager configuration, databases, and blob store"
 )
 
@@ -24,12 +24,13 @@ var backupCli = cli.Command{
 		var (
 			err error
 			fs  = &flagSet{
-				host:     c.String(hostflag[0]),
-				user:     c.String(userflag[0]),
-				pass:     c.String(passflag[0]),
-				tpass:    c.String(tpassflag[0]),
-				dest:     c.String(destflag[0]),
-				tilelist: c.String(tilelistflag[0]),
+				host:           c.String(opsManagerHostFlag[0]),
+				directorUser:   c.String(directorUserFlag[0]),
+				directorPass:   c.String(directorPassFlag[0]),
+				opsManagerUser: c.String(opsManagerUserFlag[0]),
+				opsManagerPass: c.String(opsManagerPassFlag[0]),
+				dest:           c.String(destFlag[0]),
+				tilelist:       c.String(tilelistFlag[0]),
 			}
 		)
 
@@ -37,15 +38,15 @@ var backupCli = cli.Command{
 			cfops.SetupSupportedTiles(fs)
 			err = cfops.RunPipeline(fs, cfops.Backup)
 
+			if err != nil {
+				fmt.Println(err)
+
+			} else {
+				fmt.Println(backup_full_name, " completed successfully.")
+			}
+
 		} else {
 			cli.ShowCommandHelp(c, backup_full_name)
-		}
-
-		if err != nil {
-			fmt.Println(err)
-
-		} else {
-			fmt.Println(backup_full_name, " completed successfully.")
 		}
 	},
 }

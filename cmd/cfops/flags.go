@@ -7,46 +7,53 @@ import (
 )
 
 const (
-	hostdescr     string = "hostname for Ops Manager"
-	userdescr     string = "username for Ops Manager"
-	passdescr     string = "password for Ops Manager"
-	tpassdescr    string = "password for the Ops Manager tempest user"
-	destdescr     string = "directory of the Cloud Foundry backup archive"
-	tilelistdescr string = "a csv list of the tiles you would like to run the operation on"
+	opsManagerHostDescr string = "hostname for Ops Manager"
+	directorUserDescr   string = "username for Ops Mgr Director VM"
+	directorPassDescr   string = "password for Ops Mgr Director VM"
+	opsManagerUserDescr string = "username for Ops Manager"
+	opsManagerPassDescr string = "password for Ops Manager"
+	destdescr           string = "directory of the Cloud Foundry backup archive"
+	tilelistdescr       string = "a csv list of the tiles you would like to run the operation on"
 )
 
 var (
-	hostflag     = []string{"hostname", "host"}
-	userflag     = []string{"username", "u"}
-	passflag     = []string{"password", "p"}
-	tpassflag    = []string{"tempestpassword", "tp"}
-	destflag     = []string{"destination", "d"}
-	tilelistflag = []string{"tilelist", "tl"}
+	opsManagerHostFlag = []string{"opsmanagerhost", "omh"}
+	directorUserFlag   = []string{"directoruser", "du"}
+	directorPassFlag   = []string{"directorpass", "dp"}
+	opsManagerUserFlag = []string{"opsmanageruser", "omu"}
+	opsManagerPassFlag = []string{"opsmanagerpass", "omp"}
+	destFlag           = []string{"destination", "d"}
+	tilelistFlag       = []string{"tilelist", "tl"}
 )
 
 type flagSet struct {
-	host     string
-	user     string
-	pass     string
-	tpass    string
-	dest     string
-	tilelist string
+	host           string
+	directorUser   string
+	directorPass   string
+	opsManagerUser string
+	opsManagerPass string
+	dest           string
+	tilelist       string
 }
 
 func (s *flagSet) Host() string {
 	return s.host
 }
 
-func (s *flagSet) User() string {
-	return s.user
+func (s *flagSet) DirectorUser() string {
+	return s.directorUser
 }
 
-func (s *flagSet) Pass() string {
-	return s.pass
+func (s *flagSet) DirectorPass() string {
+	return s.directorPass
 }
 
-func (s *flagSet) Tpass() string {
-	return s.tpass
+func (s *flagSet) OpsManagerUser() string {
+	return s.opsManagerUser
+}
+
+func (s *flagSet) OpsManagerPass() string {
+	return s.opsManagerPass
 }
 
 func (s *flagSet) Dest() string {
@@ -58,42 +65,42 @@ func (s *flagSet) Tilelist() string {
 }
 
 func hasValidBackupRestoreFlags(fs *flagSet) bool {
-	return (fs.Host() != "" && fs.User() != "" && fs.Pass() != "" && fs.Tpass() != "" && fs.Dest() != "")
+	return (fs.Host() != "" && fs.DirectorUser() != "" && fs.DirectorPass() != "" && fs.OpsManagerUser() != "" && fs.OpsManagerPass() != "" && fs.Dest() != "")
 }
 
 var backupRestoreFlags = []cli.Flag{
 	cli.StringFlag{
-		Name:   strings.Join(hostflag, ", "),
+		Name:   strings.Join(opsManagerHostFlag, ", "),
 		Value:  "",
-		Usage:  hostdescr,
+		Usage:  opsManagerHostDescr,
 		EnvVar: "",
 	},
 	cli.StringFlag{
-		Name:   strings.Join(userflag, ", "),
+		Name:   strings.Join(directorUserFlag, ", "),
 		Value:  "",
-		Usage:  userdescr,
+		Usage:  directorUserDescr,
 		EnvVar: "",
 	},
 	cli.StringFlag{
-		Name:   strings.Join(passflag, ", "),
+		Name:   strings.Join(directorPassFlag, ", "),
 		Value:  "",
-		Usage:  passdescr,
+		Usage:  directorPassDescr,
 		EnvVar: "",
 	},
 	cli.StringFlag{
-		Name:   strings.Join(tpassflag, ", "),
+		Name:   strings.Join(opsManagerPassFlag, ", "),
 		Value:  "",
-		Usage:  tpassdescr,
+		Usage:  opsManagerPassDescr,
 		EnvVar: "",
 	},
 	cli.StringFlag{
-		Name:   strings.Join(destflag, ", "),
+		Name:   strings.Join(destFlag, ", "),
 		Value:  "",
 		Usage:  destdescr,
 		EnvVar: "",
 	},
 	cli.StringFlag{
-		Name:   strings.Join(tilelistflag, ", "),
+		Name:   strings.Join(tilelistFlag, ", "),
 		Value:  "",
 		Usage:  tilelistdescr,
 		EnvVar: "",

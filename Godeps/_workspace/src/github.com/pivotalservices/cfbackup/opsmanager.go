@@ -24,6 +24,7 @@ const (
 	OPSMGR_BACKUP_DIR                           string = "opsmanager"
 	OPSMGR_DEPLOYMENTS_DIR                      string = "deployments"
 	OPSMGR_DEFAULT_USER                         string = "tempest"
+	OPSMGR_DEFAULT_SSH_PORT                     int    = 22
 	OPSMGR_INSTALLATION_SETTINGS_URL            string = "https://%s/api/installation_settings"
 	OPSMGR_INSTALLATION_ASSETS_URL              string = "https://%s/api/installation_asset_collection"
 	OPSMGR_DEPLOYMENTS_FILE                     string = "/var/tempest/workspaces/default/deployments/bosh-deployments.yml"
@@ -57,10 +58,10 @@ type OpsManager struct {
 }
 
 // NewOpsManager initializes an OpsManager instance
-var NewOpsManager = func(hostname string, username string, password string, tempestpassword string, target string, logger log.Logger) (context *OpsManager, err error) {
+var NewOpsManager = func(opsManagerHostname string, directorUsername string, directorPassword string, opsManagerUsername string, opsManagerPassword string, target string, logger log.Logger) (context *OpsManager, err error) {
 	var remoteExecuter command.Executer
 
-	if remoteExecuter, err = createExecuter(hostname, tempestpassword); err == nil {
+	if remoteExecuter, err = createExecuter(opsManagerHostname, opsManagerUsername, opsManagerPassword, OPSMGR_DEFAULT_SSH_PORT); err == nil {
 		settingsHttpRequestor := ghttp.NewHttpGateway()
 		settingsMultiHttpRequestor := ghttp.MultiPartUpload
 		assetsHttpRequestor := ghttp.NewHttpGateway()
@@ -72,9 +73,9 @@ var NewOpsManager = func(hostname string, username string, password string, temp
 			SettingsRequestor: settingsHttpRequestor,
 			AssetsRequestor:   assetsHttpRequestor,
 			DeploymentDir:     path.Join(target, OPSMGR_BACKUP_DIR, OPSMGR_DEPLOYMENTS_DIR),
-			Hostname:          hostname,
-			Username:          username,
-			Password:          password,
+			Hostname:          opsManagerHostname,
+			Username:          directorUsername,
+			Password:          directorPassword,
 			BackupContext: BackupContext{
 				TargetDir: target,
 			},
@@ -217,12 +218,12 @@ func (context *OpsManager) copyDeployments() (err error) {
 	return
 }
 
-func createExecuter(hostname, tempestpassword string) (remoteExecuter command.Executer, err error) {
+func createExecuter(hostname, opsManagerUsername, opsManagerPassword string, port int) (remoteExecuter command.Executer, err error) {
 	remoteExecuter, err = command.NewRemoteExecutor(command.SshConfig{
-		Username: OPSMGR_DEFAULT_USER,
-		Password: tempestpassword,
+		Username: opsManagerUsername,
+		Password: opsManagerPassword,
 		Host:     hostname,
-		Port:     22,
+		Port:     port,
 	})
 	return
 }

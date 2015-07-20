@@ -1,27 +1,32 @@
 package cfbackup
 
 type connectionBucket struct {
-	hostname        string
-	username        string
-	password        string
-	tempestPassword string
-	destination     string
+	hostname           string
+	directorUsername   string
+	directorPassword   string
+	opsManagerUser     string
+	opsManagerPassword string
+	destination        string
 }
 
 func (s connectionBucket) Host() string {
 	return s.hostname
 }
 
-func (s connectionBucket) User() string {
-	return s.username
+func (s connectionBucket) DirectorUser() string {
+	return s.directorUsername
 }
 
-func (s connectionBucket) Pass() string {
-	return s.password
+func (s connectionBucket) DirectorPass() string {
+	return s.directorPassword
 }
 
-func (s connectionBucket) TempestPass() string {
-	return s.tempestPassword
+func (s connectionBucket) OpsManagerUser() string {
+	return s.opsManagerUser
+}
+
+func (s connectionBucket) OpsManagerPass() string {
+	return s.opsManagerPassword
 }
 
 func (s connectionBucket) Destination() string {
