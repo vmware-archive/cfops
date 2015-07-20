@@ -30,9 +30,10 @@ type Tile interface {
 
 type connBucketInterface interface {
 	Host() string
-	User() string
-	Pass() string
-	TempestPass() string
+	DirectorUser() string
+	DirectorPass() string
+	OpsManagerUser() string
+	OpsManagerPass() string
 	Destination() string
 }
 
@@ -54,14 +55,15 @@ func init() {
 }
 
 //Backup the list of all default tiles
-func RunBackupPipeline(hostname, username, password, tempestpassword, destination string) (err error) {
+func RunBackupPipeline(hostname, directorUsername, directorPassword, opsManagerUser, opsManagerPassword, destination string) (err error) {
 	var tiles []Tile
 	conn := connectionBucket{
-		hostname:        hostname,
-		username:        username,
-		password:        password,
-		tempestPassword: tempestpassword,
-		destination:     destination,
+		hostname:           hostname,
+		directorUsername:   directorUsername,
+		directorPassword:   directorPassword,
+		opsManagerUser:     opsManagerUser,
+		opsManagerPassword: opsManagerPassword,
+		destination:        destination,
 	}
 
 	if tiles, err = fullTileList(conn, BACKUP_LOGGER_NAME); err == nil {
@@ -71,14 +73,15 @@ func RunBackupPipeline(hostname, username, password, tempestpassword, destinatio
 }
 
 //Restore the list of all default tiles
-func RunRestorePipeline(hostname, username, password, tempestpassword, destination string) (err error) {
+func RunRestorePipeline(hostname, directorUsername, directorPassword, opsManagerUser, opsManagerPassword, destination string) (err error) {
 	var tiles []Tile
 	conn := connectionBucket{
-		hostname:        hostname,
-		username:        username,
-		password:        password,
-		tempestPassword: tempestpassword,
-		destination:     destination,
+		hostname:           hostname,
+		directorUsername:   directorUsername,
+		directorPassword:   directorPassword,
+		opsManagerUser:     opsManagerUser,
+		opsManagerPassword: opsManagerPassword,
+		destination:        destination,
 	}
 
 	if tiles, err = fullTileList(conn, RESTORE_LOGGER_NAME); err == nil {
@@ -115,7 +118,7 @@ func fullTileList(conn connBucketInterface, loggerName string) (tiles []Tile, er
 	)
 	installationFilePath := path.Join(conn.Destination(), OPSMGR_BACKUP_DIR, OPSMGR_INSTALLATION_SETTINGS_FILENAME)
 
-	if opsmanager, err = NewOpsManager(conn.Host(), conn.User(), conn.Pass(), conn.TempestPass(), conn.Destination(), backupLogger); err == nil {
+	if opsmanager, err = NewOpsManager(conn.Host(), conn.DirectorUser(), conn.DirectorPass(), conn.OpsManagerUser(), conn.OpsManagerPass(), conn.Destination(), backupLogger); err == nil {
 		elasticRuntime = NewElasticRuntime(installationFilePath, conn.Destination(), backupLogger)
 		tiles = []Tile{
 			opsmanager,

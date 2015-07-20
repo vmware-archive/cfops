@@ -34,7 +34,7 @@ var _ = Describe("Backup / Restore", func() {
 			RunPipeline = func(actionBuilder func(Tile) func() error, tiles []Tile) (err error) {
 				return
 			}
-			err = RunBackupPipeline("", "", "", "", "")
+			err = RunBackupPipeline("", "", "", "", "", "")
 		})
 
 		AfterEach(func() {
@@ -59,7 +59,7 @@ var _ = Describe("Backup / Restore", func() {
 			RunPipeline = func(actionBuilder func(Tile) func() error, tiles []Tile) (err error) {
 				return
 			}
-			err = RunRestorePipeline("", "", "", "", "")
+			err = RunRestorePipeline("", "", "", "", "", "")
 		})
 
 		AfterEach(func() {
