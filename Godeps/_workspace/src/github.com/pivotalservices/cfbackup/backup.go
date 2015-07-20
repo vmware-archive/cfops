@@ -30,8 +30,8 @@ type Tile interface {
 
 type connBucketInterface interface {
 	Host() string
-	DirectorUser() string
-	DirectorPass() string
+	AdminUser() string
+	AdminPass() string
 	OpsManagerUser() string
 	OpsManagerPass() string
 	Destination() string
@@ -55,13 +55,13 @@ func init() {
 }
 
 //Backup the list of all default tiles
-func RunBackupPipeline(hostname, directorUsername, directorPassword, opsManagerUser, opsManagerPassword, destination string) (err error) {
+func RunBackupPipeline(hostname, adminUsername, adminPassword, opsManagerUsername, opsManagerPassword, destination string) (err error) {
 	var tiles []Tile
 	conn := connectionBucket{
 		hostname:           hostname,
-		directorUsername:   directorUsername,
-		directorPassword:   directorPassword,
-		opsManagerUser:     opsManagerUser,
+		adminUsername:      adminUsername,
+		adminPassword:      adminPassword,
+		opsManagerUsername: opsManagerUsername,
 		opsManagerPassword: opsManagerPassword,
 		destination:        destination,
 	}
@@ -73,13 +73,13 @@ func RunBackupPipeline(hostname, directorUsername, directorPassword, opsManagerU
 }
 
 //Restore the list of all default tiles
-func RunRestorePipeline(hostname, directorUsername, directorPassword, opsManagerUser, opsManagerPassword, destination string) (err error) {
+func RunRestorePipeline(hostname, adminUsername, adminPassword, opsManagerUser, opsManagerPassword, destination string) (err error) {
 	var tiles []Tile
 	conn := connectionBucket{
 		hostname:           hostname,
-		directorUsername:   directorUsername,
-		directorPassword:   directorPassword,
-		opsManagerUser:     opsManagerUser,
+		adminUsername:      adminUsername,
+		adminPassword:      adminPassword,
+		opsManagerUsername: opsManagerUser,
 		opsManagerPassword: opsManagerPassword,
 		destination:        destination,
 	}
@@ -118,7 +118,7 @@ func fullTileList(conn connBucketInterface, loggerName string) (tiles []Tile, er
 	)
 	installationFilePath := path.Join(conn.Destination(), OPSMGR_BACKUP_DIR, OPSMGR_INSTALLATION_SETTINGS_FILENAME)
 
-	if opsmanager, err = NewOpsManager(conn.Host(), conn.DirectorUser(), conn.DirectorPass(), conn.OpsManagerUser(), conn.OpsManagerPass(), conn.Destination(), backupLogger); err == nil {
+	if opsmanager, err = NewOpsManager(conn.Host(), conn.AdminUser(), conn.AdminPass(), conn.OpsManagerUser(), conn.OpsManagerPass(), conn.Destination(), backupLogger); err == nil {
 		elasticRuntime = NewElasticRuntime(installationFilePath, conn.Destination(), backupLogger)
 		tiles = []Tile{
 			opsmanager,
