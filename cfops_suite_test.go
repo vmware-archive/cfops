@@ -129,11 +129,11 @@ func (s *mockFlagSet) Host() (r string) {
 	return
 }
 
-func (s *mockFlagSet) DirectorUser() (r string) {
+func (s *mockFlagSet) AdminUser() (r string) {
 	return
 }
 
-func (s *mockFlagSet) DirectorPass() (r string) {
+func (s *mockFlagSet) AdminPass() (r string) {
 	return
 }
 

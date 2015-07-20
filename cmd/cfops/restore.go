@@ -10,7 +10,7 @@ import (
 const (
 	restore_full_name  string = "restore"
 	restore_short_name        = "r"
-	restore_usage             = "restore --opsmanagerhost <host> --directoruser <usr> --directorpass <pass> --opsmanageruser <opsuser> --opsmanagerpass <opspass> -d <dir> --tl 'opsmanager, er'"
+	restore_usage             = "restore --opsmanagerhost <host> --adminuser <usr> --adminpass <pass> --opsmanageruser <opsuser> --opsmanagerpass <opspass> -d <dir> --tl 'opsmanager, er'"
 	restore_descr             = "Restore a Cloud Foundry deployment, including Ops Manager configuration, databases, and blob store"
 )
 
@@ -25,8 +25,8 @@ var restoreCli = cli.Command{
 			err error
 			fs  = &flagSet{
 				host:           c.String(opsManagerHostFlag[0]),
-				directorUser:   c.String(directorUserFlag[0]),
-				directorPass:   c.String(directorPassFlag[0]),
+				adminUser:      c.String(adminUserFlag[0]),
+				adminPass:      c.String(adminPassFlag[0]),
 				opsManagerUser: c.String(opsManagerUserFlag[0]),
 				opsManagerPass: c.String(opsManagerPassFlag[0]),
 				dest:           c.String(destFlag[0]),

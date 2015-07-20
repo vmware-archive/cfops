@@ -9,18 +9,18 @@ import (
 
 const (
 	opsManagerHostDescr string = "hostname for Ops Manager"
-	directorUserDescr   string = "username for Ops Mgr Director VM"
-	directorPassDescr   string = "password for Ops Mgr Director VM"
+	adminUserDescr      string = "username for Ops Mgr admin VM"
+	adminPassDescr      string = "password for Ops Mgr admin VM"
 	opsManagerUserDescr string = "username for Ops Manager"
 	opsManagerPassDescr string = "password for Ops Manager"
-	destdescr           string = "directory of the Cloud Foundry backup archive"
+	destdescr           string = "adminy of the Cloud Foundry backup archive"
 	tilelistdescr       string = "a csv list of the tiles you would like to run the operation on"
 )
 
 var (
 	opsManagerHostFlag = []string{"opsmanagerhost", "omh"}
-	directorUserFlag   = []string{"directoruser", "du"}
-	directorPassFlag   = []string{"directorpass", "dp"}
+	adminUserFlag      = []string{"adminuser", "du"}
+	adminPassFlag      = []string{"adminpass", "dp"}
 	opsManagerUserFlag = []string{"opsmanageruser", "omu"}
 	opsManagerPassFlag = []string{"opsmanagerpass", "omp"}
 	destFlag           = []string{"destination", "d"}
@@ -29,8 +29,8 @@ var (
 
 type flagSet struct {
 	host           string
-	directorUser   string
-	directorPass   string
+	adminUser      string
+	adminPass      string
 	opsManagerUser string
 	opsManagerPass string
 	dest           string
@@ -41,12 +41,12 @@ func (s *flagSet) Host() string {
 	return s.host
 }
 
-func (s *flagSet) DirectorUser() string {
-	return s.directorUser
+func (s *flagSet) AdminUser() string {
+	return s.adminUser
 }
 
-func (s *flagSet) DirectorPass() string {
-	return s.directorPass
+func (s *flagSet) AdminPass() string {
+	return s.adminPass
 }
 
 func (s *flagSet) OpsManagerUser() string {
@@ -66,12 +66,12 @@ func (s *flagSet) Tilelist() string {
 }
 
 func hasValidBackupRestoreFlags(fs *flagSet) bool {
-	res := (fs.Host() != "" && fs.DirectorUser() != "" && fs.DirectorPass() != "" && fs.OpsManagerUser() != "" && fs.OpsManagerPass() != "" && fs.Dest() != "")
+	res := (fs.Host() != "" && fs.AdminUser() != "" && fs.AdminPass() != "" && fs.OpsManagerUser() != "" && fs.OpsManagerPass() != "" && fs.Dest() != "")
 
 	if res == false {
 		fmt.Println("OpsManagerHost: ", fs.Host())
-		fmt.Println("DirectorUser: ", fs.DirectorUser())
-		fmt.Println("DirectorPass: ", fs.DirectorPass())
+		fmt.Println("adminUser: ", fs.AdminUser())
+		fmt.Println("adminPass: ", fs.AdminPass())
 		fmt.Println("OpsManagerUser: ", fs.OpsManagerUser())
 		fmt.Println("OpsManagerPass: ", fs.OpsManagerPass())
 		fmt.Println("Destination: ", fs.Dest())
@@ -87,15 +87,15 @@ var backupRestoreFlags = []cli.Flag{
 		EnvVar: "",
 	},
 	cli.StringFlag{
-		Name:   strings.Join(directorUserFlag, ", "),
+		Name:   strings.Join(adminUserFlag, ", "),
 		Value:  "",
-		Usage:  directorUserDescr,
+		Usage:  adminUserDescr,
 		EnvVar: "",
 	},
 	cli.StringFlag{
-		Name:   strings.Join(directorPassFlag, ", "),
+		Name:   strings.Join(adminPassFlag, ", "),
 		Value:  "",
-		Usage:  directorPassDescr,
+		Usage:  adminPassDescr,
 		EnvVar: "",
 	},
 	cli.StringFlag{

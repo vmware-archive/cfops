@@ -12,8 +12,8 @@ var _ = Describe("cli flags", func() {
 	Context("When defined in codegangsta", func() {
 		controlFields := map[string]bool{
 			strings.Join(opsManagerHostFlag, ", "): true,
-			strings.Join(directorUserFlag, ", "):   true,
-			strings.Join(directorPassFlag, ", "):   true,
+			strings.Join(adminUserFlag, ", "):      true,
+			strings.Join(adminPassFlag, ", "):      true,
 			strings.Join(opsManagerUserFlag, ", "): true,
 			strings.Join(opsManagerPassFlag, ", "): true,
 			strings.Join(destFlag, ", "):           true,

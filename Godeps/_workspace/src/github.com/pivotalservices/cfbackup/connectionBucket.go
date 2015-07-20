@@ -2,9 +2,9 @@ package cfbackup
 
 type connectionBucket struct {
 	hostname           string
-	directorUsername   string
-	directorPassword   string
-	opsManagerUser     string
+	adminUsername      string
+	adminPassword      string
+	opsManagerUsername string
 	opsManagerPassword string
 	destination        string
 }
@@ -13,16 +13,16 @@ func (s connectionBucket) Host() string {
 	return s.hostname
 }
 
-func (s connectionBucket) DirectorUser() string {
-	return s.directorUsername
+func (s connectionBucket) AdminUser() string {
+	return s.adminUsername
 }
 
-func (s connectionBucket) DirectorPass() string {
-	return s.directorPassword
+func (s connectionBucket) AdminPass() string {
+	return s.adminPassword
 }
 
 func (s connectionBucket) OpsManagerUser() string {
-	return s.opsManagerUser
+	return s.opsManagerUsername
 }
 
 func (s connectionBucket) OpsManagerPass() string {
