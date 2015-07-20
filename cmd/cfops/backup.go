@@ -10,7 +10,7 @@ import (
 const (
 	backup_full_name  string = "backup"
 	backup_short_name        = "b"
-	backup_usage             = "backup --opsmanagerhost <host> --directoruser <usr> --directorpass <pass> --opsmanageruser <opsuser> --opsmanagerpass <opspass> -d <dir> --tl 'opsmanager, er'"
+	backup_usage             = "backup --opsmanagerhost <host> --adminuser <usr> --adminpass <pass> --opsmanageruser <opsuser> --opsmanagerpass <opspass> -d <dir> --tl 'opsmanager, er'"
 	backup_descr             = "backup a Cloud Foundry deployment, including Ops Manager configuration, databases, and blob store"
 )
 
@@ -25,8 +25,8 @@ var backupCli = cli.Command{
 			err error
 			fs  = &flagSet{
 				host:           c.String(opsManagerHostFlag[0]),
-				directorUser:   c.String(directorUserFlag[0]),
-				directorPass:   c.String(directorPassFlag[0]),
+				adminUser:      c.String(adminUserFlag[0]),
+				adminPass:      c.String(adminPassFlag[0]),
 				opsManagerUser: c.String(opsManagerUserFlag[0]),
 				opsManagerPass: c.String(opsManagerPassFlag[0]),
 				dest:           c.String(destFlag[0]),
