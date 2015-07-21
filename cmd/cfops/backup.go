@@ -24,13 +24,13 @@ var backupCli = cli.Command{
 		var (
 			err error
 			fs  = &flagSet{
-				host:           c.String(opsManagerHostFlag[0]),
-				adminUser:      c.String(adminUserFlag[0]),
-				adminPass:      c.String(adminPassFlag[0]),
-				opsManagerUser: c.String(opsManagerUserFlag[0]),
-				opsManagerPass: c.String(opsManagerPassFlag[0]),
-				dest:           c.String(destFlag[0]),
-				tilelist:       c.String(tilelistFlag[0]),
+				host:           c.String(flagList[opsManagerHost].Flag[0]),
+				adminUser:      c.String(flagList[adminUser].Flag[0]),
+				adminPass:      c.String(flagList[adminPass].Flag[0]),
+				opsManagerUser: c.String(flagList[opsManagerUser].Flag[0]),
+				opsManagerPass: c.String(flagList[opsManagerPass].Flag[0]),
+				dest:           c.String(flagList[dest].Flag[0]),
+				tilelist:       c.String(flagList[tilelist].Flag[0]),
 			}
 		)
 
@@ -40,6 +40,7 @@ var backupCli = cli.Command{
 
 			if err != nil {
 				fmt.Println(err)
+				ExitCode = errExitCode
 
 			} else {
 				fmt.Println(backup_full_name, " completed successfully.")
@@ -47,6 +48,7 @@ var backupCli = cli.Command{
 
 		} else {
 			cli.ShowCommandHelp(c, backup_full_name)
+			ExitCode = helpExitCode
 		}
 	},
 }

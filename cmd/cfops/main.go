@@ -13,11 +13,13 @@ const (
 )
 
 var (
+	ExitCode int
 	logLevel string
 	logger   log.Logger
 )
 
 func init() {
+	ExitCode = cleanExitCode
 
 	if logLevel = os.Getenv(logLevelEnv); logLevel != "" {
 		log.SetLogLevel(logLevel)
@@ -30,6 +32,7 @@ func init() {
 func main() {
 	app := NewApp()
 	app.Run(os.Args)
+	os.Exit(ExitCode)
 }
 
 // NewApp creates a new cli app
