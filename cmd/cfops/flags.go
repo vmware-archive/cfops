@@ -8,34 +8,67 @@ import (
 )
 
 const (
-	opsManagerHostDescr string = "hostname for Ops Manager"
-	adminUserDescr      string = "username for Ops Mgr admin VM"
-	adminPassDescr      string = "password for Ops Mgr admin VM"
-	opsManagerUserDescr string = "username for Ops Manager"
-	opsManagerPassDescr string = "password for Ops Manager"
-	destdescr           string = "adminy of the Cloud Foundry backup archive"
-	tilelistdescr       string = "a csv list of the tiles you would like to run the operation on"
+	errExitCode           = 1
+	helpExitCode          = 2
+	cleanExitCode         = 0
+	opsManagerHost string = "opsmanagerHost"
+	adminUser      string = "adminUser"
+	adminPass      string = "adminPass"
+	opsManagerUser string = "opsManagerUser"
+	opsManagerPass string = "opsManagerPass"
+	dest           string = "destination"
+	tilelist       string = "tilelist"
 )
 
 var (
-	opsManagerHostFlag = []string{"opsmanagerhost", "omh"}
-	adminUserFlag      = []string{"adminuser", "du"}
-	adminPassFlag      = []string{"adminpass", "dp"}
-	opsManagerUserFlag = []string{"opsmanageruser", "omu"}
-	opsManagerPassFlag = []string{"opsmanagerpass", "omp"}
-	destFlag           = []string{"destination", "d"}
-	tilelistFlag       = []string{"tilelist", "tl"}
+	flagList = map[string]flagBucket{
+		opsManagerHost: flagBucket{
+			Flag: []string{"opsmanagerhost", "omh"},
+			Desc: "hostname for Ops Manager",
+		},
+		adminUser: flagBucket{
+			Flag: []string{"adminuser", "du"},
+			Desc: "username for Ops Mgr admin VM",
+		},
+		adminPass: flagBucket{
+			Flag: []string{"adminpass", "dp"},
+			Desc: "password for Ops Mgr admin VM",
+		},
+		opsManagerUser: flagBucket{
+			Flag: []string{"opsmanageruser", "omu"},
+			Desc: "username for Ops Manager",
+		},
+		opsManagerPass: flagBucket{
+			Flag: []string{"opsmanagerpass", "omp"},
+			Desc: "password for Ops Manager",
+		},
+		dest: flagBucket{
+			Flag: []string{"destination", "d"},
+			Desc: "admin of the Cloud Foundry backup archive",
+		},
+		tilelist: flagBucket{
+			Flag: []string{"tilelist", "tl"},
+			Desc: "a csv list of the tiles you would like to run the operation on",
+		},
+	}
 )
 
-type flagSet struct {
-	host           string
-	adminUser      string
-	adminPass      string
-	opsManagerUser string
-	opsManagerPass string
-	dest           string
-	tilelist       string
-}
+type (
+	flagSet struct {
+		host           string
+		adminUser      string
+		adminPass      string
+		opsManagerUser string
+		opsManagerPass string
+		dest           string
+		tilelist       string
+	}
+
+	flagBucket struct {
+		Flag []string
+		Desc string
+	}
+)
 
 func (s *flagSet) Host() string {
 	return s.host
@@ -79,47 +112,14 @@ func hasValidBackupRestoreFlags(fs *flagSet) bool {
 	return res
 }
 
-var backupRestoreFlags = []cli.Flag{
-	cli.StringFlag{
-		Name:   strings.Join(opsManagerHostFlag, ", "),
-		Value:  "",
-		Usage:  opsManagerHostDescr,
-		EnvVar: "",
-	},
-	cli.StringFlag{
-		Name:   strings.Join(adminUserFlag, ", "),
-		Value:  "",
-		Usage:  adminUserDescr,
-		EnvVar: "",
-	},
-	cli.StringFlag{
-		Name:   strings.Join(adminPassFlag, ", "),
-		Value:  "",
-		Usage:  adminPassDescr,
-		EnvVar: "",
-	},
-	cli.StringFlag{
-		Name:   strings.Join(opsManagerUserFlag, ", "),
-		Value:  "",
-		Usage:  opsManagerUserDescr,
-		EnvVar: "",
-	},
-	cli.StringFlag{
-		Name:   strings.Join(opsManagerPassFlag, ", "),
-		Value:  "",
-		Usage:  opsManagerPassDescr,
-		EnvVar: "",
-	},
-	cli.StringFlag{
-		Name:   strings.Join(destFlag, ", "),
-		Value:  "",
-		Usage:  destdescr,
-		EnvVar: "",
-	},
-	cli.StringFlag{
-		Name:   strings.Join(tilelistFlag, ", "),
-		Value:  "",
-		Usage:  tilelistdescr,
-		EnvVar: "",
-	},
-}
+var backupRestoreFlags = func() (flags []cli.Flag) {
+	for _, v := range flagList {
+		flags = append(flags, cli.StringFlag{
+			Name:   strings.Join(v.Flag, ", "),
+			Value:  "",
+			Usage:  v.Desc,
+			EnvVar: "",
+		})
+	}
+	return
+}()

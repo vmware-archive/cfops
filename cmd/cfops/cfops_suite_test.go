@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestCfopsMain(t *testing.T) {
+func TestCfops(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Cfops main")
+	RunSpecs(t, "Cfops")
 }
