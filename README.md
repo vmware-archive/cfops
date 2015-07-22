@@ -2,11 +2,11 @@ cfops [![wercker status](https://app.wercker.com/status/d0a50d426b77a9f73da0fe4f
 ======
 
 ### Version Compatibility
-(as of release v0.0.61+)
+(as of release v1.0.0+)
 
-This is tested and known to work for **Ops Manager v1.4**
+This is tested and known to work for **Ops Manager v1.5**
 
-This is tested and known to work for **ER v1.4**
+This is tested and known to work for **ER v1.5**
 
 ### Overview
 
@@ -39,32 +39,9 @@ etc.
 
 Sample help output:
 ```
-    $ ./cfops
+$ ./cfops help backup
 NAME:
-   cfops - Cloud Foundry Operations tool for IaaS installation, deployment, and management automation
-
-USAGE:
-   cfops [global options] command [command options] [arguments...]
-
-VERSION:
-   0.0.0
-
-AUTHOR(S):
-
-COMMANDS:
-   backup, b	backup -host <host> -u <usr> -p <pass> --tp <tpass> -d <dir> --tl 'opsmanager, er'
-   restore, r	restore --host <host> -u <usr> -p <pass> --tp <tpass> -d <dir>  --tl 'opsmanager, er'
-   help, h	Shows a list of commands or help for one command
-
-GLOBAL OPTIONS:
-   --help, -h		show help
-   --version, -v	print the version
-    
-    
-    
-    $ ./cfops help backup
-NAME:
-   backup - backup -host <host> -u <usr> -p <pass> --tp <tpass> -d <dir> --tl 'opsmanager, er'
+   backup - backup --opsmanagerhost <host> --adminuser <usr> --adminpass <pass> --opsmanageruser <opsuser> --opsmanagerpass <opspass> -d <dir> --tl 'opsmanager, er'
 
 USAGE:
    command backup [command options] [arguments...]
@@ -73,29 +50,37 @@ DESCRIPTION:
    backup a Cloud Foundry deployment, including Ops Manager configuration, databases, and blob store
 
 OPTIONS:
-   --hostname, --host 		hostname for Ops Manager
-   --username, -u 		username for Ops Manager
-   --password, -p 		password for Ops Manager
-   --tempestpassword, --tp 	password for the Ops Manager tempest user
-   --destination, -d 		directory of the Cloud Foundry backup archive
+   --adminuser, --du 		username for Ops Mgr admin VM
+   --adminpass, --dp 		password for Ops Mgr admin VM
+   --opsmanageruser, --omu 	username for Ops Manager
+   --opsmanagerpass, --omp 	password for Ops Manager
+   --destination, -d 		admin of the Cloud Foundry backup archive
    --tilelist, --tl 		a csv list of the tiles you would like to run the operation on
+   --opsmanagerhost, --omh 	hostname for Ops Manager
+
+
+
+
+
+
    
-   $ ./cfops help restore
+$ ./cfops help restore
 NAME:
-   restore - restore -host <host> -u <usr> -p <pass> --tp <tpass> -d <dir> --tl 'opsmanager, er'
+   restore - restore --opsmanagerhost <host> --adminuser <usr> --adminpass <pass> --opsmanageruser <opsuser> --opsmanagerpass <opspass> -d <dir> --tl 'opsmanager, er'
 
 USAGE:
    command restore [command options] [arguments...]
 
 DESCRIPTION:
-   restore a Cloud Foundry deployment, including Ops Manager configuration, databases, and blob store
+   Restore a Cloud Foundry deployment, including Ops Manager configuration, databases, and blob store
 
 OPTIONS:
-   --hostname, --host 		hostname for Ops Manager
-   --username, -u 		username for Ops Manager
-   --password, -p 		password for Ops Manager
-   --tempestpassword, --tp 	password for the Ops Manager tempest user
-   --destination, -d 		directory of the Cloud Foundry backup archive
+   --opsmanagerhost, --omh 	hostname for Ops Manager
+   --adminuser, --du 		username for Ops Mgr admin VM
+   --adminpass, --dp 		password for Ops Mgr admin VM
+   --opsmanageruser, --omu 	username for Ops Manager
+   --opsmanagerpass, --omp 	password for Ops Manager
+   --destination, -d 		admin of the Cloud Foundry backup archive
    --tilelist, --tl 		a csv list of the tiles you would like to run the operation on
 
 ```
