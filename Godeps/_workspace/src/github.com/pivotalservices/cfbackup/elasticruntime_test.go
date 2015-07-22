@@ -72,6 +72,12 @@ var _ = Describe("ElasticRuntime", func() {
 		var installationSettingsFilePath = "fixtures/installation-settings-1-4.json"
 		testERWithVersionSpecificFile(installationSettingsFilePath)
 	})
+
+	Describe("ElasticRuntime Version 1.5", func() {
+		var installationSettingsFilePath = "fixtures/installation-settings-1-5.json"
+		testERWithVersionSpecificFile(installationSettingsFilePath)
+	})
+
 })
 
 func testERWithVersionSpecificFile(installationSettingsFilePath string) {
