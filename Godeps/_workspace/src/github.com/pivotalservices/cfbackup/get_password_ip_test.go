@@ -25,6 +25,11 @@ var _ = Describe("get_password_ip", func() {
 		var installationSettingsFilePath = "fixtures/installation-settings-1-4.json"
 		testGetPasswordWithVersionSpecificFile(installationSettingsFilePath)
 	})
+
+	Describe("Ops Manager Elastic Runtime v1.5", func() {
+		var installationSettingsFilePath = "fixtures/installation-settings-1-5.json"
+		testGetPasswordWithVersionSpecificFile(installationSettingsFilePath)
+	})
 })
 
 func testGetPasswordAndIP(product, component, username, controlIP, controlPass, installationSettingsFilePath string) {

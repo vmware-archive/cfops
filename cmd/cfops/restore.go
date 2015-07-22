@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/codegangsta/cli"
 	"github.com/pivotalservices/cfops"
@@ -23,9 +22,8 @@ var restoreCli = cli.Command{
 	Flags:       backupRestoreFlags,
 	Action: func(c *cli.Context) {
 		var (
-			exitCode = cleanExitCode
-			err      error
-			fs       = &flagSet{
+			err error
+			fs  = &flagSet{
 				host:           c.String(flagList[opsManagerHost].Flag[0]),
 				adminUser:      c.String(flagList[adminUser].Flag[0]),
 				adminPass:      c.String(flagList[adminPass].Flag[0]),
@@ -42,7 +40,7 @@ var restoreCli = cli.Command{
 
 			if err != nil {
 				fmt.Println(err)
-				exitCode = errExitCode
+				ExitCode = errExitCode
 
 			} else {
 				fmt.Println(restore_full_name, " completed successfully.")
@@ -50,8 +48,7 @@ var restoreCli = cli.Command{
 
 		} else {
 			cli.ShowCommandHelp(c, restore_full_name)
-			exitCode = helpExitCode
+			ExitCode = helpExitCode
 		}
-		os.Exit(exitCode)
 	},
 }
