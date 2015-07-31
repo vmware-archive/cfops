@@ -8,6 +8,8 @@ This is tested and known to work for **Ops Manager v1.5**
 
 This is tested and known to work for **ER v1.5**
 
+(!!! NOTE: Automated **restore** not working for **ER 1.5**  !!!) 
+
 ### Overview
 
 This is simply an automation that is based on the supported way to back up Pivotal Cloud Foundry (http://docs.pivotal.io/pivotalcf/customizing/backup-settings.html).
