@@ -28,23 +28,23 @@ var (
 		},
 		adminUser: flagBucket{
 			Flag: []string{"adminuser", "du"},
-			Desc: "username for Ops Mgr admin VM",
+			Desc: "username for Ops Mgr admin (Ops Manager WebConsole Credentials)",
 		},
 		adminPass: flagBucket{
 			Flag: []string{"adminpass", "dp"},
-			Desc: "password for Ops Mgr admin VM",
+			Desc: "password for Ops Mgr admin (Ops Manager WebConsole Credentials)",
 		},
 		opsManagerUser: flagBucket{
 			Flag: []string{"opsmanageruser", "omu"},
-			Desc: "username for Ops Manager",
+			Desc: "username for Ops Manager VM Access (used for ssh connections)",
 		},
 		opsManagerPass: flagBucket{
 			Flag: []string{"opsmanagerpass", "omp"},
-			Desc: "password for Ops Manager",
+			Desc: "password for Ops Manager VM Access (used for ssh connections)",
 		},
 		dest: flagBucket{
 			Flag: []string{"destination", "d"},
-			Desc: "admin of the Cloud Foundry backup archive",
+			Desc: "path of the Cloud Foundry backup archive",
 		},
 		tilelist: flagBucket{
 			Flag: []string{"tilelist", "tl"},
