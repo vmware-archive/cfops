@@ -13,6 +13,7 @@ const (
 )
 
 var (
+	VERSION  string
 	ExitCode int
 	logLevel string
 	logger   log.Logger
@@ -37,10 +38,10 @@ func main() {
 
 // NewApp creates a new cli app
 func NewApp() *cli.App {
-
 	app := cli.NewApp()
+	app.Version = VERSION
 	app.Name = "cfops"
-	app.Usage = "Cloud Foundry Operations tool for IaaS installation, deployment, and management automation"
+	app.Usage = "Cloud Foundry Operations Tool"
 	app.Flags = append(app.Flags,
 		cli.StringFlag{
 			Name:  "logLevel",
@@ -49,9 +50,14 @@ func NewApp() *cli.App {
 		},
 	)
 	app.Commands = append(app.Commands, []cli.Command{
+		cli.Command{
+			Name: "version",
+			Action: func(c *cli.Context) {
+				cli.ShowVersion(c)
+			},
+		},
 		backupCli,
 		restoreCli,
 	}...)
-
 	return app
 }
