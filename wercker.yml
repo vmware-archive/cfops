@@ -77,7 +77,7 @@ deploy:
     - github-create-release:
         token: $GITHUB_TOKEN
         tag: $WERCKER_GITHUB_CREATE_RELEASE_ID
-        title: Admin Portal $WERCKER_GITHUB_CREATE_RELEASE_ID
+        title: CFOPS $WERCKER_GITHUB_CREATE_RELEASE_ID
         draft: $RELEASE_DRAFT
     
     - github-upload-asset:
