@@ -7,8 +7,8 @@
 	"Deps": [
 		{
 			"ImportPath": "github.com/codegangsta/cli",
-			"Comment": "1.2.0-28-g61f43e7",
-			"Rev": "61f43e76957561f52674f48b7dc9a07f53c8f398"
+			"Comment": "1.2.0-139-g142e6cd",
+			"Rev": "142e6cd241a4dfbf7f07a018f1f8225180018da4"
 		},
 		{
 			"ImportPath": "github.com/kr/fs",
@@ -16,17 +16,17 @@
 		},
 		{
 			"ImportPath": "github.com/onsi/ginkgo",
-			"Comment": "v1.1.0-30-g5ce32b7",
-			"Rev": "5ce32b7910cdddcdd8bac6d761e2de9f27f9377b"
+			"Comment": "v1.2.0-11-gd94e2f4",
+			"Rev": "d94e2f4000332f62b356ecb2840c98f4218f5358"
 		},
 		{
 			"ImportPath": "github.com/onsi/gomega",
-			"Comment": "v1.0-26-gdc751ce",
-			"Rev": "dc751ce5f266d83c26fae5c0a9093973b29cb61d"
+			"Comment": "v1.0-52-ga2ab864",
+			"Rev": "a2ab8644e0b6a33df2cbe44673bd0f6ebba9abc3"
 		},
 		{
 			"ImportPath": "github.com/pivotal-golang/lager",
-			"Rev": "1baba58607e680b5659dddcad70d53abe5af039e"
+			"Rev": "c88fa6d6c4d2f8a21a4599785211e41777750d34"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/cfbackup",
@@ -72,7 +72,7 @@
 		},
 		{
 			"ImportPath": "gopkg.in/yaml.v1",
-			"Rev": "feb4ca79644e8e7e39c06095246ee54b1282c118"
+			"Rev": "9f9df34309c04878acc86042b16630b0f696e1de"
 		}
 	]
 }
