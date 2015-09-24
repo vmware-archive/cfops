@@ -106,14 +106,11 @@ A more comprehensive example is available at https://onsi.github.io/gomega/#_tes
 package ghttp
 
 import (
-	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
 	"regexp"
-	"strings"
 	"sync"
 
 	. "github.com/onsi/gomega"
@@ -167,11 +164,6 @@ type Server struct {
 	//Only applies if AllowUnhandledRequests is true
 	UnhandledRequestStatusCode int
 
-	//If provided, ghttp will log about each request received to the provided io.Writer
-	//Defaults to nil
-	//If you're using Ginkgo, set this to GinkgoWriter to get improved output during failures
-	Writer io.Writer
-
 	receivedRequests []*http.Request
 	requestHandlers  []http.HandlerFunc
 	routedHandlers   []routedHandler
@@ -216,34 +208,8 @@ func (s *Server) Close() {
 func (s *Server) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	s.writeLock.Lock()
 	defer func() {
-		e := recover()
-		if e != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-		}
-
-		//If the handler panics GHTTP will silently succeed.  This is bad™.
-		//To catch this case we need to fail the test if the handler has panicked.
-		//However, if the handler is panicking because Ginkgo's causing it to panic (i.e. an asswertion failed)
-		//then we shouldn't double-report the error as this will confuse people.
-
-		//So: step 1, if this is a Ginkgo panic - do nothing, Ginkgo's aware of the failure
-		eAsString, ok := e.(string)
-		if ok && strings.Contains(eAsString, "defer GinkgoRecover()") {
-			return
-		}
-
-		//If we're here, we have to do step 2: assert that the error is nil.  This assertion will
-		//allow us to fail the test suite (note: we can't call Fail since Gomega is not allowed to import Ginkgo).
-		//Since a failed assertion throws a panic, and we are likely in a goroutine, we need to defer within our defer!
-		defer func() {
-			recover()
-		}()
-		Ω(e).Should(BeNil(), "Handler Panicked")
+		recover()
 	}()
-
-	if s.Writer != nil {
-		s.Writer.Write([]byte(fmt.Sprintf("GHTTP Received Request: %s - %s\n", req.Method, req.URL)))
-	}
 
 	s.receivedRequests = append(s.receivedRequests, req)
 	if routedHandler, ok := s.handlerForRoute(req.Method, req.URL.Path); ok {
