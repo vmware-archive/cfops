@@ -41,18 +41,6 @@ build:
         code: |
           cp -R ./ ${WERCKER_OUTPUT_DIR}
 
-    - script:
-        name: cross platform build
-        code: |
-          (cd cmd/cfops/ && goxc -env GOPATH=${WERCKER_SOURCE_DIR}/Godeps/_workspace:$GOPATH -d=${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/ -bc="darwin linux windows" ) 
-
-  #after-steps:
-    #- wantedly/pretty-slack-notify@0.2.0:
-        #team: $SLACK_TEAM
-        #token: $SLACK_API_TOKEN
-        #channel: $SLACK_CHANNEL
-        #username: $SLACK_USER
-        #webhook_url: $SLACK_WEBHOOK_URL 
 
 deploy:
   steps: 
@@ -60,46 +48,37 @@ deploy:
         keyname: PCF_GITHUB_KEY
 
     - xchapter7x/flowy-release:
-        action: "get-latest"
+        action: "tag-only-release"
         tag_variable_name: "VERSION_TAG"
-        git_name: $GITFLOW_NAME
-        git_email: $GITFLOW_EMAIL
-
-    - xchapter7x/flowy-release:
-        action: "complete-release"
         active: $GITFLOW_ACTIVE
         git_name: $GITFLOW_NAME
         git_email: $GITFLOW_EMAIL
+
+    - script:
+        name: set release id variable and version for gox file
+        code: |
+          git fetch --tags
+          export WERCKER_GITHUB_CREATE_RELEASE_ID=`git log -n1 --pretty=format:%d HEAD | sed s/\ //g | awk -F',' '{print $2}'`
+          (cd cmd/cfops/ && goxc -wc -pv=${WERCKER_GITHUB_CREATE_RELEASE_ID})
+          
+    - script:
+        name: cross platform release
+        code: |
+          (cd cmd/cfops/ && goxc -env GOPATH=${WERCKER_SOURCE_DIR}/Godeps/_workspace:$GOPATH -d=${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/ -bc="darwin linux windows" ) 
+
+    - script:
+        name: create tarball
+        code: |
+          tar -cvzf cfops_binaries.tgz ${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/
+           
+    - github-create-release:
+        token: $GITHUB_TOKEN
+        tag: $WERCKER_GITHUB_CREATE_RELEASE_ID
+        title: Admin Portal $WERCKER_GITHUB_CREATE_RELEASE_ID
+        draft: $RELEASE_DRAFT
     
-    #this is a workaround for the flowy-release not resetting
-    #its branch state... 
-    - script:
-        name: reset git to proper commit
-        code: |
-          git checkout -fq ${WERCKER_GIT_COMMIT}
-          git submodule update --init --recursive
-
-    - script:
-        name: check their is a tag matching commit hash for master deploys
-        code: |
-          ./checkHash
-
-    - script:
-        name: name release folder
-        code: |
-          ./setReleaseName
-
-    - s3sync:
-        key-id: $S3_KEY
-        key-secret: $S3_SECRET
-        bucket-url: ${S3_BUCKET}/${S3_FOLDER}
-        source-dir: ./${BUILD_DIR}
-        delete-removed: false
-  
-  #after-steps:
-    #- sherzberg/slack-notify:
-        #subdomain: $SLACK_SUBDOMAIN
-        #token: $SLACK_API_TOKEN
-        #channel: $SLACK_CHANNEL
-        #username: $SLACK_USER
-        #icon_url: $SLACK_DEPLOY_ICON
+    - github-upload-asset:
+        token: $GITHUB_TOKEN
+        file: cfops_binaries.tgz
+        release_id: $WERCKER_GITHUB_CREATE_RELEASE_ID
+        content-type: application/x-gzip

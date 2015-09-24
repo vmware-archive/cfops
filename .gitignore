@@ -26,3 +26,4 @@ main
 .DS_Store
 out/
 coverage.out
+cmd/cfops/cfops
