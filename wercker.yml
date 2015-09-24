@@ -51,11 +51,24 @@ deploy:
         keyname: PCF_GITHUB_KEY
 
     - xchapter7x/flowy-release:
-        action: "tag-only-release"
+        action: "get-latest"
         tag_variable_name: "VERSION_TAG"
+        git_name: $GITFLOW_NAME
+        git_email: $GITFLOW_EMAIL
+
+    - xchapter7x/flowy-release:
+        action: "complete-release"
         active: $GITFLOW_ACTIVE
         git_name: $GITFLOW_NAME
         git_email: $GITFLOW_EMAIL
+    
+    #this is a workaround for the flowy-release not resetting
+    #its branch state... 
+    - script:
+        name: reset git to proper commit
+        code: |
+          git checkout -fq ${WERCKER_GIT_COMMIT}
+          git submodule update --init --recursive
 
     - script:
         name: set release id variable and version for gox file
