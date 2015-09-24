@@ -23,32 +23,39 @@ const (
 var (
 	flagList = map[string]flagBucket{
 		opsManagerHost: flagBucket{
-			Flag: []string{"opsmanagerhost", "omh"},
-			Desc: "hostname for Ops Manager",
+			Flag:   []string{"opsmanagerhost", "omh"},
+			Desc:   "hostname for Ops Manager",
+			EnvVar: "CFOPS_HOST",
 		},
 		adminUser: flagBucket{
-			Flag: []string{"adminuser", "du"},
-			Desc: "username for Ops Mgr admin (Ops Manager WebConsole Credentials)",
+			Flag:   []string{"adminuser", "du"},
+			Desc:   "username for Ops Mgr admin (Ops Manager WebConsole Credentials)",
+			EnvVar: "CFOPS_ADMIN_USER",
 		},
 		adminPass: flagBucket{
-			Flag: []string{"adminpass", "dp"},
-			Desc: "password for Ops Mgr admin (Ops Manager WebConsole Credentials)",
+			Flag:   []string{"adminpass", "dp"},
+			Desc:   "password for Ops Mgr admin (Ops Manager WebConsole Credentials)",
+			EnvVar: "CFOPS_ADMIN_PASS",
 		},
 		opsManagerUser: flagBucket{
-			Flag: []string{"opsmanageruser", "omu"},
-			Desc: "username for Ops Manager VM Access (used for ssh connections)",
+			Flag:   []string{"opsmanageruser", "omu"},
+			Desc:   "username for Ops Manager VM Access (used for ssh connections)",
+			EnvVar: "CFOPS_OM_USER",
 		},
 		opsManagerPass: flagBucket{
-			Flag: []string{"opsmanagerpass", "omp"},
-			Desc: "password for Ops Manager VM Access (used for ssh connections)",
+			Flag:   []string{"opsmanagerpass", "omp"},
+			Desc:   "password for Ops Manager VM Access (used for ssh connections)",
+			EnvVar: "CFOPS_OM_PASS",
 		},
 		dest: flagBucket{
-			Flag: []string{"destination", "d"},
-			Desc: "path of the Cloud Foundry backup archive",
+			Flag:   []string{"destination", "d"},
+			Desc:   "path of the Cloud Foundry backup archive",
+			EnvVar: "CFOPS_BACKUP_PATH",
 		},
 		tilelist: flagBucket{
-			Flag: []string{"tilelist", "tl"},
-			Desc: "a csv list of the tiles you would like to run the operation on",
+			Flag:   []string{"tilelist", "tl"},
+			Desc:   "a csv list of the tiles you would like to run the operation on",
+			EnvVar: "CFOPS_TILE_LIST",
 		},
 	}
 )
@@ -65,8 +72,9 @@ type (
 	}
 
 	flagBucket struct {
-		Flag []string
-		Desc string
+		Flag   []string
+		Desc   string
+		EnvVar string
 	}
 )
 
@@ -118,7 +126,7 @@ var backupRestoreFlags = func() (flags []cli.Flag) {
 			Name:   strings.Join(v.Flag, ", "),
 			Value:  "",
 			Usage:  v.Desc,
-			EnvVar: "",
+			EnvVar: v.EnvVar,
 		})
 	}
 	return
