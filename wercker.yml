@@ -66,12 +66,17 @@ build:
 
 deploy:
   steps: 
-    # Sets the go workspace and places you package
-    # at the right place in the workspace tree
-    - setup-go-workspace
+    - script:
+        name: install-packages
+        code: |
+          sudo apt-get install -y ssh wget
 
-    - add-ssh-key:
-        keyname: PCF_GITHUB_KEY
+    - wercker/add-ssh-key@1.0.2:
+        keyname: PEZ_GITHUB_KEY
+
+    - add-to-known_hosts:
+        hostname: github.com
+        fingerprint: 16:27:ac:a5:76:28:2d:36:63:1b:56:4d:eb:df:a6:48
 
     - script:
         name: set release id variable for version 
