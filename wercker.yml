@@ -1,4 +1,4 @@
-box: motemen/golang-goxc
+box: google/golang
 build:
   # The steps that will be executed on build
   steps:
@@ -41,6 +41,29 @@ build:
         code: |
           cp -R ./ ${WERCKER_OUTPUT_DIR}
 
+    - script:
+        name: go get goxc util so we can cross compile
+        code: |
+          go get -u -v github.com/laher/goxc
+          PATH=$GOPATH/bin:$PATH sudo goxc -t -os "linux darwin windows"
+
+    - script:
+        name: set release id variable and version for gox file
+        code: |
+          go get github.com/xchapter7x/versioning
+          export NEXT_VERSION=`versioning bump_patch`
+          (cd cmd/cfops/ && goxc -wc -pv=${NEXT_VERSION})
+
+    - script:
+        name: cross platform release
+        code: |
+          (cd cmd/cfops/ && goxc -env GOPATH=${WERCKER_SOURCE_DIR}/Godeps/_workspace:$GOPATH -d=${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/ -bc="darwin linux windows" ) 
+
+    - script:
+        name: create tarball
+        code: |
+          tar -cvzf cfops_binaries.tgz ${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/
+
 deploy:
   steps: 
     # Sets the go workspace and places you package
@@ -49,6 +72,12 @@ deploy:
 
     - add-ssh-key:
         keyname: PCF_GITHUB_KEY
+
+    - script:
+        name: set release id variable for version 
+        code: |
+          go get github.com/xchapter7x/versioning
+          export WERCKER_GITHUB_CREATE_RELEASE_ID=`versioning bump_patch`
 
     - xchapter7x/flowy-release:
         action: "get-latest"
@@ -70,23 +99,6 @@ deploy:
           git checkout -fq ${WERCKER_GIT_COMMIT}
           git submodule update --init --recursive
 
-    - script:
-        name: set release id variable and version for gox file
-        code: |
-          git fetch --tags
-          export WERCKER_GITHUB_CREATE_RELEASE_ID=`git log -n1 --pretty=format:%d HEAD | sed s/\ //g | awk -F',' '{print $2}'`
-          (cd cmd/cfops/ && goxc -wc -pv=${WERCKER_GITHUB_CREATE_RELEASE_ID})
-          
-    - script:
-        name: cross platform release
-        code: |
-          (cd cmd/cfops/ && goxc -env GOPATH=${WERCKER_SOURCE_DIR}/Godeps/_workspace:$GOPATH -d=${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/ -bc="darwin linux windows" ) 
-
-    - script:
-        name: create tarball
-        code: |
-          tar -cvzf cfops_binaries.tgz ${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/
-           
     - github-create-release:
         token: $GITHUB_TOKEN
         tag: $WERCKER_GITHUB_CREATE_RELEASE_ID

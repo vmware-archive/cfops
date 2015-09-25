@@ -1,0 +1,3 @@
+rm -fR _builds _steps _projects
+wercker --verbose --environment ".testrunner_env_defaults" build --git-domain github.com --git-owner pivotalservices --git-repository cfops
+rm -fR _builds _steps _projects
