@@ -72,7 +72,7 @@ deploy:
           sudo apt-get install -y ssh wget
 
     - wercker/add-ssh-key@1.0.2:
-        keyname: PEZ_GITHUB_KEY
+        keyname: PCF_GITHUB_KEY
 
     - add-to-known_hosts:
         hostname: github.com
