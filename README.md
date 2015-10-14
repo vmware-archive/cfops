@@ -52,13 +52,13 @@ DESCRIPTION:
    backup a Cloud Foundry deployment, including Ops Manager configuration, databases, and blob store
 
 OPTIONS:
-   --adminuser, --du 		username for Ops Mgr admin VM
-   --adminpass, --dp 		password for Ops Mgr admin VM
-   --opsmanageruser, --omu 	username for Ops Manager
-   --opsmanagerpass, --omp 	password for Ops Manager
-   --destination, -d 		admin of the Cloud Foundry backup archive
-   --tilelist, --tl 		a csv list of the tiles you would like to run the operation on
-   --opsmanagerhost, --omh 	hostname for Ops Manager
+   --tilelist, --tl 		a csv list of the tiles you would like to run the operation on [$CFOPS_TILE_LIST]
+   --opsmanagerhost, --omh 	hostname for Ops Manager [$CFOPS_HOST]
+   --adminuser, --du 		username for Ops Mgr admin (Ops Manager WebConsole Credentials) [$CFOPS_ADMIN_USER]
+   --adminpass, --dp 		password for Ops Mgr admin (Ops Manager WebConsole Credentials) [$CFOPS_ADMIN_PASS]
+   --opsmanageruser, --omu 	username for Ops Manager VM Access (used for ssh connections) [$CFOPS_OM_USER]
+   --opsmanagerpass, --omp 	password for Ops Manager VM Access (used for ssh connections) [$CFOPS_OM_PASS]
+   --destination, -d 		path of the Cloud Foundry backup archive [$CFOPS_BACKUP_PATH]
 
 
 
@@ -77,13 +77,13 @@ DESCRIPTION:
    Restore a Cloud Foundry deployment, including Ops Manager configuration, databases, and blob store
 
 OPTIONS:
-   --opsmanagerhost, --omh 	hostname for Ops Manager
-   --adminuser, --du 		username for Ops Mgr admin VM
-   --adminpass, --dp 		password for Ops Mgr admin VM
-   --opsmanageruser, --omu 	username for Ops Manager
-   --opsmanagerpass, --omp 	password for Ops Manager
-   --destination, -d 		admin of the Cloud Foundry backup archive
-   --tilelist, --tl 		a csv list of the tiles you would like to run the operation on
+   --tilelist, --tl 		a csv list of the tiles you would like to run the operation on [$CFOPS_TILE_LIST]
+   --opsmanagerhost, --omh 	hostname for Ops Manager [$CFOPS_HOST]
+   --adminuser, --du 		username for Ops Mgr admin (Ops Manager WebConsole Credentials) [$CFOPS_ADMIN_USER]
+   --adminpass, --dp 		password for Ops Mgr admin (Ops Manager WebConsole Credentials) [$CFOPS_ADMIN_PASS]
+   --opsmanageruser, --omu 	username for Ops Manager VM Access (used for ssh connections) [$CFOPS_OM_USER]
+   --opsmanagerpass, --omp 	password for Ops Manager VM Access (used for ssh connections) [$CFOPS_OM_PASS]
+   --destination, -d 		path of the Cloud Foundry backup archive [$CFOPS_BACKUP_PATH]
 
 ```
 
