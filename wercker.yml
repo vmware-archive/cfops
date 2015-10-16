@@ -68,14 +68,19 @@ build:
         name: add repo to artifact
         code: |
           cp -R ./ ${WERCKER_OUTPUT_DIR}
+          ls -la
+          pwd
+          echo ${WERCKER_OUTPUT_DIR}
           ls -la ${WERCKER_OUTPUT_DIR}
-
 deploy:
   steps: 
     - script:
         name: install-packages
         code: |
           sudo apt-get install -y ssh wget
+          ls -la
+          pwd
+          echo ${WERCKER_OUTPUT_DIR}
           ls -la ${WERCKER_OUTPUT_DIR}
 
     - wercker/add-ssh-key@1.0.2:
