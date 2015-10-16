@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package ssh_test
+package ssh
 
 import (
 	"bytes"
@@ -12,15 +12,14 @@ import (
 	"net"
 	"net/http"
 
-	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/terminal"
 )
 
 func ExampleNewServerConn() {
 	// An SSH server is represented by a ServerConfig, which holds
 	// certificate details and handles authentication of ServerConns.
-	config := &ssh.ServerConfig{
-		PasswordCallback: func(c ssh.ConnMetadata, pass []byte) (*ssh.Permissions, error) {
+	config := &ServerConfig{
+		PasswordCallback: func(c ConnMetadata, pass []byte) (*Permissions, error) {
 			// Should use constant-time compare (or better, salt+hash) in
 			// a production setting.
 			if c.User() == "testuser" && string(pass) == "tiger" {
@@ -35,7 +34,7 @@ func ExampleNewServerConn() {
 		panic("Failed to load private key")
 	}
 
-	private, err := ssh.ParsePrivateKey(privateBytes)
+	private, err := ParsePrivateKey(privateBytes)
 	if err != nil {
 		panic("Failed to parse private key")
 	}
@@ -55,12 +54,12 @@ func ExampleNewServerConn() {
 
 	// Before use, a handshake must be performed on the incoming
 	// net.Conn.
-	_, chans, reqs, err := ssh.NewServerConn(nConn, config)
+	_, chans, reqs, err := NewServerConn(nConn, config)
 	if err != nil {
 		panic("failed to handshake")
 	}
 	// The incoming Request channel must be serviced.
-	go ssh.DiscardRequests(reqs)
+	go DiscardRequests(reqs)
 
 	// Service the incoming Channel channel.
 	for newChannel := range chans {
@@ -69,7 +68,7 @@ func ExampleNewServerConn() {
 		// "session" and ServerShell may be used to present a simple
 		// terminal interface.
 		if newChannel.ChannelType() != "session" {
-			newChannel.Reject(ssh.UnknownChannelType, "unknown channel type")
+			newChannel.Reject(UnknownChannelType, "unknown channel type")
 			continue
 		}
 		channel, requests, err := newChannel.Accept()
@@ -80,7 +79,7 @@ func ExampleNewServerConn() {
 		// Sessions have out-of-band requests such as "shell",
 		// "pty-req" and "env".  Here we handle only the
 		// "shell" request.
-		go func(in <-chan *ssh.Request) {
+		go func(in <-chan *Request) {
 			for req := range in {
 				ok := false
 				switch req.Type {
@@ -118,13 +117,13 @@ func ExampleDial() {
 	//
 	// To authenticate with the remote server you must pass at least one
 	// implementation of AuthMethod via the Auth field in ClientConfig.
-	config := &ssh.ClientConfig{
+	config := &ClientConfig{
 		User: "username",
-		Auth: []ssh.AuthMethod{
-			ssh.Password("yourpassword"),
+		Auth: []AuthMethod{
+			Password("yourpassword"),
 		},
 	}
-	client, err := ssh.Dial("tcp", "yourserver.com:22", config)
+	client, err := Dial("tcp", "yourserver.com:22", config)
 	if err != nil {
 		panic("Failed to dial: " + err.Error())
 	}
@@ -148,14 +147,14 @@ func ExampleDial() {
 }
 
 func ExampleClient_Listen() {
-	config := &ssh.ClientConfig{
+	config := &ClientConfig{
 		User: "username",
-		Auth: []ssh.AuthMethod{
-			ssh.Password("password"),
+		Auth: []AuthMethod{
+			Password("password"),
 		},
 	}
 	// Dial your ssh server.
-	conn, err := ssh.Dial("tcp", "localhost:22", config)
+	conn, err := Dial("tcp", "localhost:22", config)
 	if err != nil {
 		log.Fatalf("unable to connect: %s", err)
 	}
@@ -176,14 +175,14 @@ func ExampleClient_Listen() {
 
 func ExampleSession_RequestPty() {
 	// Create client config
-	config := &ssh.ClientConfig{
+	config := &ClientConfig{
 		User: "username",
-		Auth: []ssh.AuthMethod{
-			ssh.Password("password"),
+		Auth: []AuthMethod{
+			Password("password"),
 		},
 	}
 	// Connect to ssh server
-	conn, err := ssh.Dial("tcp", "localhost:22", config)
+	conn, err := Dial("tcp", "localhost:22", config)
 	if err != nil {
 		log.Fatalf("unable to connect: %s", err)
 	}
@@ -195,10 +194,10 @@ func ExampleSession_RequestPty() {
 	}
 	defer session.Close()
 	// Set up terminal modes
-	modes := ssh.TerminalModes{
-		ssh.ECHO:          0,     // disable echoing
-		ssh.TTY_OP_ISPEED: 14400, // input speed = 14.4kbaud
-		ssh.TTY_OP_OSPEED: 14400, // output speed = 14.4kbaud
+	modes := TerminalModes{
+		ECHO:          0,     // disable echoing
+		TTY_OP_ISPEED: 14400, // input speed = 14.4kbaud
+		TTY_OP_OSPEED: 14400, // output speed = 14.4kbaud
 	}
 	// Request pseudo terminal
 	if err := session.RequestPty("xterm", 80, 40, modes); err != nil {

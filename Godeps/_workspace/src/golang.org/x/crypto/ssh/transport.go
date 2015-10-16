@@ -12,7 +12,6 @@ import (
 
 const (
 	gcmCipherID = "aes128-gcm@openssh.com"
-	aes128cbcID = "aes128-cbc"
 )
 
 // packetConn represents a transport that implements packet based
@@ -45,13 +44,13 @@ type transport struct {
 	sessionID []byte
 }
 
-// getSessionID returns the ID of the SSH connection. The return value
-// should not be modified.
 func (t *transport) getSessionID() []byte {
 	if t.sessionID == nil {
 		panic("session ID not set yet")
 	}
-	return t.sessionID
+	s := make([]byte, len(t.sessionID))
+	copy(s, t.sessionID)
+	return s
 }
 
 // packetCipher represents a combination of SSH encryption/MAC
@@ -217,10 +216,6 @@ func newPacketCipher(d direction, algs directionAlgorithms, kex *kexResult) (pac
 
 	if algs.Cipher == gcmCipherID {
 		return newGCMCipher(iv, key, macKey)
-	}
-
-	if algs.Cipher == aes128cbcID {
-		return newAESCBCCipher(iv, key, macKey, algs)
 	}
 
 	c := &streamPacketCipher{
