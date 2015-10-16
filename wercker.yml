@@ -68,10 +68,7 @@ build:
         name: add repo to artifact
         code: |
           cp -R ./ ${WERCKER_OUTPUT_DIR}
-          ls -la
-          pwd
-          echo ${WERCKER_OUTPUT_DIR}
-          ls -la ${WERCKER_OUTPUT_DIR}
+
 deploy:
   steps: 
     - script:
@@ -124,6 +121,6 @@ deploy:
     
     - github-upload-asset:
         token: $GITHUB_TOKEN
-        file: ${WERCKER_OUTPUT_DIR}/cfops_binaries.tgz
+        file: cfops_binaries.tgz
         release_id: $WERCKER_GITHUB_CREATE_RELEASE_ID
         content-type: application/x-gzip
