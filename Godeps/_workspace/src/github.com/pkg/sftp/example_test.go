@@ -6,8 +6,9 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
+
+	"github.com/pkg/sftp"
 )
 
 func Example(conn *ssh.Client) {

@@ -2,6 +2,7 @@ package cfbackup_test
 
 import (
 	"io/ioutil"
+	"net/http"
 	"path"
 
 	. "github.com/onsi/ginkgo"
@@ -18,7 +19,7 @@ var _ = Describe("OpsManager object", func() {
 		tmpDir     string
 		backupDir  string
 	)
-	Describe("Restore method", func() {
+	Describe("Given a Restore method", func() {
 
 		Context("calling restore with failed removal of deployment files", func() {
 
@@ -153,10 +154,42 @@ var _ = Describe("OpsManager object", func() {
 				Ω(err).ShouldNot(BeNil())
 			})
 		})
-
 	})
 
-	Describe("Backup method", func() {
+	Describe("Given a Backup method", func() {
+		Context("When calling an ops manager api endpoint that returns a non successful status code", func() {
+			var (
+				err         error
+				controlBody = "there was an error"
+			)
+
+			BeforeEach(func() {
+				tmpDir, _ = ioutil.TempDir("/tmp", "test")
+				backupDir = path.Join(tmpDir, "backup", "opsmanager")
+				fakeHttpRequestor := &MockHttpGateway{StatusCode: http.StatusUnauthorized, State: controlBody}
+
+				opsManager = &OpsManager{
+					SettingsRequestor: fakeHttpRequestor,
+					Hostname:          "localhost",
+					Username:          "user",
+					Password:          "password",
+					BackupContext: BackupContext{
+						TargetDir: path.Join(tmpDir, "backup"),
+					},
+					Executer:            &successExecuter{},
+					LocalExecuter:       NewLocalMockExecuter(),
+					DeploymentDir:       "fixtures/encryptionkey",
+					OpsmanagerBackupDir: "opsmanager",
+					Logger:              Logger(),
+				}
+				err = opsManager.Backup()
+			})
+
+			It("Then we should fail and output the error message from ops manager", func() {
+				Ω(err).Should(HaveOccurred())
+				Ω(err.Error()).Should(Equal(controlBody))
+			})
+		})
 
 		Context("called yielding an error in the chain", func() {
 			BeforeEach(func() {

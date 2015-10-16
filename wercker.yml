@@ -62,7 +62,7 @@ build:
     - script:
         name: create tarball
         code: |
-          tar -cvzf ${WERCKER_OUTPUT_DIR}/cfops_binaries.tgz ${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/
+          tar -cvzf cfops_binaries.tgz ${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/
 
 deploy:
   steps: 

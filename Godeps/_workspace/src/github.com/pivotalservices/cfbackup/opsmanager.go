@@ -2,8 +2,10 @@ package cfbackup
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"path"
@@ -182,9 +184,13 @@ func (context *OpsManager) exportUrlToWriter(url string, dest io.Writer, request
 		Password:    context.Password,
 		ContentType: "application/octet-stream",
 	})()
-	if err == nil {
+	if err == nil && resp.StatusCode == http.StatusOK {
 		defer resp.Body.Close()
 		_, err = io.Copy(dest, resp.Body)
+
+	} else if resp.StatusCode != http.StatusOK {
+		errMsg, _ := ioutil.ReadAll(resp.Body)
+		err = errors.New(string(errMsg[:]))
 	}
 	return
 }
