@@ -15,7 +15,7 @@ const (
 
 var (
 	PGDMP_DUMP_BIN string = "/var/vcap/packages/postgres/bin/pg_dump"
-	PGDMP_SQL_BIN         = "/var/vcap/packages/postgres/bin/psql"
+	PGDMP_SQL_BIN         = "/var/vcap/packages/postgres/bin/psql -v ON_ERROR_STOP=1"
 )
 
 type PgDump struct {
