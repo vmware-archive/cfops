@@ -7,7 +7,9 @@ import (
 	"net/url"
 	"regexp"
 
+	"github.com/golang/protobuf/proto"
 	"github.com/onsi/gomega/gbytes"
+	"github.com/onsi/gomega/ghttp/protobuf"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -454,6 +456,27 @@ var _ = Describe("TestServer", func() {
 			})
 		})
 
+		Describe("VerifyBody", func() {
+			BeforeEach(func() {
+				s.AppendHandlers(CombineHandlers(
+					VerifyRequest("POST", "/foo"),
+					VerifyBody([]byte("some body")),
+				))
+			})
+
+			It("should verify the body", func() {
+				resp, err = http.Post(s.URL()+"/foo", "", bytes.NewReader([]byte("some body")))
+				Ω(err).ShouldNot(HaveOccurred())
+			})
+
+			It("should verify the body", func() {
+				failures := InterceptGomegaFailures(func() {
+					http.Post(s.URL()+"/foo", "", bytes.NewReader([]byte("wrong body")))
+				})
+				Ω(failures).Should(HaveLen(1))
+			})
+		})
+
 		Describe("VerifyJSON", func() {
 			BeforeEach(func() {
 				s.AppendHandlers(CombineHandlers(
@@ -498,6 +521,186 @@ var _ = Describe("TestServer", func() {
 			It("should verify the json body and the content type", func() {
 				failures := InterceptGomegaFailures(func() {
 					http.Post(s.URL()+"/foo", "application/json", bytes.NewReader([]byte(`[1,3]`)))
+				})
+				Ω(failures).Should(HaveLen(1))
+			})
+		})
+
+		Describe("VerifyForm", func() {
+			var formValues url.Values
+
+			BeforeEach(func() {
+				formValues = make(url.Values)
+				formValues.Add("users", "user1")
+				formValues.Add("users", "user2")
+				formValues.Add("group", "users")
+			})
+
+			Context("when encoded in the URL", func() {
+				BeforeEach(func() {
+					s.AppendHandlers(CombineHandlers(
+						VerifyRequest("GET", "/foo"),
+						VerifyForm(url.Values{
+							"users": []string{"user1", "user2"},
+							"group": []string{"users"},
+						}),
+					))
+				})
+
+				It("should verify form values", func() {
+					resp, err = http.Get(s.URL() + "/foo?" + formValues.Encode())
+					Ω(err).ShouldNot(HaveOccurred())
+				})
+
+				It("should ignore extra values", func() {
+					formValues.Add("extra", "value")
+					resp, err = http.Get(s.URL() + "/foo?" + formValues.Encode())
+					Ω(err).ShouldNot(HaveOccurred())
+				})
+
+				It("fail on missing values", func() {
+					formValues.Del("group")
+					failures := InterceptGomegaFailures(func() {
+						resp, err = http.Get(s.URL() + "/foo?" + formValues.Encode())
+					})
+					Ω(failures).Should(HaveLen(1))
+				})
+
+				It("fail on incorrect values", func() {
+					formValues.Set("group", "wheel")
+					failures := InterceptGomegaFailures(func() {
+						resp, err = http.Get(s.URL() + "/foo?" + formValues.Encode())
+					})
+					Ω(failures).Should(HaveLen(1))
+				})
+			})
+
+			Context("when present in the body", func() {
+				BeforeEach(func() {
+					s.AppendHandlers(CombineHandlers(
+						VerifyRequest("POST", "/foo"),
+						VerifyForm(url.Values{
+							"users": []string{"user1", "user2"},
+							"group": []string{"users"},
+						}),
+					))
+				})
+
+				It("should verify form values", func() {
+					resp, err = http.PostForm(s.URL()+"/foo", formValues)
+					Ω(err).ShouldNot(HaveOccurred())
+				})
+
+				It("should ignore extra values", func() {
+					formValues.Add("extra", "value")
+					resp, err = http.PostForm(s.URL()+"/foo", formValues)
+					Ω(err).ShouldNot(HaveOccurred())
+				})
+
+				It("fail on missing values", func() {
+					formValues.Del("group")
+					failures := InterceptGomegaFailures(func() {
+						resp, err = http.PostForm(s.URL()+"/foo", formValues)
+					})
+					Ω(failures).Should(HaveLen(1))
+				})
+
+				It("fail on incorrect values", func() {
+					formValues.Set("group", "wheel")
+					failures := InterceptGomegaFailures(func() {
+						resp, err = http.PostForm(s.URL()+"/foo", formValues)
+					})
+					Ω(failures).Should(HaveLen(1))
+				})
+			})
+		})
+
+		Describe("VerifyFormKV", func() {
+			Context("when encoded in the URL", func() {
+				BeforeEach(func() {
+					s.AppendHandlers(CombineHandlers(
+						VerifyRequest("GET", "/foo"),
+						VerifyFormKV("users", "user1", "user2"),
+					))
+				})
+
+				It("verifies the form value", func() {
+					resp, err = http.Get(s.URL() + "/foo?users=user1&users=user2")
+					Ω(err).ShouldNot(HaveOccurred())
+				})
+
+				It("verifies the form value", func() {
+					failures := InterceptGomegaFailures(func() {
+						resp, err = http.Get(s.URL() + "/foo?users=user1")
+					})
+					Ω(failures).Should(HaveLen(1))
+				})
+			})
+
+			Context("when present in the body", func() {
+				BeforeEach(func() {
+					s.AppendHandlers(CombineHandlers(
+						VerifyRequest("POST", "/foo"),
+						VerifyFormKV("users", "user1", "user2"),
+					))
+				})
+
+				It("verifies the form value", func() {
+					resp, err = http.PostForm(s.URL()+"/foo", url.Values{"users": []string{"user1", "user2"}})
+					Ω(err).ShouldNot(HaveOccurred())
+				})
+
+				It("verifies the form value", func() {
+					failures := InterceptGomegaFailures(func() {
+						resp, err = http.PostForm(s.URL()+"/foo", url.Values{"users": []string{"user1"}})
+					})
+					Ω(failures).Should(HaveLen(1))
+				})
+			})
+		})
+
+		Describe("VerifyProtoRepresenting", func() {
+			var message *protobuf.SimpleMessage
+
+			BeforeEach(func() {
+				message = new(protobuf.SimpleMessage)
+				message.Description = proto.String("A description")
+				message.Id = proto.Int32(0)
+
+				s.AppendHandlers(CombineHandlers(
+					VerifyRequest("POST", "/proto"),
+					VerifyProtoRepresenting(message),
+				))
+			})
+
+			It("verifies the proto body and the content type", func() {
+				serialized, err := proto.Marshal(message)
+				Ω(err).ShouldNot(HaveOccurred())
+
+				resp, err = http.Post(s.URL()+"/proto", "application/x-protobuf", bytes.NewReader(serialized))
+				Ω(err).ShouldNot(HaveOccurred())
+			})
+
+			It("should verify the proto body and the content type", func() {
+				serialized, err := proto.Marshal(&protobuf.SimpleMessage{
+					Description: proto.String("A description"),
+					Id:          proto.Int32(0),
+					Metadata:    proto.String("some metadata"),
+				})
+				Ω(err).ShouldNot(HaveOccurred())
+
+				failures := InterceptGomegaFailures(func() {
+					http.Post(s.URL()+"/proto", "application/x-protobuf", bytes.NewReader(serialized))
+				})
+				Ω(failures).Should(HaveLen(1))
+			})
+
+			It("should verify the proto body and the content type", func() {
+				serialized, err := proto.Marshal(message)
+				Ω(err).ShouldNot(HaveOccurred())
+
+				failures := InterceptGomegaFailures(func() {
+					http.Post(s.URL()+"/proto", "application/not-x-protobuf", bytes.NewReader(serialized))
 				})
 				Ω(failures).Should(HaveLen(1))
 			})
@@ -771,6 +974,85 @@ var _ = Describe("TestServer", func() {
 						Ω(err).ShouldNot(HaveOccurred())
 
 						Ω(resp.Header["Content-Type"]).Should(Equal([]string{"not-json"}))
+					})
+				})
+			})
+		})
+
+		Describe("RespondWithProto", func() {
+			var message *protobuf.SimpleMessage
+
+			BeforeEach(func() {
+				message = new(protobuf.SimpleMessage)
+				message.Description = proto.String("A description")
+				message.Id = proto.Int32(99)
+			})
+
+			Context("when no optional headers are set", func() {
+				BeforeEach(func() {
+					s.AppendHandlers(CombineHandlers(
+						VerifyRequest("POST", "/proto"),
+						RespondWithProto(http.StatusCreated, message),
+					))
+				})
+
+				It("should return the response", func() {
+					resp, err = http.Post(s.URL()+"/proto", "application/x-protobuf", nil)
+					Ω(err).ShouldNot(HaveOccurred())
+
+					Ω(resp.StatusCode).Should(Equal(http.StatusCreated))
+
+					var received protobuf.SimpleMessage
+					body, err := ioutil.ReadAll(resp.Body)
+					err = proto.Unmarshal(body, &received)
+					Ω(err).ShouldNot(HaveOccurred())
+				})
+
+				It("should set the Content-Type header to application/x-protobuf", func() {
+					resp, err = http.Post(s.URL()+"/proto", "application/x-protobuf", nil)
+					Ω(err).ShouldNot(HaveOccurred())
+
+					Ω(resp.Header["Content-Type"]).Should(Equal([]string{"application/x-protobuf"}))
+				})
+			})
+
+			Context("when optional headers are set", func() {
+				var headers http.Header
+				BeforeEach(func() {
+					headers = http.Header{"Stuff": []string{"things"}}
+				})
+
+				JustBeforeEach(func() {
+					s.AppendHandlers(CombineHandlers(
+						VerifyRequest("POST", "/proto"),
+						RespondWithProto(http.StatusCreated, message, headers),
+					))
+				})
+
+				It("should preserve those headers", func() {
+					resp, err = http.Post(s.URL()+"/proto", "application/x-protobuf", nil)
+					Ω(err).ShouldNot(HaveOccurred())
+
+					Ω(resp.Header["Stuff"]).Should(Equal([]string{"things"}))
+				})
+
+				It("should set the Content-Type header to application/x-protobuf", func() {
+					resp, err = http.Post(s.URL()+"/proto", "application/x-protobuf", nil)
+					Ω(err).ShouldNot(HaveOccurred())
+
+					Ω(resp.Header["Content-Type"]).Should(Equal([]string{"application/x-protobuf"}))
+				})
+
+				Context("when setting the Content-Type explicitly", func() {
+					BeforeEach(func() {
+						headers["Content-Type"] = []string{"not-x-protobuf"}
+					})
+
+					It("should use the Content-Type header that was explicitly set", func() {
+						resp, err = http.Post(s.URL()+"/proto", "application/x-protobuf", nil)
+						Ω(err).ShouldNot(HaveOccurred())
+
+						Ω(resp.Header["Content-Type"]).Should(Equal([]string{"not-x-protobuf"}))
 					})
 				})
 			})
