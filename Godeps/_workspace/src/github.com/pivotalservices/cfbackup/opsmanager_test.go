@@ -42,7 +42,6 @@ var _ = Describe("OpsManager object", func() {
 					Executer:            &failExecuter{},
 					DeploymentDir:       "fixtures/encryptionkey",
 					OpsmanagerBackupDir: "opsmanager",
-					Logger:              Logger(),
 				}
 				f, _ := osutils.SafeCreate(opsManager.TargetDir, opsManager.OpsmanagerBackupDir, OPSMGR_INSTALLATION_SETTINGS_FILENAME)
 				f.Close()
@@ -77,7 +76,6 @@ var _ = Describe("OpsManager object", func() {
 					Executer:            &successExecuter{},
 					DeploymentDir:       "fixtures/encryptionkey",
 					OpsmanagerBackupDir: "opsmanager",
-					Logger:              Logger(),
 				}
 				f, _ := osutils.SafeCreate(opsManager.TargetDir, opsManager.OpsmanagerBackupDir, OPSMGR_INSTALLATION_SETTINGS_FILENAME)
 				f.Close()
@@ -111,7 +109,6 @@ var _ = Describe("OpsManager object", func() {
 					Executer:            &failExecuter{},
 					DeploymentDir:       "fixtures/encryptionkey",
 					OpsmanagerBackupDir: "opsmanager",
-					Logger:              Logger(),
 				}
 				f, _ := osutils.SafeCreate(opsManager.TargetDir, opsManager.OpsmanagerBackupDir, OPSMGR_INSTALLATION_SETTINGS_FILENAME)
 				f.Close()
@@ -143,7 +140,6 @@ var _ = Describe("OpsManager object", func() {
 					Executer:            &failExecuter{},
 					DeploymentDir:       "fixtures/encryptionkey",
 					OpsmanagerBackupDir: "opsmanager",
-					Logger:              Logger(),
 				}
 				f, _ := osutils.SafeCreate(opsManager.TargetDir, opsManager.OpsmanagerBackupDir, OPSMGR_INSTALLATION_SETTINGS_FILENAME)
 				f.Close()
@@ -180,7 +176,6 @@ var _ = Describe("OpsManager object", func() {
 					LocalExecuter:       NewLocalMockExecuter(),
 					DeploymentDir:       "fixtures/encryptionkey",
 					OpsmanagerBackupDir: "opsmanager",
-					Logger:              Logger(),
 				}
 				err = opsManager.Backup()
 			})
@@ -207,7 +202,6 @@ var _ = Describe("OpsManager object", func() {
 					LocalExecuter:       NewLocalMockExecuter(),
 					DeploymentDir:       "fixtures/encryptionkey",
 					OpsmanagerBackupDir: "opsmanager",
-					Logger:              Logger(),
 				}
 
 			})
@@ -252,7 +246,6 @@ var _ = Describe("OpsManager object", func() {
 					LocalExecuter:       NewLocalMockExecuter(),
 					DeploymentDir:       "fixtures/encryptionkey",
 					OpsmanagerBackupDir: "opsmanager",
-					Logger:              Logger(),
 				}
 			})
 

@@ -6,6 +6,7 @@ import (
 
 	"github.com/pivotalservices/gtils/command"
 	"github.com/pivotalservices/gtils/osutils"
+	"github.com/xchapter7x/lo"
 )
 
 const (
@@ -31,6 +32,7 @@ type MysqlDump struct {
 }
 
 func NewMysqlDump(ip, username, password string) *MysqlDump {
+	lo.G.Debug("setting up a new local mysqldump object")
 	m := &MysqlDump{
 		Ip:       ip,
 		Username: username,
@@ -41,7 +43,9 @@ func NewMysqlDump(ip, username, password string) *MysqlDump {
 }
 
 func NewRemoteMysqlDump(username, password string, sshCfg command.SshConfig) (*MysqlDump, error) {
+	lo.G.Debug("setting up a new remote MyslDump object")
 	remoteExecuter, err := command.NewRemoteExecutor(sshCfg)
+
 	return &MysqlDump{
 		Ip:        "localhost",
 		Username:  username,
@@ -52,15 +56,16 @@ func NewRemoteMysqlDump(username, password string, sshCfg command.SshConfig) (*M
 }
 
 func (s *MysqlDump) Import(lfile io.Reader) (err error) {
-
 	if err = s.RemoteOps.UploadFile(lfile); err == nil {
 		err = s.restore()
 	}
+	lo.G.Debug("mysqldump Import called: ", err)
 	return
 }
 
 func (s *MysqlDump) Dump(dest io.Writer) (err error) {
 	err = s.Caller.Execute(dest, s.getDumpCommand())
+	lo.G.Debug("mysqldump Dump called: ", s.getDumpCommand(), err)
 	return
 }
 
@@ -70,6 +75,7 @@ func (s *MysqlDump) restore() (err error) {
 		s.getFlushCommand(),
 	}
 	err = execute_list(callList, s.Caller)
+	lo.G.Debug("mysqldump restore called: ", callList, err)
 	return
 }
 

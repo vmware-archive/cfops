@@ -4,7 +4,6 @@ import (
 	"os"
 
 	"github.com/codegangsta/cli"
-	"github.com/pivotalservices/cfops"
 	"github.com/pivotalservices/gtils/log"
 )
 
@@ -21,13 +20,6 @@ var (
 
 func init() {
 	ExitCode = cleanExitCode
-
-	if logLevel = os.Getenv(logLevelEnv); logLevel != "" {
-		log.SetLogLevel(logLevel)
-		logger = log.LogFactory("cfops cli", log.Lager, os.Stdout)
-		logger.Debug("log level set", log.Data{"level": logLevel})
-		cfops.SetLogger(logger)
-	}
 }
 
 func main() {
@@ -44,9 +36,10 @@ func NewApp() *cli.App {
 	app.Usage = "Cloud Foundry Operations Tool"
 	app.Flags = append(app.Flags,
 		cli.StringFlag{
-			Name:  "logLevel",
-			Value: "info",
-			Usage: "log level: debug, info, error or fatal",
+			Name:   "logLevel",
+			Value:  "info",
+			Usage:  "set the log level by setting the LOG_LEVEL environment variable",
+			EnvVar: "LOG_LEVEL",
 		},
 	)
 	app.Commands = append(app.Commands, []cli.Command{

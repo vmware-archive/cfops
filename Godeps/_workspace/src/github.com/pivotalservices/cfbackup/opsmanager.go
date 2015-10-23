@@ -14,6 +14,7 @@ import (
 	ghttp "github.com/pivotalservices/gtils/http"
 	"github.com/pivotalservices/gtils/log"
 	"github.com/pivotalservices/gtils/osutils"
+	"github.com/xchapter7x/lo"
 )
 
 const (
@@ -56,11 +57,10 @@ type OpsManager struct {
 	AssetsRequestor     httpRequestor
 	DeploymentDir       string
 	OpsmanagerBackupDir string
-	Logger              log.Logger
 }
 
 // NewOpsManager initializes an OpsManager instance
-var NewOpsManager = func(opsManagerHostname string, adminUsername string, adminPassword string, opsManagerUsername string, opsManagerPassword string, target string, logger log.Logger) (context *OpsManager, err error) {
+var NewOpsManager = func(opsManagerHostname string, adminUsername string, adminPassword string, opsManagerUsername string, opsManagerPassword string, target string) (context *OpsManager, err error) {
 	var remoteExecuter command.Executer
 
 	if remoteExecuter, err = createExecuter(opsManagerHostname, opsManagerUsername, opsManagerPassword, OPSMGR_DEFAULT_SSH_PORT); err == nil {
@@ -84,7 +84,6 @@ var NewOpsManager = func(opsManagerHostname string, adminUsername string, adminP
 			Executer:            remoteExecuter,
 			LocalExecuter:       command.NewLocalExecuter(),
 			OpsmanagerBackupDir: OPSMGR_BACKUP_DIR,
-			Logger:              logger,
 		}
 	}
 	return
@@ -142,7 +141,7 @@ func (context *OpsManager) importInstallationPart(url, filename, fieldname strin
 
 		if res, err = upload(conn, fieldname, filename, fileRef, nil); err != nil {
 			err = fmt.Errorf(fmt.Sprintf("ERROR:%s - %v", err.Error(), res))
-			context.Logger.Debug("upload failed", log.Data{"err": err, "response": res})
+			lo.G.Debug("upload failed", log.Data{"err": err, "response": res})
 		}
 	}
 	return
@@ -169,7 +168,7 @@ func (context *OpsManager) exportUrlToFile(urlFormat string, filename string) (e
 
 	url := fmt.Sprintf(urlFormat, context.Hostname)
 
-	context.Logger.Debug("Exporting url '%s' to file '%s'", log.Data{"url": url, "filename": filename})
+	lo.G.Debug("Exporting url '%s' to file '%s'", log.Data{"url": url, "filename": filename})
 
 	if settingsFileRef, err = osutils.SafeCreate(context.TargetDir, context.OpsmanagerBackupDir, filename); err == nil {
 		err = context.exportUrlToWriter(url, settingsFileRef, context.SettingsRequestor)
@@ -198,14 +197,14 @@ func (context *OpsManager) exportUrlToWriter(url string, dest io.Writer, request
 func (context *OpsManager) extract() (err error) {
 	var keyFileRef *os.File
 	defer keyFileRef.Close()
-	context.Logger.Debug("Extracting Ops Manager")
+	lo.G.Debug("Extracting Ops Manager")
 
 	if keyFileRef, err = osutils.SafeCreate(context.TargetDir, context.OpsmanagerBackupDir, OPSMGR_ENCRYPTIONKEY_FILENAME); err == nil {
-		context.Logger.Debug("Extracting encryption key")
+		lo.G.Debug("Extracting encryption key")
 		backupDir := path.Join(context.TargetDir, context.OpsmanagerBackupDir)
 		deployment := path.Join(backupDir, OPSMGR_DEPLOYMENTS_FILENAME)
 		cmd := "tar -xf " + deployment + " -C " + backupDir
-		context.Logger.Debug("Extracting : %s", log.Data{"command": cmd})
+		lo.G.Debug("Extracting : %s", log.Data{"command": cmd})
 		context.LocalExecuter.Execute(nil, cmd)
 
 		err = ExtractEncryptionKey(keyFileRef, context.DeploymentDir)

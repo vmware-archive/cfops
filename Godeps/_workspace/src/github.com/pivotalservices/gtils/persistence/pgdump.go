@@ -6,6 +6,7 @@ import (
 
 	"github.com/pivotalservices/gtils/command"
 	"github.com/pivotalservices/gtils/osutils"
+	"github.com/xchapter7x/lo"
 )
 
 const (
@@ -56,6 +57,7 @@ func NewPgRemoteDump(port int, database, username, password string, sshCfg comma
 }
 
 func (s *PgDump) Import(lfile io.Reader) (err error) {
+	lo.G.Debug("pgdump Import being called")
 
 	if err = s.RemoteOps.UploadFile(lfile); err == nil {
 		err = s.restore()
@@ -71,6 +73,7 @@ func (s *PgDump) restore() (err error) {
 		s.getImportCommand(),
 	}
 	err = execute_list(callList, s.Caller)
+	lo.G.Debug("pgdump restore called: ", callList, err)
 	return
 }
 
@@ -91,6 +94,7 @@ func (s *PgDump) getImportCommand() string {
 
 func (s *PgDump) Dump(dest io.Writer) (err error) {
 	err = s.Caller.Execute(dest, s.getDumpCommand())
+	lo.G.Debug("pgdump Dump called: ", s.getDumpCommand(), err)
 	return
 }
 
