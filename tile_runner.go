@@ -2,12 +2,11 @@ package cfops
 
 import (
 	"fmt"
-	"os"
 	"path"
 	"strings"
 
 	"github.com/pivotalservices/cfbackup"
-	"github.com/pivotalservices/gtils/log"
+	"github.com/xchapter7x/lo"
 )
 
 const (
@@ -25,7 +24,6 @@ var (
 		Backup:  cfbackup.RunBackupPipeline,
 	}
 	SupportedTiles map[string]func() (Tile, error)
-	backupLogger   log.Logger = log.LogFactory("cfops default logger", log.Lager, os.Stdout)
 )
 
 func ErrUnsupportedTile(errString string) error {
@@ -61,21 +59,21 @@ func formatArray(a []string) []string {
 func SetupSupportedTiles(fs flagSet) {
 	SupportedTiles = map[string]func() (Tile, error){
 		OpsMgr: func() (opsmgr Tile, err error) {
-			opsmgr, err = cfbackup.NewOpsManager(fs.Host(), fs.AdminUser(), fs.AdminPass(), fs.OpsManagerUser(), fs.OpsManagerPass(), fs.Dest(), backupLogger)
-			backupLogger.Debug("Creating a new OpsManager object", nil)
+			opsmgr, err = cfbackup.NewOpsManager(fs.Host(), fs.AdminUser(), fs.AdminPass(), fs.OpsManagerUser(), fs.OpsManagerPass(), fs.Dest())
+			lo.G.Debug("Creating a new OpsManager object")
 			return
 		},
 		ER: func() (er Tile, err error) {
 			installationFilePath := path.Join(fs.Dest(), cfbackup.OPSMGR_BACKUP_DIR, cfbackup.OPSMGR_INSTALLATION_SETTINGS_FILENAME)
-			er = cfbackup.NewElasticRuntime(installationFilePath, fs.Dest(), backupLogger)
-			backupLogger.Debug("Creating a new ElasticRuntime object", nil)
+			er = cfbackup.NewElasticRuntime(installationFilePath, fs.Dest())
+			lo.G.Debug("Creating a new ElasticRuntime object")
 			return
 		},
 	}
 }
 
 func runTileUsingAction(t Tile, action string) (err error) {
-	backupLogger.Debug("Running on tile", nil)
+	lo.G.Debug("Running on tile")
 	switch action {
 	case Restore:
 		err = t.Restore()
@@ -83,7 +81,7 @@ func runTileUsingAction(t Tile, action string) (err error) {
 	case Backup:
 		err = t.Backup()
 	}
-	backupLogger.Debug("Action complete", nil)
+	lo.G.Debug("Action complete")
 	return
 }
 
@@ -119,18 +117,13 @@ func runTileListUsingAction(fs flagSet, action string) (err error) {
 	return
 }
 
-func SetLogger(logger log.Logger) {
-	backupLogger = logger
-}
-
 func RunPipeline(fs flagSet, action string) (err error) {
 
 	if hasTilelistFlag(fs) {
-		backupLogger.Debug("Running a tile list action", nil)
+		lo.G.Debug("Running a tile list action")
 		err = runTileListUsingAction(fs, action)
 
 	} else {
-		cfbackup.SetLogger(backupLogger)
 		err = BuiltinPipelineExecution[action](fs.Host(), fs.AdminUser(), fs.AdminPass(), fs.OpsManagerUser(), fs.OpsManagerPass(), fs.Dest())
 	}
 	return

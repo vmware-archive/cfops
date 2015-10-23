@@ -116,7 +116,6 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 					},
 					SystemsInfo:       info,
 					PersistentSystems: ps,
-					Logger:            Logger(),
 				}
 			})
 
@@ -248,7 +247,6 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 						TargetDir: target,
 					},
 					SystemsInfo: info,
-					Logger:      Logger(),
 				}
 			})
 
@@ -318,7 +316,6 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 						TargetDir: target,
 					},
 					SystemsInfo: info,
-					Logger:      Logger(),
 				}
 				er.ReadAllUserCredentials()
 			})
@@ -425,7 +422,6 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 						TargetDir: target,
 					},
 					SystemsInfo: info,
-					Logger:      Logger(),
 				}
 				er.ReadAllUserCredentials()
 			})
@@ -480,7 +476,6 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 						TargetDir: target,
 					},
 					SystemsInfo: info,
-					Logger:      Logger(),
 				}
 				er.ReadAllUserCredentials()
 			})
@@ -537,7 +532,6 @@ func testERWithVersionSpecificFile(installationSettingsFilePath string) {
 						TargetDir: target,
 					},
 					SystemsInfo: info,
-					Logger:      Logger(),
 				}
 				er.ReadAllUserCredentials()
 			})

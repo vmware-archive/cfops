@@ -12,6 +12,7 @@ import (
 	. "github.com/pivotalservices/gtils/http"
 	"github.com/pivotalservices/gtils/log"
 	"github.com/pivotalservices/gtils/osutils"
+	"github.com/xchapter7x/lo"
 )
 
 const (
@@ -52,7 +53,6 @@ type ElasticRuntime struct {
 	HttpGateway       HttpGateway
 	InstallationName  string
 	BackupContext
-	Logger log.Logger
 }
 
 type CCJob struct {
@@ -61,7 +61,7 @@ type CCJob struct {
 }
 
 // NewElasticRuntime initializes an ElasticRuntime intance
-var NewElasticRuntime = func(jsonFile string, target string, logger log.Logger) *ElasticRuntime {
+var NewElasticRuntime = func(jsonFile string, target string) *ElasticRuntime {
 	var (
 		uaadbInfo *PgInfo = &PgInfo{
 			SystemInfo: SystemInfo{
@@ -129,7 +129,6 @@ var NewElasticRuntime = func(jsonFile string, target string, logger log.Logger) 
 			nfsInfo,
 			mysqldbInfo,
 		},
-		Logger: logger,
 	}
 	return context
 }
@@ -151,7 +150,7 @@ func (context *ElasticRuntime) backupRestore(action int) (err error) {
 	)
 
 	if err = context.ReadAllUserCredentials(); err == nil && context.directorCredentialsValid() {
-		context.Logger.Debug("Retrieving All CC VMs")
+		lo.G.Debug("Retrieving All CC VMs")
 		manifest, erro := context.getManifest()
 		if err != nil {
 			return erro
@@ -159,15 +158,15 @@ func (context *ElasticRuntime) backupRestore(action int) (err error) {
 		if ccJobs, err = context.getAllCloudControllerVMs(); err == nil {
 			directorInfo := context.SystemsInfo[ER_DIRECTOR]
 			cloudController := NewCloudController(directorInfo.Get(SD_IP), directorInfo.Get(SD_USER), directorInfo.Get(SD_PASS), context.InstallationName, manifest, ccJobs)
-			context.Logger.Debug("Setting up CC jobs")
+			lo.G.Debug("Setting up CC jobs")
 			defer cloudController.Start()
 			cloudController.Stop()
 		}
-		context.Logger.Debug("Running db action")
+		lo.G.Debug("Running db action")
 		if len(context.PersistentSystems) > 0 {
 			err = context.RunDbAction(context.PersistentSystems, action)
 			if err != nil {
-				context.Logger.Error("Error backing up db", err)
+				lo.G.Error("Error backing up db", err)
 				err = ER_DB_BACKUP
 			}
 		} else {
@@ -181,15 +180,15 @@ func (context *ElasticRuntime) backupRestore(action int) (err error) {
 
 func (context *ElasticRuntime) getAllCloudControllerVMs() (ccvms []CCJob, err error) {
 
-	context.Logger.Debug("Entering getAllCloudControllerVMs() function")
+	lo.G.Debug("Entering getAllCloudControllerVMs() function")
 	directorInfo := context.SystemsInfo[ER_DIRECTOR]
 	connectionURL := fmt.Sprintf(ER_VMS_URL, directorInfo.Get(SD_IP), context.InstallationName)
-	context.Logger.Debug("getAllCloudControllerVMs() function", log.Data{"connectionURL": connectionURL, "directorInfo": directorInfo})
+	lo.G.Debug("getAllCloudControllerVMs() function", log.Data{"connectionURL": connectionURL, "directorInfo": directorInfo})
 	gateway := context.HttpGateway
 	if gateway == nil {
 		gateway = NewHttpGateway()
 	}
-	context.Logger.Debug("Retrieving CC vms")
+	lo.G.Debug("Retrieving CC vms")
 	if resp, err := gateway.Get(HttpRequestEntity{
 		Url:         connectionURL,
 		Username:    directorInfo.Get(SD_USER),
@@ -198,7 +197,7 @@ func (context *ElasticRuntime) getAllCloudControllerVMs() (ccvms []CCJob, err er
 	})(); err == nil {
 		var jsonObj []VMObject
 
-		context.Logger.Debug("Unmarshalling CC vms")
+		lo.G.Debug("Unmarshalling CC vms")
 		defer resp.Body.Close()
 		body, err := ioutil.ReadAll(resp.Body)
 		if err = json.Unmarshal(body, &jsonObj); err == nil {
@@ -211,10 +210,11 @@ func (context *ElasticRuntime) getAllCloudControllerVMs() (ccvms []CCJob, err er
 func (context *ElasticRuntime) RunDbAction(dbInfoList []SystemDump, action int) (err error) {
 
 	for _, info := range dbInfoList {
+		lo.G.Debug(fmt.Sprintf("%v", info))
 
 		if err = info.Error(); err == nil {
 			err = context.readWriterArchive(info, context.TargetDir, action)
-			context.Logger.Debug("backed up db", log.Data{"info": info})
+			lo.G.Debug("backed up db", log.Data{"info": info})
 		} else {
 			break
 		}
@@ -263,11 +263,11 @@ func (context *ElasticRuntime) importExport(rw io.ReadWriter, s SystemDump, acti
 
 		switch action {
 		case IMPORT_ARCHIVE:
-			context.Logger.Debug("we are doing something here now")
+			lo.G.Debug("we are doing something here now")
 			err = pb.Import(rw)
 
 		case EXPORT_ARCHIVE:
-			context.Logger.Info("Dumping database to file")
+			lo.G.Info("Dumping database to file")
 			err = pb.Dump(rw)
 		}
 	}
