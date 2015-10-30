@@ -15,8 +15,8 @@ const (
 )
 
 var (
-	PGDMP_DUMP_BIN string = "/var/vcap/packages/postgres/bin/pg_dump"
-	PGDMP_SQL_BIN         = "/var/vcap/packages/postgres/bin/psql -v ON_ERROR_STOP=1"
+	PGDMP_DUMP_BIN    string = "/var/vcap/packages/postgres/bin/pg_dump"
+	PGDMP_RESTORE_BIN string = "/var/vcap/packages/postgres/bin/pg_restore"
 )
 
 type PgDump struct {
@@ -49,8 +49,8 @@ func NewPgRemoteDump(port int, database, username, password string, sshCfg comma
 		Ip:        "localhost",
 		Port:      port,
 		Database:  database,
-		Username:  username,
-		Password:  password,
+		Username:  sshCfg.Username,
+		Password:  sshCfg.Password,
 		Caller:    remoteExecuter,
 		RemoteOps: osutils.NewRemoteOperations(sshCfg),
 	}, err
@@ -67,29 +67,11 @@ func (s *PgDump) Import(lfile io.Reader) (err error) {
 
 func (s *PgDump) restore() (err error) {
 	callList := []string{
-		s.getAddSuperUserCommand(),
-		s.getDropCommand(),
-		s.getCreateCommand(),
-		s.getImportCommand(),
+		s.getRestoreCommand(),
 	}
 	err = execute_list(callList, s.Caller)
 	lo.G.Debug("pgdump restore called: ", callList, err)
 	return
-}
-
-func (s *PgDump) getDropCommand() string {
-	connect := s.getPostgresConnect(PGDMP_SQL_BIN)
-	return fmt.Sprintf("%s -c '%s'", connect, PGDMP_DROP_CMD)
-}
-
-func (s *PgDump) getCreateCommand() string {
-	connect := s.getPostgresConnect(PGDMP_SQL_BIN)
-	return fmt.Sprintf("%s -c '%s'", connect, PGDMP_CREATE_CMD)
-}
-
-func (s *PgDump) getImportCommand() string {
-	connect := s.getPostgresConnect(PGDMP_SQL_BIN)
-	return fmt.Sprintf("%s < %s", connect, s.RemoteOps.Path())
 }
 
 func (s *PgDump) Dump(dest io.Writer) (err error) {
@@ -98,16 +80,8 @@ func (s *PgDump) Dump(dest io.Writer) (err error) {
 	return
 }
 
-func (s *PgDump) getAddSuperUserCommand() string {
-	return fmt.Sprintf("echo \"%s\" | sudo -u postgres %s -c 'alter role %s superuser;'",
-		s.Password,
-		PGDMP_SQL_BIN,
-		s.Username,
-	)
-}
-
-func (s *PgDump) getPostgresConnect(command string) string {
-	return fmt.Sprintf("PGPASSWORD=%s %s -h %s -U %s -p %d %s",
+func (s *PgDump) dumpConnectionDecorator(command string) string {
+	return fmt.Sprintf("PGPASSWORD=%s %s -Fc -h %s -U %s -p %d %s",
 		s.Password,
 		command,
 		s.Ip,
@@ -117,6 +91,22 @@ func (s *PgDump) getPostgresConnect(command string) string {
 	)
 }
 
+func (s *PgDump) restoreConnectionDecorator(command string) string {
+	return fmt.Sprintf("PGPASSWORD=%s %s -h %s -U %s -x -p %d -c -d %s %s",
+		s.Password,
+		command,
+		s.Ip,
+		s.Username,
+		s.Port,
+		s.Database,
+		s.RemoteOps.Path(),
+	)
+}
+
+func (s *PgDump) getRestoreCommand() string {
+	return s.restoreConnectionDecorator(PGDMP_RESTORE_BIN)
+}
+
 func (s *PgDump) getDumpCommand() string {
-	return s.getPostgresConnect(PGDMP_DUMP_BIN)
+	return s.dumpConnectionDecorator(PGDMP_DUMP_BIN)
 }

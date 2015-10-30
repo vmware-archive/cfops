@@ -153,7 +153,7 @@ var _ = Describe("PgDump", func() {
 			It("Should execute the pg command", func() {
 				var b bytes.Buffer
 				pgDumpInstance.Dump(&b)
-				cmd := fmt.Sprintf("PGPASSWORD=%s %s -h %s -U %s -p 0 ", password, PGDMP_DUMP_BIN, ip, username)
+				cmd := fmt.Sprintf("PGPASSWORD=%s %s -Fc -h %s -U %s -p 0 ", password, PGDMP_DUMP_BIN, ip, username)
 				Ω(b.String()).Should(Equal(cmd))
 			})
 
