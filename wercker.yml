@@ -42,7 +42,7 @@ build:
           cp -R ./ ${WERCKER_OUTPUT_DIR}
 
     - script:
-        name: go get goxc util so we can cross compile
+        name: go cross compile setup make.bash  
         code: |
           ls $GOROOT
           (cd ${GOROOT}/src && GOOS=linux GOARCH=amd64 bash make.bash --no-clean )
@@ -50,7 +50,7 @@ build:
           (cd ${GOROOT}/src && GOOS=windows GOARCH=amd64 bash make.bash --no-clean)
 
     - script:
-        name: set release id variable and version for gox file
+        name: set release id variable and version
         code: |
           go get github.com/xchapter7x/versioning
           export NEXT_VERSION=`versioning bump_patch`
