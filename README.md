@@ -2,13 +2,21 @@ cfops [![wercker status](https://app.wercker.com/status/d0a50d426b77a9f73da0fe4f
 ======
 
 ### Version Compatibility
-(as of release v1.0.0+)
 
-This is tested and known to work for **Ops Manager v1.5**
+(as of release v1.1.0+)
 
-This is tested and known to work for **ER v1.5**
+**IAAS**
+This utility is only designed to work for PivotalCF on VSphere
 
-(!!! NOTE: Automated **restore** not working for **ER 1.5**  !!!) 
+**BACKUP**
+tested and known to work for **Ops Manager v1.5**
+tested and known to work for **ER v1.5**
+
+**RESTORE**
+tested and known to work for **Ops Manager v1.5**
+!! Partially working for **ER v1.5** 
+   * Note: Mysql automatic restore failing. (ccdb, uaadb, consoledb & nfs all working)
+
 
 ### Overview
 
