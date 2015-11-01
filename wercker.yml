@@ -44,20 +44,24 @@ build:
     - script:
         name: go get goxc util so we can cross compile
         code: |
-          go get -u -v github.com/laher/goxc
-          PATH=$GOPATH/bin:$PATH sudo goxc -t -os "linux darwin windows"
+          ls $GOROOT
+          (cd ${GOROOT}/src && GOOS=linux GOARCH=amd64 bash make.bash --no-clean )
+          (cd ${GOROOT}/src && GOOS=darwin GOARCH=amd64 bash make.bash --no-clean)
+          (cd ${GOROOT}/src && GOOS=windows GOARCH=amd64 bash make.bash --no-clean)
 
     - script:
         name: set release id variable and version for gox file
         code: |
           go get github.com/xchapter7x/versioning
           export NEXT_VERSION=`versioning bump_patch`
-          (cd cmd/cfops/ && goxc -wc -pv=${NEXT_VERSION})
+          echo "next version should be: ${NEXT_VERSION}"
 
     - script:
         name: cross platform release
         code: |
-          (cd cmd/cfops/ && goxc -env GOPATH=${WERCKER_SOURCE_DIR}/Godeps/_workspace:$GOPATH -d=${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/ -bc="darwin linux windows" ) 
+          (cd cmd/cfops/ && GOOS=linux GOARCH=amd64 godep go build -ldflags "-X main.VERSION ${NEXT_VERSION}" && mkdir -p ${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/linux64 && mv cfops ${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/linux64)
+          (cd cmd/cfops/ && GOOS=darwin GOARCH=amd64 godep go build -ldflags "-X main.VERSION ${NEXT_VERSION}" && mkdir -p ${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/osx && mv cfops ${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/osx)
+          (cd cmd/cfops/ && GOOS=windows GOARCH=amd64 godep go build -ldflags "-X main.VERSION ${NEXT_VERSION}" && mkdir -p ${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/win64 && mv cfops.exe ${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/win64)
 
     - script:
         name: create tarball
