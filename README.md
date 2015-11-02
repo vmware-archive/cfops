@@ -20,10 +20,11 @@ tested and known to work for **Ops Manager v1.5**
 
 ### Overview
 
-This is simply an automation that is based on the supported way to back up Pivotal Cloud Foundry (http://docs.pivotal.io/pivotalcf/customizing/backup-settings.html).
+This is simply an automation that is based on the supported way to back up Pivotal Cloud Foundry (http://docs.pivotal.io/pivotalcf/customizing/backup-restore/backup-pcf.html).
 
 It may be extended in the future to support greater breadth of functionality.
 
+**Backing up ER will take Cloud Controller offline for the duration of the backup, causing your foundation to become readonly for the duration of the backup**. App pushes etc will not work during this time. 
 
 ### Install
 
