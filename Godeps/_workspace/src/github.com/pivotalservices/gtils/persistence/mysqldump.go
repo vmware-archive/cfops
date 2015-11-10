@@ -72,7 +72,6 @@ func (s *MysqlDump) Dump(dest io.Writer) (err error) {
 func (s *MysqlDump) restore() (err error) {
 	callList := []string{
 		s.getImportCommand(),
-		s.getFlushCommand(),
 	}
 	err = execute_list(callList, s.Caller)
 	lo.G.Debug("mysqldump restore called: ", callList, err)
