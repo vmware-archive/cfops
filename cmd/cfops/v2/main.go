@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/codegangsta/cli"
+	"github.com/pivotalservices/cfops/tileregistry"
 )
 
 var (
@@ -29,6 +31,15 @@ func NewApp() *cli.App {
 			Name: "version",
 			Action: func(c *cli.Context) {
 				cli.ShowVersion(c)
+			},
+		},
+		cli.Command{
+			Name: "list-tiles",
+			Action: func(c *cli.Context) {
+				fmt.Println("Available Tiles:")
+				for n, _ := range tileregistry.GetRegistry() {
+					fmt.Println(n)
+				}
 			},
 		},
 	}...)

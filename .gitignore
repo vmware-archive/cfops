@@ -27,3 +27,4 @@ main
 out/
 coverage.out
 cmd/cfops/cfops
+cmd/cfops/v2/v2
