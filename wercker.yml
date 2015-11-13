@@ -1,4 +1,4 @@
-box: google/golang
+box: golang
 build:
   # The steps that will be executed on build
   steps:
@@ -42,14 +42,6 @@ build:
           cp -R ./ ${WERCKER_OUTPUT_DIR}
 
     - script:
-        name: go cross compile setup make.bash  
-        code: |
-          ls $GOROOT
-          (cd ${GOROOT}/src && GOOS=linux GOARCH=amd64 bash make.bash --no-clean )
-          (cd ${GOROOT}/src && GOOS=darwin GOARCH=amd64 bash make.bash --no-clean)
-          (cd ${GOROOT}/src && GOOS=windows GOARCH=amd64 bash make.bash --no-clean)
-
-    - script:
         name: set release id variable and version
         code: |
           go get github.com/xchapter7x/versioning
@@ -59,9 +51,9 @@ build:
     - script:
         name: cross platform release
         code: |
-          (cd cmd/cfops/ && GOOS=linux GOARCH=amd64 godep go build -ldflags "-X main.VERSION ${NEXT_VERSION}" && mkdir -p ${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/linux64 && mv cfops ${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/linux64)
-          (cd cmd/cfops/ && GOOS=darwin GOARCH=amd64 godep go build -ldflags "-X main.VERSION ${NEXT_VERSION}" && mkdir -p ${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/osx && mv cfops ${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/osx)
-          (cd cmd/cfops/ && GOOS=windows GOARCH=amd64 godep go build -ldflags "-X main.VERSION ${NEXT_VERSION}" && mkdir -p ${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/win64 && mv cfops.exe ${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/win64)
+          (cd cmd/cfops/ && GOOS=linux GOARCH=amd64 godep go build -ldflags "-X main.VERSION=${NEXT_VERSION}" && mkdir -p ${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/linux64 && mv cfops ${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/linux64)
+          (cd cmd/cfops/ && GOOS=darwin GOARCH=amd64 godep go build -ldflags "-X main.VERSION=${NEXT_VERSION}" && mkdir -p ${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/osx && mv cfops ${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/osx)
+          (cd cmd/cfops/ && GOOS=windows GOARCH=amd64 godep go build -ldflags "-X main.VERSION=${NEXT_VERSION}" && mkdir -p ${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/win64 && mv cfops.exe ${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/win64)
 
     - script:
         name: create tarball
@@ -78,7 +70,7 @@ deploy:
     - script:
         name: install-packages
         code: |
-          sudo apt-get install -y ssh wget
+          sudo apt-get install -y openssh-client wget
           ls -la
           pwd
           echo ${WERCKER_OUTPUT_DIR}
