@@ -14,8 +14,7 @@ tested and known to work for **ER v1.5**
 
 **RESTORE**
 tested and known to work for **Ops Manager v1.5**
-!! Partially working for **ER v1.5** 
-   * Note: Mysql automatic restore failing. (ccdb, uaadb, consoledb & nfs all working)
+tested and known to work for **ER v1.5** 
 
 
 ### Overview
