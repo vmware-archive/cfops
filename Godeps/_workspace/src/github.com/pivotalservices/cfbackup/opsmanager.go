@@ -89,6 +89,17 @@ var NewOpsManager = func(opsManagerHostname string, adminUsername string, adminP
 	return
 }
 
+func (context *OpsManager) GetInstallationSettings() (settings io.Reader, err error) {
+	var bytesBuffer = new(bytes.Buffer)
+	url := fmt.Sprintf(OPSMGR_INSTALLATION_SETTINGS_URL, context.Hostname)
+	lo.G.Debug(fmt.Sprintf("Exporting url '%s'", url))
+
+	if err = context.exportUrlToWriter(url, bytesBuffer, context.SettingsRequestor); err == nil {
+		settings = bytesBuffer
+	}
+	return
+}
+
 // Backup performs a backup of a Pivotal Ops Manager instance
 func (context *OpsManager) Backup() (err error) {
 	if err = context.copyDeployments(); err == nil {
