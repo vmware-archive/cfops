@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/codegangsta/cli"
+	_ "github.com/pivotalservices/cfbackup"
 	"github.com/pivotalservices/cfops/tileregistry"
 )
 
