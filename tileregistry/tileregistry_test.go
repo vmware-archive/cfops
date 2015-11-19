@@ -4,16 +4,13 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	. "github.com/pivotalservices/cfops/tileregistry"
+	"github.com/pivotalservices/cfops/tileregistry/fake"
 )
-
-type fakeTileGenerator struct {
-	TileGenerator
-}
 
 var _ = Describe("tileregistry", func() {
 	var (
 		controlTileGeneratorKey = "myRegisteredTileGenerator"
-		myTileGenerator         = new(fakeTileGenerator)
+		myTileGenerator         = new(fake.TileGenerator)
 	)
 	Describe("given: a Register() method", func() {
 		Context("when: passed a name and a TileGenerator interface", func() {
