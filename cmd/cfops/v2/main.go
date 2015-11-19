@@ -10,19 +10,24 @@ import (
 )
 
 var (
-	VERSION  string
-	ExitCode int
-	logLevel string
+	VERSION string
 )
 
+type ErrorHandler struct {
+	ExitCode int
+	Error    error
+}
+
 func main() {
-	app := NewApp()
+	eh := new(ErrorHandler)
+	eh.ExitCode = 0
+	app := NewApp(eh)
 	app.Run(os.Args)
-	os.Exit(ExitCode)
+	os.Exit(eh.ExitCode)
 }
 
 // NewApp creates a new cli app
-func NewApp() *cli.App {
+func NewApp(eh *ErrorHandler) *cli.App {
 	app := cli.NewApp()
 	app.Version = VERSION
 	app.Name = "cfops"
@@ -45,20 +50,8 @@ func NewApp() *cli.App {
 				}
 			},
 		},
-		cli.Command{
-			Name:  "backup",
-			Usage: "creates a backup archive of the target tile",
-			Action: func(c *cli.Context) {
-				cli.ShowVersion(c)
-			},
-		},
-		cli.Command{
-			Name:  "restore",
-			Usage: "restores from an archive to the target tile",
-			Action: func(c *cli.Context) {
-				cli.ShowVersion(c)
-			},
-		},
+		CreateBURACliCommand("backup", "creates a backup archive of the target tile", eh),
+		CreateBURACliCommand("restore", "restores from an archive to the target tile", eh),
 	}
 	return app
 }
