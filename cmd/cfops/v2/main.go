@@ -27,15 +27,17 @@ func NewApp() *cli.App {
 	app.Version = VERSION
 	app.Name = "cfops"
 	app.Usage = "Cloud Foundry Operations Tool"
-	app.Commands = append(app.Commands, []cli.Command{
+	app.Commands = []cli.Command{
 		cli.Command{
-			Name: "version",
+			Name:  "version",
+			Usage: "shows the application version currently in use",
 			Action: func(c *cli.Context) {
 				cli.ShowVersion(c)
 			},
 		},
 		cli.Command{
-			Name: "list-tiles",
+			Name:  "list-tiles",
+			Usage: "shows a list of available backup/restore target tiles",
 			Action: func(c *cli.Context) {
 				fmt.Println("Available Tiles:")
 				for n, _ := range tileregistry.GetRegistry() {
@@ -43,6 +45,20 @@ func NewApp() *cli.App {
 				}
 			},
 		},
-	}...)
+		cli.Command{
+			Name:  "backup",
+			Usage: "creates a backup archive of the target tile",
+			Action: func(c *cli.Context) {
+				cli.ShowVersion(c)
+			},
+		},
+		cli.Command{
+			Name:  "restore",
+			Usage: "restores from an archive to the target tile",
+			Action: func(c *cli.Context) {
+				cli.ShowVersion(c)
+			},
+		},
+	}
 	return app
 }
