@@ -120,12 +120,9 @@ func (context *OpsManager) importInstallation() (err error) {
 			err = context.removeExistingDeploymentFiles()
 		}
 	}()
-	installSettingsUrl := fmt.Sprintf(OPSMGR_INSTALLATION_SETTINGS_URL, context.Hostname)
-
-	if err = context.importInstallationPart(installSettingsUrl, OPSMGR_INSTALLATION_SETTINGS_FILENAME, OPSMGR_INSTALLATION_SETTINGS_POSTFIELD_NAME, context.SettingsUploader); err == nil {
-		installAssetsUrl := fmt.Sprintf(OPSMGR_INSTALLATION_ASSETS_URL, context.Hostname)
-		err = context.importInstallationPart(installAssetsUrl, OPSMGR_INSTALLATION_ASSETS_FILENAME, OPSMGR_INSTALLATION_ASSETS_POSTFIELD_NAME, context.AssetsUploader)
-	}
+	lo.G.Debug("uplaoding installation assets")
+	installAssetsUrl := fmt.Sprintf(OPSMGR_INSTALLATION_ASSETS_URL, context.Hostname)
+	err = context.importInstallationPart(installAssetsUrl, OPSMGR_INSTALLATION_ASSETS_FILENAME, OPSMGR_INSTALLATION_ASSETS_POSTFIELD_NAME, context.AssetsUploader)
 	return
 }
 

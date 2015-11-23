@@ -38,7 +38,7 @@ type HttpGateway interface {
 	Put(HttpRequestEntity, io.Reader) RequestAdaptor
 }
 
-func NewHttpGateway() HttpGateway {
+var NewHttpGateway = func() HttpGateway {
 	return &DefaultHttpGateway{}
 }
 

@@ -37,7 +37,7 @@ func MultiPartBody(paramName, filename string, fileRef io.Reader, params map[str
 	return
 }
 
-func MultiPartUpload(conn ConnAuth, paramName, filename string, fileRef io.Reader, params map[string]string) (res *http.Response, err error) {
+var MultiPartUpload = func(conn ConnAuth, paramName, filename string, fileRef io.Reader, params map[string]string) (res *http.Response, err error) {
 	var contentType string
 	var rbody io.Reader
 
