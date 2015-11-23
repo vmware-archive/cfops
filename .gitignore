@@ -28,3 +28,6 @@ out/
 coverage.out
 cmd/cfops/cfops
 cmd/cfops/v2/v2
+_builds
+_projects
+_steps

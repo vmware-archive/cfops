@@ -1,9 +1,0 @@
-box: ubuntu
-build:
-    steps:
-        - script:
-            name: install libgmp-dev
-            code: apt-get install libgmp-dev -y
-
-        - shellcheck:
-            files: init.sh
