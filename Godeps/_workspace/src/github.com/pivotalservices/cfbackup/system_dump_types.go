@@ -3,11 +3,27 @@ package cfbackup
 import (
 	"fmt"
 	"io"
+	"os"
 
 	"github.com/pivotalservices/gtils/command"
 	"github.com/pivotalservices/gtils/persistence"
 	"github.com/xchapter7x/goutil"
 )
+
+func init() {
+	SetPGDumpUtilVersions()
+}
+
+func SetPGDumpUtilVersions() {
+	switch os.Getenv(ER_VERSION_ENV_FLAG) {
+	case ER_VERSION_16:
+		persistence.PGDMP_DUMP_BIN = "/var/vcap/packages/postgres-9.4.2/bin/pg_dump"
+		persistence.PGDMP_RESTORE_BIN = "/var/vcap/packages/postgres-9.4.2/bin/pg_restore"
+	default:
+		persistence.PGDMP_DUMP_BIN = "/var/vcap/packages/postgres/bin/pg_dump"
+		persistence.PGDMP_RESTORE_BIN = "/var/vcap/packages/postgres/bin/pg_restore"
+	}
+}
 
 const (
 	SD_PRODUCT   string = "Product"
