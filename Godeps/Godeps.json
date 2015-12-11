@@ -1,6 +1,6 @@
 {
 	"ImportPath": "github.com/pivotalservices/cfops",
-	"GoVersion": "go1.4.2",
+	"GoVersion": "go1.5.2",
 	"Packages": [
 		"./..."
 	],
@@ -34,8 +34,8 @@
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/cfbackup",
-			"Comment": "v0.1.0-39-gbebc773",
-			"Rev": "bebc773cd244ab64dc4561a4281647c2492dec5c"
+			"Comment": "v0.1.0-40-gce856d9",
+			"Rev": "ce856d982ab15e815aa65e3a40bd4106f1e21a17"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/bosh",
