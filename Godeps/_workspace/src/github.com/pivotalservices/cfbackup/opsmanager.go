@@ -1,6 +1,7 @@
 package cfbackup
 
 import (
+	"bufio"
 	"bytes"
 	"errors"
 	"fmt"
@@ -135,11 +136,13 @@ func (context *OpsManager) removeExistingDeploymentFiles() (err error) {
 
 func (context *OpsManager) importInstallationPart(url, filename, fieldname string, upload httpUploader) (err error) {
 	var (
-		fileRef io.Reader
+		fileRef *os.File
 	)
 	filePath := path.Join(context.TargetDir, context.OpsmanagerBackupDir, filename)
 
 	if fileRef, err = os.Open(filePath); err == nil {
+		defer fileRef.Close()
+		bufferedFileRef := bufio.NewReader(fileRef)
 		var res *http.Response
 		conn := ghttp.ConnAuth{
 			Url:      url,
@@ -147,7 +150,7 @@ func (context *OpsManager) importInstallationPart(url, filename, fieldname strin
 			Password: context.Password,
 		}
 
-		if res, err = upload(conn, fieldname, filename, fileRef, nil); err != nil {
+		if res, err = upload(conn, fieldname, filename, bufferedFileRef, nil); err != nil {
 			err = fmt.Errorf(fmt.Sprintf("ERROR:%s - %v", err.Error(), res))
 			lo.G.Debug("upload failed", log.Data{"err": err, "response": res})
 		}
