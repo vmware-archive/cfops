@@ -2,6 +2,7 @@ package fake
 
 import (
 	"io"
+	"io/ioutil"
 	"net/http"
 
 	ghttp "github.com/pivotalservices/gtils/http"
@@ -34,9 +35,11 @@ func (s *HttpRequestor) Put(entity ghttp.HttpRequestEntity, body io.Reader) ghtt
 
 type MultiPart struct {
 	UploadCallCount int
+	SpyFileContents []byte
 }
 
 func (s *MultiPart) Upload(conn ghttp.ConnAuth, paramName, filename string, fileRef io.Reader, params map[string]string) (res *http.Response, err error) {
+	s.SpyFileContents, _ = ioutil.ReadAll(fileRef)
 	s.UploadCallCount++
 	return
 }
