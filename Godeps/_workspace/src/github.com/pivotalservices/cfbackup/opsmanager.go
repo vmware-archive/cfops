@@ -66,9 +66,9 @@ var NewOpsManager = func(opsManagerHostname string, adminUsername string, adminP
 
 	if remoteExecuter, err = createExecuter(opsManagerHostname, opsManagerUsername, opsManagerPassword, OPSMGR_DEFAULT_SSH_PORT); err == nil {
 		settingsHttpRequestor := ghttp.NewHttpGateway()
-		settingsMultiHttpRequestor := ghttp.MultiPartUpload
+		settingsMultiHttpRequestor := ghttp.LargeMultiPartUpload
 		assetsHttpRequestor := ghttp.NewHttpGateway()
-		assetsMultiHttpRequestor := ghttp.MultiPartUpload
+		assetsMultiHttpRequestor := ghttp.LargeMultiPartUpload
 
 		context = &OpsManager{
 			SettingsUploader:  settingsMultiHttpRequestor,
@@ -150,7 +150,7 @@ func (context *OpsManager) importInstallationPart(url, filename, fieldname strin
 			Password: context.Password,
 		}
 
-		if res, err = upload(conn, fieldname, filename, bufferedFileRef, nil); err != nil {
+		if res, err = upload(conn, fieldname, filePath, bufferedFileRef, nil); err != nil {
 			err = fmt.Errorf(fmt.Sprintf("ERROR:%s - %v", err.Error(), res))
 			lo.G.Debug("upload failed", log.Data{"err": err, "response": res})
 		}
