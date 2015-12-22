@@ -6,10 +6,6 @@
 	],
 	"Deps": [
 		{
-			"ImportPath": "github.com/cheggaaa/pb",
-			"Rev": "0d0a7ff1a7808f93e57dfe7c1935b0b007e30c27"
-		},
-		{
 			"ImportPath": "github.com/codegangsta/cli",
 			"Comment": "1.2.0-159-gcffab77",
 			"Rev": "cffab77ecb4f963ced9e30344eb2b9282ef36887"
@@ -38,36 +34,41 @@
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/cfbackup",
-			"Comment": "v0.1.0-44-g74e9471",
-			"Rev": "74e9471518c658e196c15e2bb40ed0077be1dfa3"
+			"Comment": "v0.1.0-45-gb506d9e",
+			"Rev": "b506d9e228611429fe0f08407f9f54619ea249dd"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/bosh",
-			"Rev": "9a44ade815a5a8ddd6fb4adb5100c427a01a5703"
+			"Rev": "b4a5ba0edcfd1da67937e259fc58e40b3395b382"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/command",
-			"Rev": "9a44ade815a5a8ddd6fb4adb5100c427a01a5703"
+			"Rev": "b4a5ba0edcfd1da67937e259fc58e40b3395b382"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/http",
-			"Rev": "9a44ade815a5a8ddd6fb4adb5100c427a01a5703"
+			"Rev": "b4a5ba0edcfd1da67937e259fc58e40b3395b382"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/log",
-			"Rev": "9a44ade815a5a8ddd6fb4adb5100c427a01a5703"
+			"Rev": "b4a5ba0edcfd1da67937e259fc58e40b3395b382"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/osutils",
-			"Rev": "9a44ade815a5a8ddd6fb4adb5100c427a01a5703"
+			"Rev": "b4a5ba0edcfd1da67937e259fc58e40b3395b382"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/persistence",
-			"Rev": "9a44ade815a5a8ddd6fb4adb5100c427a01a5703"
+			"Rev": "b4a5ba0edcfd1da67937e259fc58e40b3395b382"
 		},
 		{
 			"ImportPath": "github.com/pkg/sftp",
 			"Rev": "9d712e91b1f05c35bf7e8fa71a1b09392925d452"
+		},
+		{
+			"ImportPath": "github.com/technoweenie/multipartstreamer",
+			"Comment": "v1.0.1",
+			"Rev": "a90a01d73ae432e2611d178c18367fbaa13e0154"
 		},
 		{
 			"ImportPath": "github.com/xchapter7x/goutil",
