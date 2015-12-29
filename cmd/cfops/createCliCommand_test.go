@@ -8,7 +8,7 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	. "github.com/pivotalservices/cfops/cmd/cfops/v2"
+	. "github.com/pivotalservices/cfops/cmd/cfops"
 	"github.com/pivotalservices/cfops/tileregistry"
 	"github.com/pivotalservices/cfops/tileregistry/fake"
 )
