@@ -55,7 +55,7 @@ NAME:
    cfops - Cloud Foundry Operations Tool
 
 USAGE:
-   ./createCliCommand command [command options] [arguments...]
+   ./cfops command [command options] [arguments...]
 
 COMMANDS:
    version	shows the application version currently in use
