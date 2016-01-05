@@ -14,7 +14,7 @@ tested and known to work for **ER v1.6**
 
 **RESTORE**
 tested and known to work for **Ops Manager v1.6**
-tested and known to work for **ER v1.6** 
+tested and known to work for **ER v1.6**
 
 
 ### Overview
@@ -23,7 +23,7 @@ This is simply an automation that is based on the supported way to back up Pivot
 
 It may be extended in the future to support greater breadth of functionality.
 
-**Backing up ER will take Cloud Controller offline for the duration of the backup, causing your foundation to become readonly for the duration of the backup**. App pushes etc will not work during this time. 
+**Backing up ER will take Cloud Controller offline for the duration of the backup, causing your foundation to become readonly for the duration of the backup**. App pushes etc will not work during this time.
 
 ### Install
 
@@ -63,6 +63,14 @@ COMMANDS:
    backup	creates a backup archive of the target tile
    restore	restores from an archive to the target tile
    help, h	Shows a list of commands or help for one command
+```
+
+**setting pcf versions**
+
+If using PCF 1.6 or above you need to set the `ER_VERSION` variable.
+
+```
+ER_VERSION=1.6 ./cfops backup ...
 ```
 
 **setting log levels**
@@ -179,7 +187,7 @@ OPTIONS:
 
 
 
-   
+
 $ ./cfops help restore
 NAME:
    restore - restore --opsmanagerhost <host> --adminuser <usr> --adminpass <pass> --opsmanageruser <opsuser> --opsmanagerpass <opspass> -d <dir> --tl 'opsmanager, er'
@@ -200,8 +208,3 @@ OPTIONS:
    --destination, -d 		path of the Cloud Foundry backup archive [$CFOPS_BACKUP_PATH]
 
 ```
-
-
-
-
-
