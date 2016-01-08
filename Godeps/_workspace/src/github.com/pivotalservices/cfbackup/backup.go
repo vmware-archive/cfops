@@ -16,29 +16,6 @@ var (
 	}
 )
 
-// Tile is a deployable component that can be backed up
-type Tile interface {
-	Backup() error
-	Restore() error
-}
-
-type connBucketInterface interface {
-	Host() string
-	AdminUser() string
-	AdminPass() string
-	OpsManagerUser() string
-	OpsManagerPass() string
-	Destination() string
-}
-
-type BackupContext struct {
-	TargetDir string
-}
-
-type action func() error
-
-type actionAdaptor func(t Tile) action
-
 //Backup the list of all default tiles
 func RunBackupPipeline(hostname, adminUsername, adminPassword, opsManagerUsername, opsManagerPassword, destination string) (err error) {
 	var tiles []Tile
@@ -101,7 +78,7 @@ func fullTileList(conn connBucketInterface, loggerName string) (tiles []Tile, er
 		opsmanager     Tile
 		elasticRuntime Tile
 	)
-	installationFilePath := path.Join(conn.Destination(), OPSMGR_BACKUP_DIR, OPSMGR_INSTALLATION_SETTINGS_FILENAME)
+	installationFilePath := path.Join(conn.Destination(), OpsMgrBackupDir, OpsMgrInstallationSettingsFilename)
 
 	if opsmanager, err = NewOpsManager(conn.Host(), conn.AdminUser(), conn.AdminPass(), conn.OpsManagerUser(), conn.OpsManagerPass(), conn.Destination()); err == nil {
 		elasticRuntime = NewElasticRuntime(installationFilePath, conn.Destination())

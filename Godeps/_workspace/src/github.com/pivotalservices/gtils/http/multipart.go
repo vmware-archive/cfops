@@ -15,7 +15,7 @@ type ConnAuth struct {
 }
 
 type MultiPartBodyFunc func(string, string, io.Reader, map[string]string) (io.ReadWriter, string, error)
-type MultiPartUploadFunc func(conn ConnAuth, paramName, filename string, fileRef io.Reader, params map[string]string) (res *http.Response, err error)
+type MultiPartUploadFunc func(conn ConnAuth, paramName, filename string, fileSize int64, fileRef io.Reader, params map[string]string) (res *http.Response, err error)
 
 func MultiPartBody(paramName, filename string, fileRef io.Reader, params map[string]string) (body io.ReadWriter, contentType string, err error) {
 	var part io.Writer
@@ -37,7 +37,7 @@ func MultiPartBody(paramName, filename string, fileRef io.Reader, params map[str
 	return
 }
 
-var MultiPartUpload = func(conn ConnAuth, paramName, filename string, fileRef io.Reader, params map[string]string) (res *http.Response, err error) {
+var MultiPartUpload = func(conn ConnAuth, paramName, filename string, fileSize int64, fileRef io.Reader, params map[string]string) (res *http.Response, err error) {
 	var contentType string
 	var rbody io.Reader
 

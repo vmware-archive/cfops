@@ -9,9 +9,9 @@ import (
 	"os"
 	"path"
 
+	"github.com/cloudfoundry-community/go-cfenv"
 	. "github.com/pivotalservices/gtils/http"
 	"github.com/pivotalservices/gtils/log"
-	"github.com/pivotalservices/gtils/osutils"
 	"github.com/xchapter7x/lo"
 )
 
@@ -122,10 +122,8 @@ var NewElasticRuntime = func(jsonFile string, target string) *ElasticRuntime {
 	)
 
 	context := &ElasticRuntime{
-		JsonFile: jsonFile,
-		BackupContext: BackupContext{
-			TargetDir: target,
-		},
+		JsonFile:      jsonFile,
+		BackupContext: NewBackupContext(target, cfenv.CurrentEnv()),
 		SystemsInfo: map[string]SystemDump{
 			ER_DIRECTOR: directorInfo,
 			ER_CONSOLE:  consoledbInfo,
@@ -234,53 +232,28 @@ func (context *ElasticRuntime) RunDbAction(dbInfoList []SystemDump, action int) 
 	return
 }
 
-func (context *ElasticRuntime) getReadWriter(fpath string, action int) (rw io.ReadWriter, err error) {
-	switch action {
-	case IMPORT_ARCHIVE:
-		var exists bool
-
-		if exists, err = osutils.Exists(fpath); exists && err == nil {
-			rw, err = os.Open(fpath)
-
-		} else {
-			var pathError os.PathError
-			pathError = *ER_ERROR_INVALID_PATH
-			pathError.Path = fpath
-			err = &pathError
-		}
-
-	case EXPORT_ARCHIVE:
-		rw, err = osutils.SafeCreate(fpath)
-	}
-	return
-}
-
 func (context *ElasticRuntime) readWriterArchive(dbInfo SystemDump, databaseDir string, action int) (err error) {
-	var (
-		archivefile io.ReadWriter
-	)
 	filename := fmt.Sprintf(ER_BACKUP_FILE_FORMAT, dbInfo.Get(SD_COMPONENT))
 	filepath := path.Join(databaseDir, filename)
 
-	if archivefile, err = context.getReadWriter(filepath, action); err == nil {
-		err = context.importExport(archivefile, dbInfo, action)
-	}
-	return
-}
-
-func (context *ElasticRuntime) importExport(rw io.ReadWriter, s SystemDump, action int) (err error) {
 	var pb PersistanceBackup
 
-	if pb, err = s.GetPersistanceBackup(); err == nil {
-
+	if pb, err = dbInfo.GetPersistanceBackup(); err == nil {
 		switch action {
 		case IMPORT_ARCHIVE:
 			lo.G.Debug("we are doing something here now")
-			err = pb.Import(rw)
-
+			var backupReader io.ReadCloser
+			if backupReader, err = context.Reader(filepath); err == nil {
+				defer backupReader.Close()
+				err = pb.Import(backupReader)
+			}
 		case EXPORT_ARCHIVE:
 			lo.G.Info("Dumping database to file")
-			err = pb.Dump(rw)
+			var backupWriter io.WriteCloser
+			if backupWriter, err = context.Writer(filepath); err == nil {
+				defer backupWriter.Close()
+				err = pb.Dump(backupWriter)
+			}
 		}
 	}
 	return
@@ -294,7 +267,6 @@ func (context *ElasticRuntime) ReadAllUserCredentials() (err error) {
 	defer fileRef.Close()
 
 	if fileRef, err = os.Open(context.JsonFile); err == nil {
-
 		if jsonObj, err = ReadAndUnmarshal(fileRef); err == nil {
 			err = context.assignCredentialsAndInstallationName(jsonObj)
 		}
