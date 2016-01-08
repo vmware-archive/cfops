@@ -38,7 +38,7 @@ type MultiPart struct {
 	SpyFileContents []byte
 }
 
-func (s *MultiPart) Upload(conn ghttp.ConnAuth, paramName, filename string, fileRef io.Reader, params map[string]string) (res *http.Response, err error) {
+func (s *MultiPart) Upload(conn ghttp.ConnAuth, paramName, filename string, fileSize int64, fileRef io.Reader, params map[string]string) (res *http.Response, err error) {
 	s.SpyFileContents, _ = ioutil.ReadAll(fileRef)
 	s.UploadCallCount++
 	return

@@ -8,33 +8,31 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"path"
 
+	"github.com/cloudfoundry-community/go-cfenv"
 	"github.com/pivotalservices/gtils/command"
 	ghttp "github.com/pivotalservices/gtils/http"
 	"github.com/pivotalservices/gtils/log"
-	"github.com/pivotalservices/gtils/osutils"
 	"github.com/xchapter7x/lo"
 )
 
+// Ops Manager Backup constants
 const (
-	OPSMGR_INSTALLATION_SETTINGS_FILENAME       string = "installation.json"
-	OPSMGR_INSTALLATION_SETTINGS_POSTFIELD_NAME string = "installation[file]"
-	OPSMGR_INSTALLATION_ASSETS_FILENAME         string = "installation.zip"
-	OPSMGR_INSTALLATION_ASSETS_POSTFIELD_NAME   string = "installation[file]"
-	OPSMGR_DEPLOYMENTS_FILENAME                 string = "deployments.tar.gz"
-	OPSMGR_ENCRYPTIONKEY_FILENAME               string = "cc_db_encryption_key.txt"
-	OPSMGR_BACKUP_DIR                           string = "opsmanager"
-	OPSMGR_DEPLOYMENTS_DIR                      string = "deployments"
-	OPSMGR_DEFAULT_USER                         string = "tempest"
-	OPSMGR_DEFAULT_SSH_PORT                     int    = 22
-	OPSMGR_INSTALLATION_SETTINGS_URL            string = "https://%s/api/installation_settings"
-	OPSMGR_INSTALLATION_ASSETS_URL              string = "https://%s/api/installation_asset_collection"
-	OPSMGR_DEPLOYMENTS_FILE                     string = "/var/tempest/workspaces/default/deployments/bosh-deployments.yml"
+	OpsMgrInstallationSettingsFilename    string = "installation.json"
+	OpsMgrInstallationAssetsFileName      string = "installation.zip"
+	OpsMgrInstallationAssetsPostFieldName string = "installation[file]"
+	OpsMgrDeploymentsFileName             string = "deployments.tar.gz"
+	OpsMgrEncryptionKeyFileName           string = "cc_db_encryption_key.txt"
+	OpsMgrBackupDir                       string = "opsmanager"
+	OpsMgrDeploymentsDir                  string = "deployments"
+	OpsMgrDefaultSSHPort                  int    = 22
+	OpsMgrInstallationSettingsURL         string = "https://%s/api/installation_settings"
+	OpsMgrInstallationAssetsURL           string = "https://%s/api/installation_asset_collection"
+	OpsMgrDeploymentsFile                 string = "/var/tempest/workspaces/default/deployments/bosh-deployments.yml"
 )
 
-type httpUploader func(conn ghttp.ConnAuth, paramName, filename string, fileRef io.Reader, params map[string]string) (res *http.Response, err error)
+type httpUploader func(conn ghttp.ConnAuth, paramName, filename string, fileSize int64, fileRef io.Reader, params map[string]string) (res *http.Response, err error)
 
 type httpRequestor interface {
 	Get(ghttp.HttpRequestEntity) ghttp.RequestAdaptor
@@ -64,172 +62,26 @@ type OpsManager struct {
 var NewOpsManager = func(opsManagerHostname string, adminUsername string, adminPassword string, opsManagerUsername string, opsManagerPassword string, target string) (context *OpsManager, err error) {
 	var remoteExecuter command.Executer
 
-	if remoteExecuter, err = createExecuter(opsManagerHostname, opsManagerUsername, opsManagerPassword, OPSMGR_DEFAULT_SSH_PORT); err == nil {
-		settingsHttpRequestor := ghttp.NewHttpGateway()
-		settingsMultiHttpRequestor := ghttp.LargeMultiPartUpload
-		assetsHttpRequestor := ghttp.NewHttpGateway()
-		assetsMultiHttpRequestor := ghttp.LargeMultiPartUpload
+	if remoteExecuter, err = createExecuter(opsManagerHostname, opsManagerUsername, opsManagerPassword, OpsMgrDefaultSSHPort); err == nil {
+		settingsHTTPRequestor := ghttp.NewHttpGateway()
+		settingsMultiHTTPRequestor := ghttp.LargeMultiPartUpload
+		assetsHTTPRequestor := ghttp.NewHttpGateway()
+		assetsMultiHTTPRequestor := ghttp.LargeMultiPartUpload
 
 		context = &OpsManager{
-			SettingsUploader:  settingsMultiHttpRequestor,
-			AssetsUploader:    assetsMultiHttpRequestor,
-			SettingsRequestor: settingsHttpRequestor,
-			AssetsRequestor:   assetsHttpRequestor,
-			DeploymentDir:     path.Join(target, OPSMGR_BACKUP_DIR, OPSMGR_DEPLOYMENTS_DIR),
-			Hostname:          opsManagerHostname,
-			Username:          adminUsername,
-			Password:          adminPassword,
-			BackupContext: BackupContext{
-				TargetDir: target,
-			},
+			SettingsUploader:    settingsMultiHTTPRequestor,
+			AssetsUploader:      assetsMultiHTTPRequestor,
+			SettingsRequestor:   settingsHTTPRequestor,
+			AssetsRequestor:     assetsHTTPRequestor,
+			DeploymentDir:       path.Join(target, OpsMgrBackupDir, OpsMgrDeploymentsDir),
+			Hostname:            opsManagerHostname,
+			Username:            adminUsername,
+			Password:            adminPassword,
+			BackupContext:       NewBackupContext(target, cfenv.CurrentEnv()),
 			Executer:            remoteExecuter,
 			LocalExecuter:       command.NewLocalExecuter(),
-			OpsmanagerBackupDir: OPSMGR_BACKUP_DIR,
+			OpsmanagerBackupDir: OpsMgrBackupDir,
 		}
-	}
-	return
-}
-
-func (context *OpsManager) GetInstallationSettings() (settings io.Reader, err error) {
-	var bytesBuffer = new(bytes.Buffer)
-	url := fmt.Sprintf(OPSMGR_INSTALLATION_SETTINGS_URL, context.Hostname)
-	lo.G.Debug(fmt.Sprintf("Exporting url '%s'", url))
-
-	if err = context.exportUrlToWriter(url, bytesBuffer, context.SettingsRequestor); err == nil {
-		settings = bytesBuffer
-	}
-	return
-}
-
-// Backup performs a backup of a Pivotal Ops Manager instance
-func (context *OpsManager) Backup() (err error) {
-	if err = context.copyDeployments(); err == nil {
-		err = context.exportAndExtract()
-	}
-	return
-}
-
-// Restore performs a restore of a Pivotal Ops Manager instance
-func (context *OpsManager) Restore() (err error) {
-	err = context.importInstallation()
-	return
-}
-
-func (context *OpsManager) importInstallation() (err error) {
-	defer func() {
-		if err == nil {
-			err = context.removeExistingDeploymentFiles()
-		}
-	}()
-	lo.G.Debug("uplaoding installation assets")
-	installAssetsUrl := fmt.Sprintf(OPSMGR_INSTALLATION_ASSETS_URL, context.Hostname)
-	err = context.importInstallationPart(installAssetsUrl, OPSMGR_INSTALLATION_ASSETS_FILENAME, OPSMGR_INSTALLATION_ASSETS_POSTFIELD_NAME, context.AssetsUploader)
-	return
-}
-
-func (context *OpsManager) removeExistingDeploymentFiles() (err error) {
-	var w bytes.Buffer
-	command := fmt.Sprintf("if [ -f %s ]; then sudo rm %s;fi", OPSMGR_DEPLOYMENTS_FILE, OPSMGR_DEPLOYMENTS_FILE)
-	err = context.Executer.Execute(&w, command)
-	return
-}
-
-func (context *OpsManager) importInstallationPart(url, filename, fieldname string, upload httpUploader) (err error) {
-	var (
-		fileRef *os.File
-	)
-	filePath := path.Join(context.TargetDir, context.OpsmanagerBackupDir, filename)
-
-	if fileRef, err = os.Open(filePath); err == nil {
-		defer fileRef.Close()
-		bufferedFileRef := bufio.NewReader(fileRef)
-		var res *http.Response
-		conn := ghttp.ConnAuth{
-			Url:      url,
-			Username: context.Username,
-			Password: context.Password,
-		}
-
-		if res, err = upload(conn, fieldname, filePath, bufferedFileRef, nil); err != nil {
-			err = fmt.Errorf(fmt.Sprintf("ERROR:%s - %v", err.Error(), res))
-			lo.G.Debug("upload failed", log.Data{"err": err, "response": res})
-		}
-	}
-	return
-}
-
-func (context *OpsManager) exportAndExtract() (err error) {
-	if err = context.extract(); err == nil {
-		err = context.export()
-	}
-	return
-}
-
-func (context *OpsManager) export() (err error) {
-
-	if err = context.exportUrlToFile(OPSMGR_INSTALLATION_SETTINGS_URL, OPSMGR_INSTALLATION_SETTINGS_FILENAME); err == nil {
-		err = context.exportUrlToFile(OPSMGR_INSTALLATION_ASSETS_URL, OPSMGR_INSTALLATION_ASSETS_FILENAME)
-	}
-	return
-}
-
-func (context *OpsManager) exportUrlToFile(urlFormat string, filename string) (err error) {
-	var settingsFileRef *os.File
-	defer settingsFileRef.Close()
-
-	url := fmt.Sprintf(urlFormat, context.Hostname)
-
-	lo.G.Debug("Exporting url '%s' to file '%s'", log.Data{"url": url, "filename": filename})
-
-	if settingsFileRef, err = osutils.SafeCreate(context.TargetDir, context.OpsmanagerBackupDir, filename); err == nil {
-		err = context.exportUrlToWriter(url, settingsFileRef, context.SettingsRequestor)
-	}
-	return
-}
-
-func (context *OpsManager) exportUrlToWriter(url string, dest io.Writer, requestor httpRequestor) (err error) {
-	resp, err := requestor.Get(ghttp.HttpRequestEntity{
-		Url:         url,
-		Username:    context.Username,
-		Password:    context.Password,
-		ContentType: "application/octet-stream",
-	})()
-	if err == nil && resp.StatusCode == http.StatusOK {
-		defer resp.Body.Close()
-		_, err = io.Copy(dest, resp.Body)
-
-	} else if resp.StatusCode != http.StatusOK {
-		errMsg, _ := ioutil.ReadAll(resp.Body)
-		err = errors.New(string(errMsg[:]))
-	}
-	return
-}
-
-func (context *OpsManager) extract() (err error) {
-	var keyFileRef *os.File
-	defer keyFileRef.Close()
-	lo.G.Debug("Extracting Ops Manager")
-
-	if keyFileRef, err = osutils.SafeCreate(context.TargetDir, context.OpsmanagerBackupDir, OPSMGR_ENCRYPTIONKEY_FILENAME); err == nil {
-		lo.G.Debug("Extracting encryption key")
-		backupDir := path.Join(context.TargetDir, context.OpsmanagerBackupDir)
-		deployment := path.Join(backupDir, OPSMGR_DEPLOYMENTS_FILENAME)
-		cmd := "tar -xf " + deployment + " -C " + backupDir
-		lo.G.Debug("Extracting : %s", log.Data{"command": cmd})
-		context.LocalExecuter.Execute(nil, cmd)
-
-		err = ExtractEncryptionKey(keyFileRef, context.DeploymentDir)
-	}
-	return
-}
-
-func (context *OpsManager) copyDeployments() (err error) {
-	var file *os.File
-	defer file.Close()
-
-	if file, err = osutils.SafeCreate(context.TargetDir, context.OpsmanagerBackupDir, OPSMGR_DEPLOYMENTS_FILENAME); err == nil {
-		command := "cd /var/tempest/workspaces/default && tar cz deployments"
-		err = context.Executer.Execute(file, command)
 	}
 	return
 }
@@ -241,5 +93,151 @@ func createExecuter(hostname, opsManagerUsername, opsManagerPassword string, por
 		Host:     hostname,
 		Port:     port,
 	})
+	return
+}
+
+// GetInstallationSettings retrieves all the installation settings from OpsMan
+// and returns them in a buffered reader
+func (context *OpsManager) GetInstallationSettings() (settings io.Reader, err error) {
+	var bytesBuffer = new(bytes.Buffer)
+	url := fmt.Sprintf(OpsMgrInstallationSettingsURL, context.Hostname)
+	lo.G.Debug(fmt.Sprintf("Exporting url '%s'", url))
+
+	if err = context.saveHTTPResponse(url, bytesBuffer); err == nil {
+		settings = bytesBuffer
+	}
+	return
+}
+
+//~ Backup Operations
+
+// Backup performs a backup of a Pivotal Ops Manager instance
+func (context *OpsManager) Backup() (err error) {
+	if err = context.saveDeployments(); err == nil {
+		err = context.saveInstallation()
+	}
+	return
+}
+
+func (context *OpsManager) saveDeployments() (err error) {
+	var backupWriter io.WriteCloser
+	if backupWriter, err = context.Writer(context.TargetDir, context.OpsmanagerBackupDir, OpsMgrDeploymentsFileName); err == nil {
+		defer backupWriter.Close()
+		command := "cd /var/tempest/workspaces/default && tar cz deployments"
+		err = context.Executer.Execute(backupWriter, command)
+	}
+	return
+}
+
+func (context *OpsManager) saveInstallation() (err error) {
+	if err = context.saveEncryptionKey(); err == nil {
+		err = context.saveInstallationSettingsAndAssets()
+	}
+	return
+}
+
+func (context *OpsManager) saveEncryptionKey() (err error) {
+	var backupWriter io.WriteCloser
+	if backupWriter, err = context.Writer(context.TargetDir, context.OpsmanagerBackupDir, OpsMgrEncryptionKeyFileName); err == nil {
+		defer backupWriter.Close()
+		lo.G.Debug("Extracting encryption key")
+		backupDir := path.Join(context.TargetDir, context.OpsmanagerBackupDir)
+		deployment := path.Join(backupDir, OpsMgrDeploymentsFileName)
+		cmd := "tar -xf " + deployment + " -C " + backupDir
+		lo.G.Debug("Extracting : %s", log.Data{"command": cmd})
+		context.LocalExecuter.Execute(nil, cmd)
+		err = ExtractEncryptionKey(backupWriter, context.DeploymentDir)
+	}
+	return
+}
+
+func (context *OpsManager) saveInstallationSettingsAndAssets() (err error) {
+	if err = context.exportFile(OpsMgrInstallationSettingsURL, OpsMgrInstallationSettingsFilename); err == nil {
+		err = context.exportFile(OpsMgrInstallationAssetsURL, OpsMgrInstallationAssetsFileName)
+	}
+	return
+}
+
+func (context *OpsManager) exportFile(urlFormat string, filename string) (err error) {
+	url := fmt.Sprintf(urlFormat, context.Hostname)
+
+	lo.G.Debug("Exporting file", log.Data{"url": url, "filename": filename})
+	var backupWriter io.WriteCloser
+
+	if backupWriter, err = context.Writer(context.TargetDir, context.OpsmanagerBackupDir, filename); err == nil {
+		defer backupWriter.Close()
+		err = context.saveHTTPResponse(url, backupWriter)
+	}
+	return
+}
+
+func (context *OpsManager) saveHTTPResponse(url string, dest io.Writer) (err error) {
+	requestor := context.SettingsRequestor
+	resp, err := requestor.Get(ghttp.HttpRequestEntity{
+		Url:         url,
+		Username:    context.Username,
+		Password:    context.Password,
+		ContentType: "application/octet-stream",
+	})()
+
+	if err == nil && resp.StatusCode == http.StatusOK {
+		defer resp.Body.Close()
+		_, err = io.Copy(dest, resp.Body)
+
+	} else if resp.StatusCode != http.StatusOK {
+		errMsg, _ := ioutil.ReadAll(resp.Body)
+		err = errors.New(string(errMsg[:]))
+	}
+	return
+}
+
+//~ Restore Operations
+
+// Restore performs a restore of a Pivotal Ops Manager instance
+func (context *OpsManager) Restore() (err error) {
+	err = context.importInstallation()
+	return
+}
+
+func (context *OpsManager) importInstallation() (err error) {
+	defer func() {
+
+		if err == nil {
+			err = context.removeExistingDeploymentFiles()
+		}
+	}()
+	lo.G.Debug("uploading installation assets")
+	installAssetsURL := fmt.Sprintf(OpsMgrInstallationAssetsURL, context.Hostname)
+	err = context.importInstallationPart(installAssetsURL, OpsMgrInstallationAssetsFileName, OpsMgrInstallationAssetsPostFieldName, context.AssetsUploader)
+	return
+}
+
+func (context *OpsManager) importInstallationPart(url, filename, fieldname string, upload httpUploader) (err error) {
+	var backupReader io.ReadCloser
+
+	if backupReader, err = context.Reader(context.TargetDir, context.OpsmanagerBackupDir, filename); err == nil {
+		defer backupReader.Close()
+		bufferedReader := bufio.NewReader(backupReader)
+		var res *http.Response
+		conn := ghttp.ConnAuth{
+			Url:      url,
+			Username: context.Username,
+			Password: context.Password,
+		}
+
+		filePath := path.Join(context.TargetDir, context.OpsmanagerBackupDir, filename)
+
+		if res, err = upload(conn, fieldname, filePath, -1, bufferedReader, nil); err != nil {
+			err = fmt.Errorf(fmt.Sprintf("ERROR:%s - %v", err.Error(), res))
+			lo.G.Debug("upload failed", log.Data{"err": err, "response": res})
+		}
+	}
+	return
+}
+
+func (context *OpsManager) removeExistingDeploymentFiles() (err error) {
+	var w bytes.Buffer
+	command := fmt.Sprintf("if [ -f %s ]; then sudo rm %s;fi", OpsMgrDeploymentsFile, OpsMgrDeploymentsFile)
+	err = context.Executer.Execute(&w, command)
 	return
 }

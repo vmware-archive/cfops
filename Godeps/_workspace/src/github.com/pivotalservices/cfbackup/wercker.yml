@@ -1,4 +1,4 @@
-box: motemen/golang-goxc
+box: erykwalder/golang@1.5.0
 build:
   # The steps that will be executed on build
   steps:
@@ -35,10 +35,10 @@ build:
           cp -R ./ ${WERCKER_OUTPUT_DIR}
 
 deploy:
-  steps: 
+  steps:
     - add-ssh-key:
         keyname: PCF_GITHUB_KEY
-  
+
     - xchapter7x/flowy-release:
         action: "complete-release"
         tag_variable_name: "VERSION_TAG"

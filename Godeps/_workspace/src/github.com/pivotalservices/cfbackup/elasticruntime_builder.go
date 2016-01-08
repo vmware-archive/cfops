@@ -19,7 +19,7 @@ func (s *ElasticRuntimeBuilder) New(tileSpec tileregistry.TileSpec) (elasticRunt
 	)
 
 	if installationSettings, err = GetInstallationSettings(tileSpec); err == nil {
-		installationTmpFile, err = ioutil.TempFile("", OPSMGR_INSTALLATION_SETTINGS_FILENAME)
+		installationTmpFile, err = ioutil.TempFile("", OpsMgrInstallationSettingsFilename)
 		defer installationTmpFile.Close()
 		io.Copy(installationTmpFile, installationSettings)
 		elasticRuntime = NewElasticRuntime(installationTmpFile.Name(), tileSpec.ArchiveDirectory)
