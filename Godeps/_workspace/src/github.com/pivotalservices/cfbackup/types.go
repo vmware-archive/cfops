@@ -5,6 +5,7 @@ import "io"
 //BackupContext - stores the base context information for a backup/restore
 type BackupContext struct {
 	TargetDir string
+	IsS3      bool
 	StorageProvider
 }
 

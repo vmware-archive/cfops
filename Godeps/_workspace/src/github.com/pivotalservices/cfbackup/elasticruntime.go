@@ -220,7 +220,7 @@ func (context *ElasticRuntime) getAllCloudControllerVMs() (ccvms []CCJob, err er
 func (context *ElasticRuntime) RunDbAction(dbInfoList []SystemDump, action int) (err error) {
 
 	for _, info := range dbInfoList {
-		lo.G.Debug(fmt.Sprintf("%v", info))
+		lo.G.Debug(fmt.Sprintf("RunDbAction info: %+v", info))
 
 		if err = info.Error(); err == nil {
 			err = context.readWriterArchive(info, context.TargetDir, action)
@@ -248,7 +248,7 @@ func (context *ElasticRuntime) readWriterArchive(dbInfo SystemDump, databaseDir 
 				err = pb.Import(backupReader)
 			}
 		case EXPORT_ARCHIVE:
-			lo.G.Info("Dumping database to file")
+			lo.G.Info("Exporting database")
 			var backupWriter io.WriteCloser
 			if backupWriter, err = context.Writer(filepath); err == nil {
 				defer backupWriter.Close()
@@ -296,6 +296,7 @@ func (context *ElasticRuntime) assignCredentials(jsonObj InstallationCompareObje
 		if ip, pass, err = GetPasswordAndIP(jsonObj, sysInfo.Get(SD_PRODUCT), sysInfo.Get(SD_COMPONENT), sysInfo.Get(SD_IDENTITY)); err == nil {
 			sysInfo.Set(SD_IP, ip)
 			sysInfo.Set(SD_PASS, pass)
+			lo.G.Debug("%s credentials for %s from installation.json are %s", name, sysInfo.Get(SD_COMPONENT), sysInfo.Get(SD_IDENTITY), pass)
 			_, vpass, err = GetPasswordAndIP(jsonObj, sysInfo.Get(SD_PRODUCT), sysInfo.Get(SD_COMPONENT), sysInfo.Get(SD_VCAPUSER))
 			sysInfo.Set(SD_VCAPPASS, vpass)
 			context.SystemsInfo[name] = sysInfo
