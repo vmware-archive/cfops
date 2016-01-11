@@ -7,6 +7,7 @@ func NewBackupContext(targetDir string, env map[string]string) (backupContext Ba
 	}
 	if useS3(env) {
 		backupContext.StorageProvider = NewS3Provider(env[S3Domain], env[AccessKeyIDVarname], env[SecretAccessKeyVarname], env[BucketNameVarname])
+		backupContext.IsS3 = true
 	} else {
 		backupContext.StorageProvider = NewDiskProvider()
 	}
