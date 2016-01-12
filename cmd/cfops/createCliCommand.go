@@ -36,11 +36,12 @@ func buraAction(commandName string, eh *ErrorHandler) (action func(*cli.Context)
 			}
 		)
 
-		if err := getTileFromRegistry(fs, commandName); err == nil {
-			lo.G.Debug("Tile action completed successfully")
-
+		if tile, err := getTileFromRegistry(fs, commandName); err == nil {
+			if err = runTileAction(commandName, tile); err == nil {
+				lo.G.Debug("Tile action completed successfully")
+			}
 		} else {
-			lo.G.Error("there was an error getting tile from registry:", err.Error())
+			lo.G.Error("there was an error getting tile from registry: %v", err)
 			cli.ShowCommandHelp(c, commandName)
 			eh.ExitCode = helpExitCode
 			eh.Error = err
@@ -50,6 +51,7 @@ func buraAction(commandName string, eh *ErrorHandler) (action func(*cli.Context)
 }
 
 func runTileAction(commandName string, tile tileregistry.Tile) (err error) {
+	lo.G.Debug("Running %s for tile: %+v", commandName, tile)
 	switch commandName {
 	case "backup":
 		err = tile.Backup()
@@ -59,16 +61,14 @@ func runTileAction(commandName string, tile tileregistry.Tile) (err error) {
 	return
 }
 
-func getTileFromRegistry(fs *flagSet, commandName string) (err error) {
-	var tile tileregistry.Tile
-	lo.G.Debug("checking registry for available tile")
-	lo.G.Error(fs.Tile())
+func getTileFromRegistry(fs *flagSet, commandName string) (tile tileregistry.Tile, err error) {
+	lo.G.Debug("checking registry for %s tile", fs.Tile())
 
 	if tileBuilder, ok := tileregistry.GetRegistry()[fs.Tile()]; ok {
 		lo.G.Debug("found tile in registry")
 
 		if hasValidBackupRestoreFlags(fs) {
-			lo.G.Debug("we have all required flags and a proper builder: ", tileBuilder)
+			lo.G.Debug("we have all required flags and a proper builder")
 			tile, err = tileBuilder.New(tileregistry.TileSpec{
 				OpsManagerHost:   fs.Host(),
 				AdminUser:        fs.AdminUser(),
@@ -77,7 +77,9 @@ func getTileFromRegistry(fs *flagSet, commandName string) (err error) {
 				OpsManagerPass:   fs.OpsManagerPass(),
 				ArchiveDirectory: fs.Dest(),
 			})
-			err = runTileAction(commandName, tile)
+			if err != nil {
+				return nil, fmt.Errorf("failure to connect to ops manager host: %v", err)
+			}
 
 		} else {
 			err = ErrInvalidFlagArgs

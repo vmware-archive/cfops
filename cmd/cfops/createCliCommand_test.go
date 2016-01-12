@@ -120,6 +120,37 @@ func testTileAction(actionName string) {
 					Ω(controlErrorHandler.Error).Should(Equal(ErrInvalidFlagArgs))
 				})
 			})
+
+			Context("when a tile builder returns an error", func() {
+				var (
+					controlTileName      = "fake-tile"
+					controlTileGenerator *fake.TileGenerator
+					controlTile          *fake.Tile
+				)
+				BeforeEach(func() {
+					controlTile = new(fake.Tile)
+					controlTileGenerator = new(fake.TileGenerator)
+					controlTileGenerator.TileSpy = controlTile
+					controlTileGenerator.ErrFake = fmt.Errorf("operation timed out")
+					tileregistry.Register(controlTileName, controlTileGenerator)
+					set := flag.NewFlagSet("", 0)
+					set.String("tile", controlTileName, "")
+					set.String("opsmanagerhost", "*****", "")
+					set.String("adminuser", "*****", "")
+					set.String("adminpass", "*****", "")
+					set.String("opsmanageruser", "*****", "")
+					set.String("opsmanagerpass", "*****", "")
+					set.String("destination", "*****", "")
+					controlCliContext = cli.NewContext(cli.NewApp(), set, nil)
+					controlCmd = CreateBURACliCommand(controlName, controlUsage, controlErrorHandler)
+					controlCliContext.Command = controlCmd
+				})
+				It("then it should set an error and failure exit code", func() {
+					controlCmd.Action(controlCliContext)
+					Ω(controlErrorHandler.ExitCode).ShouldNot(Equal(controlExit))
+					Ω(controlErrorHandler.Error).Should(HaveOccurred())
+				})
+			})
 		})
 	})
 }
