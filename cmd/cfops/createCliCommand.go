@@ -11,7 +11,7 @@ import (
 )
 
 func CreateBURACliCommand(name string, usage string, eh *ErrorHandler) (command cli.Command) {
-	desc := fmt.Sprintf("%s --opsmanagerhost <host> --adminuser <usr> --adminpass <pass> --opsmanageruser <opsuser> --opsmanagerpass <opspass> --pem <pemfile_path> -d <dir> --tile elastic-runtime", name)
+	desc := fmt.Sprintf("%s --opsmanagerhost <host> --adminuser <usr> --adminpass <pass> --opsmanageruser <opsuser> --opsmanagerpass <opspass> -d <dir> --tile elastic-runtime", name)
 	command = cli.Command{
 		Name:        name,
 		Usage:       usage,
@@ -33,7 +33,6 @@ func buraAction(commandName string, eh *ErrorHandler) (action func(*cli.Context)
 				opsManagerPass: c.String(flagList[opsManagerPass].Flag[0]),
 				dest:           c.String(flagList[dest].Flag[0]),
 				tile:           c.String(flagList[tile].Flag[0]),
-				pempath:        c.String(flagList[pempath].Flag[0]),
 			}
 		)
 
@@ -77,7 +76,6 @@ func getTileFromRegistry(fs *flagSet, commandName string) (tile tileregistry.Til
 				OpsManagerUser:   fs.OpsManagerUser(),
 				OpsManagerPass:   fs.OpsManagerPass(),
 				ArchiveDirectory: fs.Dest(),
-				PEM:							fs.PEMPath(),
 			})
 			if err != nil {
 				return nil, fmt.Errorf("failure to connect to ops manager host: %v", err)
@@ -116,7 +114,6 @@ const (
 	opsManagerPass string = "opsManagerPass"
 	dest           string = "destination"
 	tile           string = "tile"
-	pempath				 string = "pem"
 )
 
 var (
@@ -158,11 +155,6 @@ var (
 			Desc:   "a tile you would like to run the operation on",
 			EnvVar: "CFOPS_TILE",
 		},
-		pempath: flagBucket{
-			Flag:   []string{"pem", "k"},
-			Desc:   "give the path to your desired pem file for all ssh authentication",
-			EnvVar: "CFOPS_PEM_PATH",
-		},
 	}
 )
 
@@ -175,7 +167,6 @@ type (
 		opsManagerPass string
 		dest           string
 		tile           string
-		pempath				 string
 	}
 
 	flagBucket struct {
@@ -211,10 +202,6 @@ func (s *flagSet) Dest() string {
 
 func (s *flagSet) Tile() string {
 	return s.tile
-}
-
-func (s *flagSet) PEMPath() string {
-	return s.pempath
 }
 
 func hasValidBackupRestoreFlags(fs *flagSet) bool {
