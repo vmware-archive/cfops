@@ -18,5 +18,6 @@ type (
 		OpsManagerUser   string
 		OpsManagerPass   string
 		ArchiveDirectory string
+		PEM							 string
 	}
 )
