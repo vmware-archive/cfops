@@ -10,6 +10,7 @@ import (
 	"github.com/xchapter7x/lo"
 )
 
+//CreateBURACliCommand - this will create a cli command object for backup / restore
 func CreateBURACliCommand(name string, usage string, eh *ErrorHandler) (command cli.Command) {
 	desc := fmt.Sprintf("%s --opsmanagerhost <host> --adminuser <usr> --adminpass <pass> --opsmanageruser <opsuser> --opsmanagerpass <opspass> -d <dir> --tile elastic-runtime", name)
 	command = cli.Command{
@@ -117,7 +118,9 @@ const (
 )
 
 var (
-	ErrInvalidFlagArgs      = errors.New("invalid cli flag args")
+	//ErrInvalidFlagArgs - error for invalid flags
+	ErrInvalidFlagArgs = errors.New("invalid cli flag args")
+	//ErrInvalidTileSelection - error for invalid tile
 	ErrInvalidTileSelection = errors.New("invalid tile selected. try the 'list-tiles' option to see a list of available tiles.")
 	flagList                = map[string]flagBucket{
 		opsManagerHost: flagBucket{
