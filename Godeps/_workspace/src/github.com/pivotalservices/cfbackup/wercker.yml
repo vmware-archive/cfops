@@ -1,0 +1,58 @@
+box: golang
+build:
+  # The steps that will be executed on build
+  steps:
+    # Sets the go workspace and places you package
+    # at the right place in the workspace tree
+    - setup-go-workspace
+    - wercker/golint
+
+    # Get the dependencies
+    - script:
+        name: go get
+        code: |
+          cd $WERCKER_SOURCE_DIR
+          go version
+          go get -u github.com/tools/godep
+          export PATH=$WERCKER_SOURCE_DIR/bin:$PATH
+
+    # Test the project
+    - script:
+        name: go test
+        code: |
+          godep go test ./... -v -race
+
+    # Setting the coverage watermark low.
+    # This should be raised as we gain more coverage...
+    # Test coverage for the project
+    - script:
+        name: go test cover
+        code: |
+          ./testCoverage ./... $COVERAGE_WATERMARK
+
+    - script:
+        name: add repo to artifact
+        code: |
+          cp -R ./ ${WERCKER_OUTPUT_DIR}
+
+deploy:
+  steps:
+    - script:
+        name: install-packages
+        code: |
+          sudo apt-get install -y openssh-client wget
+
+    - add-ssh-key:
+        keyname: PCF_GITHUB_KEY
+
+    - wercker/add-to-known_hosts@1.4.0:
+        hostname: github.com
+        fingerprint: 16:27:ac:a5:76:28:2d:36:63:1b:56:4d:eb:df:a6:48
+
+
+    - xchapter7x/flowy-release:
+        action: "complete-release"
+        tag_variable_name: "VERSION_TAG"
+        active: $GITFLOW_ACTIVE
+        git_name: $GITFLOW_NAME
+        git_email: $GITFLOW_EMAIL
