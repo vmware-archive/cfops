@@ -13,13 +13,19 @@ func (s *ElasticRuntimeBuilder) New(tileSpec tileregistry.TileSpec) (elasticRunt
 	var (
 		installationSettings io.Reader
 		installationTmpFile  *os.File
+		sshKey               = ""
 	)
 
 	if installationSettings, err = GetInstallationSettings(tileSpec); err == nil {
 		installationTmpFile, err = ioutil.TempFile("", OpsMgrInstallationSettingsFilename)
 		defer installationTmpFile.Close()
 		io.Copy(installationTmpFile, installationSettings)
-		elasticRuntime = NewElasticRuntime(installationTmpFile.Name(), tileSpec.ArchiveDirectory)
+		config := NewConfigurationParser(installationTmpFile.Name())
+
+		if iaas, err := config.GetIaaS(); err == nil {
+			sshKey = iaas.SSHPrivateKey
+		}
+		elasticRuntime = NewElasticRuntime(installationTmpFile.Name(), tileSpec.ArchiveDirectory, sshKey)
 	}
 	return
 }

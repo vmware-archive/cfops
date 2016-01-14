@@ -13,12 +13,13 @@ type (
 
 	// ElasticRuntime contains information about a Pivotal Elastic Runtime deployment
 	ElasticRuntime struct {
+		BackupContext
 		JSONFile          string
 		SystemsInfo       map[string]SystemDump
 		PersistentSystems []SystemDump
 		HTTPGateway       ghttp.HttpGateway
 		InstallationName  string
-		BackupContext
+		SSHPrivateKey     string
 	}
 
 	//ElasticRuntimeBuilder -- an object that can build an elastic runtime pre-initialized
@@ -117,14 +118,15 @@ type (
 	//SystemInfo - a struct representing a base systemdump implementation
 	SystemInfo struct {
 		goutil.GetSet
-		Product   string
-		Component string
-		Identity  string
-		Ip        string
-		User      string
-		Pass      string
-		VcapUser  string
-		VcapPass  string
+		Product       string
+		Component     string
+		Identity      string
+		Ip            string
+		User          string
+		Pass          string
+		VcapUser      string
+		VcapPass      string
+		SSHPrivateKey string
 	}
 	//PgInfo - a struct representing a pgres systemdump implementation
 	PgInfo struct {
