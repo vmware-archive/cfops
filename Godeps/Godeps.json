@@ -35,7 +35,7 @@
 		},
 		{
 			"ImportPath": "github.com/op/go-logging",
-			"Rev": "e8d5414f0947014548c2334044a0fac13187dfee"
+			"Rev": "dfaf3dff9b631bc4236201d90d41ee0de9202889"
 		},
 		{
 			"ImportPath": "github.com/pivotal-golang/lager",
