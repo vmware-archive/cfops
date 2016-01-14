@@ -5,6 +5,8 @@ goutil & itertools
 
 [![GoDoc](http://godoc.org/github.com/xchapter7x/goutil?status.png)](http://godoc.org/github.com/xchapter7x/goutil)
 
+[![CoverageStatus](https://coveralls.io/repos/xchapter7x/goutil/badge.svg?branch=HEAD&service=github)](https://coveralls.io/github/xchapter7x/goutil?branch=HEAD)
+
 contains many generic utility functions and helpers:
 
 - Iterate

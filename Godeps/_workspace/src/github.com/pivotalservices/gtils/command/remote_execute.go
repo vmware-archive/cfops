@@ -60,9 +60,7 @@ func (c *SshClientWrapper) NewSession() (SSHSession, error) {
 func NewRemoteExecutor(sshCfg SshConfig) (executor Executer, err error) {
 	clientconfig := &ssh.ClientConfig{
 		User: sshCfg.Username,
-		Auth: []ssh.AuthMethod{
-			ssh.Password(sshCfg.Password),
-		},
+		Auth: sshCfg.GetAuthMethod(),
 	}
 	client, err := ssh.Dial("tcp", fmt.Sprintf("%s:%d", sshCfg.Host, sshCfg.Port), clientconfig)
 	if err != nil {

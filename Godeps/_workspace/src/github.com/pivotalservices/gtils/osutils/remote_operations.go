@@ -10,22 +10,26 @@ import (
 )
 
 const (
-	REMOTE_IMPORT_PATH string = "/tmp/archive.backup"
+	//RemoteImportPath - path to place the temporary remote import files when uploaded
+	RemoteImportPath string = "/tmp/archive.backup"
 )
 
-func NewRemoteOperations(sshCfg command.SshConfig) *remoteOperations {
-	return &remoteOperations{
+//NewRemoteOperations - a constructor for a remoteoperations object
+func NewRemoteOperations(sshCfg command.SshConfig) *RemoteOperations {
+	return &RemoteOperations{
 		sshCfg:     sshCfg,
-		remotePath: REMOTE_IMPORT_PATH,
+		remotePath: RemoteImportPath,
 	}
 }
 
-type remoteOperations struct {
+//RemoteOperations - an object which allows us to execute operations on a remote system
+type RemoteOperations struct {
 	sshCfg     command.SshConfig
 	remotePath string
 }
 
-func (s *remoteOperations) UploadFile(lfile io.Reader) (err error) {
+//UploadFile - allows us to upload the contents of the given reader
+func (s *RemoteOperations) UploadFile(lfile io.Reader) (err error) {
 	var rfile io.WriteCloser
 
 	if rfile, err = s.GetRemoteFile(); err == nil {
@@ -35,15 +39,18 @@ func (s *remoteOperations) UploadFile(lfile io.Reader) (err error) {
 	return
 }
 
-func (s *remoteOperations) SetPath(p string) {
+//SetPath - allows us to set the remote path of the upload
+func (s *RemoteOperations) SetPath(p string) {
 	s.remotePath = p
 }
 
-func (s *remoteOperations) Path() string {
+//Path - allows us to get the path of the remote upload
+func (s *RemoteOperations) Path() string {
 	return s.remotePath
 }
 
-func (s *remoteOperations) GetRemoteFile() (rfile io.WriteCloser, err error) {
+//GetRemoteFile - get a file from a remote system and return a writecloser to it
+func (s *RemoteOperations) GetRemoteFile() (rfile io.WriteCloser, err error) {
 	var (
 		sshconn    *ssh.Client
 		sftpclient *sftp.Client

@@ -79,6 +79,7 @@ func ensurePath(path string) (string, error) {
 	return path, err
 }
 
+//Exists - check if the given path exists
 func Exists(path string) (bool, error) {
 	_, err := os.Stat(path)
 	if err == nil {

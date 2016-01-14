@@ -1,0 +1,10 @@
+
+# Check if images are available locally
+DOCKER_LOCAL=""
+if [[ $(docker images|grep redis) && $(docker images|grep mongo) && $(docker images|grep golang) ]]; then 
+  echo "Using previously cached docker images"
+  DOCKER_LOCAL="--docker-local"
+fi
+rm -fR _builds _steps _projects _cache _temp
+wercker --verbose --environment ".testrunner_env_defaults" build --git-domain github.com --git-owner pivotalservices --git-repository cfbackup ${DOCKER_LOCAL}
+rm -fR _builds _steps _projects _cache _temp

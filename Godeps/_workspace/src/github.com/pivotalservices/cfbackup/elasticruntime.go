@@ -2,7 +2,6 @@ package cfbackup
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -10,92 +9,10 @@ import (
 	"path"
 
 	"github.com/cloudfoundry-community/go-cfenv"
-	"github.com/pivotalservices/gtils/http"
+	ghttp "github.com/pivotalservices/gtils/http"
 	"github.com/pivotalservices/gtils/log"
 	"github.com/xchapter7x/lo"
 )
-
-const (
-	//ERDefaultSystemUser - default user for system vms
-	ERDefaultSystemUser = "vcap"
-	//ERDirectorInfoURL - url format for a director info endpoint
-	ERDirectorInfoURL = "https://%s:25555/info"
-	//ERBackupDir - default er backup dir
-	ERBackupDir = "elasticruntime"
-	//ERVmsURL - url format for a vms url
-	ERVmsURL = "https://%s:25555/deployments/%s/vms"
-	//ERDirector -- key
-	ERDirector = "DirectorInfo"
-	//ERConsole -- key
-	ERConsole = "ConsoledbInfo"
-	//ERUaa -- key
-	ERUaa = "UaadbInfo"
-	//ERCc -- key
-	ERCc = "CcdbInfo"
-	//ERMySQL -- key
-	ERMySQL = "MysqldbInfo"
-	//ERNfs -- key
-	ERNfs = "NfsInfo"
-	//ERBackupFileFormat -- format of archive filename
-	ERBackupFileFormat = "%s.backup"
-	//ERInvalidDirectorCredsMsg -- error message for invalid creds on director
-	ERInvalidDirectorCredsMsg = "invalid director credentials"
-	//ERNoPersistenceArchives -- error message for persistence stores
-	ERNoPersistenceArchives = "there are no persistence stores in the list"
-	//ERFileDoesNotExist -- error message for file does not exist
-	ERFileDoesNotExist = "file does not exist"
-	//ErrERDBBackupFailure -- error message for backup failure
-	ErrERDBBackupFailure = "failed to backup database"
-	//ERVersionEnvFlag -- env flag from ER version toggle
-	ERVersionEnvFlag = "ER_VERSION"
-	//ERVersion16 -- value for 1.6 toggle
-	ERVersion16 = "1.6"
-)
-
-const (
-	//ImportArchive --
-	ImportArchive = iota
-	//ExportArchive --
-	ExportArchive
-)
-
-var (
-	//ErrERDirectorCreds - error for director creds
-	ErrERDirectorCreds = errors.New(ERInvalidDirectorCredsMsg)
-	//ErrEREmptyDBList - error for db list empty
-	ErrEREmptyDBList = errors.New(ERNoPersistenceArchives)
-	//ErrERInvalidPath - invalid filepath error
-	ErrERInvalidPath = &os.PathError{Err: errors.New(ERFileDoesNotExist)}
-	//ErrERDBBackup - error for db backup failures
-	ErrERDBBackup = errors.New(ErrERDBBackupFailure)
-)
-
-//BoshName - function which returns proper bosh component name for given version
-func BoshName() (bosh string) {
-	switch os.Getenv(ERVersionEnvFlag) {
-	case ERVersion16:
-		bosh = "p-bosh"
-	default:
-		bosh = "microbosh"
-	}
-	return
-}
-
-// ElasticRuntime contains information about a Pivotal Elastic Runtime deployment
-type ElasticRuntime struct {
-	JSONFile          string
-	SystemsInfo       map[string]SystemDump
-	PersistentSystems []SystemDump
-	HTTPGateway       http.HttpGateway
-	InstallationName  string
-	BackupContext
-}
-
-//CCJob - a cloud controller job object
-type CCJob struct {
-	Job   string
-	Index int
-}
 
 // NewElasticRuntime initializes an ElasticRuntime intance
 var NewElasticRuntime = func(jsonFile string, target string) *ElasticRuntime {
@@ -154,7 +71,7 @@ var NewElasticRuntime = func(jsonFile string, target string) *ElasticRuntime {
 			ERConsole:  consoledbInfo,
 			ERUaa:      uaadbInfo,
 			ERCc:       ccdbInfo,
-			ERMySQL:    mysqldbInfo,
+			ERMySql:    mysqldbInfo,
 			ERNfs:      nfsInfo,
 		},
 		PersistentSystems: []SystemDump{
@@ -221,10 +138,10 @@ func (context *ElasticRuntime) getAllCloudControllerVMs() (ccvms []CCJob, err er
 	lo.G.Debug("getAllCloudControllerVMs() function", log.Data{"connectionURL": connectionURL, "directorInfo": directorInfo})
 	gateway := context.HTTPGateway
 	if gateway == nil {
-		gateway = http.NewHttpGateway()
+		gateway = ghttp.NewHttpGateway()
 	}
 	lo.G.Debug("Retrieving CC vms")
-	if resp, err := gateway.Get(http.HttpRequestEntity{
+	if resp, err := gateway.Get(ghttp.HttpRequestEntity{
 		Url:         connectionURL,
 		Username:    directorInfo.Get(SDUser),
 		Password:    directorInfo.Get(SDPass),
@@ -341,9 +258,9 @@ func (context *ElasticRuntime) directorCredentialsValid() (ok bool) {
 		connectionURL := fmt.Sprintf(ERDirectorInfoURL, directorInfo.Get(SDIP))
 		gateway := context.HTTPGateway
 		if gateway == nil {
-			gateway = http.NewHttpGateway()
+			gateway = ghttp.NewHttpGateway()
 		}
-		_, err := gateway.Get(http.HttpRequestEntity{
+		_, err := gateway.Get(ghttp.HttpRequestEntity{
 			Url:         connectionURL,
 			Username:    directorInfo.Get(SDUser),
 			Password:    directorInfo.Get(SDPass),

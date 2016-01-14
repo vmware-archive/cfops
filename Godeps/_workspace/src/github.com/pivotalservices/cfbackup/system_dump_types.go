@@ -2,93 +2,23 @@ package cfbackup
 
 import (
 	"fmt"
-	"io"
 	"os"
 
 	"github.com/pivotalservices/gtils/command"
 	"github.com/pivotalservices/gtils/persistence"
-	"github.com/xchapter7x/goutil"
 )
-
-func init() {
-	SetPGDumpUtilVersions()
-}
 
 //SetPGDumpUtilVersions -- set version paths for pgdump/pgrestore utils
 func SetPGDumpUtilVersions() {
 	switch os.Getenv(ERVersionEnvFlag) {
 	case ERVersion16:
-		persistence.PGDMP_DUMP_BIN = "/var/vcap/packages/postgres-9.4.2/bin/pg_dump"
-		persistence.PGDMP_RESTORE_BIN = "/var/vcap/packages/postgres-9.4.2/bin/pg_restore"
+		persistence.PGDmpDumpBin = "/var/vcap/packages/postgres-9.4.2/bin/pg_dump"
+		persistence.PGDmpRestoreBin = "/var/vcap/packages/postgres-9.4.2/bin/pg_restore"
 	default:
-		persistence.PGDMP_DUMP_BIN = "/var/vcap/packages/postgres/bin/pg_dump"
-		persistence.PGDMP_RESTORE_BIN = "/var/vcap/packages/postgres/bin/pg_restore"
+		persistence.PGDmpDumpBin = "/var/vcap/packages/postgres/bin/pg_dump"
+		persistence.PGDmpRestoreBin = "/var/vcap/packages/postgres/bin/pg_restore"
 	}
 }
-
-const (
-	//SDProduct --
-	SDProduct string = "Product"
-	//SDComponent --
-	SDComponent string = "Component"
-	//SDIdentity --
-	SDIdentity string = "Identity"
-	//SDIP --
-	SDIP string = "Ip"
-	//SDUser --
-	SDUser string = "User"
-	//SDPass --
-	SDPass string = "Pass"
-	//SDVcapUser --
-	SDVcapUser string = "VcapUser"
-	//SDVcapPass --
-	SDVcapPass string = "VcapPass"
-)
-
-type (
-	//PersistanceBackup - a struct representing a persistence backup
-	PersistanceBackup interface {
-		Dump(io.Writer) error
-		Import(io.Reader) error
-	}
-
-	stringGetterSetter interface {
-		Get(string) string
-		Set(string, string)
-	}
-	//SystemDump - definition for a SystemDump interface
-	SystemDump interface {
-		stringGetterSetter
-		Error() error
-		GetPersistanceBackup() (dumper PersistanceBackup, err error)
-	}
-	//SystemInfo - a struct representing a base systemdump implementation
-	SystemInfo struct {
-		goutil.GetSet
-		Product   string
-		Component string
-		Identity  string
-		Ip        string
-		User      string
-		Pass      string
-		VcapUser  string
-		VcapPass  string
-	}
-	//PgInfo - a struct representing a pgres systemdump implementation
-	PgInfo struct {
-		SystemInfo
-		Database string
-	}
-	//MysqlInfo - a struct representing a mysql systemdump implementation
-	MysqlInfo struct {
-		SystemInfo
-		Database string
-	}
-	//NfsInfo - a struct representing a nfs systemdump implementation
-	NfsInfo struct {
-		SystemInfo
-	}
-)
 
 //Get - a getter for a systeminfo object
 func (s *SystemInfo) Get(name string) string {

@@ -2,9 +2,6 @@ package cfbackup
 
 import "github.com/pivotalservices/cfops/tileregistry"
 
-//OpsManagerBuilder - an object that can build ops manager objects
-type OpsManagerBuilder struct{}
-
 //New -- builds a new ops manager object pre initialized
 func (s *OpsManagerBuilder) New(tileSpec tileregistry.TileSpec) (opsManagerTile tileregistry.Tile, err error) {
 	var opsManager *OpsManager

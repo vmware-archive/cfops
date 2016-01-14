@@ -7,7 +7,7 @@ import (
 	"github.com/xchapter7x/lo"
 )
 
-func execute_list(callList []string, caller command.Executer) (err error) {
+func executeList(callList []string, caller command.Executer) (err error) {
 	for _, callstring := range callList {
 		lo.G.Debug(callstring)
 
