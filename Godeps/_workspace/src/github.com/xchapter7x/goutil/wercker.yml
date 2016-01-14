@@ -25,3 +25,11 @@ build:
         name: go test cover
         code: |
           ./testCoverage ./... 90
+
+    - script:
+        name: coveralls upload
+        code: |
+          go get github.com/axw/gocov/gocov
+          go get github.com/mattn/goveralls
+          GIT_BRANCH=$WERCKER_GIT_BRANCH
+          ./coverage --coveralls

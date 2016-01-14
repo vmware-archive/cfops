@@ -9,31 +9,10 @@ import (
 	"github.com/xchapter7x/lo"
 )
 
-const (
-	PGDMP_DROP_CMD   string = "drop schema public cascade;"
-	PGDMP_CREATE_CMD        = "create schema public;"
-)
-
-var (
-	PGDMP_DUMP_BIN    string = "/var/vcap/packages/postgres/bin/pg_dump"
-	PGDMP_RESTORE_BIN string = "/var/vcap/packages/postgres/bin/pg_restore"
-)
-
-type PgDump struct {
-	sshCfg    command.SshConfig
-	Ip        string
-	Port      int
-	Database  string
-	Username  string
-	Password  string
-	DbFile    string
-	Caller    command.Executer
-	RemoteOps remoteOperationsInterface
-}
-
+//NewPgDump - a pgdump object initialized for local fs
 func NewPgDump(ip string, port int, database, username, password string) *PgDump {
 	return &PgDump{
-		Ip:       ip,
+		IP:       ip,
 		Port:     port,
 		Database: database,
 		Username: username,
@@ -42,11 +21,12 @@ func NewPgDump(ip string, port int, database, username, password string) *PgDump
 	}
 }
 
+//NewPgRemoteDump - a pgdump initialized for remote fs
 func NewPgRemoteDump(port int, database, username, password string, sshCfg command.SshConfig) (*PgDump, error) {
 	remoteExecuter, err := command.NewRemoteExecutor(sshCfg)
 	return &PgDump{
 		sshCfg:    sshCfg,
-		Ip:        "localhost",
+		IP:        "localhost",
 		Port:      port,
 		Database:  database,
 		Username:  sshCfg.Username,
@@ -56,6 +36,7 @@ func NewPgRemoteDump(port int, database, username, password string, sshCfg comma
 	}, err
 }
 
+//Import - allows us to import a pgdmp file in the form of a reader
 func (s *PgDump) Import(lfile io.Reader) (err error) {
 	lo.G.Debug("pgdump Import being called")
 
@@ -69,11 +50,12 @@ func (s *PgDump) restore() (err error) {
 	callList := []string{
 		s.getRestoreCommand(),
 	}
-	err = execute_list(callList, s.Caller)
+	err = executeList(callList, s.Caller)
 	lo.G.Debug("pgdump restore called: ", callList, err)
 	return
 }
 
+//Dump - allows us to create a backup and pipe it to the given writer
 func (s *PgDump) Dump(dest io.Writer) (err error) {
 	err = s.Caller.Execute(dest, s.getDumpCommand())
 	lo.G.Debug("pgdump Dump called: ", s.getDumpCommand(), err)
@@ -84,7 +66,7 @@ func (s *PgDump) dumpConnectionDecorator(command string) string {
 	return fmt.Sprintf("PGPASSWORD=%s %s -Fc -h %s -U %s -p %d %s",
 		s.Password,
 		command,
-		s.Ip,
+		s.IP,
 		s.Username,
 		s.Port,
 		s.Database,
@@ -95,7 +77,7 @@ func (s *PgDump) restoreConnectionDecorator(command string) string {
 	return fmt.Sprintf("PGPASSWORD=%s %s -h %s -U %s -x -p %d -c -d %s %s",
 		s.Password,
 		command,
-		s.Ip,
+		s.IP,
 		s.Username,
 		s.Port,
 		s.Database,
@@ -104,9 +86,9 @@ func (s *PgDump) restoreConnectionDecorator(command string) string {
 }
 
 func (s *PgDump) getRestoreCommand() string {
-	return s.restoreConnectionDecorator(PGDMP_RESTORE_BIN)
+	return s.restoreConnectionDecorator(PGDmpRestoreBin)
 }
 
 func (s *PgDump) getDumpCommand() string {
-	return s.dumpConnectionDecorator(PGDMP_DUMP_BIN)
+	return s.dumpConnectionDecorator(PGDmpDumpBin)
 }

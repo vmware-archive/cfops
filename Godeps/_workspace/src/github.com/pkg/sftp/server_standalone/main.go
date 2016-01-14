@@ -13,13 +13,10 @@ import (
 )
 
 func main() {
-	var (
-		readOnly      bool
-		debugLevelStr string
-		debugLevel    int
-		debugStderr   bool
-	)
-
+	readOnly := false
+	debugLevelStr := "none"
+	debugLevel := 0
+	debugStderr := false
 	flag.BoolVar(&readOnly, "R", false, "read-only server")
 	flag.BoolVar(&debugStderr, "e", false, "debug to stderr")
 	flag.StringVar(&debugLevelStr, "l", "none", "debug level")

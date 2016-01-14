@@ -3,14 +3,14 @@ sftp
 
 The `sftp` package provides support for file system operations on remote ssh servers using the SFTP subsystem.
 
-!["unix status"](https://travis-ci.org/pkg/sftp.svg)
+[![wercker status](https://app.wercker.com/status/7d3e9b916954ac3a7ed15a457938bac4/s/master "wercker status")](https://app.wercker.com/project/bykey/7d3e9b916954ac3a7ed15a457938bac4)
 
 usage and examples
 ------------------
 
 See [godoc.org/github.com/pkg/sftp](http://godoc.org/github.com/pkg/sftp) for examples and usage.
 
-The basic operation of the package mirrors the facilities of the [os](http://golang.org/pkg/os) package.
+The basic operation of the package mirrors the facilities of the [os](http://golang.org/pkg/os) package. 
 
 The Walker interface for directory traversal is heavily inspired by Keith Rarick's [fs](http://godoc.org/github.com/kr/fs) package.
 
@@ -24,6 +24,4 @@ roadmap
 contributing
 ------------
 
-We welcome pull requests, bug fixes and issue reports.
-
-Before proposing a large change, first please discuss your change by raising an issue.
+Features, Issues, and Pull Requests are always welcome.

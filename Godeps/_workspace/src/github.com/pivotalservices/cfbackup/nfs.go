@@ -9,20 +9,6 @@ import (
 	"github.com/pivotalservices/gtils/osutils"
 )
 
-const (
-	//NfsDirPath - this is where the nfs store lives
-	NfsDirPath string = "/var/vcap/store"
-	//NfsArchiveDir - this is the archive dir name
-	NfsArchiveDir string = "shared"
-	//NfsDefaultSSHUser - this is the default ssh user for nfs
-	NfsDefaultSSHUser string = "vcap"
-)
-
-type remoteOpsInterface interface {
-	UploadFile(lfile io.Reader) (err error)
-	Path() string
-}
-
 //BackupNfs - this function will execute the nfs backup process
 func BackupNfs(password, ip string, dest io.Writer) (err error) {
 	var nfsb *NFSBackup
@@ -32,15 +18,6 @@ func BackupNfs(password, ip string, dest io.Writer) (err error) {
 	}
 	return
 }
-
-//NFSBackup - this is a nfs backup object
-type NFSBackup struct {
-	Caller    command.Executer
-	RemoteOps remoteOpsInterface
-}
-
-//NfsNewRemoteExecuter - this is a function which is able to execute a remote command against the nfs server
-var NfsNewRemoteExecuter func(command.SshConfig) (command.Executer, error) = command.NewRemoteExecutor
 
 //NewNFSBackup - constructor for an nfsbackup object
 func NewNFSBackup(password, ip string) (nfs *NFSBackup, err error) {

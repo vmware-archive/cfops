@@ -55,7 +55,6 @@ type Record struct {
 	formatted string
 }
 
-// Formatted returns the formatted log record string.
 func (r *Record) Formatted(calldepth int) string {
 	if r.formatted == "" {
 		var buf bytes.Buffer
@@ -65,7 +64,6 @@ func (r *Record) Formatted(calldepth int) string {
 	return r.formatted
 }
 
-// Message returns the log record message.
 func (r *Record) Message() string {
 	if r.message == nil {
 		// Redact the arguments that implements the Redactor interface
@@ -80,8 +78,6 @@ func (r *Record) Message() string {
 	return *r.message
 }
 
-// Logger is the actual logger which creates log records based on the functions
-// called and passes them to the underlying logging backend.
 type Logger struct {
 	Module      string
 	backend     LeveledBackend
@@ -92,14 +88,12 @@ type Logger struct {
 	ExtraCalldepth int
 }
 
-// SetBackend overrides any previously defined backend for this logger.
 func (l *Logger) SetBackend(backend LeveledBackend) {
 	l.backend = backend
 	l.haveBackend = true
 }
 
 // TODO call NewLogger and remove MustGetLogger?
-
 // GetLogger creates and returns a Logger object based on the module name.
 func GetLogger(module string) (*Logger, error) {
 	return &Logger{Module: module}, nil
@@ -199,18 +193,8 @@ func (l *Logger) Error(format string, args ...interface{}) {
 	l.log(ERROR, format, args...)
 }
 
-// Errorf logs a message using ERROR as log level.
-func (l *Logger) Errorf(format string, args ...interface{}) {
-	l.log(ERROR, format, args...)
-}
-
 // Warning logs a message using WARNING as log level.
 func (l *Logger) Warning(format string, args ...interface{}) {
-	l.log(WARNING, format, args...)
-}
-
-// Warningf logs a message using WARNING as log level.
-func (l *Logger) Warningf(format string, args ...interface{}) {
 	l.log(WARNING, format, args...)
 }
 
@@ -219,28 +203,13 @@ func (l *Logger) Notice(format string, args ...interface{}) {
 	l.log(NOTICE, format, args...)
 }
 
-// Noticef logs a message using NOTICE as log level.
-func (l *Logger) Noticef(format string, args ...interface{}) {
-	l.log(NOTICE, format, args...)
-}
-
 // Info logs a message using INFO as log level.
 func (l *Logger) Info(format string, args ...interface{}) {
 	l.log(INFO, format, args...)
 }
 
-// Infof logs a message using INFO as log level.
-func (l *Logger) Infof(format string, args ...interface{}) {
-	l.log(INFO, format, args...)
-}
-
 // Debug logs a message using DEBUG as log level.
 func (l *Logger) Debug(format string, args ...interface{}) {
-	l.log(DEBUG, format, args...)
-}
-
-// Debugf logs a message using DEBUG as log level.
-func (l *Logger) Debugf(format string, args ...interface{}) {
 	l.log(DEBUG, format, args...)
 }
 

@@ -2,7 +2,6 @@ package chug
 
 import (
 	"bufio"
-	"bytes"
 	"encoding/json"
 	"errors"
 	"io"
@@ -34,15 +33,9 @@ type LogEntry struct {
 }
 
 func Chug(reader io.Reader, out chan<- Entry) {
-	scanner := bufio.NewReader(reader)
-	for {
-		line, err := scanner.ReadBytes('\n')
-		if line != nil {
-			out <- entry(bytes.TrimSuffix(line, []byte{'\n'}))
-		}
-		if err != nil {
-			break
-		}
+	scanner := bufio.NewScanner(reader)
+	for scanner.Scan() {
+		out <- entry(scanner.Bytes())
 	}
 	close(out)
 }

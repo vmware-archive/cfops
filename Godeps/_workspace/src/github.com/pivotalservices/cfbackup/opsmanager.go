@@ -17,51 +17,6 @@ import (
 	"github.com/xchapter7x/lo"
 )
 
-// Ops Manager Backup constants
-const (
-	OpsMgrInstallationSettingsFilename    string = "installation.json"
-	OpsMgrInstallationAssetsFileName      string = "installation.zip"
-	OpsMgrInstallationAssetsPostFieldName string = "installation[file]"
-	OpsMgrDeploymentsFileName             string = "deployments.tar.gz"
-	OpsMgrEncryptionKeyFileName           string = "cc_db_encryption_key.txt"
-	OpsMgrBackupDir                       string = "opsmanager"
-	OpsMgrDeploymentsDir                  string = "deployments"
-	OpsMgrDefaultSSHPort                  int    = 22
-	OpsMgrInstallationSettingsURL         string = "https://%s/api/installation_settings"
-	OpsMgrInstallationAssetsURL           string = "https://%s/api/installation_asset_collection"
-	OpsMgrDeploymentsFile                 string = "/var/tempest/workspaces/default/deployments/bosh-deployments.yml"
-)
-
-type httpUploader func(conn ghttp.ConnAuth, paramName, filename string, fileSize int64, fileRef io.Reader, params map[string]string) (res *http.Response, err error)
-
-type httpRequestor interface {
-	Get(ghttp.HttpRequestEntity) ghttp.RequestAdaptor
-	Post(ghttp.HttpRequestEntity, io.Reader) ghttp.RequestAdaptor
-	Put(ghttp.HttpRequestEntity, io.Reader) ghttp.RequestAdaptor
-}
-
-// OpsManager contains the location and credentials of a Pivotal Ops Manager instance
-type OpsManager struct {
-	BackupContext
-	Hostname            string
-	Username            string
-	Password            string
-	TempestPassword     string
-	DbEncryptionKey     string
-	Executer            command.Executer
-	LocalExecuter       command.Executer
-	SettingsUploader    httpUploader
-	AssetsUploader      httpUploader
-	SettingsRequestor   httpRequestor
-	AssetsRequestor     httpRequestor
-	DeploymentDir       string
-	OpsmanagerBackupDir string
-	SSHPrivateKey       string
-	SSHUsername         string
-	SSHPassword         string
-	SSHPort             int
-}
-
 // NewOpsManager initializes an OpsManager instance
 var NewOpsManager = func(opsManagerHostname string, adminUsername string, adminPassword string, opsManagerUsername string, opsManagerPassword string, target string) (context *OpsManager, err error) {
 	backupContext := NewBackupContext(target, cfenv.CurrentEnv())
