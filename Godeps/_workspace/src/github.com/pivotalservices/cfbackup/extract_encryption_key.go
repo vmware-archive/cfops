@@ -41,6 +41,7 @@ func (s yamlkey) EncryptionKey() (key string, err error) {
 	return
 }
 
+//ExtractEncryptionKey - extract the encryptionKey from a deployment archive
 func ExtractEncryptionKey(dest io.Writer, deploymentDir string) (err error) {
 	var flist []os.FileInfo
 

@@ -56,43 +56,53 @@ type OpsManager struct {
 	AssetsRequestor     httpRequestor
 	DeploymentDir       string
 	OpsmanagerBackupDir string
+	SSHPrivateKey       string
+	SSHUsername         string
+	SSHPassword         string
+	SSHPort             int
 }
 
 // NewOpsManager initializes an OpsManager instance
 var NewOpsManager = func(opsManagerHostname string, adminUsername string, adminPassword string, opsManagerUsername string, opsManagerPassword string, target string) (context *OpsManager, err error) {
-	var remoteExecuter command.Executer
+	backupContext := NewBackupContext(target, cfenv.CurrentEnv())
+	settingsHTTPRequestor := ghttp.NewHttpGateway()
+	settingsMultiHTTPRequestor := GetUploader(backupContext)
+	assetsHTTPRequestor := ghttp.NewHttpGateway()
+	assetsMultiHTTPRequestor := GetUploader(backupContext)
 
-	if remoteExecuter, err = createExecuter(opsManagerHostname, opsManagerUsername, opsManagerPassword, OpsMgrDefaultSSHPort); err == nil {
-		backupContext := NewBackupContext(target, cfenv.CurrentEnv())
-		settingsHTTPRequestor := ghttp.NewHttpGateway()
-		settingsMultiHTTPRequestor := GetUploader(backupContext)
-		assetsHTTPRequestor := ghttp.NewHttpGateway()
-		assetsMultiHTTPRequestor := GetUploader(backupContext)
-
-		context = &OpsManager{
-			SettingsUploader:    settingsMultiHTTPRequestor,
-			AssetsUploader:      assetsMultiHTTPRequestor,
-			SettingsRequestor:   settingsHTTPRequestor,
-			AssetsRequestor:     assetsHTTPRequestor,
-			DeploymentDir:       path.Join(target, OpsMgrBackupDir, OpsMgrDeploymentsDir),
-			Hostname:            opsManagerHostname,
-			Username:            adminUsername,
-			Password:            adminPassword,
-			BackupContext:       backupContext,
-			Executer:            remoteExecuter,
-			LocalExecuter:       command.NewLocalExecuter(),
-			OpsmanagerBackupDir: OpsMgrBackupDir,
-		}
+	context = &OpsManager{
+		SettingsUploader:    settingsMultiHTTPRequestor,
+		AssetsUploader:      assetsMultiHTTPRequestor,
+		SettingsRequestor:   settingsHTTPRequestor,
+		AssetsRequestor:     assetsHTTPRequestor,
+		DeploymentDir:       path.Join(target, OpsMgrBackupDir, OpsMgrDeploymentsDir),
+		Hostname:            opsManagerHostname,
+		Username:            adminUsername,
+		Password:            adminPassword,
+		BackupContext:       backupContext,
+		LocalExecuter:       command.NewLocalExecuter(),
+		OpsmanagerBackupDir: OpsMgrBackupDir,
+		SSHUsername:         opsManagerUsername,
+		SSHPassword:         opsManagerPassword,
+		SSHPort:             OpsMgrDefaultSSHPort,
 	}
+	err = context.createExecuter()
 	return
 }
 
-func createExecuter(hostname, opsManagerUsername, opsManagerPassword string, port int) (remoteExecuter command.Executer, err error) {
-	remoteExecuter, err = command.NewRemoteExecutor(command.SshConfig{
-		Username: opsManagerUsername,
-		Password: opsManagerPassword,
-		Host:     hostname,
-		Port:     port,
+//SetSSHPrivateKey - sets the private key in the ops manager object and rebuilds the remote executer associated with the opsmanager
+func (context *OpsManager) SetSSHPrivateKey(key string) {
+	context.SSHPrivateKey = key
+	context.createExecuter()
+}
+
+func (context *OpsManager) createExecuter() (err error) {
+	context.Executer, err = command.NewRemoteExecutor(command.SshConfig{
+		Username: context.SSHUsername,
+		Password: context.SSHPassword,
+		Host:     context.Hostname,
+		Port:     context.SSHPort,
+		SSLKey:   context.SSHPrivateKey,
 	})
 	return
 }
@@ -167,9 +177,13 @@ func (context *OpsManager) saveHTTPResponse(url string, dest io.Writer) (err err
 		defer resp.Body.Close()
 		_, err = io.Copy(dest, resp.Body)
 
-	} else if resp.StatusCode != http.StatusOK {
+	} else if resp != nil && resp.StatusCode != http.StatusOK {
 		errMsg, _ := ioutil.ReadAll(resp.Body)
 		err = errors.New(string(errMsg[:]))
+	}
+
+	if err != nil {
+		lo.G.Error("error in save http request", err)
 	}
 	return
 }
@@ -189,8 +203,8 @@ func (context *OpsManager) importInstallation() (err error) {
 			err = context.removeExistingDeploymentFiles()
 		}
 	}()
-	lo.G.Debug("uploading installation assets")
 	installAssetsURL := fmt.Sprintf(OpsMgrInstallationAssetsURL, context.Hostname)
+	lo.G.Debug("uploading installation assets installAssetsURL: %s", installAssetsURL)
 	err = context.importInstallationPart(installAssetsURL, OpsMgrInstallationAssetsFileName, OpsMgrInstallationAssetsPostFieldName, context.AssetsUploader)
 	return
 }
@@ -210,7 +224,7 @@ func (context *OpsManager) importInstallationPart(url, filename, fieldname strin
 		filePath := path.Join(context.TargetDir, context.OpsmanagerBackupDir, filename)
 		bufferedReader := bufio.NewReader(backupReader)
 
-		lo.G.Debug("upload request", log.Data{"fieldname": fieldname, "filePath": filePath})
+		lo.G.Debug("upload request", log.Data{"fieldname": fieldname, "filePath": filePath, "conn": conn})
 
 		if res, err = upload(conn, fieldname, filePath, -1, bufferedReader, nil); err != nil {
 			err = fmt.Errorf(fmt.Sprintf("ERROR:%s", err.Error()))

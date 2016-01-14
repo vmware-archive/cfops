@@ -14,9 +14,10 @@ func init() {
 	SetPGDumpUtilVersions()
 }
 
+//SetPGDumpUtilVersions -- set version paths for pgdump/pgrestore utils
 func SetPGDumpUtilVersions() {
-	switch os.Getenv(ER_VERSION_ENV_FLAG) {
-	case ER_VERSION_16:
+	switch os.Getenv(ERVersionEnvFlag) {
+	case ERVersion16:
 		persistence.PGDMP_DUMP_BIN = "/var/vcap/packages/postgres-9.4.2/bin/pg_dump"
 		persistence.PGDMP_RESTORE_BIN = "/var/vcap/packages/postgres-9.4.2/bin/pg_restore"
 	default:
@@ -26,17 +27,26 @@ func SetPGDumpUtilVersions() {
 }
 
 const (
-	SD_PRODUCT   string = "Product"
-	SD_COMPONENT string = "Component"
-	SD_IDENTITY  string = "Identity"
-	SD_IP        string = "Ip"
-	SD_USER      string = "User"
-	SD_PASS      string = "Pass"
-	SD_VCAPUSER  string = "VcapUser"
-	SD_VCAPPASS  string = "VcapPass"
+	//SDProduct --
+	SDProduct string = "Product"
+	//SDComponent --
+	SDComponent string = "Component"
+	//SDIdentity --
+	SDIdentity string = "Identity"
+	//SDIP --
+	SDIP string = "Ip"
+	//SDUser --
+	SDUser string = "User"
+	//SDPass --
+	SDPass string = "Pass"
+	//SDVcapUser --
+	SDVcapUser string = "VcapUser"
+	//SDVcapPass --
+	SDVcapPass string = "VcapPass"
 )
 
 type (
+	//PersistanceBackup - a struct representing a persistence backup
 	PersistanceBackup interface {
 		Dump(io.Writer) error
 		Import(io.Reader) error
@@ -46,13 +56,13 @@ type (
 		Get(string) string
 		Set(string, string)
 	}
-
+	//SystemDump - definition for a SystemDump interface
 	SystemDump interface {
 		stringGetterSetter
 		Error() error
 		GetPersistanceBackup() (dumper PersistanceBackup, err error)
 	}
-
+	//SystemInfo - a struct representing a base systemdump implementation
 	SystemInfo struct {
 		goutil.GetSet
 		Product   string
@@ -64,34 +74,38 @@ type (
 		VcapUser  string
 		VcapPass  string
 	}
-
+	//PgInfo - a struct representing a pgres systemdump implementation
 	PgInfo struct {
 		SystemInfo
 		Database string
 	}
-
+	//MysqlInfo - a struct representing a mysql systemdump implementation
 	MysqlInfo struct {
 		SystemInfo
 		Database string
 	}
-
+	//NfsInfo - a struct representing a nfs systemdump implementation
 	NfsInfo struct {
 		SystemInfo
 	}
 )
 
+//Get - a getter for a systeminfo object
 func (s *SystemInfo) Get(name string) string {
 	return s.GetSet.Get(s, name).(string)
 }
 
+//Set - a setter for a systeminfo object
 func (s *SystemInfo) Set(name string, val string) {
 	s.GetSet.Set(s, name, val)
 }
 
+//GetPersistanceBackup - the constructor for a new nfsinfo object
 func (s *NfsInfo) GetPersistanceBackup() (dumper PersistanceBackup, err error) {
 	return NewNFSBackup(s.Pass, s.Ip)
 }
 
+//GetPersistanceBackup - the constructor for a new mysqlinfo object
 func (s *MysqlInfo) GetPersistanceBackup() (dumper PersistanceBackup, err error) {
 	sshConfig := command.SshConfig{
 		Username: s.VcapUser,
@@ -102,6 +116,7 @@ func (s *MysqlInfo) GetPersistanceBackup() (dumper PersistanceBackup, err error)
 	return persistence.NewRemoteMysqlDump(s.User, s.Pass, sshConfig)
 }
 
+//GetPersistanceBackup - the constructor for a new pginfo object
 func (s *PgInfo) GetPersistanceBackup() (dumper PersistanceBackup, err error) {
 	sshConfig := command.SshConfig{
 		Username: s.VcapUser,
@@ -112,11 +127,13 @@ func (s *PgInfo) GetPersistanceBackup() (dumper PersistanceBackup, err error) {
 	return persistence.NewPgRemoteDump(2544, s.Database, s.User, s.Pass, sshConfig)
 }
 
+//GetPersistanceBackup - the constructor for a systeminfo object
 func (s *SystemInfo) GetPersistanceBackup() (dumper PersistanceBackup, err error) {
 	panic("you have to extend SystemInfo and implement GetPersistanceBackup method on the child")
 	return
 }
 
+//Error - method making systeminfo implement the error interface
 func (s *SystemInfo) Error() (err error) {
 	if s.Product == "" ||
 		s.Component == "" ||

@@ -1,6 +1,6 @@
 {
 	"ImportPath": "github.com/pivotalservices/cfbackup",
-	"GoVersion": "go1.5.1",
+	"GoVersion": "go1.5.2",
 	"Packages": [
 		"./..."
 	],
@@ -16,79 +16,71 @@
 		},
 		{
 			"ImportPath": "github.com/mitchellh/mapstructure",
-			"Rev": "2caf8efc93669b6c43e0441cdc6aed17546c96f3"
+			"Rev": "281073eb9eb092240d33ef253c404f1cca550309"
 		},
 		{
 			"ImportPath": "github.com/onsi/ginkgo",
-			"Comment": "v1.2.0-34-ge43390e",
-			"Rev": "e43390e35a4a88f3f95d5ddf9055efb7a1170469"
+			"Comment": "v1.2.0-22-g39d2c24",
+			"Rev": "39d2c24f8a92c88f7e7f4d8ec6c80d3cc8f5ac65"
 		},
 		{
 			"ImportPath": "github.com/onsi/gomega",
-			"Comment": "v1.0-75-g0fe2044",
-			"Rev": "0fe204460da2c8fa1babcaac196e694de8f1aaa1"
+			"Comment": "v1.0-71-g2152b45",
+			"Rev": "2152b45fa28a361beba9aab0885972323a444e28"
 		},
 		{
 			"ImportPath": "github.com/op/go-logging",
-			"Rev": "dfaf3dff9b631bc4236201d90d41ee0de9202889"
+			"Rev": "e8d5414f0947014548c2334044a0fac13187dfee"
 		},
 		{
 			"ImportPath": "github.com/pivotal-golang/lager",
-			"Rev": "95b2ada4cdf781bdcf07e5207879e034ac8c5314"
+			"Rev": "be52ae622d25728f17aac7330e4565201c19155c"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/cfops/tileregistry",
-			"Comment": "v2.0.0-5-ga8689bc",
-			"Rev": "a8689bc2686ee3bf7ea8de9eb9c256e7509ff7e2"
+			"Comment": "v2.0.0-13-g9ab9c1f",
+			"Rev": "9ab9c1f23fa390f723c2075f5523bd335e5f3301"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/bosh",
-			"Comment": "v0.1.3-42-g10e33ef",
-			"Rev": "10e33efcac16b7bca2d2daac13313e7877a828d4"
+			"Rev": "208345bbf4e1c41d91fc1d276edb07a6c05c12d6"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/command",
-			"Comment": "v0.1.3-42-g10e33ef",
-			"Rev": "10e33efcac16b7bca2d2daac13313e7877a828d4"
+			"Rev": "208345bbf4e1c41d91fc1d276edb07a6c05c12d6"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/http",
-			"Comment": "v0.1.3-42-g10e33ef",
-			"Rev": "10e33efcac16b7bca2d2daac13313e7877a828d4"
+			"Rev": "208345bbf4e1c41d91fc1d276edb07a6c05c12d6"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/log",
-			"Comment": "v0.1.3-42-g10e33ef",
-			"Rev": "10e33efcac16b7bca2d2daac13313e7877a828d4"
+			"Rev": "208345bbf4e1c41d91fc1d276edb07a6c05c12d6"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/mock",
-			"Comment": "v0.1.3-42-g10e33ef",
-			"Rev": "10e33efcac16b7bca2d2daac13313e7877a828d4"
+			"Rev": "208345bbf4e1c41d91fc1d276edb07a6c05c12d6"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/osutils",
-			"Comment": "v0.1.3-42-g10e33ef",
-			"Rev": "10e33efcac16b7bca2d2daac13313e7877a828d4"
+			"Rev": "208345bbf4e1c41d91fc1d276edb07a6c05c12d6"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/persistence",
-			"Comment": "v0.1.3-42-g10e33ef",
-			"Rev": "10e33efcac16b7bca2d2daac13313e7877a828d4"
+			"Rev": "208345bbf4e1c41d91fc1d276edb07a6c05c12d6"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/storage",
-			"Comment": "v0.1.3-42-g10e33ef",
-			"Rev": "10e33efcac16b7bca2d2daac13313e7877a828d4"
+			"Rev": "208345bbf4e1c41d91fc1d276edb07a6c05c12d6"
 		},
 		{
 			"ImportPath": "github.com/pkg/sftp",
-			"Rev": "42c8b50df5531555393e888d6724dcd81511835e"
+			"Rev": "9d712e91b1f05c35bf7e8fa71a1b09392925d452"
 		},
 		{
 			"ImportPath": "github.com/rlmcpherson/s3gof3r",
-			"Comment": "v0.5.0",
-			"Rev": "31603a0dc94aefb822bfe2ceea75a6be6013b445"
+			"Comment": "v0.5.0-8-gb574ee3",
+			"Rev": "b574ee38528c51c2c8652b79e71245817c59bd61"
 		},
 		{
 			"ImportPath": "github.com/technoweenie/multipartstreamer",
@@ -97,19 +89,16 @@
 		},
 		{
 			"ImportPath": "github.com/xchapter7x/goutil",
-			"Rev": "ae6b732e91c5efae7c109e70bed2551d1c60de0e"
+			"Rev": "046742e03686eda64c6ac938594120d7fb5b3ecc"
 		},
 		{
 			"ImportPath": "github.com/xchapter7x/lo",
 			"Rev": "aa2602d0e8e8647f0ce7b53109b37040941915aa"
 		},
 		{
-			"ImportPath": "golang.org/x/crypto/curve25519",
-			"Rev": "552e9d568fde9701ea1944fb01c8aadaceaa7353"
-		},
-		{
 			"ImportPath": "golang.org/x/crypto/ssh",
-			"Rev": "552e9d568fde9701ea1944fb01c8aadaceaa7353"
+			"Comment": "null-234",
+			"Rev": "3760e016850398b85094c4c99e955b8c3dea5711"
 		},
 		{
 			"ImportPath": "gopkg.in/yaml.v1",
