@@ -1,0 +1,63 @@
+#!/bin/bash
+
+set -e
+
+if [ $# -lt 2 ]; then
+  echo "Usage: run backup|restore <tile>"
+  exit 1
+fi
+
+if [[ "${CFOPS_HOST}X" == "X" ]]; then
+  echo "CFOPS_HOST environment variable not set"
+  exit 1
+fi
+if [[ "${CFOPS_ADMIN_USER}X" == "X" ]]; then
+  echo "CFOPS_ADMIN_USER environment variable not set"
+  exit 1
+fi
+if [[ "${CFOPS_ADMIN_PASS}X" == "X" ]]; then
+  echo "CFOPS_ADMIN_PASS environment variable not set"
+  exit 1
+fi
+if [[ "${CFOPS_ADMIN_PASS}X" == "X" ]]; then
+  echo "CFOPS_ADMIN_PASS environment variable not set"
+  exit 1
+fi
+if [[ "${CFOPS_OM_PASS}X" == "X" ]]; then
+  echo "CFOPS_OM_PASS environment variable not set"
+  exit 1
+fi
+
+ACTION=$1
+TILE=$2
+ER_VERSION=${ER_VERSION:-1.6}
+LOG_LEVEL=${LOG_LEVEL:-debug}
+CFOPS_DEST_PATH=${CFOPS_DEST_PATH:-/tmp}
+S3_ACTIVE=${S3_ACTIVE:false}
+S3_BUCKET_NAME=${S3_BUCKET_NAME:-pcfbackup-files}
+
+if [[ $S3_ACTIVE ]]; then
+  if [[ "${S3_SECRET_ACCESS_KEY}X" == "X" ]]; then
+    echo "S3_SECRET_ACCESS_KEY environment variable not set"
+    exit 1
+  fi
+  if [[ "${S3_ACCESS_KEY_ID}X" == "X" ]]; then
+    echo "S3_ACCESS_KEY_ID environment variable not set"
+    exit 1
+  fi
+fi
+
+ROOT_DIR=$(cd $(dirname $(dirname $0)) && pwd)
+SCRIPTS_DIR=$(dirname $0)
+
+. $SCRIPTS_DIR/build
+
+echo -e "\nRunning cfops $1 $2"
+echo "Starting at: " $(date)
+echo ""
+
+#echo -e "$(env | grep CFOPS && env | grep S3)"
+
+$ROOT_DIR/out/cfops $ACTION -t $TILE --omh $CFOPS_HOST --du $CFOPS_ADMIN_USER --dp $CFOPS_ADMIN_PASS --omu ubuntu --omp $CFOPS_OM_PASS
+
+echo -e "\nEnded at:" $(date)
