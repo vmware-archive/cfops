@@ -13,6 +13,24 @@ type SshConfig struct {
 	Password string
 	Host     string
 	Port     int
+	SSLKey   string
+}
+
+func (s *SshConfig) GetAuthMethod() (authMethod []ssh.AuthMethod) {
+
+	if s.SSLKey == "" {
+		authMethod = []ssh.AuthMethod{
+			ssh.Password(s.Password),
+		}
+
+	} else {
+		keySigner, _ := ssh.ParsePrivateKey([]byte(s.SSLKey))
+
+		authMethod = []ssh.AuthMethod{
+			ssh.PublicKeys(keySigner),
+		}
+	}
+	return
 }
 
 type ClientInterface interface {

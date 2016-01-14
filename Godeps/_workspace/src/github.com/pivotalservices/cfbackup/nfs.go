@@ -10,9 +10,12 @@ import (
 )
 
 const (
-	NFS_DIR_PATH         string = "/var/vcap/store"
-	NFS_ARCHIVE_DIR      string = "shared"
-	NFS_DEFAULT_SSH_USER string = "vcap"
+	//NfsDirPath - this is where the nfs store lives
+	NfsDirPath string = "/var/vcap/store"
+	//NfsArchiveDir - this is the archive dir name
+	NfsArchiveDir string = "shared"
+	//NfsDefaultSSHUser - this is the default ssh user for nfs
+	NfsDefaultSSHUser string = "vcap"
 )
 
 type remoteOpsInterface interface {
@@ -20,6 +23,7 @@ type remoteOpsInterface interface {
 	Path() string
 }
 
+//BackupNfs - this function will execute the nfs backup process
 func BackupNfs(password, ip string, dest io.Writer) (err error) {
 	var nfsb *NFSBackup
 
@@ -29,16 +33,19 @@ func BackupNfs(password, ip string, dest io.Writer) (err error) {
 	return
 }
 
+//NFSBackup - this is a nfs backup object
 type NFSBackup struct {
 	Caller    command.Executer
 	RemoteOps remoteOpsInterface
 }
 
+//NfsNewRemoteExecuter - this is a function which is able to execute a remote command against the nfs server
 var NfsNewRemoteExecuter func(command.SshConfig) (command.Executer, error) = command.NewRemoteExecutor
 
+//NewNFSBackup - constructor for an nfsbackup object
 func NewNFSBackup(password, ip string) (nfs *NFSBackup, err error) {
 	config := command.SshConfig{
-		Username: NFS_DEFAULT_SSH_USER,
+		Username: NfsDefaultSSHUser,
 		Password: password,
 		Host:     ip,
 		Port:     22,
@@ -54,11 +61,13 @@ func NewNFSBackup(password, ip string) (nfs *NFSBackup, err error) {
 	return
 }
 
+//Dump - will dump the output of a executed command to the given writer
 func (s *NFSBackup) Dump(dest io.Writer) (err error) {
 	err = s.Caller.Execute(dest, s.getDumpCommand())
 	return
 }
 
+//Import - will upload the contents of the given io.reader to the remote execution target and execute the restore command against the uploaded file.
 func (s *NFSBackup) Import(lfile io.Reader) (err error) {
 	if err = s.RemoteOps.UploadFile(lfile); err == nil {
 		err = s.Caller.Execute(ioutil.Discard, s.getRestoreCommand())
@@ -67,9 +76,9 @@ func (s *NFSBackup) Import(lfile io.Reader) (err error) {
 }
 
 func (s *NFSBackup) getRestoreCommand() string {
-	return fmt.Sprintf("cd %s && tar zx %s", NFS_DIR_PATH, s.RemoteOps.Path())
+	return fmt.Sprintf("cd %s && tar zx %s", NfsDirPath, s.RemoteOps.Path())
 }
 
 func (s *NFSBackup) getDumpCommand() string {
-	return fmt.Sprintf("cd %s && tar cz %s", NFS_DIR_PATH, NFS_ARCHIVE_DIR)
+	return fmt.Sprintf("cd %s && tar cz %s", NfsDirPath, NfsArchiveDir)
 }

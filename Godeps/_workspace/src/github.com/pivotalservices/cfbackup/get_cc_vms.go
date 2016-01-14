@@ -9,21 +9,24 @@ import (
 )
 
 type (
+	//VMObject - a struct representing a vm
 	VMObject struct {
 		Job   string
 		Index int
 	}
-
+	//CloudControllerDeploymentParser - a struct which will handle the parsing of deployments
 	CloudControllerDeploymentParser struct {
 		vms []CCJob
 	}
 )
 
+//GetCCVMs - a function to get a list of ccjobs
 func GetCCVMs(jsonObj []VMObject) ([]CCJob, error) {
 	parser := &CloudControllerDeploymentParser{}
 	return parser.Parse(jsonObj)
 }
 
+//Parse - a method which will parse a given vmobject array
 func (s *CloudControllerDeploymentParser) Parse(jsonObj []VMObject) ([]CCJob, error) {
 	err := s.setupAndRun(jsonObj)
 	return s.vms, err
@@ -50,6 +53,7 @@ func (s *CloudControllerDeploymentParser) setupAndRun(jsonObj []VMObject) (err e
 	return nil
 }
 
+//ReadAndUnmarshalVMObjects - read the io.reader and unmarshal its contents into an vmobject array
 func ReadAndUnmarshalVMObjects(src io.Reader) (jsonObj []VMObject, err error) {
 	var contents []byte
 

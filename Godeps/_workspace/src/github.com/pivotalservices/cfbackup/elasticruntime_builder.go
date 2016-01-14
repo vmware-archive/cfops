@@ -27,6 +27,7 @@ func (s *ElasticRuntimeBuilder) New(tileSpec tileregistry.TileSpec) (elasticRunt
 	return
 }
 
+//GetInstallationSettings - makes a call to ops manager and returns a io.reader containing the contents of the installation settings file.
 var GetInstallationSettings = func(tileSpec tileregistry.TileSpec) (settings io.Reader, err error) {
 	var (
 		opsManager *OpsManager
