@@ -32,7 +32,7 @@ func (s *SystemInfo) Set(name string, val string) {
 
 //GetPersistanceBackup - the constructor for a new nfsinfo object
 func (s *NfsInfo) GetPersistanceBackup() (dumper PersistanceBackup, err error) {
-	return NewNFSBackup(s.Pass, s.Ip)
+	return NewNFSBackup(s.Pass, s.Ip, s.SSHPrivateKey)
 }
 
 //GetPersistanceBackup - the constructor for a new mysqlinfo object
@@ -42,6 +42,7 @@ func (s *MysqlInfo) GetPersistanceBackup() (dumper PersistanceBackup, err error)
 		Password: s.VcapPass,
 		Host:     s.Ip,
 		Port:     22,
+		SSLKey:   s.SSHPrivateKey,
 	}
 	return persistence.NewRemoteMysqlDump(s.User, s.Pass, sshConfig)
 }
@@ -53,6 +54,7 @@ func (s *PgInfo) GetPersistanceBackup() (dumper PersistanceBackup, err error) {
 		Password: s.VcapPass,
 		Host:     s.Ip,
 		Port:     22,
+		SSLKey:   s.SSHPrivateKey,
 	}
 	return persistence.NewPgRemoteDump(2544, s.Database, s.User, s.Pass, sshConfig)
 }

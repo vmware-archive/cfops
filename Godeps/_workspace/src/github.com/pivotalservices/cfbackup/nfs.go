@@ -9,23 +9,14 @@ import (
 	"github.com/pivotalservices/gtils/osutils"
 )
 
-//BackupNfs - this function will execute the nfs backup process
-func BackupNfs(password, ip string, dest io.Writer) (err error) {
-	var nfsb *NFSBackup
-
-	if nfsb, err = NewNFSBackup(password, ip); err == nil {
-		err = nfsb.Dump(dest)
-	}
-	return
-}
-
 //NewNFSBackup - constructor for an nfsbackup object
-func NewNFSBackup(password, ip string) (nfs *NFSBackup, err error) {
+func NewNFSBackup(password, ip string, sslKey string) (nfs *NFSBackup, err error) {
 	config := command.SshConfig{
 		Username: NfsDefaultSSHUser,
 		Password: password,
 		Host:     ip,
 		Port:     22,
+		SSLKey:   sslKey,
 	}
 	var remoteExecuter command.Executer
 

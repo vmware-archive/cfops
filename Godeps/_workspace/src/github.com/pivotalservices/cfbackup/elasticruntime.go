@@ -15,55 +15,62 @@ import (
 )
 
 // NewElasticRuntime initializes an ElasticRuntime intance
-var NewElasticRuntime = func(jsonFile string, target string) *ElasticRuntime {
+var NewElasticRuntime = func(jsonFile string, target string, sshKey string) *ElasticRuntime {
 	var (
 		uaadbInfo *PgInfo = &PgInfo{
 			SystemInfo: SystemInfo{
-				Product:   "cf",
-				Component: "uaadb",
-				Identity:  "root",
+				Product:       "cf",
+				Component:     "uaadb",
+				Identity:      "root",
+				SSHPrivateKey: sshKey,
 			},
 			Database: "uaa",
 		}
 		consoledbInfo *PgInfo = &PgInfo{
 			SystemInfo: SystemInfo{
-				Product:   "cf",
-				Component: "consoledb",
-				Identity:  "root",
+				Product:       "cf",
+				Component:     "consoledb",
+				Identity:      "root",
+				SSHPrivateKey: sshKey,
 			},
 			Database: "console",
 		}
 		ccdbInfo *PgInfo = &PgInfo{
 			SystemInfo: SystemInfo{
-				Product:   "cf",
-				Component: "ccdb",
-				Identity:  "admin",
+				Product:       "cf",
+				Component:     "ccdb",
+				Identity:      "admin",
+				SSHPrivateKey: sshKey,
 			},
 			Database: "ccdb",
 		}
 		mysqldbInfo *MysqlInfo = &MysqlInfo{
 			SystemInfo: SystemInfo{
-				Product:   "cf",
-				Component: "mysql",
-				Identity:  "root",
+				Product:       "cf",
+				Component:     "mysql",
+				Identity:      "root",
+				SSHPrivateKey: sshKey,
 			},
 			Database: "mysql",
 		}
 		directorInfo *SystemInfo = &SystemInfo{
-			Product:   BoshName(),
-			Component: "director",
-			Identity:  "director",
+			Product:       BoshName(),
+			Component:     "director",
+			Identity:      "director",
+			SSHPrivateKey: sshKey,
 		}
 		nfsInfo *NfsInfo = &NfsInfo{
 			SystemInfo: SystemInfo{
-				Product:   "cf",
-				Component: "nfs_server",
-				Identity:  "vcap",
+				Product:       "cf",
+				Component:     "nfs_server",
+				Identity:      "vcap",
+				SSHPrivateKey: sshKey,
 			},
 		}
 	)
 
 	context := &ElasticRuntime{
+		SSHPrivateKey: sshKey,
 		JSONFile:      jsonFile,
 		BackupContext: NewBackupContext(target, cfenv.CurrentEnv()),
 		SystemsInfo: map[string]SystemDump{
