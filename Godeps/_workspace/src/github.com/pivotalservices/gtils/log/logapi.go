@@ -7,8 +7,10 @@ import (
 	"github.com/pivotal-golang/lager"
 )
 
+//Data - a type representing a map
 type Data map[string]interface{}
 
+//Logger - a logger interface type
 type Logger interface {
 	Debug(message string, data ...Data)
 	Info(message string, data ...Data)
@@ -23,12 +25,15 @@ type logger struct {
 	Writer   io.Writer
 }
 
+//LogType - a int representation of the logtype
 type LogType uint
 
 const (
+	//Lager = a logtype for Lager
 	Lager LogType = iota
 )
 
+//Constants for log levels
 const (
 	DEBUG = "debug"
 	INFO  = "info"
@@ -46,6 +51,7 @@ func init() {
 	flag.Parse()
 }
 
+//AddFlags - a function to add flags to a given flag set
 func AddFlags(flagSet *flag.FlagSet) {
 	flagSet.StringVar(
 		&minLogLevel,
@@ -55,10 +61,12 @@ func AddFlags(flagSet *flag.FlagSet) {
 	)
 }
 
+//SetLogLevel - a function to set the log level
 func SetLogLevel(level string) {
 	minLogLevel = level
 }
 
+//LogFactory - a log creator
 func LogFactory(name string, logType LogType, writer io.Writer) Logger {
 	log := &logger{Name: name, LogLevel: minLogLevel, Writer: writer}
 	if logType == Lager {
