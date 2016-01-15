@@ -38,17 +38,25 @@ func buraAction(commandName string, eh *ErrorHandler) (action func(*cli.Context)
 		)
 
 		if tile, err := getTileFromRegistry(fs, commandName); err == nil {
-			if err = runTileAction(commandName, tile); err == nil {
-				lo.G.Debug("Tile action completed successfully")
+			if err = runTileAction(commandName, tile); err != nil {
+				lo.G.Errorf("there was an error: %s running %s on %s", err.Error(), commandName, fs.Tile())
+				exitOnError(eh, c, commandName, err)
+				return
 			}
 		} else {
-			lo.G.Error("there was an error getting tile from registry: %v", err)
-			cli.ShowCommandHelp(c, commandName)
-			eh.ExitCode = helpExitCode
-			eh.Error = err
+			lo.G.Errorf("there was an error getting tile from registry: %s", err.Error())
+			exitOnError(eh, c, commandName, err)
+			return
 		}
+		lo.G.Debug("Tile action completed successfully")
 	}
 	return
+}
+
+func exitOnError(eh *ErrorHandler, c *cli.Context, commandName string, err error) {
+	cli.ShowCommandHelp(c, commandName)
+	eh.ExitCode = helpExitCode
+	eh.Error = err
 }
 
 func runTileAction(commandName string, tile tileregistry.Tile) (err error) {
@@ -63,7 +71,7 @@ func runTileAction(commandName string, tile tileregistry.Tile) (err error) {
 }
 
 func getTileFromRegistry(fs *flagSet, commandName string) (tile tileregistry.Tile, err error) {
-	lo.G.Debug("checking registry for %s tile", fs.Tile())
+	lo.G.Debug("checking registry for '%s' tile", fs.Tile())
 
 	if tileBuilder, ok := tileregistry.GetRegistry()[fs.Tile()]; ok {
 		lo.G.Debug("found tile in registry")
@@ -79,7 +87,7 @@ func getTileFromRegistry(fs *flagSet, commandName string) (tile tileregistry.Til
 				ArchiveDirectory: fs.Dest(),
 			})
 			if err != nil {
-				return nil, fmt.Errorf("failure to connect to ops manager host: %v", err)
+				return nil, fmt.Errorf("failure to connect to ops manager host: %s", err.Error())
 			}
 
 		} else {
@@ -87,6 +95,7 @@ func getTileFromRegistry(fs *flagSet, commandName string) (tile tileregistry.Til
 		}
 
 	} else {
+		lo.G.Errorf("tile '%s' not found", fs.Tile())
 		err = ErrInvalidTileSelection
 	}
 	return
@@ -121,7 +130,7 @@ var (
 	//ErrInvalidFlagArgs - error for invalid flags
 	ErrInvalidFlagArgs = errors.New("invalid cli flag args")
 	//ErrInvalidTileSelection - error for invalid tile
-	ErrInvalidTileSelection = errors.New("invalid tile selected. try the 'list-tiles' option to see a list of available tiles.")
+	ErrInvalidTileSelection = errors.New("invalid tile selected. try the 'list-tiles' option to see a list of available tiles")
 	flagList                = map[string]flagBucket{
 		opsManagerHost: flagBucket{
 			Flag:   []string{"opsmanagerhost", "omh"},
