@@ -101,6 +101,37 @@ func testTileAction(actionName string) {
 				})
 			})
 
+			Context("when running a tile action returns an error", func() {
+				var (
+					controlTileName      = "fake-tile"
+					controlTileGenerator *fake.TileGenerator
+					controlTile          *fake.Tile
+				)
+				BeforeEach(func() {
+					controlTile = new(fake.Tile)
+					controlTile.ErrFake = fmt.Errorf("operation failed")
+					controlTileGenerator = new(fake.TileGenerator)
+					controlTileGenerator.TileSpy = controlTile
+					tileregistry.Register(controlTileName, controlTileGenerator)
+					set := flag.NewFlagSet("", 0)
+					set.String("tile", controlTileName, "")
+					set.String("opsmanagerhost", "*****", "")
+					set.String("adminuser", "*****", "")
+					set.String("adminpass", "*****", "")
+					set.String("opsmanageruser", "*****", "")
+					set.String("opsmanagerpass", "*****", "")
+					set.String("destination", "*****", "")
+					controlCliContext = cli.NewContext(cli.NewApp(), set, nil)
+					controlCmd = CreateBURACliCommand(controlName, controlUsage, controlErrorHandler)
+					controlCliContext.Command = controlCmd
+				})
+				It("then it should set an error and failure exit code", func() {
+					controlCmd.Action(controlCliContext)
+					Ω(controlErrorHandler.ExitCode).ShouldNot(Equal(controlExit))
+					Ω(controlErrorHandler.Error).Should(HaveOccurred())
+				})
+			})
+
 			Context("when the action is called w/o proper flags but with a registered tile", func() {
 				var controlTileName = "fake-tile"
 				BeforeEach(func() {

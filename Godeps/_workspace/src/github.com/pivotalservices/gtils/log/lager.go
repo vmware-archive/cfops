@@ -6,6 +6,7 @@ import (
 	"github.com/pivotal-golang/lager"
 )
 
+//NewLager - constructor for a Logger object
 func NewLager(log *logger) Logger {
 	var minLagerLogLevel lager.LogLevel
 	switch log.LogLevel {

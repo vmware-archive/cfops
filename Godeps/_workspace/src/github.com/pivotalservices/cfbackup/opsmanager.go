@@ -131,7 +131,6 @@ func (context *OpsManager) saveHTTPResponse(url string, dest io.Writer) (err err
 	if err == nil && resp.StatusCode == http.StatusOK {
 		defer resp.Body.Close()
 		_, err = io.Copy(dest, resp.Body)
-
 	} else if resp != nil && resp.StatusCode != http.StatusOK {
 		errMsg, _ := ioutil.ReadAll(resp.Body)
 		err = errors.New(string(errMsg[:]))
@@ -169,7 +168,7 @@ func (context *OpsManager) importInstallationPart(url, filename, fieldname strin
 
 	if backupReader, err = context.Reader(context.TargetDir, context.OpsmanagerBackupDir, filename); err == nil {
 		defer backupReader.Close()
-		var res *http.Response
+		var resp *http.Response
 		conn := ghttp.ConnAuth{
 			Url:      url,
 			Username: context.Username,
@@ -181,9 +180,18 @@ func (context *OpsManager) importInstallationPart(url, filename, fieldname strin
 
 		lo.G.Debug("upload request", log.Data{"fieldname": fieldname, "filePath": filePath, "conn": conn})
 
-		if res, err = upload(conn, fieldname, filePath, -1, bufferedReader, nil); err != nil {
-			err = fmt.Errorf(fmt.Sprintf("ERROR:%s", err.Error()))
-			lo.G.Debug("upload failed", log.Data{"err": err, "response": res})
+		creds := map[string]string{
+			"password": context.Password,
+		}
+		resp, err = upload(conn, fieldname, filePath, -1, bufferedReader, creds)
+		if err == nil && resp.StatusCode == http.StatusOK {
+			lo.G.Debug("Request for %s succeeded with status: %s", url, resp.Status)
+		} else if resp != nil && resp.StatusCode != http.StatusOK {
+			err = fmt.Errorf("Request for %s failed with status: %s", url, resp.Status)
+		}
+
+		if err != nil {
+			lo.G.Error("error uploading installation: %s", err.Error())
 		}
 	}
 	return
