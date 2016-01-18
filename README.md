@@ -7,9 +7,13 @@ cfops [![wercker status](https://app.wercker.com/status/d0a50d426b77a9f73da0fe4f
 Supports PivotalCF on:
    - **VSphere**
       - ops-manager (backup/restore `verified`)
-      - elastic-runtime (backup/restore `verified`)
+      - elastic-runtime
+         - postgres datastore (backup/restore `verified`)
+         - mysql datastore (backup/restore `coming soon`)
+         - external datastore (backup/restore `no yet supported`)
    - **AWS** 
       - ops-manager (backup `verified`)
+      - elastic-runtime (`not yet supported`)
 
 
 ### Overview
