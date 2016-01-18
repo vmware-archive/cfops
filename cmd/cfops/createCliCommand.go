@@ -221,7 +221,6 @@ func hasValidBackupRestoreFlags(fs *flagSet) bool {
 		fs.AdminUser() != "" &&
 		fs.AdminPass() != "" &&
 		fs.OpsManagerUser() != "" &&
-		fs.OpsManagerPass() != "" &&
 		fs.Dest() != "" &&
 		fs.Tile() != "")
 
