@@ -6,7 +6,10 @@ cfops [![wercker status](https://app.wercker.com/status/d0a50d426b77a9f73da0fe4f
 (as of release v1.1.0+)
 
 **IAAS**
-This utility is only designed to work for PivotalCF on VSphere
+Supports PivotalCF on:
+   VSphere (ops-manager, elastic-runtime `verified`)
+   AWS (ops-manager `verified`)
+
 
 **BACKUP**
 tested and known to work for **Ops Manager v1.6**
