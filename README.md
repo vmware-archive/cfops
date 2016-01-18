@@ -3,21 +3,13 @@ cfops [![wercker status](https://app.wercker.com/status/d0a50d426b77a9f73da0fe4f
 
 ### Version Compatibility
 
-(as of release v1.1.0+)
-
 **IAAS**
 Supports PivotalCF on:
-   VSphere (ops-manager, elastic-runtime `verified`)
-   AWS (ops-manager `verified`)
-
-
-**BACKUP**
-tested and known to work for **Ops Manager v1.6**
-tested and known to work for **ER v1.6**
-
-**RESTORE**
-tested and known to work for **Ops Manager v1.6**
-tested and known to work for **ER v1.6**
+   - **VSphere**
+      - ops-manager (backup/restore `verified`)
+      - elastic-runtime (backup/restore `verified`)
+   - **AWS** 
+      - ops-manager (backup `verified`)
 
 
 ### Overview
