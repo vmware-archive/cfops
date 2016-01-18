@@ -3,6 +3,9 @@ package command
 import (
 	"fmt"
 	"io"
+	"sync"
+
+	"github.com/xchapter7x/lo"
 
 	"golang.org/x/crypto/ssh"
 )
@@ -19,11 +22,13 @@ type SshConfig struct {
 func (s *SshConfig) GetAuthMethod() (authMethod []ssh.AuthMethod) {
 
 	if s.SSLKey == "" {
+		lo.G.Debug("using password for authn")
 		authMethod = []ssh.AuthMethod{
 			ssh.Password(s.Password),
 		}
 
 	} else {
+		lo.G.Debug("using sslkey for authn")
 		keySigner, _ := ssh.ParsePrivateKey([]byte(s.SSLKey))
 
 		authMethod = []ssh.AuthMethod{
@@ -38,7 +43,9 @@ type ClientInterface interface {
 }
 
 type DefaultRemoteExecutor struct {
-	Client ClientInterface
+	Client         ClientInterface
+	LazyClientDial func()
+	once           sync.Once
 }
 
 //Wrapper of ssh client to match client interface signature, since client.NewSession() does not use an interface
@@ -62,14 +69,15 @@ func NewRemoteExecutor(sshCfg SshConfig) (executor Executer, err error) {
 		User: sshCfg.Username,
 		Auth: sshCfg.GetAuthMethod(),
 	}
-	client, err := ssh.Dial("tcp", fmt.Sprintf("%s:%d", sshCfg.Host, sshCfg.Port), clientconfig)
-	if err != nil {
-		return
+	remoteExecutor := &DefaultRemoteExecutor{}
+	remoteExecutor.LazyClientDial = func() {
+		client, err := ssh.Dial("tcp", fmt.Sprintf("%s:%d", sshCfg.Host, sshCfg.Port), clientconfig)
+		if err != nil {
+			return
+		}
+		remoteExecutor.Client = NewClientWrapper(client)
 	}
-	c := NewClientWrapper(client)
-	executor = &DefaultRemoteExecutor{
-		Client: c,
-	}
+	executor = remoteExecutor
 	return
 }
 
@@ -82,6 +90,7 @@ type SSHSession interface {
 
 // Copy the output from a command to the specified io.Writer
 func (executor *DefaultRemoteExecutor) Execute(dest io.Writer, command string) (err error) {
+	executor.once.Do(executor.LazyClientDial)
 	session, err := executor.Client.NewSession()
 	defer session.Close()
 	if err != nil {
