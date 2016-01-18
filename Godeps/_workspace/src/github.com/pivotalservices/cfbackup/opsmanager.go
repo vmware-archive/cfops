@@ -47,6 +47,7 @@ var NewOpsManager = func(opsManagerHostname string, adminUsername string, adminP
 
 //SetSSHPrivateKey - sets the private key in the ops manager object and rebuilds the remote executer associated with the opsmanager
 func (context *OpsManager) SetSSHPrivateKey(key string) {
+	lo.G.Debug("Setting SSHKey")
 	context.SSHPrivateKey = key
 	context.createExecuter()
 }
