@@ -3,8 +3,6 @@ cfops [![wercker status](https://app.wercker.com/status/d0a50d426b77a9f73da0fe4f
 
 ### Version Compatibility
 
-(as of release v1.1.0+)
-
 **IAAS**
 Supports PivotalCF on:
    - **VSphere**
