@@ -20,6 +20,11 @@ var LargeMultiPartUpload = func(conn ConnAuth, paramName, filename string, fileS
 			lo.G.Error("writefields error: ", err)
 		}
 	}
+
+	if fileSize == int64(-1) {
+		fileSize = GetFileSize(filename)
+	}
+
 	ms.WriteReader(paramName, filename, fileSize, fileRef)
 	if req, err = http.NewRequest("POST", conn.Url, nil); err == nil {
 		if conn.Username != "" && conn.Password != "" {
