@@ -35,7 +35,10 @@ build:
     - script:
         name: go smoke build
         code: |
+          pwd
           ls -lha
+          ls -lha cmd
+          ls -lha cmd/cfops
           (cd cmd/cfops && godep go build) 
 
     - script:

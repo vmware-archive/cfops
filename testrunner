@@ -1,4 +1,3 @@
-
 # Check if images are available locally
 DOCKER_LOCAL=""
 if [[ $(docker images|grep golang) ]]; then 
