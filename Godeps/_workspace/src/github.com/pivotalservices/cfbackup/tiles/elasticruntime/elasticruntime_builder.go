@@ -24,7 +24,7 @@ func (s *ElasticRuntimeBuilder) New(tileSpec tileregistry.TileSpec) (elasticRunt
 		io.Copy(installationTmpFile, installationSettings)
 		config := cfbackup.NewConfigurationParser(installationTmpFile.Name())
 
-		if iaas, err := config.GetIaaS(); err == nil {
+		if iaas, hasKey := config.GetIaaS(); hasKey {
 			sshKey = iaas.SSHPrivateKey
 		}
 		elasticRuntime = NewElasticRuntime(installationTmpFile.Name(), tileSpec.ArchiveDirectory, sshKey)

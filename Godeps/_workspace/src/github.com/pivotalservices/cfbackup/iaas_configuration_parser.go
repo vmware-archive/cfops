@@ -29,11 +29,12 @@ func NewConfigurationParserFromReader(settings io.Reader) *ConfigurationParser {
 }
 
 //GetIaaS - get the iaas elements from the installation settings
-func (s *ConfigurationParser) GetIaaS() (config IaaSConfiguration, err error) {
+func (s *ConfigurationParser) GetIaaS() (config IaaSConfiguration, hasSSHKey bool) {
 	config = s.installationSettings.Infrastructure.IaaSConfig
+	hasSSHKey = false
 
-	if config.SSHPrivateKey == "" {
-		err = ErrNoSSLKeyFound
+	if config.SSHPrivateKey != "" {
+		hasSSHKey = true
 	}
 	return
 }

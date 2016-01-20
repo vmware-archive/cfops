@@ -14,7 +14,7 @@ func (s *OpsManagerBuilder) New(tileSpec tileregistry.TileSpec) (opsManagerTile 
 	if installationSettings, err := opsManager.GetInstallationSettings(); err == nil {
 		config := cfbackup.NewConfigurationParserFromReader(installationSettings)
 
-		if iaas, err := config.GetIaaS(); err == nil {
+		if iaas, hasKey := config.GetIaaS(); hasKey {
 			lo.G.Debug("we found a iaas info block")
 			opsManager.SetSSHPrivateKey(iaas.SSHPrivateKey)
 
