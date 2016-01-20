@@ -1,4 +1,4 @@
-package cfbackup
+package opsmanager
 
 import (
 	"bufio"
@@ -11,6 +11,7 @@ import (
 	"path"
 
 	"github.com/cloudfoundry-community/go-cfenv"
+	"github.com/pivotalservices/cfbackup"
 	"github.com/pivotalservices/gtils/command"
 	ghttp "github.com/pivotalservices/gtils/http"
 	"github.com/pivotalservices/gtils/log"
@@ -19,11 +20,11 @@ import (
 
 // NewOpsManager initializes an OpsManager instance
 var NewOpsManager = func(opsManagerHostname string, adminUsername string, adminPassword string, opsManagerUsername string, opsManagerPassword string, target string) (context *OpsManager, err error) {
-	backupContext := NewBackupContext(target, cfenv.CurrentEnv())
+	backupContext := cfbackup.NewBackupContext(target, cfenv.CurrentEnv())
 	settingsHTTPRequestor := ghttp.NewHttpGateway()
-	settingsMultiHTTPRequestor := GetUploader(backupContext)
+	settingsMultiHTTPRequestor := httpUploader(cfbackup.GetUploader(backupContext))
 	assetsHTTPRequestor := ghttp.NewHttpGateway()
-	assetsMultiHTTPRequestor := GetUploader(backupContext)
+	assetsMultiHTTPRequestor := httpUploader(cfbackup.GetUploader(backupContext))
 
 	context = &OpsManager{
 		SettingsUploader:    settingsMultiHTTPRequestor,

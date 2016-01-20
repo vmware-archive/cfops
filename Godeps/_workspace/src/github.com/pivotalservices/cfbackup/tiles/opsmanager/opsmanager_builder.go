@@ -1,6 +1,7 @@
-package cfbackup
+package opsmanager
 
 import (
+	"github.com/pivotalservices/cfbackup"
 	"github.com/pivotalservices/cfops/tileregistry"
 	"github.com/xchapter7x/lo"
 )
@@ -11,7 +12,7 @@ func (s *OpsManagerBuilder) New(tileSpec tileregistry.TileSpec) (opsManagerTile 
 	opsManager, err = NewOpsManager(tileSpec.OpsManagerHost, tileSpec.AdminUser, tileSpec.AdminPass, tileSpec.OpsManagerUser, tileSpec.OpsManagerPass, tileSpec.ArchiveDirectory)
 
 	if installationSettings, err := opsManager.GetInstallationSettings(); err == nil {
-		config := NewConfigurationParserFromReader(installationSettings)
+		config := cfbackup.NewConfigurationParserFromReader(installationSettings)
 
 		if iaas, err := config.GetIaaS(); err == nil {
 			lo.G.Debug("we found a iaas info block")
