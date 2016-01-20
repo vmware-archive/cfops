@@ -19,18 +19,6 @@ const (
 	//IsS3Varname - s3 persistence true|false
 	IsS3Varname = "S3_ACTIVE"
 
-	OpsMgrInstallationSettingsFilename    string = "installation.json"
-	OpsMgrInstallationAssetsFileName      string = "installation.zip"
-	OpsMgrInstallationAssetsPostFieldName string = "installation[file]"
-	OpsMgrDeploymentsFileName             string = "deployments.tar.gz"
-	OpsMgrEncryptionKeyFileName           string = "cc_db_encryption_key.txt"
-	OpsMgrBackupDir                       string = "opsmanager"
-	OpsMgrDeploymentsDir                  string = "deployments"
-	OpsMgrDefaultSSHPort                  int    = 22
-	OpsMgrInstallationSettingsURL         string = "https://%s/api/installation_settings"
-	OpsMgrInstallationAssetsURL           string = "https://%s/api/installation_asset_collection"
-	OpsMgrDeploymentsFile                 string = "/var/tempest/workspaces/default/deployments/bosh-deployments.yml"
-
 	//NfsDirPath - this is where the nfs store lives
 	NfsDirPath string = "/var/vcap/store"
 	//NfsArchiveDir - this is the archive dir name
@@ -54,8 +42,8 @@ const (
 	ERUaa = "UaadbInfo"
 	//ERCc -- key
 	ERCc = "CcdbInfo"
-	//ERMySql -- key
-	ERMySql = "MysqldbInfo"
+	//ERMySQL -- key
+	ERMySQL = "MysqldbInfo"
 	//ERNfs -- key
 	ERNfs = "NfsInfo"
 	//ERBackupFileFormat -- format of archive filename
@@ -108,7 +96,7 @@ var (
 	ErrNoSSLKeyFound = errors.New("no ssl key found in iaas config")
 
 	//NfsNewRemoteExecuter - this is a function which is able to execute a remote command against the nfs server
-	NfsNewRemoteExecuter func(command.SshConfig) (command.Executer, error) = command.NewRemoteExecutor
+	NfsNewRemoteExecuter = command.NewRemoteExecutor
 
 	//ErrERDirectorCreds - error for director creds
 	ErrERDirectorCreds = errors.New(ERInvalidDirectorCredsMsg)
