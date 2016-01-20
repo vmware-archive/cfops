@@ -6,7 +6,7 @@ import (
 
 //GetUploader - returns an uploader from a given backup context
 func GetUploader(backupContext BackupContext) (uploader httpUploader) {
-	uploader = ghttp.MultiPartUpload
+	uploader = ghttp.LargeMultiPartUpload
 
 	if backupContext.IsS3 {
 		uploader = ghttp.MultiPartUpload

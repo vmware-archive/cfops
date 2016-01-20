@@ -42,48 +42,48 @@
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/cfops/tileregistry",
-			"Comment": "v2.0.0-20-g713dc9a",
-			"Rev": "713dc9ad5eb192eced2e4dee425833f5f3772679"
+			"Comment": "v2.0.0-35-g95d094a",
+			"Rev": "95d094a1778f2d8cde6fcc6b5f4fb766d6a05529"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/bosh",
-			"Comment": "v0.1.3-58-g0527e67",
-			"Rev": "0527e67a0ed02ab62fb05f81954291a59e00353f"
+			"Comment": "v0.1.3-59-ga3e850e",
+			"Rev": "a3e850e446e758aec09c582c64b0297c564c5b16"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/command",
-			"Comment": "v0.1.3-58-g0527e67",
-			"Rev": "0527e67a0ed02ab62fb05f81954291a59e00353f"
+			"Comment": "v0.1.3-59-ga3e850e",
+			"Rev": "a3e850e446e758aec09c582c64b0297c564c5b16"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/http",
-			"Comment": "v0.1.3-58-g0527e67",
-			"Rev": "0527e67a0ed02ab62fb05f81954291a59e00353f"
+			"Comment": "v0.1.3-59-ga3e850e",
+			"Rev": "a3e850e446e758aec09c582c64b0297c564c5b16"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/log",
-			"Comment": "v0.1.3-58-g0527e67",
-			"Rev": "0527e67a0ed02ab62fb05f81954291a59e00353f"
+			"Comment": "v0.1.3-59-ga3e850e",
+			"Rev": "a3e850e446e758aec09c582c64b0297c564c5b16"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/mock",
-			"Comment": "v0.1.3-58-g0527e67",
-			"Rev": "0527e67a0ed02ab62fb05f81954291a59e00353f"
+			"Comment": "v0.1.3-59-ga3e850e",
+			"Rev": "a3e850e446e758aec09c582c64b0297c564c5b16"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/osutils",
-			"Comment": "v0.1.3-58-g0527e67",
-			"Rev": "0527e67a0ed02ab62fb05f81954291a59e00353f"
+			"Comment": "v0.1.3-59-ga3e850e",
+			"Rev": "a3e850e446e758aec09c582c64b0297c564c5b16"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/persistence",
-			"Comment": "v0.1.3-58-g0527e67",
-			"Rev": "0527e67a0ed02ab62fb05f81954291a59e00353f"
+			"Comment": "v0.1.3-59-ga3e850e",
+			"Rev": "a3e850e446e758aec09c582c64b0297c564c5b16"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/storage",
-			"Comment": "v0.1.3-58-g0527e67",
-			"Rev": "0527e67a0ed02ab62fb05f81954291a59e00353f"
+			"Comment": "v0.1.3-59-ga3e850e",
+			"Rev": "a3e850e446e758aec09c582c64b0297c564c5b16"
 		},
 		{
 			"ImportPath": "github.com/pkg/sftp",

@@ -92,9 +92,6 @@ const (
 )
 
 var (
-	//ErrNoSSLKeyFound - error if there are no ssl keys found in the iaas config block of installationsettings
-	ErrNoSSLKeyFound = errors.New("no ssl key found in iaas config")
-
 	//NfsNewRemoteExecuter - this is a function which is able to execute a remote command against the nfs server
 	NfsNewRemoteExecuter = command.NewRemoteExecutor
 
