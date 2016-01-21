@@ -13,9 +13,8 @@ func GetFileSize(filename string) (fileSize int64) {
 	if file, err = os.Open(filename); err == nil {
 		fileInfo, err = file.Stat()
 		fileSize = fileInfo.Size()
-	}
 
-	if err != nil {
+	} else {
 		fileSize = -1
 	}
 	return
