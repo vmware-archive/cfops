@@ -39,16 +39,48 @@ type (
 
 	//InstallationSettings - an object to house installationsettings elements from the json
 	InstallationSettings struct {
-		Infrastructure Infrastructure
+		Infrastructure Infrastructure `json:"infrastructure"`
+		Products       []Products     `json:"products"`
 	}
+
 	//Infrastructure - a struct to house Infrastructure block elements from the json
 	Infrastructure struct {
+		Type       string            `json:"type"`
 		IaaSConfig IaaSConfiguration `json:"iaas_configuration"`
 	}
+
 	//IaaSConfiguration - a struct to house the IaaSConfiguration block elements from the json
 	IaaSConfiguration struct {
 		SSHPrivateKey string `json:"ssh_private_key"`
 	}
+
+	// Products contains installation settings for a product
+	Products struct {
+		Identifer      string              `json:"identifier"`
+		IPS            map[string][]string `json:"ips"`
+		Jobs           []Jobs              `json:"jobs"`
+		ProductVersion string              `json:"product_version"`
+	}
+
+	// Jobs contains job settings for a product
+	Jobs struct {
+		Identifier string       `json:"identifier"`
+		Properties []Properties `json:"properties"`
+		Instances  []Instances  `json:"instances"`
+	}
+
+	// Properties contains property settings for a job
+	Properties struct {
+		Definition string      `json:"definition"`
+		Value      interface{} `json:"value"`
+	}
+
+	// Instances contains instances for a job
+	Instances struct {
+		Identifier string `json:"identifier"`
+		Value      int    `json:"value"`
+	}
+
 	//ConfigurationParser - the parser to handle installation settings file parsing
 	ConfigurationParser struct {
 		installationSettings InstallationSettings
