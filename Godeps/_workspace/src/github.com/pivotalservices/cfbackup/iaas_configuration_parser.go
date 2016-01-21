@@ -2,6 +2,7 @@ package cfbackup
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 )
@@ -10,7 +11,9 @@ import (
 func NewConfigurationParser(installationFilePath string) *ConfigurationParser {
 	is := InstallationSettings{}
 	b, _ := ioutil.ReadFile(installationFilePath)
+	fmt.Printf("the length of our installation settings file is %d\n", len(b))
 	json.Unmarshal(b, &is)
+	fmt.Printf("our installation settings is %s\n", is)
 
 	return &ConfigurationParser{
 		installationSettings: is,
