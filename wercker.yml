@@ -35,7 +35,7 @@ build:
     - script:
         name: go smoke build
         code: |
-          (cd cmd/cfops && godep go build) 
+          (cd cmd/cfops && godep go build)
 
     - script:
         name: add repo to artifact
@@ -67,7 +67,7 @@ build:
           cp -R ./ ${WERCKER_OUTPUT_DIR}
 
 deploy:
-  steps: 
+  steps:
     - script:
         name: install-packages
         code: |
@@ -85,7 +85,7 @@ deploy:
         fingerprint: 16:27:ac:a5:76:28:2d:36:63:1b:56:4d:eb:df:a6:48
 
     - script:
-        name: set release id variable for version 
+        name: set release id variable for version
         code: |
           go get github.com/xchapter7x/versioning
           export WERCKER_GITHUB_CREATE_RELEASE_ID=`versioning bump_patch`
@@ -101,9 +101,9 @@ deploy:
         active: $GITFLOW_ACTIVE
         git_name: $GITFLOW_NAME
         git_email: $GITFLOW_EMAIL
-    
+
     #this is a workaround for the flowy-release not resetting
-    #its branch state... 
+    #its branch state...
     - script:
         name: reset git to proper commit
         code: |
@@ -115,9 +115,30 @@ deploy:
         tag: $WERCKER_GITHUB_CREATE_RELEASE_ID
         title: CFOPS $WERCKER_GITHUB_CREATE_RELEASE_ID
         draft: $RELEASE_DRAFT
-    
+
     - github-upload-asset:
         token: $GITHUB_TOKEN
         file: cfops_binaries.tgz
         release_id: $WERCKER_GITHUB_CREATE_RELEASE_ID
         content-type: application/x-gzip
+
+    - s3sync:
+        key-id: $S3_KEY
+        key-secret: $S3_SECRET
+        bucket-url: ${S3_BUCKET}/${S3_FOLDER}
+        source-dir: ${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/linux64
+        delete-removed: false
+
+    - s3sync:
+        key-id: $S3_KEY
+        key-secret: $S3_SECRET
+        bucket-url: ${S3_BUCKET}/${S3_FOLDER}
+        source-dir: ${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/osx
+        delete-removed: false
+
+    - s3sync:
+        key-id: $S3_KEY
+        key-secret: $S3_SECRET
+        bucket-url: ${S3_BUCKET}/${S3_FOLDER}
+        source-dir: ${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/win64
+        delete-removed: false
