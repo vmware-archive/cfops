@@ -28,6 +28,7 @@ func main() {
 
 // NewApp creates a new cli app
 func NewApp(eh *ErrorHandler) *cli.App {
+	cli.AppHelpTemplate = CfopsHelpTemplate
 	app := cli.NewApp()
 	app.Version = VERSION
 	app.Name = "cfops"
