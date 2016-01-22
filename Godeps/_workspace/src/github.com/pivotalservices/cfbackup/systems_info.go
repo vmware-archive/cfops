@@ -1,37 +1,27 @@
 package cfbackup
 
-import "fmt"
+import "github.com/xchapter7x/lo"
 
 // NewSystemsInfo creates a map of SystemDumps that are configured
 // based on the installation settings fetched from ops manager
 func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo {
 
-	fmt.Println("we have an sys info installation settings file %s", installationSettingsFile)
+	lo.G.Debugf("we have an sys info installation settings file %s", installationSettingsFile)
 
 	configParser := NewConfigurationParser(installationSettingsFile)
 	installationSettings := configParser.installationSettings
 
-	fmt.Println("we have a some installationSettings  %v", installationSettings)
-	//director config
-	//blobstore type
-	// db type
+	lo.G.Debugf("we have a some installationSettings  %v", installationSettings)
 
-	// ccdb backup postgres if instance_count >=1 else will be backedf up by HAMySQL
-	// uaadb backup postgres if instance_count >=1 else will be backedf up by HAMySQL
-	// consoleDB backup postgres if instance_count >=1 else will be backedf up by HAMySQL
-	// mysql backup postgres if instance_count >=1 else will be backedf up by HAMySQL
 	var systemDumps = make(map[string]SystemDump)
+	dumps := []SystemDump{}
 
-	// Search for CF and check DB jobs for postgres
 	for _, product := range installationSettings.Products {
 		identifier := product.Identifer
 		if identifier == "cf" {
-			fmt.Println("we have a cf product")
-			for _, job := range product.Jobs { //jobs are release jobs like nats/ccdb
+			for _, job := range product.Jobs {
 
-				if isPostgres(job.Identifier, job.Instances) { // job id is db
-
-					fmt.Println("we have some psql")
+				if isPostgres(job.Identifier, job.Instances) {
 
 					systemDumps[ERConsole] = &PgInfo{
 						SystemInfo: SystemInfo{
@@ -42,6 +32,7 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo 
 						},
 						Database: "console",
 					}
+					dumps = append(dumps, systemDumps[ERConsole])
 
 					systemDumps[ERCc] = &PgInfo{
 						SystemInfo: SystemInfo{
@@ -52,6 +43,7 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo 
 						},
 						Database: "ccdb",
 					}
+					dumps = append(dumps, systemDumps[ERCc])
 
 					systemDumps[ERUaa] = &PgInfo{
 						SystemInfo: SystemInfo{
@@ -62,6 +54,8 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo 
 						},
 						Database: "uaa",
 					}
+					dumps = append(dumps, systemDumps[ERUaa])
+					break
 				}
 			}
 		}
@@ -75,6 +69,7 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo 
 		},
 		Database: "mysql",
 	}
+	dumps = append(dumps, systemDumps[ERMySQL])
 	systemDumps[ERDirector] = &SystemInfo{
 		Product:       BoshName(),
 		Component:     "director",
@@ -89,31 +84,25 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo 
 			SSHPrivateKey: sshKey,
 		},
 	}
+	dumps = append(dumps, systemDumps[ERNfs])
 
 	return SystemsInfo{
 		SystemDumps: systemDumps,
+		Dumps:       dumps,
 	}
 }
 
 // PersistentSystems returns a slice of all the
 // configured SystemDump for an installation
 func (s SystemsInfo) PersistentSystems() []SystemDump {
-	v := make([]SystemDump, len(s.SystemDumps))
-	idx := 0
-	for _, value := range s.SystemDumps {
-		v[idx] = value
-		idx++
-	}
-	return v
+	return s.Dumps
 }
 
 func isPostgres(jobdb string, instances []Instances) bool {
-	//Create a slice containing all pg dbs
 	pgdbs := []string{"ccdb", "uaadb", "consoledb"}
 
 	for _, pgdb := range pgdbs {
 		if pgdb == jobdb {
-			//Check to see in say uaadb has a local db instance
 			for _, instances := range instances {
 				val := instances.Value
 				if val >= 1 {
