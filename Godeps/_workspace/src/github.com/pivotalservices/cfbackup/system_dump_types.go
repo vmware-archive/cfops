@@ -35,6 +35,18 @@ func (s *NfsInfo) GetPersistanceBackup() (dumper PersistanceBackup, err error) {
 	return NewNFSBackup(s.Pass, s.Ip, s.SSHPrivateKey)
 }
 
+//GetPersistanceBackup - the constructor for a new DirectorInfo object
+func (s *DirectorInfo) GetPersistanceBackup() (dumper PersistanceBackup, err error) {
+	sshConfig := command.SshConfig{
+		Username: s.VcapUser,
+		Password: s.VcapPass,
+		Host:     s.Ip,
+		Port:     22,
+		SSLKey:   s.SSHPrivateKey,
+	}
+	return persistence.NewPgRemoteDump(2544, s.Database, s.User, s.Pass, sshConfig)
+}
+
 //GetPersistanceBackup - the constructor for a new mysqlinfo object
 func (s *MysqlInfo) GetPersistanceBackup() (dumper PersistanceBackup, err error) {
 	sshConfig := command.SshConfig{
