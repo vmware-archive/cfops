@@ -1,7 +1,5 @@
 package cfbackup
 
-import "fmt"
-
 // NewSystemsInfo creates a map of SystemDumps that are configured
 // based on the installation settings fetched from ops manager
 func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo {
@@ -81,7 +79,6 @@ func (s SystemsInfo) PersistentSystems() []SystemDump {
 	jobs := []SystemDump{}
 
 	for _, info := range ps {
-		fmt.Printf("info:%+v\n", s.SystemDumps[info])
 		if _, ok := s.SystemDumps[info]; ok {
 			jobs = append(jobs, s.SystemDumps[info])
 		}
