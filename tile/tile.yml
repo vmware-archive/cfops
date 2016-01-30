@@ -1,0 +1,84 @@
+---
+name: cfops
+icon_file: resources/icon.png
+label: Automation tool for Pivotal CF
+description: A CLI tool for running backup and restore operations on Pivotal Cloud Foundry products
+
+packages:
+- name: docker-cfops
+  type: docker-bosh
+  image: malston/cfops
+#  files:
+#  - path: resources/ubuntu_image.tgz
+  cpu: 1
+  memory: 4096
+  ephemeral_disk: 4096
+  persistent_disk: 2048
+  instances: 1
+  manifest: |
+    containers:
+    - name: cfops
+      image: malston/cfops
+      env_vars:
+        - "CFOPS_HOST=(( .properties.host.value ))"
+        - "CFOPS_ADMIN_USER=(( .properties.opsman_user.value ))"
+        - "CFOPS_ADMIN_PASS=(( .properties.opsman_password.value ))"
+        - "CFOPS_OM_USER=(( .properties.opsman_ssh_user.value ))"
+        - "CFOPS_OM_PASS=(( .properties.opsman_ssh_password.value ))"
+        - "CFOPS_TILE=(( .properties.tile.value ))"
+        - "CFOPS_CRON=(( .properties.backup_cron_expression.value ))"
+        - "S3_ACCESS_KEY_ID=(( .properties.s3_access_key_id.value ))"
+        - "S3_SECRET_ACCESS_KEY=(( .properties.s3_secret_access_key.value ))"
+        - "S3_BUCKET_NAME=(( .properties.s3_bucket_name.value ))"
+        - "S3_ACTIVE=(( .properties.s3_active.value ))"
+
+stemcell_criteria:
+
+properties:
+
+forms:
+- name: backup
+  label: CFOps Backup
+  description: Properties for CFOps Backup
+  properties:
+  - name: backup_cron_expression
+    type: string
+    label: Schedule Backup
+    default: "*/30 * * * *"
+    description: Schedule backups on a regular basis with a CRON expression.
+  - name: tile
+    type: dropdown_select
+    label: Tile
+    options:
+    - name: ops-manager
+      label: Ops Manager
+      default: true
+    - name: elastic-runtime
+      label: Elastic Runtime
+  - name: host
+    type: string
+    label: Ops Manager Host
+  - name: opsman_user
+    type: string
+    label: Ops Manager Username
+  - name: opsman_password
+    type: string
+    label: Ops Manager Password
+  - name: opsman_ssh_user
+    type: string
+    label: Ops Manager SSH User
+  - name: opsman_ssh_password
+    type: string
+    label: Ops Manager SSH Password
+  - name: s3_bucket_name
+    type: string
+    label: Ops Manager SSH Password
+  - name: s3_access_key_id
+    type: string
+    label: Ops Manager SSH Password
+  - name: s3_secret_access_key
+    type: string
+    label: Ops Manager SSH Password
+  - name: s3_active
+    type: boolean
+    label: Enable S3 backup
