@@ -32,10 +32,6 @@ packages:
         - "S3_BUCKET_NAME=(( .properties.s3_bucket_name.value ))"
         - "S3_ACTIVE=(( .properties.s3_active.value ))"
 
-stemcell_criteria:
-
-properties:
-
 forms:
 - name: backup
   label: CFOps Backup
