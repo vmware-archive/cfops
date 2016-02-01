@@ -56,23 +56,35 @@ type (
 
 	// Products contains installation settings for a product
 	Products struct {
-		Identifer      string              `json:"identifier"`
-		IPS            map[string][]string `json:"ips"`
-		Jobs           []Jobs              `json:"jobs"`
-		ProductVersion string              `json:"product_version"`
+		Identifier                         string              `json:"identifier"`
+		IPS                                map[string][]string `json:"ips"`
+		Jobs                               []Jobs              `json:"jobs"`
+		ProductVersion                     string              `json:"product_version"`
+		AZReference                        []string            `json:"availability_zone_references"`
+		DisabledPostDeployErrandNames      []string            `json:"disabled_post_deploy_errand_names"`
+		DeploymentNetworkReference         string              `json:"deployment_network_reference"`
+		GUID                               string              `json: "guid"`
+		InfrastructureNetworkReference     string              `json:"infrastructure_network_reference"`
+		InstallationName                   string              `json:"installation_name"`
+		SingletonAvailabilityZoneReference string              `json: "sigleton_availability_zone_reference"`
+		Stemcell                           interface{}         `json: "stemcell"`
 	}
 
 	// Jobs contains job settings for a product
 	Jobs struct {
-		Identifier string       `json:"identifier"`
-		Properties []Properties `json:"properties"`
-		Instances  []Instances  `json:"instances"`
+		Identifier       string                   `json:"identifier"`
+		Properties       []Properties             `json:"properties"`
+		Instances        []Instances              `json:"instances"`
+		GUID             string                   `json: "guid"`
+		InstallationName string                   `json: "installation_name"`
+		Partitions       []map[string]interface{} `json: "partitions"`
+		Resources        []map[string]interface{} `json: "resources"`
 	}
 
 	// Properties contains property settings for a job
 	Properties struct {
-		Definition string      `json:"definition"`
-		Value      interface{} `json:"value"`
+		Identifier string            `json:"identifier"`
+		Value      map[string]string `json:"value"`
 	}
 
 	// Instances contains instances for a job
