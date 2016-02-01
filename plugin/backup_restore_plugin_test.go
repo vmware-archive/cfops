@@ -8,6 +8,7 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/pivotalservices/cfbackup"
 	. "github.com/pivotalservices/cfops/plugin"
 
 	"github.com/pivotalservices/cfops/plugin/fake"
@@ -83,8 +84,8 @@ var _ = Describe("given a plugin", func() {
 			Context("when the rpc is running", func() {
 				var err error
 				var activity = "backup"
-				var controlProducts = []Product{Product{}, Product{}, Product{}}
-				var controlCredentials = []Credential{Credential{}, Credential{}, Credential{}}
+				var controlProducts = make(map[string]cfbackup.Products)
+				var controlCredentials = make(map[string]map[string][]cfbackup.Properties)
 				var fakePCF = &fake.PivotalCF{
 					FakeProducts:    controlProducts,
 					FakeCredentials: controlCredentials,

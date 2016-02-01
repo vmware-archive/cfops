@@ -1,6 +1,6 @@
 package plugin
 
-import "github.com/pivotalservices/cfbackup/tiles/opsmanager"
+import "github.com/pivotalservices/cfbackup"
 
 //Meta - plugin meta data storage object
 type Meta struct {
@@ -17,16 +17,17 @@ type Plugin interface {
 }
 
 //Product - implementation
-type Product struct{}
+type Product cfbackup.Products
 
 //Credential - credential implementation
-type Credential struct{}
+type Credential cfbackup.Properties
 
 //PivotalCF - interface representing a pivotalcf
 type PivotalCF interface {
+	SetActivity(string)
 	GetActivity() string
-	GetProducts() []Product
-	GetCredentials() []Credential
+	GetProducts() map[string]cfbackup.Products
+	GetCredentials() map[string]map[string][]cfbackup.Properties
 }
 
 type wrappedPlugin struct {
@@ -41,7 +42,12 @@ type PluginTileBuilder struct {
 
 //PluginTile - tile implementation of a plugin
 type PluginTile struct {
-	OpsManager *opsmanager.OpsManager
-	FilePath   string
-	Meta       Meta
+	PivotalCF PivotalCF
+	FilePath  string
+	Meta      Meta
+}
+
+type defaultPivotalCF struct {
+	activity             string
+	installationSettings *cfbackup.ConfigurationParser
 }
