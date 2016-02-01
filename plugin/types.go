@@ -4,9 +4,10 @@ import "github.com/pivotalservices/cfbackup/tiles/opsmanager"
 
 //Meta - plugin meta data storage object
 type Meta struct {
-	Name        string
-	Role        string
-	Description string
+	Name                string
+	Role                string
+	Description         string
+	SupportedActivities map[string]bool
 }
 
 //Plugin - a plugin interface definition
