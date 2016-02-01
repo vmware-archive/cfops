@@ -10,6 +10,13 @@ const (
 	PluginPort = int(1984)
 	//PluginMeta - default plugin arg to show meta data
 	PluginMeta = "plugin-meta"
+
+	//PluginActivityRestore - activity keyname
+	PluginActivityRestore = "restore"
+	//PluginActivityBackup - activity keyname
+	PluginActivityBackup = "backup"
+	//PluginActivityExecute - activity keyname
+	PluginActivityExecute = "execute"
 )
 
 var (

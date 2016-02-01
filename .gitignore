@@ -14,7 +14,6 @@ _cgo_defun.c
 _cgo_gotypes.go
 _cgo_export.*
 _testmain.go
-*.exe
 *.test
 *.prof
 *.coverprofile
@@ -33,3 +32,4 @@ _projects
 _steps
 
 .envrc
+!plugin/load/fixture_plugins/windows/sample.exe
