@@ -12,8 +12,10 @@ import (
 func main() {
 
 	if len(os.Args) == 2 {
+		lo.G.Debug("executing run plugin", os.Args)
 		runPlugin()
 	} else {
+		lo.G.Debug("executing call plugin", os.Args)
 		callPlugin()
 	}
 }

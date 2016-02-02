@@ -6,7 +6,7 @@ import "github.com/pivotalservices/cfbackup"
 func (s *DefaultPivotalCF) GetProducts() (products map[string]cfbackup.Products) {
 	products = make(map[string]cfbackup.Products)
 
-	for _, product := range s.installationSettings.GetProducts() {
+	for _, product := range s.InstallationSettings.GetProducts() {
 		products[product.Identifier] = product
 	}
 	return
@@ -16,7 +16,7 @@ func (s *DefaultPivotalCF) GetProducts() (products map[string]cfbackup.Products)
 func (s *DefaultPivotalCF) GetCredentials() (creds map[string]map[string][]cfbackup.Properties) {
 	creds = make(map[string]map[string][]cfbackup.Properties)
 
-	for _, product := range s.installationSettings.GetProducts() {
+	for _, product := range s.InstallationSettings.GetProducts() {
 		creds[product.Identifier] = make(map[string][]cfbackup.Properties)
 
 		for _, job := range product.Jobs {
@@ -30,6 +30,6 @@ func (s *DefaultPivotalCF) GetCredentials() (creds map[string]map[string][]cfbac
 var NewPivotalCF = func(installationSettings *cfbackup.ConfigurationParser) PivotalCF {
 
 	return &DefaultPivotalCF{
-		installationSettings: installationSettings,
+		InstallationSettings: installationSettings,
 	}
 }

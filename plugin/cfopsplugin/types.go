@@ -50,8 +50,7 @@ type BackupRestoreRPC struct {
 
 //DefaultPivotalCF - default implementation of PivotalCF interface
 type DefaultPivotalCF struct {
-	activity             string
-	installationSettings *cfbackup.ConfigurationParser
+	InstallationSettings *cfbackup.ConfigurationParser
 }
 
 //PluginTileBuilder - factory for a tile wrapped plugin

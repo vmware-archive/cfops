@@ -39,7 +39,7 @@ func buraAction(commandName string, eh *ErrorHandler) (action func(*cli.Context)
 
 		if tile, err := getTileFromRegistry(fs, commandName); err == nil {
 			if err = runTileAction(commandName, tile); err != nil {
-				lo.G.Errorf("there was an error: %s running %s on %s", err.Error(), commandName, fs.Tile())
+				lo.G.Errorf("there was an error: %s running %s on %s tile:%v", err.Error(), commandName, fs.Tile(), tile)
 				exitOnError(eh, c, commandName, err)
 				return
 			}
