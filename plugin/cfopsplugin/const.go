@@ -9,13 +9,6 @@ import (
 const (
 	//PluginMeta - default plugin arg to show meta data
 	PluginMeta = "plugin-meta"
-
-	//PluginActivityRestore - activity keyname
-	PluginActivityRestore = "restore"
-	//PluginActivityBackup - activity keyname
-	PluginActivityBackup = "backup"
-	//PluginActivityExecute - activity keyname
-	PluginActivityExecute = "execute"
 )
 
 var handshakeConfig = plugin.HandshakeConfig{
