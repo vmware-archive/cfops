@@ -47,6 +47,7 @@ func Call(name string, filePath string) (BackupRestorer, *plugin.Client) {
 
 	rpcClient, err := client.Client()
 	if err != nil {
+		lo.G.Debug("rpcclient error: ", err)
 		log.Fatal(err)
 	}
 
