@@ -53,7 +53,7 @@ func loadPlugin(dir string, fileInfo os.FileInfo) (err error) {
 		meta := cfopsplugin.Meta{}
 		if err = json.Unmarshal(bytes, &meta); err == nil {
 
-			if meta.Name == "" || meta.Role == "" {
+			if meta.Name == "" {
 				lo.G.Debug("plugin meta busted", meta)
 				err = ErrInvalidPluginMeta
 
