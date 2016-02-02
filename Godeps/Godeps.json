@@ -20,6 +20,14 @@
 			"Rev": "2402d76f3d41f928c7902a765dfc872356dd3aad"
 		},
 		{
+			"ImportPath": "github.com/hashicorp/go-plugin",
+			"Rev": "a76fe2078cae6ff99c99180785e7605f7fd0dc30"
+		},
+		{
+			"ImportPath": "github.com/hashicorp/yamux",
+			"Rev": "df949784da9ed028ee76df44652e42d37a09d7e4"
+		},
+		{
 			"ImportPath": "github.com/kr/fs",
 			"Rev": "2788f0dbd16903de03cb8186e5c7d97b69ad387b"
 		},
