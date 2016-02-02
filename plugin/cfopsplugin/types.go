@@ -59,10 +59,3 @@ type PluginTileBuilder struct {
 	FilePath string
 	Meta     Meta
 }
-
-//PluginTile - tile implementation of a plugin
-type PluginTile struct {
-	PivotalCF PivotalCF
-	FilePath  string
-	Meta      Meta
-}
