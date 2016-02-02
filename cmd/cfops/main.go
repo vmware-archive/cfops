@@ -6,6 +6,7 @@ import (
 
 	"github.com/codegangsta/cli"
 	_ "github.com/pivotalservices/cfbackup/tiles"
+	_ "github.com/pivotalservices/cfops/plugin/load"
 	"github.com/pivotalservices/cfops/tileregistry"
 )
 
