@@ -95,7 +95,7 @@ type (
 
 	//ConfigurationParser - the parser to handle installation settings file parsing
 	ConfigurationParser struct {
-		installationSettings InstallationSettings
+		InstallationSettings InstallationSettings
 	}
 
 	//CCJob - a cloud controller job object

@@ -13,7 +13,7 @@ func NewConfigurationParser(installationFilePath string) *ConfigurationParser {
 	json.Unmarshal(b, &is)
 
 	return &ConfigurationParser{
-		installationSettings: is,
+		InstallationSettings: is,
 	}
 }
 
@@ -24,13 +24,13 @@ func NewConfigurationParserFromReader(settings io.Reader) *ConfigurationParser {
 	json.Unmarshal(b, &is)
 
 	return &ConfigurationParser{
-		installationSettings: is,
+		InstallationSettings: is,
 	}
 }
 
 //GetIaaS - get the iaas elements from the installation settings
 func (s *ConfigurationParser) GetIaaS() (config IaaSConfiguration, hasSSHKey bool) {
-	config = s.installationSettings.Infrastructure.IaaSConfig
+	config = s.InstallationSettings.Infrastructure.IaaSConfig
 	hasSSHKey = false
 
 	if config.SSHPrivateKey != "" {
@@ -84,5 +84,5 @@ func isPostgres(job string, instances []Instances) bool {
 
 //GetProducts - get the products array
 func (s *ConfigurationParser) GetProducts() (products []Products) {
-	return s.installationSettings.Products
+	return s.InstallationSettings.Products
 }

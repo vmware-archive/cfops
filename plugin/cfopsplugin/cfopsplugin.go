@@ -32,8 +32,7 @@ func Start(plgn Plugin) {
 
 //Call - calls a given plugin by name and file path
 func Call(name string, filePath string) (BackupRestorer, *plugin.Client) {
-	var backupRestoreInterface BackupRestorer
-	RegisterPlugin(name, backupRestoreInterface)
+	RegisterPlugin(name, new(BackupRestoreRPC))
 	log.SetOutput(ioutil.Discard)
 
 	client := plugin.NewClient(&plugin.ClientConfig{
@@ -44,14 +43,14 @@ func Call(name string, filePath string) (BackupRestorer, *plugin.Client) {
 		Plugins:         GetPlugins(),
 		Cmd:             exec.Command(filePath, "plugin"),
 	})
-
 	rpcClient, err := client.Client()
+
 	if err != nil {
 		lo.G.Debug("rpcclient error: ", err)
 		log.Fatal(err)
 	}
-
 	raw, err := rpcClient.Dispense(name)
+
 	if err != nil {
 		lo.G.Debug("error: ", err)
 		log.Fatal(err)
