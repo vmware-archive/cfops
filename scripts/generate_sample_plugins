@@ -1,0 +1,10 @@
+#!/bin/bash
+MYOS=darwin
+GOOS=${MYOS} godep go build plugin/cfopsplugin/sample/main.go && chmod +x main && mv main plugin/load/fixture_plugins/${MYOS}/sample
+
+MYOS=linux
+GOOS=${MYOS} godep go build plugin/cfopsplugin/sample/main.go && chmod +x main && mv main plugin/load/fixture_plugins/${MYOS}/sample
+
+MYOS=windows
+GOOS=${MYOS} godep go build plugin/cfopsplugin/sample/main.go && chmod +x main.exe && mv main.exe plugin/load/fixture_plugins/${MYOS}/sample
+

@@ -8,7 +8,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/pivotalservices/cfops/plugin"
+	"github.com/pivotalservices/cfops/plugin/cfopsplugin"
 	"github.com/pivotalservices/cfops/tileregistry"
 	"github.com/xchapter7x/lo"
 )
@@ -48,8 +48,8 @@ func loadPlugin(dir string, fileInfo os.FileInfo) (err error) {
 	var bytes []byte
 	filePath := dir + "/" + fileInfo.Name()
 
-	if bytes, err = exec.Command(filePath, plugin.PluginMeta).Output(); err == nil {
-		meta := plugin.Meta{}
+	if bytes, err = exec.Command(filePath, cfopsplugin.PluginMeta).Output(); err == nil {
+		meta := cfopsplugin.Meta{}
 		if err = json.Unmarshal(bytes, &meta); err == nil {
 
 			if meta.Name == "" || meta.Role == "" {
@@ -57,7 +57,7 @@ func loadPlugin(dir string, fileInfo os.FileInfo) (err error) {
 				err = ErrInvalidPluginMeta
 
 			} else {
-				ptb := &plugin.PluginTileBuilder{
+				ptb := &cfopsplugin.PluginTileBuilder{
 					FilePath: filePath,
 					Meta:     meta,
 				}
