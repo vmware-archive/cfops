@@ -4,13 +4,16 @@ import (
 	"encoding/json"
 	"io"
 	"io/ioutil"
+	"github.com/xchapter7x/lo"
 )
 
 //NewConfigurationParser - constructor for a ConfigurationParser from a json installationsettings file
 func NewConfigurationParser(installationFilePath string) *ConfigurationParser {
 	is := InstallationSettings{}
 	b, _ := ioutil.ReadFile(installationFilePath)
-	json.Unmarshal(b, &is)
+	if err := json.Unmarshal(b, &is); err != nil {
+		lo.G.Error("Unmarshal installation settings error", err)
+	}
 
 	return &ConfigurationParser{
 		InstallationSettings: is,
@@ -21,7 +24,9 @@ func NewConfigurationParser(installationFilePath string) *ConfigurationParser {
 func NewConfigurationParserFromReader(settings io.Reader) *ConfigurationParser {
 	is := InstallationSettings{}
 	b, _ := ioutil.ReadAll(settings)
-	json.Unmarshal(b, &is)
+	if err := json.Unmarshal(b, &is); err != nil {
+		lo.G.Error("Unmarshal installation settings error", err)
+	}
 
 	return &ConfigurationParser{
 		InstallationSettings: is,
