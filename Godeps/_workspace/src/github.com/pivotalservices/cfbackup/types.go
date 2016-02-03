@@ -84,7 +84,7 @@ type (
 	// Properties contains property settings for a job
 	Properties struct {
 		Identifier string            `json:"identifier"`
-		Value      map[string]string `json:"value"`
+		Value      interface{} `json:"value"`
 	}
 
 	// Instances contains instances for a job
