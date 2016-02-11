@@ -36,6 +36,10 @@
 			"Rev": "281073eb9eb092240d33ef253c404f1cca550309"
 		},
 		{
+			"ImportPath": "github.com/nu7hatch/gouuid",
+			"Rev": "179d4d0c4d8d407a32af483c2354df1d2c91e6c3"
+		},
+		{
 			"ImportPath": "github.com/onsi/ginkgo",
 			"Comment": "v1.2.0-34-ge43390e",
 			"Rev": "e43390e35a4a88f3f95d5ddf9055efb7a1170469"
@@ -55,8 +59,8 @@
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/cfbackup",
-			"Comment": "v0.1.0-116-g3fe3f2b",
-			"Rev": "3fe3f2bbf443eae111506876f50c22c6436efbdd"
+			"Comment": "v0.1.0-118-g8e91aba",
+			"Rev": "8e91aba1c4fbb00b640efceae27e3f7d40385be5"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/bosh",
