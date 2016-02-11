@@ -1,6 +1,16 @@
 package cfopsplugin
 
-import "github.com/pivotalservices/cfbackup"
+import (
+	"io"
+
+	"github.com/pivotalservices/cfbackup"
+	"github.com/pivotalservices/cfops/tileregistry"
+)
+
+//GetHostDetails - return all of the host and archive details in the form of a tile spec object
+func (s *DefaultPivotalCF) GetHostDetails() tileregistry.TileSpec {
+	return s.TileSpec
+}
 
 //GetProducts - gets a products object from the given pivotalcf
 func (s *DefaultPivotalCF) GetProducts() (products map[string]cfbackup.Products) {
@@ -26,10 +36,21 @@ func (s *DefaultPivotalCF) GetCredentials() (creds map[string]map[string][]cfbac
 	return
 }
 
+//NewArchiveWriter - creates a writer to a named resource using the given name on the cfops defined target (s3, local, etc)
+func (s *DefaultPivotalCF) NewArchiveWriter(name string) (writer io.Writer) {
+	return
+}
+
+//NewArchiveReader - creates a reader to a named resource using the given name on the cfops defined target (s3, local, etc)
+func (s *DefaultPivotalCF) NewArchiveReader(name string) (reader io.Reader) {
+	return
+}
+
 //NewPivotalCF - creates the default pivotacf
-var NewPivotalCF = func(installationSettings *cfbackup.ConfigurationParser) PivotalCF {
+var NewPivotalCF = func(installationSettings *cfbackup.ConfigurationParser, ts tileregistry.TileSpec) PivotalCF {
 
 	return &DefaultPivotalCF{
+		TileSpec:             ts,
 		InstallationSettings: installationSettings,
 	}
 }

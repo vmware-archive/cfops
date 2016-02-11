@@ -20,12 +20,12 @@ func init() {
 	}
 
 	if strings.ToUpper(os.Getenv(PluginSupport)) == "TRUE" {
-		LoadPlugins(PluginDir)
+		Plugins(PluginDir)
 	}
 }
 
-//LoadPlugins - function to register plugins with cfops
-func LoadPlugins(dir string) (err error) {
+//Plugins - function to register plugins residing in a given directory with cfops
+func Plugins(dir string) (err error) {
 	var fileInfoArray []os.FileInfo
 	var fileInfo os.FileInfo
 
