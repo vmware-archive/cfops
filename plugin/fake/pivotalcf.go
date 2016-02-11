@@ -12,8 +12,8 @@ type PivotalCF struct {
 	FakeProducts    map[string]cfbackup.Products
 	FakeCredentials map[string]map[string][]cfbackup.Properties
 	FakeActivity    string
-	FakeReader      io.Reader
-	FakeWriter      io.Writer
+	FakeReader      io.ReadCloser
+	FakeWriter      io.WriteCloser
 	FakeHostDetails tileregistry.TileSpec
 }
 
@@ -43,13 +43,13 @@ func (s *PivotalCF) GetCredentials() (credentials map[string]map[string][]cfback
 }
 
 //NewArchiveReader -- fake archive reader
-func (s *PivotalCF) NewArchiveReader(name string) (reader io.Reader) {
+func (s *PivotalCF) NewArchiveReader(name string) (reader io.ReadCloser, err error) {
 	reader = s.FakeReader
 	return
 }
 
 //NewArchiveWriter -- fake archive writer
-func (s *PivotalCF) NewArchiveWriter(name string) (writer io.Writer) {
+func (s *PivotalCF) NewArchiveWriter(name string) (writer io.WriteCloser, err error) {
 	writer = s.FakeWriter
 	return
 }
