@@ -110,9 +110,10 @@ func (context *ElasticRuntime) RunDbAction(dbInfoList []cfbackup.SystemDump, act
 
 		if err = info.Error(); err == nil {
 			err = context.readWriterArchive(info, context.TargetDir, action)
+
 		} else {
-			// Don't error out yet until issue #111461510 is resolved.
-			continue
+			lo.G.Error("readWriterArchive err: ", err)
+			break
 		}
 	}
 	return
