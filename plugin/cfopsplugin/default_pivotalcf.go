@@ -47,6 +47,8 @@ func (s *DefaultPivotalCF) NewArchiveWriter(name string) (writer io.WriteCloser,
 
 //NewArchiveReader - creates a reader to a named resource using the given name on the cfops defined target (s3, local, etc)
 func (s *DefaultPivotalCF) NewArchiveReader(name string) (reader io.ReadCloser, err error) {
+	backupContext := cfbackup.NewBackupContext(s.TileSpec.ArchiveDirectory, cfenv.CurrentEnv())
+	reader, err = backupContext.StorageProvider.Reader(path.Join(s.TileSpec.ArchiveDirectory, name))
 	return
 }
 

@@ -6,6 +6,7 @@ import (
 	"os"
 	"path"
 
+	"github.com/nu7hatch/gouuid"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/pivotalservices/cfbackup"
@@ -46,9 +47,16 @@ var _ = Describe("DefaultPivotalCF initialized with valid installationSettings &
 		})
 	})
 
-	Context("when NewArchiveWriter is called w/ a name", func() {
-		controlName := "myarchive"
-		It("then it should create a writer based on the cfops configured directory target", func() {
+	Context("when NewArchiveWriter is called w/ a archive name", func() {
+		var controlName string
+		BeforeEach(func() {
+			u, _ := uuid.NewV4()
+			controlName = u.String()
+		})
+		AfterEach(func() {
+			os.Remove(path.Join(controlTmpDir, controlName))
+		})
+		It("then it should create a writer based on the cfops configured target and the archive name", func() {
 			_, errStatBefore := os.Stat(path.Join(controlTmpDir, controlName))
 			Ω(os.IsNotExist(errStatBefore)).ShouldNot(BeFalse())
 			writer, err := pivotalCF.NewArchiveWriter(controlName)
@@ -64,13 +72,26 @@ var _ = Describe("DefaultPivotalCF initialized with valid installationSettings &
 		})
 	})
 
-	XContext("when NewArchiveReader is called w/ a name", func() {
-		controlName := "myarchive"
-		It("then it should return a reader based on the cfops configured directory target", func() {
+	Context("when NewArchiveReader is called w/ a valid archive name", func() {
+		var controlName string
+		BeforeEach(func() {
+			u, _ := uuid.NewV4()
+			controlName := u.String()
+			os.Create(path.Join(controlTmpDir, controlName))
+		})
+		AfterEach(func() {
+			os.Remove(path.Join(controlTmpDir, controlName))
+		})
+
+		It("then it should return a reader based on the cfops configured target and the archive name", func() {
 			reader, err := pivotalCF.NewArchiveReader(controlName)
-			contents, _ := ioutil.ReadAll(reader)
 			Ω(err).ShouldNot(HaveOccurred())
-			Ω(contents).Should(Equal(""))
+			Ω(reader).ShouldNot(BeNil())
+			Ω(func() {
+				func(x io.Reader) {
+					lo.G.Debug("the returned var should be a valid Reader", reader)
+				}(reader)
+			}).ShouldNot(Panic())
 		})
 	})
 
