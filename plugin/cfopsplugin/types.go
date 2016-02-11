@@ -1,9 +1,11 @@
 package cfopsplugin
 
 import (
+	"io"
 	"net/rpc"
 
 	"github.com/pivotalservices/cfbackup"
+	"github.com/pivotalservices/cfops/tileregistry"
 )
 
 //Meta - plugin meta data storage object
@@ -28,8 +30,11 @@ type Plugin interface {
 
 //PivotalCF - interface representing a pivotalcf
 type PivotalCF interface {
+	GetHostDetails() tileregistry.TileSpec
 	GetProducts() map[string]cfbackup.Products
 	GetCredentials() map[string]map[string][]cfbackup.Properties
+	NewArchiveReader(name string) io.Reader
+	NewArchiveWriter(name string) io.Writer
 }
 
 //BackupRestorePlugin - this is an implementation of the rpc client and server wrapper
@@ -50,6 +55,7 @@ type BackupRestoreRPC struct {
 
 //DefaultPivotalCF - default implementation of PivotalCF interface
 type DefaultPivotalCF struct {
+	TileSpec             tileregistry.TileSpec
 	InstallationSettings *cfbackup.ConfigurationParser
 }
 

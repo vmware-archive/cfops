@@ -9,11 +9,11 @@ import (
 	"github.com/pivotalservices/cfops/tileregistry"
 )
 
-var _ = Describe("given LoadPlugins", func() {
+var _ = Describe("given Plugins", func() {
 	Context("when called with a valid plugin directory containing plugins", func() {
 		It("then it should register all plugins in the plugins directory", func() {
 			controlTileLength := len(tileregistry.GetRegistry())
-			err := LoadPlugins("fixture_plugins/" + runtime.GOOS)
+			err := Plugins("fixture_plugins/" + runtime.GOOS)
 			tileCount := len(tileregistry.GetRegistry())
 			Ω(err).ShouldNot(HaveOccurred())
 			Ω(tileCount).Should(BeNumerically(">", controlTileLength))
@@ -22,7 +22,7 @@ var _ = Describe("given LoadPlugins", func() {
 	Context("when called on a invalid or empty directory", func() {
 		var err error
 		BeforeEach(func() {
-			err = LoadPlugins("dir-does-not-exist")
+			err = Plugins("dir-does-not-exist")
 		})
 		It("then it should yield an error", func() {
 			Ω(err).Should(HaveOccurred())
@@ -31,7 +31,7 @@ var _ = Describe("given LoadPlugins", func() {
 	Context("when a plugin is not able to be registered", func() {
 		var err error
 		BeforeEach(func() {
-			err = LoadPlugins("busted_plugins")
+			err = Plugins("busted_plugins")
 		})
 		It("then it should yield an error", func() {
 			Ω(err).Should(HaveOccurred())
