@@ -2,7 +2,9 @@ package cfopsplugin
 
 import (
 	"io"
+	"path"
 
+	"github.com/cloudfoundry-community/go-cfenv"
 	"github.com/pivotalservices/cfbackup"
 	"github.com/pivotalservices/cfops/tileregistry"
 )
@@ -37,12 +39,14 @@ func (s *DefaultPivotalCF) GetCredentials() (creds map[string]map[string][]cfbac
 }
 
 //NewArchiveWriter - creates a writer to a named resource using the given name on the cfops defined target (s3, local, etc)
-func (s *DefaultPivotalCF) NewArchiveWriter(name string) (writer io.Writer) {
+func (s *DefaultPivotalCF) NewArchiveWriter(name string) (writer io.WriteCloser, err error) {
+	backupContext := cfbackup.NewBackupContext(s.TileSpec.ArchiveDirectory, cfenv.CurrentEnv())
+	writer, err = backupContext.StorageProvider.Writer(path.Join(s.TileSpec.ArchiveDirectory, name))
 	return
 }
 
 //NewArchiveReader - creates a reader to a named resource using the given name on the cfops defined target (s3, local, etc)
-func (s *DefaultPivotalCF) NewArchiveReader(name string) (reader io.Reader) {
+func (s *DefaultPivotalCF) NewArchiveReader(name string) (reader io.ReadCloser, err error) {
 	return
 }
 

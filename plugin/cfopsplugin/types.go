@@ -33,8 +33,8 @@ type PivotalCF interface {
 	GetHostDetails() tileregistry.TileSpec
 	GetProducts() map[string]cfbackup.Products
 	GetCredentials() map[string]map[string][]cfbackup.Properties
-	NewArchiveReader(name string) io.Reader
-	NewArchiveWriter(name string) io.Writer
+	NewArchiveReader(name string) (io.ReadCloser, error)
+	NewArchiveWriter(name string) (io.WriteCloser, error)
 }
 
 //BackupRestorePlugin - this is an implementation of the rpc client and server wrapper
