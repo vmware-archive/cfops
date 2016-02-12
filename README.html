@@ -1,0 +1,249 @@
+<?xml version='1.0' encoding='utf-8' ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	</head>
+	<body>
+		<h1 id="cfops-http-cfops-io-wercker-status-https-app-wercker-com-status-d0a50d426b77a9f73da0fe4f383ad624-s-master-wercker-status-https-app-wercker-com-project-bykey-d0a50d426b77a9f73da0fe4f383ad624-godoc-http-godoc-org-github-com-pivotalservices-cfops-status-png-http-godoc-org-github-com-pivotalservices-cfops-gitter-https-badges-gitter-im-pivotalservices-cfops-svg-https-gitter-im-pivotalservices-cfops-utm_source-badge-utm_medium-badge-utm_campaign-pr-badge">
+			<a href="http://cfops.io">cfops</a> 
+			<a href="https://app.wercker.com/status/d0a50d426b77a9f73da0fe4f383ad624/s/master" title="wercker status">![wercker status</a>](https://app.wercker.com/project/bykey/d0a50d426b77a9f73da0fe4f383ad624) 
+			<a href="http://godoc.org/github.com/pivotalservices/cfops?status.png">![GoDoc</a>](http://godoc.org/github.com/pivotalservices/cfops) 
+			<a href="https://badges.gitter.im/pivotalservices/cfops.svg">![Gitter</a>](https://gitter.im/pivotalservices/cfops?utm
+			<em>source=badge&amp;utm</em>medium=badge&amp;utm_campaign=pr-badge)
+		</h1>
+		<p>======</p>
+		<h3 id="version-compatibility">Version Compatibility</h3>
+		<p>
+			<strong>IAAS</strong>
+			Supports PivotalCF on:
+		</p>
+		<ul>
+			<li>
+				<strong>VSphere</strong>
+				      - ops-manager (backup/restore 
+				<code>verified</code>)
+				      - elastic-runtime
+				         - postgres datastore (backup/restore 
+				<code>verified</code>)
+				         - mysql datastore (backup/restore 
+				<code>coming soon</code>)
+				         - external datastore (backup/restore 
+				<code>no yet supported</code>)
+			</li>
+			<li>
+				<strong>AWS</strong> 
+				      - ops-manager (backup 
+				<code>verified</code>)
+				      - elastic-runtime (
+				<code>not yet supported</code>)
+			</li>
+		</ul>
+		<h3 id="overview">Overview</h3>
+		<p>This is simply an automation that is based on the supported way to back up Pivotal Cloud Foundry (http://docs.pivotal.io/pivotalcf/customizing/backup-restore/backup-pcf.html).</p>
+		<p>It may be extended in the future to support greater breadth of functionality.</p>
+		<p>
+			<strong>Backing up ER will take Cloud Controller offline for the duration of the backup, causing your foundation to become readonly for the duration of the backup</strong>. App pushes etc will not work during this time.
+		</p>
+		<h3 id="install">Install</h3>
+		<p>Download the latest version here:
+			https://github.com/pivotalservices/cfops/releases/latest</p>
+		<h3 id="contributing">Contributing</h3>
+		<p>PRs welcome.</p>
+		<h3 id="differences-between-v1-and-v2">Differences between v1 and v2</h3>
+		<p>While the core package cfops uses to do the backup &amp; restore has not changed
+			the cli of cfops itself has been changed.</p>
+		<p>Major differences are:</p>
+		<ul>
+			<li>one must specify a single tile to backup/restore at a time.</li>
+			<li>one can list the tiles that are supported via the cli.</li>
+			<li>more to come...</li>
+		</ul>
+		<h3 id="usage-cfops-v2-x-x">Usage (cfops v2.x.x+)</h3>
+		<p>
+			<strong>general commands</strong>
+		</p>
+		<p>
+			<code>`</code>
+			NAME:
+			   cfops - Cloud Foundry Operations Tool
+		</p>
+		<p>USAGE:
+			   ./cfops command [command options] [arguments...]</p>
+		<p>COMMANDS:
+			   version	shows the application version currently in use
+			   list-tiles	shows a list of available backup/restore target tiles
+			   backup	creates a backup archive of the target tile
+			   restore	restores from an archive to the target tile
+			   help, h	Shows a list of commands or help for one command
+
+			<code>`</code>
+		</p>
+		<p>
+			<strong>setting pcf versions</strong>
+		</p>
+		<p>If using PCF 1.6 or above you need to set the 
+			<code>ER_VERSION</code> variable.
+		</p>
+		<p>
+			<code>`</code>
+			ER_VERSION=1.6 ./cfops backup ...
+
+			<code>`</code>
+		</p>
+		<p>
+			<strong>setting log levels</strong>
+		</p>
+		<p>
+			<code>`</code>
+			LOG_LEVEL=(debug|info|error) ./cfops backup ...
+
+			<code>`</code>
+		</p>
+		<p>
+			<strong>list available tiles</strong>
+		</p>
+		<p>
+			<code>`</code>
+			$ cfops list-tiles
+			Available Tiles:
+			ops-manager
+			elastic-runtime
+
+			<code>`</code>
+		</p>
+		<p>
+			<strong>list version</strong>
+		</p>
+		<p>
+			<code>`</code>
+			$ cfops version
+			cfops version v2.0.0
+
+			<code>`</code>
+		</p>
+		<p>
+			<strong>run a backup on a tile</strong>
+		</p>
+		<p>
+			<code>`</code>
+			NAME:
+			   ./cfops backup - creates a backup archive of the target tile
+		</p>
+		<p>USAGE:
+			   ./cfops backup [command options] [arguments...]</p>
+		<p>DESCRIPTION:
+			   backup --opsmanagerhost <host> --adminuser <usr> --adminpass <pass> --opsmanageruser <opsuser> --opsmanagerpass <opspass> -d <dir> --tile elastic-runtime</p>
+		<p>OPTIONS:
+			   --destination, -d 		path of the Cloud Foundry archive [$CFOPS
+			<em>DEST</em>PATH]
+			   --tile, -t 			a tile you would like to run the operation on [$CFOPS_TILE]
+			   --opsmanagerhost, --omh 	hostname for Ops Manager [$CFOPS_HOST]
+			   --adminuser, --du 		username for Ops Mgr admin (Ops Manager WebConsole Credentials) [$CFOPS
+			<em>ADMIN</em>USER]
+			   --adminpass, --dp 		password for Ops Mgr admin (Ops Manager WebConsole Credentials) [$CFOPS
+			<em>ADMIN</em>PASS]
+			   --opsmanageruser, --omu 	username for Ops Manager VM Access (used for ssh connections) [$CFOPS
+			<em>OM</em>USER]
+			   --opsmanagerpass, --omp 	password for Ops Manager VM Access (used for ssh connections) [$CFOPS
+			<em>OM</em>PASS]
+
+			<code>`</code>
+		</p>
+		<p>
+			<strong>run a restore on a tile</strong>
+		</p>
+		<p>
+			<code>`</code>
+			NAME:
+			   ./cfops restore - restores from an archive to the target tile
+		</p>
+		<p>USAGE:
+			   ./cfops restore [command options] [arguments...]
+			<br/>
+		</p>
+		<p>DESCRIPTION:
+			   restore --opsmanagerhost <host> --adminuser <usr> --adminpass <pass> --opsmanageruser <opsuser> --opsmanagerpass <opspass> -d <dir> --tile elastic-runtime</p>
+		<p>OPTIONS:
+			   --adminuser, --du 		username for Ops Mgr admin (Ops Manager WebConsole Credentials) [$CFOPS
+			<em>ADMIN</em>USER]
+			   --adminpass, --dp 		password for Ops Mgr admin (Ops Manager WebConsole Credentials) [$CFOPS
+			<em>ADMIN</em>PASS]
+			   --opsmanageruser, --omu 	username for Ops Manager VM Access (used for ssh connections) [$CFOPS
+			<em>OM</em>USER]
+			   --opsmanagerpass, --omp 	password for Ops Manager VM Access (used for ssh connections) [$CFOPS
+			<em>OM</em>PASS]
+			   --destination, -d 		path of the Cloud Foundry archive [$CFOPS
+			<em>DEST</em>PATH]
+			   --tile, -t 			a tile you would like to run the operation on [$CFOPS_TILE]
+			   --opsmanagerhost, --omh 	hostname for Ops Manager [$CFOPS_HOST]
+
+			<code>`</code>
+		</p>
+		<p>
+			<strong>changing the default archive path</strong>
+		</p>
+		<p>
+			<code>`</code>
+			CFOPS
+			<em>REMOTE</em>ARCHIVE_PATH=/var/vcap/store/archive.backup ./cfops backup ...
+		</p>
+		<hr/>
+		<h3 id="usage-cfops-v1-x-x">Usage (cfops v1.x.x)</h3>
+		<p>For example you can try the various commands, args and flags (and --help documentation) that are currently proposed, such as:</p>
+		<pre><code>$ ./cfops -help</code></pre>
+		<pre><code>$ ./cfops backup</code></pre>
+		<pre><code>$ ./cfops restore</code></pre>
+		<p>etc.</p>
+		<p>Sample help output:
+
+			<code>`</code>
+			$ ./cfops help backup
+			NAME:
+			   backup - backup --opsmanagerhost <host> --adminuser <usr> --adminpass <pass> --opsmanageruser <opsuser> --opsmanagerpass <opspass> -d <dir> --tl 'opsmanager, er'
+		</p>
+		<p>USAGE:
+			   command backup [command options] [arguments...]</p>
+		<p>DESCRIPTION:
+			   backup a Cloud Foundry deployment, including Ops Manager configuration, databases, and blob store</p>
+		<p>OPTIONS:
+			   --tilelist, --tl 		a csv list of the tiles you would like to run the operation on [$CFOPS
+			<em>TILE</em>LIST]
+			   --opsmanagerhost, --omh 	hostname for Ops Manager [$CFOPS_HOST]
+			   --adminuser, --du 		username for Ops Mgr admin (Ops Manager WebConsole Credentials) [$CFOPS
+			<em>ADMIN</em>USER]
+			   --adminpass, --dp 		password for Ops Mgr admin (Ops Manager WebConsole Credentials) [$CFOPS
+			<em>ADMIN</em>PASS]
+			   --opsmanageruser, --omu 	username for Ops Manager VM Access (used for ssh connections) [$CFOPS
+			<em>OM</em>USER]
+			   --opsmanagerpass, --omp 	password for Ops Manager VM Access (used for ssh connections) [$CFOPS
+			<em>OM</em>PASS]
+			   --destination, -d 		path of the Cloud Foundry backup archive [$CFOPS
+			<em>BACKUP</em>PATH]
+		</p>
+		<p>$ ./cfops help restore
+			NAME:
+			   restore - restore --opsmanagerhost <host> --adminuser <usr> --adminpass <pass> --opsmanageruser <opsuser> --opsmanagerpass <opspass> -d <dir> --tl 'opsmanager, er'</p>
+		<p>USAGE:
+			   command restore [command options] [arguments...]</p>
+		<p>DESCRIPTION:
+			   Restore a Cloud Foundry deployment, including Ops Manager configuration, databases, and blob store</p>
+		<p>OPTIONS:
+			   --tilelist, --tl 		a csv list of the tiles you would like to run the operation on [$CFOPS
+			<em>TILE</em>LIST]
+			   --opsmanagerhost, --omh 	hostname for Ops Manager [$CFOPS_HOST]
+			   --adminuser, --du 		username for Ops Mgr admin (Ops Manager WebConsole Credentials) [$CFOPS
+			<em>ADMIN</em>USER]
+			   --adminpass, --dp 		password for Ops Mgr admin (Ops Manager WebConsole Credentials) [$CFOPS
+			<em>ADMIN</em>PASS]
+			   --opsmanageruser, --omu 	username for Ops Manager VM Access (used for ssh connections) [$CFOPS
+			<em>OM</em>USER]
+			   --opsmanagerpass, --omp 	password for Ops Manager VM Access (used for ssh connections) [$CFOPS
+			<em>OM</em>PASS]
+			   --destination, -d 		path of the Cloud Foundry backup archive [$CFOPS
+			<em>BACKUP</em>PATH]
+		</p>
+		<p>
+			<code>`</code>
+		</p>
+	</body>
+</html>
