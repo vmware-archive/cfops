@@ -6,6 +6,7 @@ import (
 
 	"github.com/pivotalservices/cfbackup"
 	"github.com/pivotalservices/cfops/tileregistry"
+	"github.com/pivotalservices/gtils/command"
 )
 
 //Meta - plugin meta data storage object
@@ -35,6 +36,8 @@ type PivotalCF interface {
 	GetCredentials() map[string]map[string][]cfbackup.Properties
 	NewArchiveReader(name string) (io.ReadCloser, error)
 	NewArchiveWriter(name string) (io.WriteCloser, error)
+	GetSshConfig(productName, jobName string) (command.SshConfig, error)
+	GetJobProperties(productName, jobName string) (properties []cfbackup.Properties, err error)
 }
 
 //BackupRestorePlugin - this is an implementation of the rpc client and server wrapper

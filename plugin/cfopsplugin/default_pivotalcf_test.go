@@ -1,6 +1,7 @@
 package cfopsplugin_test
 
 import (
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -24,7 +25,7 @@ var _ = Describe("DefaultPivotalCF initialized with valid installationSettings &
 		OpsManagerHost:   "localhost",
 	}
 	BeforeEach(func() {
-		configParser = cfbackup.NewConfigurationParser("./fixtures/installation-settings-1-6-default.json")
+		configParser = cfbackup.NewConfigurationParser("./fixtures/installation-settings-1-6-aws.json")
 		pivotalCF = NewPivotalCF(configParser, controlTileSpec)
 	})
 	Context("when GetCredentials is called", func() {
@@ -94,5 +95,53 @@ var _ = Describe("DefaultPivotalCF initialized with valid installationSettings &
 			}).ShouldNot(Panic())
 		})
 	})
+	products := map[string]string{
+		"p-mysql": "mysql",
+		"p-redis": "cf-redis-broker",
+	}
+	for productName, jobName := range products {
+		controlProductName := productName
+		controlJobName := jobName
+		Context("when GetJobProperties is called", func() {
+
+			Context(fmt.Sprintf("when called with %s product name and %s job name", controlProductName, controlJobName), func() {
+				It("then it should return a list of properties", func() {
+					properties, err := pivotalCF.GetJobProperties(controlProductName, controlJobName)
+					Ω(err).ShouldNot(HaveOccurred())
+					Ω(len(properties)).Should(BeNumerically(">", 0))
+				})
+			})
+			Context("when called with invalid productName", func() {
+				It("then it should return an error", func() {
+					_, err := pivotalCF.GetJobProperties("missingProgram", "missingJobName")
+					Ω(err).Should(HaveOccurred())
+					Ω(err.Error()).Should(Equal("job missingJobName not found for product missingProgram"))
+				})
+			})
+			Context("when called with invalid jobName", func() {
+				It("then it should return an error", func() {
+					_, err := pivotalCF.GetJobProperties("p-mysql", "missingJobName")
+					Ω(err).Should(HaveOccurred())
+					Ω(err.Error()).Should(Equal("job missingJobName not found for product p-mysql"))
+
+				})
+			})
+		})
+		XContext("when GetSshConfig is called", func() {
+
+			Context(fmt.Sprintf("when called with %s product name, %s job name", controlProductName, controlJobName), func() {
+				It("then it should return a valid SshConfig", func() {
+					sshConfig, err := pivotalCF.GetSshConfig(controlProductName, controlJobName)
+					Ω(err).ShouldNot(HaveOccurred())
+					Ω(sshConfig.Host).ShouldNot(BeEmpty())
+					Ω(sshConfig.Port).ShouldNot(BeEmpty())
+					Ω(sshConfig.Username).ShouldNot(BeEmpty())
+					Ω(sshConfig.Password).ShouldNot(BeEmpty())
+					Ω(sshConfig.SSLKey).Should(BeEmpty())
+				})
+			})
+
+		})
+	}
 
 })

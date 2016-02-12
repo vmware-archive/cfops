@@ -5,16 +5,19 @@ import (
 
 	"github.com/pivotalservices/cfbackup"
 	"github.com/pivotalservices/cfops/tileregistry"
+	"github.com/pivotalservices/gtils/command"
 )
 
 //PivotalCF --
 type PivotalCF struct {
-	FakeProducts    map[string]cfbackup.Products
-	FakeCredentials map[string]map[string][]cfbackup.Properties
-	FakeActivity    string
-	FakeReader      io.ReadCloser
-	FakeWriter      io.WriteCloser
-	FakeHostDetails tileregistry.TileSpec
+	FakeProducts      map[string]cfbackup.Products
+	FakeCredentials   map[string]map[string][]cfbackup.Properties
+	FakeActivity      string
+	FakeReader        io.ReadCloser
+	FakeWriter        io.WriteCloser
+	FakeHostDetails   tileregistry.TileSpec
+	FakeSshConfig     command.SshConfig
+	FakeJobProperties []cfbackup.Properties
 }
 
 //GetHostDetails --
@@ -52,4 +55,14 @@ func (s *PivotalCF) NewArchiveReader(name string) (reader io.ReadCloser, err err
 func (s *PivotalCF) NewArchiveWriter(name string) (writer io.WriteCloser, err error) {
 	writer = s.FakeWriter
 	return
+}
+
+func (s *PivotalCF) GetSshConfig(productName, jobName string) (sshConfig command.SshConfig, err error) {
+	sshConfig = s.FakeSshConfig
+	return
+}
+
+func (s *PivotalCF) GetJobProperties(productName, jobName string) (properties []cfbackup.Properties, err error) {
+    properties = s.FakeJobProperties
+    return
 }

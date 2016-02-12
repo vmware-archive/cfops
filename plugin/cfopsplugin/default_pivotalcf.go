@@ -1,12 +1,14 @@
 package cfopsplugin
 
 import (
+	"fmt"
 	"io"
 	"path"
 
 	"github.com/cloudfoundry-community/go-cfenv"
 	"github.com/pivotalservices/cfbackup"
 	"github.com/pivotalservices/cfops/tileregistry"
+	"github.com/pivotalservices/gtils/command"
 )
 
 //GetHostDetails - return all of the host and archive details in the form of a tile spec object
@@ -49,6 +51,32 @@ func (s *DefaultPivotalCF) NewArchiveWriter(name string) (writer io.WriteCloser,
 func (s *DefaultPivotalCF) NewArchiveReader(name string) (reader io.ReadCloser, err error) {
 	backupContext := cfbackup.NewBackupContext(s.TileSpec.ArchiveDirectory, cfenv.CurrentEnv())
 	reader, err = backupContext.StorageProvider.Reader(path.Join(s.TileSpec.ArchiveDirectory, name))
+	return
+}
+
+//GetSshConfig - returns the information needed to Ssh into product VM
+func (s *DefaultPivotalCF) GetSshConfig(productName, jobName string) (sshConfig command.SshConfig, err error) {
+	//properties := s.GetJobProperties(productName, jobName)
+
+	return
+}
+
+func (s *DefaultPivotalCF) GetJobProperties(productName, jobName string) (properties []cfbackup.Properties, err error) {
+	var jobFound bool = false
+	if _, ok := s.GetProducts()[productName]; ok {
+		product := s.GetProducts()[productName]
+		for _, job := range product.Jobs {
+			if job.Identifier == jobName {
+				properties = job.Properties
+				jobFound = true
+			}
+		}
+	} else {
+		err = fmt.Errorf("product %s not found", productName)
+	}
+	if !jobFound {
+	    err = fmt.Errorf("job %s not found for product %s", jobName, productName)
+	}
 	return
 }
 
