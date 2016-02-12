@@ -27,7 +27,7 @@ func (s *ElasticRuntimeBuilder) New(tileSpec tileregistry.TileSpec) (elasticRunt
 		if iaas, hasKey := config.GetIaaS(); hasKey {
 			sshKey = iaas.SSHPrivateKey
 		}
-		elasticRuntime = NewElasticRuntime(installationTmpFile.Name(), tileSpec.ArchiveDirectory, sshKey)
+		elasticRuntime = NewElasticRuntime(installationTmpFile.Name(), tileSpec.ArchiveDirectory, sshKey, tileSpec.RemoteArchivePath)
 	}
 	return
 }

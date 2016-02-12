@@ -16,8 +16,8 @@ import (
 )
 
 // NewElasticRuntime initializes an ElasticRuntime intance
-var NewElasticRuntime = func(jsonFile string, target string, sshKey string) *ElasticRuntime {
-	systemsInfo := cfbackup.NewSystemsInfo(jsonFile, sshKey)
+var NewElasticRuntime = func(jsonFile string, target string, sshKey string, remoteArchivePath string) *ElasticRuntime {
+	systemsInfo := cfbackup.NewSystemsInfo(jsonFile, sshKey, remoteArchivePath)
 	context := &ElasticRuntime{
 		SSHPrivateKey:     sshKey,
 		JSONFile:          jsonFile,

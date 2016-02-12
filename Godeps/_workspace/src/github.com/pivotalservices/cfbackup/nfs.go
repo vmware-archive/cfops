@@ -10,7 +10,7 @@ import (
 )
 
 //NewNFSBackup - constructor for an nfsbackup object
-func NewNFSBackup(password, ip string, sslKey string) (nfs *NFSBackup, err error) {
+func NewNFSBackup(password, ip string, sslKey string, remoteArchivePath string) (nfs *NFSBackup, err error) {
 	config := command.SshConfig{
 		Username: NfsDefaultSSHUser,
 		Password: password,
@@ -23,7 +23,7 @@ func NewNFSBackup(password, ip string, sslKey string) (nfs *NFSBackup, err error
 	if remoteExecuter, err = NfsNewRemoteExecuter(config); err == nil {
 		nfs = &NFSBackup{
 			Caller:    remoteExecuter,
-			RemoteOps: osutils.NewRemoteOperations(config),
+			RemoteOps: osutils.NewRemoteOperationsWithPath(config, remoteArchivePath),
 		}
 	}
 	return

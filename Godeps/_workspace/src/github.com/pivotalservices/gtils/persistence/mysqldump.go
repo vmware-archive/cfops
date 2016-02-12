@@ -21,18 +21,26 @@ func NewMysqlDump(ip, username, password string) *MysqlDump {
 	return m
 }
 
-//NewRemoteMysqlDump - will initialize a mysqldmp for remote execution
-func NewRemoteMysqlDump(username, password string, sshCfg command.SshConfig) (*MysqlDump, error) {
-	lo.G.Debug("setting up a new remote MyslDump object")
+func NewRemoteMysqlDumpWithPath(username, password string, sshCfg command.SshConfig, remoteArchivePath string) (*MysqlDump, error) {
+    lo.G.Debug("setting up a new remote MyslDump object")
 	remoteExecuter, err := command.NewRemoteExecutor(sshCfg)
 
+    remoteOps := osutils.NewRemoteOperations(sshCfg)
+    if len(remoteArchivePath) > 0 {
+        remoteOps.SetPath(remoteArchivePath)
+    }
+    
 	return &MysqlDump{
 		IP:        "localhost",
 		Username:  username,
 		Password:  password,
 		Caller:    remoteExecuter,
-		RemoteOps: osutils.NewRemoteOperations(sshCfg),
+		RemoteOps: remoteOps,
 	}, err
+}
+//NewRemoteMysqlDump - will initialize a mysqldmp for remote execution
+func NewRemoteMysqlDump(username, password string, sshCfg command.SshConfig) (*MysqlDump, error) {
+	return NewRemoteMysqlDumpWithPath(username, password, sshCfg, "")
 }
 
 //Import - will import to mysql from the given reader

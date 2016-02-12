@@ -21,9 +21,12 @@ func NewPgDump(ip string, port int, database, username, password string) *PgDump
 	}
 }
 
-//NewPgRemoteDump - a pgdump initialized for remote fs
-func NewPgRemoteDump(port int, database, username, password string, sshCfg command.SshConfig) (*PgDump, error) {
+func NewPgRemoteDumpWithPath(port int, database, username, password string, sshCfg command.SshConfig, remoteArchivePath string) (*PgDump, error) {
 	remoteExecuter, err := command.NewRemoteExecutor(sshCfg)
+	remoteOps := osutils.NewRemoteOperations(sshCfg)
+	if len(remoteArchivePath) > 0 {
+		remoteOps.SetPath(remoteArchivePath)
+	}
 	return &PgDump{
 		sshCfg:    sshCfg,
 		IP:        "localhost",
@@ -32,8 +35,13 @@ func NewPgRemoteDump(port int, database, username, password string, sshCfg comma
 		Username:  sshCfg.Username,
 		Password:  sshCfg.Password,
 		Caller:    remoteExecuter,
-		RemoteOps: osutils.NewRemoteOperations(sshCfg),
+		RemoteOps: remoteOps,
 	}, err
+}
+
+//NewPgRemoteDump - a pgdump initialized for remote fs
+func NewPgRemoteDump(port int, database, username, password string, sshCfg command.SshConfig) (*PgDump, error) {
+	return NewPgRemoteDumpWithPath(port, database, username, password, sshCfg, "")
 }
 
 //Import - allows us to import a pgdmp file in the form of a reader
