@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/codegangsta/cli"
@@ -79,12 +80,13 @@ func getTileFromRegistry(fs *flagSet, commandName string) (tile tileregistry.Til
 		if hasValidBackupRestoreFlags(fs) {
 			lo.G.Debug("we have all required flags and a proper builder")
 			tile, err = tileBuilder.New(tileregistry.TileSpec{
-				OpsManagerHost:   fs.Host(),
-				AdminUser:        fs.AdminUser(),
-				AdminPass:        fs.AdminPass(),
-				OpsManagerUser:   fs.OpsManagerUser(),
-				OpsManagerPass:   fs.OpsManagerPass(),
-				ArchiveDirectory: fs.Dest(),
+				OpsManagerHost:    fs.Host(),
+				AdminUser:         fs.AdminUser(),
+				AdminPass:         fs.AdminPass(),
+				OpsManagerUser:    fs.OpsManagerUser(),
+				OpsManagerPass:    fs.OpsManagerPass(),
+				ArchiveDirectory:  fs.Dest(),
+				RemoteArchivePath: RemoteArchivePath(),
 			})
 			if err != nil {
 				return nil, fmt.Errorf("failure to connect to ops manager host: %s", err.Error())
@@ -114,16 +116,19 @@ var buraFlags = func() (flags []cli.Flag) {
 }()
 
 const (
-	errExitCode           = 1
-	helpExitCode          = 2
-	cleanExitCode         = 0
-	opsManagerHost string = "opsmanagerHost"
-	adminUser      string = "adminUser"
-	adminPass      string = "adminPass"
-	opsManagerUser string = "opsManagerUser"
-	opsManagerPass string = "opsManagerPass"
-	dest           string = "destination"
-	tile           string = "tile"
+	errExitCode                         = 1
+	helpExitCode                        = 2
+	cleanExitCode                       = 0
+	opsManagerHost               string = "opsmanagerHost"
+	adminUser                    string = "adminUser"
+	adminPass                    string = "adminPass"
+	opsManagerUser               string = "opsManagerUser"
+	opsManagerPass               string = "opsManagerPass"
+	dest                         string = "destination"
+	tile                         string = "tile"
+	remoteArchivePath            string = "/var/vcap/store/archive.backup"
+	//RemoteArchivePathEnvVariable - constant for environment variable
+	RemoteArchivePathEnvVariable string = "CFOPS_REMOTE_ARCHIVE_PATH"
 )
 
 var (
@@ -215,6 +220,13 @@ func (s *flagSet) Dest() string {
 func (s *flagSet) Tile() string {
 	return s.tile
 }
+//RemoteArchivePath - function for getting the archive path to set on tile spec
+func RemoteArchivePath() string {
+	if len(os.Getenv(RemoteArchivePathEnvVariable)) > 0 {
+		return os.Getenv(RemoteArchivePathEnvVariable)
+	}
+	return remoteArchivePath
+}
 
 func hasValidBackupRestoreFlags(fs *flagSet) bool {
 	res := (fs.Host() != "" &&
@@ -231,6 +243,7 @@ func hasValidBackupRestoreFlags(fs *flagSet) bool {
 		lo.G.Debug("OpsManagerUser: ", fs.OpsManagerUser())
 		lo.G.Debug("OpsManagerPass: ", fs.OpsManagerPass())
 		lo.G.Debug("Destination: ", fs.Dest())
+		lo.G.Debug("RemoteArchivePath: ", RemoteArchivePath())
 	}
 	return res
 }

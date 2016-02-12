@@ -3,6 +3,7 @@ package main_test
 import (
 	"flag"
 	"fmt"
+	"os"
 
 	"github.com/codegangsta/cli"
 
@@ -16,6 +17,23 @@ import (
 var _ = Describe("given a CreateBURACliCommand func", func() {
 	testTileAction("backup")
 	testTileAction("restore")
+	Context("when RemoteArchivePath is called with no environment variable set", func() {
+		It("Then it should return default value", func() {
+			Ω(RemoteArchivePath()).Should(Equal("/var/vcap/store/archive.backup"))
+		})
+	})
+	Context("when RemoteArchivePath is called with an environment variable set", func() {
+		BeforeEach(func() {
+			os.Setenv(RemoteArchivePathEnvVariable, "/mynewpath/archive.backup")
+
+		})
+		AfterEach(func() {
+			os.Setenv(RemoteArchivePathEnvVariable, "")
+		})
+		It("Then it should return environment variable value", func() {
+			Ω(RemoteArchivePath()).Should(Equal("/mynewpath/archive.backup"))
+		})
+	})
 })
 
 func testTileAction(actionName string) {

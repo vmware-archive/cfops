@@ -124,7 +124,7 @@ NAME:
    ./cfops restore - restores from an archive to the target tile
 
 USAGE:
-   ./cfops restore [command options] [arguments...]
+   ./cfops restore [command options] [arguments...]   
 
 DESCRIPTION:
    restore --opsmanagerhost <host> --adminuser <usr> --adminpass <pass> --opsmanageruser <opsuser> --opsmanagerpass <opspass> -d <dir> --tile elastic-runtime
@@ -139,6 +139,10 @@ OPTIONS:
    --opsmanagerhost, --omh 	hostname for Ops Manager [$CFOPS_HOST]
 ```
 
+**changing the default archive path**
+
+```
+CFOPS_REMOTE_ARCHIVE_PATH=/var/vcap/store/archive.backup ./cfops backup ...
 
 
 

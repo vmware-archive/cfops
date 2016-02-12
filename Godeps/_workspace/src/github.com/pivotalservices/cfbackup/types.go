@@ -83,7 +83,7 @@ type (
 
 	// Properties contains property settings for a job
 	Properties struct {
-		Identifier string            `json:"identifier"`
+		Identifier string      `json:"identifier"`
 		Value      interface{} `json:"value"`
 	}
 
@@ -123,16 +123,17 @@ type (
 	//SystemInfo - a struct representing a base systemdump implementation
 	SystemInfo struct {
 		goutil.GetSet
-		systemInfo    map[string]SystemDump
-		Product       string
-		Component     string
-		Identity      string
-		Ip            string
-		User          string
-		Pass          string
-		VcapUser      string
-		VcapPass      string
-		SSHPrivateKey string
+		systemInfo        map[string]SystemDump
+		Product           string
+		Component         string
+		Identity          string
+		Ip                string
+		User              string
+		Pass              string
+		VcapUser          string
+		VcapPass          string
+		SSHPrivateKey     string
+		RemoteArchivePath string
 	}
 	//PgInfo - a struct representing a pgres systemdump implementation
 	PgInfo struct {

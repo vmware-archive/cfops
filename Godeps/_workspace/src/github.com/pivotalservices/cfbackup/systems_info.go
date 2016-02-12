@@ -2,7 +2,7 @@ package cfbackup
 
 // NewSystemsInfo creates a map of SystemDumps that are configured
 // based on the installation settings fetched from ops manager
-func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo {
+func NewSystemsInfo(installationSettingsFile string, sshKey string, remoteArchivePath string) SystemsInfo {
 
 	configParser := NewConfigurationParser(installationSettingsFile)
 
@@ -17,6 +17,7 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo 
 					Component:     "consoledb",
 					Identity:      "root",
 					SSHPrivateKey: sshKey,
+					RemoteArchivePath: remoteArchivePath,
 				},
 				Database: "console",
 			}
@@ -27,6 +28,7 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo 
 					Component:     "ccdb",
 					Identity:      "admin",
 					SSHPrivateKey: sshKey,
+					RemoteArchivePath: remoteArchivePath,
 				},
 				Database: "ccdb",
 			}
@@ -37,6 +39,7 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo 
 					Component:     "uaadb",
 					Identity:      "root",
 					SSHPrivateKey: sshKey,
+					RemoteArchivePath: remoteArchivePath,
 				},
 				Database: "uaa",
 			}
@@ -48,6 +51,7 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo 
 			Component:     "mysql",
 			Identity:      "root",
 			SSHPrivateKey: sshKey,
+			RemoteArchivePath: remoteArchivePath,
 		},
 		Database: "mysql",
 	}
@@ -57,6 +61,7 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo 
 		Component:     "director",
 		Identity:      "director",
 		SSHPrivateKey: sshKey,
+		RemoteArchivePath: remoteArchivePath,
 	}
 	systemDumps[ERNfs] = &NfsInfo{
 		SystemInfo: SystemInfo{
@@ -64,6 +69,7 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo 
 			Component:     "nfs_server",
 			Identity:      "vcap",
 			SSHPrivateKey: sshKey,
+			RemoteArchivePath: remoteArchivePath,
 		},
 	}
 

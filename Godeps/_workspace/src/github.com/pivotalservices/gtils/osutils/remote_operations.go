@@ -16,9 +16,16 @@ const (
 
 //NewRemoteOperations - a constructor for a remoteoperations object
 func NewRemoteOperations(sshCfg command.SshConfig) *RemoteOperations {
+	return NewRemoteOperationsWithPath(sshCfg, RemoteImportPath)
+}
+
+func NewRemoteOperationsWithPath(sshCfg command.SshConfig, remoteImportPath string) *RemoteOperations {
+	if len(remoteImportPath) == 0 {
+		panic("remoteImportPath cannot be blank")
+	}
 	return &RemoteOperations{
 		sshCfg:     sshCfg,
-		remotePath: RemoteImportPath,
+		remotePath: remoteImportPath,
 	}
 }
 
