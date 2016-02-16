@@ -13,10 +13,9 @@ import (
 	"github.com/pivotalservices/cfbackup"
 	. "github.com/pivotalservices/cfops/plugin/cfopsplugin"
 	"github.com/pivotalservices/cfops/tileregistry"
+	"github.com/pivotalservices/gtils/command"
 	"github.com/xchapter7x/lo"
 )
-
-
 
 var _ = Describe("DefaultPivotalCF initialized with valid installationSettings & TileSpec", func() {
 	var configParser *cfbackup.ConfigurationParser
@@ -117,7 +116,7 @@ var _ = Describe("DefaultPivotalCF initialized with valid installationSettings &
 				It("then it should return an error", func() {
 					_, err := pivotalCF.GetJobProperties("missingProgram", "missingJobName")
 					Ω(err).Should(HaveOccurred())
-					Ω(err.Error()).Should(Equal("job missingJobName not found for product missingProgram"))
+					Ω(err.Error()).Should(Equal("product missingProgram not found"))
 				})
 			})
 			Context("when called with invalid jobName", func() {
@@ -137,6 +136,41 @@ var _ = Describe("DefaultPivotalCF initialized with valid installationSettings &
 					Ω(pMap["identity"]).ShouldNot(BeEmpty())
 					Ω(pMap["password"]).ShouldNot(BeEmpty())
 				})
+			})
+		})
+		Context("when GetSSHConfig is called", func() {
+			Context(fmt.Sprintf("when called with %s product name and %s job name", controlProductName, controlJobName), func() {
+				var sshConfig command.SshConfig
+				var err error
+				BeforeEach(func() {
+					sshConfig, err = pivotalCF.GetSSHConfig(controlProductName, controlJobName)
+				})
+				It("then it should initialize port", func() {
+					Ω(sshConfig.Port).Should(Equal(22))
+				})
+				It("then it should return an initialized command.SshConfig", func() {
+					Ω(err).ShouldNot(HaveOccurred())
+					Ω(sshConfig).ShouldNot(BeNil())
+				})
+				It("then it should intialize host name", func() {
+					Ω(sshConfig.Host).ShouldNot(BeEmpty())
+				})
+				It("then it should initialize username", func() {
+					Ω(sshConfig.Username).ShouldNot(BeEmpty())
+				})
+				It("then it should initalized SSLKey or password", func() {
+					Ω(func() bool {
+						return sshConfig.SSLKey == "" && sshConfig.Password == ""
+					}()).ShouldNot(BeTrue())
+
+				})
+			})
+		})
+		Context("when GetJobIP is called", func() {
+			It("then it should return a ip", func() {
+				ip, err := pivotalCF.GetJobIP(controlProductName, controlJobName)
+				Ω(err).ShouldNot(HaveOccurred())
+				Ω(ip).ShouldNot(BeEmpty())
 			})
 		})
 	}

@@ -5,6 +5,7 @@ import (
 
 	"github.com/pivotalservices/cfbackup"
 	"github.com/pivotalservices/cfops/tileregistry"
+	"github.com/pivotalservices/gtils/command"
 )
 
 //PivotalCF --
@@ -17,6 +18,8 @@ type PivotalCF struct {
 	FakeHostDetails   tileregistry.TileSpec
 	FakeJobProperties []cfbackup.Properties
 	FakePropertyMap   map[string]string
+	FakeSSHConfig     command.SshConfig
+	FakeIP            string
 }
 
 //GetHostDetails --
@@ -65,5 +68,17 @@ func (s *PivotalCF) GetJobProperties(productName, jobName string) (properties []
 //GetPropertyValues - returns fake map[string]string
 func (s *PivotalCF) GetPropertyValues(productName, jobName, identifier string) (propertyMap map[string]string, err error) {
 	propertyMap = s.FakePropertyMap
+	return
+}
+
+//GetSSHConfig - returns command.SshConfig for a given product, job vm
+func (s *PivotalCF) GetSSHConfig(productName, jobName string) (sshConfig command.SshConfig, err error) {
+	sshConfig = s.FakeSSHConfig
+	return
+}
+
+//GetJobIP - returns ip for a given product, job vm
+func (s *PivotalCF) GetJobIP(productName, jobName string) (ip string, err error) {
+	ip = s.FakeIP
 	return
 }
