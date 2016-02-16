@@ -9,12 +9,14 @@ import (
 
 //PivotalCF --
 type PivotalCF struct {
-	FakeProducts    map[string]cfbackup.Products
-	FakeCredentials map[string]map[string][]cfbackup.Properties
-	FakeActivity    string
-	FakeReader      io.ReadCloser
-	FakeWriter      io.WriteCloser
-	FakeHostDetails tileregistry.TileSpec
+	FakeProducts      map[string]cfbackup.Products
+	FakeCredentials   map[string]map[string][]cfbackup.Properties
+	FakeActivity      string
+	FakeReader        io.ReadCloser
+	FakeWriter        io.WriteCloser
+	FakeHostDetails   tileregistry.TileSpec
+	FakeJobProperties []cfbackup.Properties
+	FakePropertyMap   map[string]string
 }
 
 //GetHostDetails --
@@ -51,5 +53,17 @@ func (s *PivotalCF) NewArchiveReader(name string) (reader io.ReadCloser, err err
 //NewArchiveWriter -- fake archive writer
 func (s *PivotalCF) NewArchiveWriter(name string) (writer io.WriteCloser, err error) {
 	writer = s.FakeWriter
+	return
+}
+
+//GetJobProperties - returns fake []cfbackup.Properties
+func (s *PivotalCF) GetJobProperties(productName, jobName string) (properties []cfbackup.Properties, err error) {
+	properties = s.FakeJobProperties
+	return
+}
+
+//GetPropertyValues - returns fake map[string]string
+func (s *PivotalCF) GetPropertyValues(productName, jobName, identifier string) (propertyMap map[string]string, err error) {
+	propertyMap = s.FakePropertyMap
 	return
 }

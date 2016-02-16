@@ -1,6 +1,7 @@
 package cfopsplugin
 
 import (
+	"fmt"
 	"io"
 	"path"
 
@@ -49,6 +50,44 @@ func (s *DefaultPivotalCF) NewArchiveWriter(name string) (writer io.WriteCloser,
 func (s *DefaultPivotalCF) NewArchiveReader(name string) (reader io.ReadCloser, err error) {
 	backupContext := cfbackup.NewBackupContext(s.TileSpec.ArchiveDirectory, cfenv.CurrentEnv())
 	reader, err = backupContext.StorageProvider.Reader(path.Join(s.TileSpec.ArchiveDirectory, name))
+	return
+}
+
+//GetJobProperties - returns []cfbackup.Properties for a given product and job
+func (s *DefaultPivotalCF) GetJobProperties(productName, jobName string) (properties []cfbackup.Properties, err error) {
+	var jobFound = false
+	if _, ok := s.GetProducts()[productName]; ok {
+		product := s.GetProducts()[productName]
+		for _, job := range product.Jobs {
+			if job.Identifier == jobName {
+				properties = job.Properties
+				jobFound = true
+			}
+		}
+	} else {
+		err = fmt.Errorf("product %s not found", productName)
+	}
+	if !jobFound {
+		err = fmt.Errorf("job %s not found for product %s", jobName, productName)
+	}
+	return
+}
+
+//GetPropertyValues - returns map[string]string for a given product, job and property identifier
+func (s *DefaultPivotalCF) GetPropertyValues(productName, jobName, identifier string) (propertyMap map[string]string, err error) {
+	var properties []cfbackup.Properties
+
+	properties, err = s.GetJobProperties(productName, jobName)
+	propertyMap = make(map[string]string)
+	for _, property := range properties {
+
+		if property.Identifier == identifier {
+			pMap := property.Value.(map[string]interface{})
+			for key, value := range pMap {
+				propertyMap[key] = value.(string)
+			}
+		}
+	}
 	return
 }
 

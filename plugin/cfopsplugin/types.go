@@ -23,6 +23,7 @@ type BackupRestorer interface {
 	Setup(PivotalCF) error
 }
 
+//Plugin - is a interface plugin providers should implement
 type Plugin interface {
 	BackupRestorer
 	GetMeta() Meta
@@ -35,6 +36,8 @@ type PivotalCF interface {
 	GetCredentials() map[string]map[string][]cfbackup.Properties
 	NewArchiveReader(name string) (io.ReadCloser, error)
 	NewArchiveWriter(name string) (io.WriteCloser, error)
+	GetJobProperties(productName, jobName string) (properties []cfbackup.Properties, err error)
+	GetPropertyValues(productName, jobName, identifier string) (propertyMap map[string]string, err error)
 }
 
 //BackupRestorePlugin - this is an implementation of the rpc client and server wrapper
