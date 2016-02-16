@@ -2,9 +2,15 @@ package cfbackup
 
 // NewSystemsInfo creates a map of SystemDumps that are configured
 // based on the installation settings fetched from ops manager
-func NewSystemsInfo(installationSettingsFile string, sshKey string, remoteArchivePath string) SystemsInfo {
+func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo {
 
 	configParser := NewConfigurationParser(installationSettingsFile)
+
+	const (
+		defaultRemoteArchivePath = "/tmp/archive.backup"
+		mysqlRemoteArchivePath   = "/var/vcap/store/mysql/archive.backup"
+		nfsRemoteArchivePath     = "/var/vcap/store/shared/archive.backup"
+	)
 
 	var systemDumps = make(map[string]SystemDump)
 
@@ -13,33 +19,33 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string, remoteArchiv
 		case "consoledb":
 			systemDumps[ERConsole] = &PgInfo{
 				SystemInfo: SystemInfo{
-					Product:       "cf",
-					Component:     "consoledb",
-					Identity:      "root",
-					SSHPrivateKey: sshKey,
-					RemoteArchivePath: remoteArchivePath,
+					Product:           "cf",
+					Component:         "consoledb",
+					Identity:          "root",
+					SSHPrivateKey:     sshKey,
+					RemoteArchivePath: defaultRemoteArchivePath,
 				},
 				Database: "console",
 			}
 		case "ccdb":
 			systemDumps[ERCc] = &PgInfo{
 				SystemInfo: SystemInfo{
-					Product:       "cf",
-					Component:     "ccdb",
-					Identity:      "admin",
-					SSHPrivateKey: sshKey,
-					RemoteArchivePath: remoteArchivePath,
+					Product:           "cf",
+					Component:         "ccdb",
+					Identity:          "admin",
+					SSHPrivateKey:     sshKey,
+					RemoteArchivePath: defaultRemoteArchivePath,
 				},
 				Database: "ccdb",
 			}
 		case "uaadb":
 			systemDumps[ERUaa] = &PgInfo{
 				SystemInfo: SystemInfo{
-					Product:       "cf",
-					Component:     "uaadb",
-					Identity:      "root",
-					SSHPrivateKey: sshKey,
-					RemoteArchivePath: remoteArchivePath,
+					Product:           "cf",
+					Component:         "uaadb",
+					Identity:          "root",
+					SSHPrivateKey:     sshKey,
+					RemoteArchivePath: defaultRemoteArchivePath,
 				},
 				Database: "uaa",
 			}
@@ -47,29 +53,29 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string, remoteArchiv
 	}
 	systemDumps[ERMySQL] = &MysqlInfo{
 		SystemInfo: SystemInfo{
-			Product:       "cf",
-			Component:     "mysql",
-			Identity:      "root",
-			SSHPrivateKey: sshKey,
-			RemoteArchivePath: remoteArchivePath,
+			Product:           "cf",
+			Component:         "mysql",
+			Identity:          "root",
+			SSHPrivateKey:     sshKey,
+			RemoteArchivePath: mysqlRemoteArchivePath,
 		},
 		Database: "mysql",
 	}
 
 	systemDumps[ERDirector] = &SystemInfo{
-		Product:       BoshName(),
-		Component:     "director",
-		Identity:      "director",
-		SSHPrivateKey: sshKey,
-		RemoteArchivePath: remoteArchivePath,
+		Product:           BoshName(),
+		Component:         "director",
+		Identity:          "director",
+		SSHPrivateKey:     sshKey,
+		RemoteArchivePath: defaultRemoteArchivePath,
 	}
 	systemDumps[ERNfs] = &NfsInfo{
 		SystemInfo: SystemInfo{
-			Product:       "cf",
-			Component:     "nfs_server",
-			Identity:      "vcap",
-			SSHPrivateKey: sshKey,
-			RemoteArchivePath: remoteArchivePath,
+			Product:           "cf",
+			Component:         "nfs_server",
+			Identity:          "vcap",
+			SSHPrivateKey:     sshKey,
+			RemoteArchivePath: nfsRemoteArchivePath,
 		},
 	}
 
