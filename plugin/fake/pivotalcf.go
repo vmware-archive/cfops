@@ -16,8 +16,9 @@ type PivotalCF struct {
 	FakeReader        io.ReadCloser
 	FakeWriter        io.WriteCloser
 	FakeHostDetails   tileregistry.TileSpec
-	FakeSshConfig     command.SshConfig
+	FakeSSHConfig     command.SshConfig
 	FakeJobProperties []cfbackup.Properties
+	FakePropertyMap   map[string]string
 }
 
 //GetHostDetails --
@@ -57,12 +58,20 @@ func (s *PivotalCF) NewArchiveWriter(name string) (writer io.WriteCloser, err er
 	return
 }
 
-func (s *PivotalCF) GetSshConfig(productName, jobName string) (sshConfig command.SshConfig, err error) {
-	sshConfig = s.FakeSshConfig
+//GetSSHConfig - returns fake SshConfig
+func (s *PivotalCF) GetSSHConfig(productName, jobName string) (sshConfig command.SshConfig, err error) {
+	sshConfig = s.FakeSSHConfig
 	return
 }
 
+//GetJobProperties - returns fake []cfbackup.Properties
 func (s *PivotalCF) GetJobProperties(productName, jobName string) (properties []cfbackup.Properties, err error) {
-    properties = s.FakeJobProperties
-    return
+	properties = s.FakeJobProperties
+	return
+}
+
+//GetPropertyValues - returns fake map[string]string
+func (s *PivotalCF) GetPropertyValues(productName, jobName, identifier string) (propertyMap map[string]string, err error) {
+	propertyMap = s.FakePropertyMap
+	return
 }

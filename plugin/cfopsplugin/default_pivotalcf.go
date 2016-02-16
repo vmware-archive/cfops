@@ -54,15 +54,16 @@ func (s *DefaultPivotalCF) NewArchiveReader(name string) (reader io.ReadCloser, 
 	return
 }
 
-//GetSshConfig - returns the information needed to Ssh into product VM
-func (s *DefaultPivotalCF) GetSshConfig(productName, jobName string) (sshConfig command.SshConfig, err error) {
+//GetSSHConfig - returns the information needed to Ssh into product VM
+func (s *DefaultPivotalCF) GetSSHConfig(productName, jobName string) (sshConfig command.SshConfig, err error) {
 	//properties := s.GetJobProperties(productName, jobName)
 
 	return
 }
 
+//GetJobProperties - returns []cfbackup.Properties for a given product and job
 func (s *DefaultPivotalCF) GetJobProperties(productName, jobName string) (properties []cfbackup.Properties, err error) {
-	var jobFound bool = false
+	var jobFound = false
 	if _, ok := s.GetProducts()[productName]; ok {
 		product := s.GetProducts()[productName]
 		for _, job := range product.Jobs {
@@ -78,6 +79,24 @@ func (s *DefaultPivotalCF) GetJobProperties(productName, jobName string) (proper
 	    err = fmt.Errorf("job %s not found for product %s", jobName, productName)
 	}
 	return
+}
+
+//GetPropertyValues - returns map[string]string for a given product, job and property identifier
+func (s *DefaultPivotalCF) GetPropertyValues(productName, jobName, identifier string) (propertyMap map[string]string, err error) {
+    var properties []cfbackup.Properties
+    
+	properties, err = s.GetJobProperties(productName, jobName)
+	propertyMap = make(map[string]string)
+	for _, property := range properties {
+
+		if property.Identifier == identifier {
+			pMap := property.Value.(map[string]interface{})
+			for key, value := range pMap {
+			    propertyMap[key]  = value.(string)
+			}
+		}
+	}
+    return
 }
 
 //NewPivotalCF - creates the default pivotacf

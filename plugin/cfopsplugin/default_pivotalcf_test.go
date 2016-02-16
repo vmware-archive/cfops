@@ -16,6 +16,8 @@ import (
 	"github.com/xchapter7x/lo"
 )
 
+
+
 var _ = Describe("DefaultPivotalCF initialized with valid installationSettings & TileSpec", func() {
 	var configParser *cfbackup.ConfigurationParser
 	var pivotalCF PivotalCF
@@ -127,11 +129,21 @@ var _ = Describe("DefaultPivotalCF initialized with valid installationSettings &
 				})
 			})
 		})
-		XContext("when GetSshConfig is called", func() {
+		Context("when GetPropertyValues is called", func() {
+			Context(fmt.Sprintf("when called with %s product name and %s job name", controlProductName, controlJobName), func() {
+				It("then it should map of properties", func() {
+					pMap, err := pivotalCF.GetPropertyValues(controlProductName, controlJobName, "vm_credentials")
+					Ω(err).ShouldNot(HaveOccurred())
+					Ω(pMap["identity"]).ShouldNot(BeEmpty())
+					Ω(pMap["password"]).ShouldNot(BeEmpty())
+				})
+			})
+		})
+		XContext("when GetSSHConfig is called", func() {
 
 			Context(fmt.Sprintf("when called with %s product name, %s job name", controlProductName, controlJobName), func() {
 				It("then it should return a valid SshConfig", func() {
-					sshConfig, err := pivotalCF.GetSshConfig(controlProductName, controlJobName)
+					sshConfig, err := pivotalCF.GetSSHConfig(controlProductName, controlJobName)
 					Ω(err).ShouldNot(HaveOccurred())
 					Ω(sshConfig.Host).ShouldNot(BeEmpty())
 					Ω(sshConfig.Port).ShouldNot(BeEmpty())
