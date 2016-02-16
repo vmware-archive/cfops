@@ -139,14 +139,6 @@ OPTIONS:
    --opsmanagerhost, --omh 	hostname for Ops Manager [$CFOPS_HOST]
 ```
 
-**changing the default archive path**
-
-```
-CFOPS_REMOTE_ARCHIVE_PATH=/var/vcap/store/archive.backup ./cfops backup ...
-```
-
-
-
 ---
 
 
