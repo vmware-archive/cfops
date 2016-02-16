@@ -139,21 +139,6 @@ var _ = Describe("DefaultPivotalCF initialized with valid installationSettings &
 				})
 			})
 		})
-		XContext("when GetSSHConfig is called", func() {
-
-			Context(fmt.Sprintf("when called with %s product name, %s job name", controlProductName, controlJobName), func() {
-				It("then it should return a valid SshConfig", func() {
-					sshConfig, err := pivotalCF.GetSSHConfig(controlProductName, controlJobName)
-					Ω(err).ShouldNot(HaveOccurred())
-					Ω(sshConfig.Host).ShouldNot(BeEmpty())
-					Ω(sshConfig.Port).ShouldNot(BeEmpty())
-					Ω(sshConfig.Username).ShouldNot(BeEmpty())
-					Ω(sshConfig.Password).ShouldNot(BeEmpty())
-					Ω(sshConfig.SSLKey).Should(BeEmpty())
-				})
-			})
-
-		})
 	}
 
 })

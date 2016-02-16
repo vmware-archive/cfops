@@ -8,7 +8,6 @@ import (
 	"github.com/cloudfoundry-community/go-cfenv"
 	"github.com/pivotalservices/cfbackup"
 	"github.com/pivotalservices/cfops/tileregistry"
-	"github.com/pivotalservices/gtils/command"
 )
 
 //GetHostDetails - return all of the host and archive details in the form of a tile spec object
@@ -54,13 +53,6 @@ func (s *DefaultPivotalCF) NewArchiveReader(name string) (reader io.ReadCloser, 
 	return
 }
 
-//GetSSHConfig - returns the information needed to Ssh into product VM
-func (s *DefaultPivotalCF) GetSSHConfig(productName, jobName string) (sshConfig command.SshConfig, err error) {
-	//properties := s.GetJobProperties(productName, jobName)
-
-	return
-}
-
 //GetJobProperties - returns []cfbackup.Properties for a given product and job
 func (s *DefaultPivotalCF) GetJobProperties(productName, jobName string) (properties []cfbackup.Properties, err error) {
 	var jobFound = false
@@ -76,15 +68,15 @@ func (s *DefaultPivotalCF) GetJobProperties(productName, jobName string) (proper
 		err = fmt.Errorf("product %s not found", productName)
 	}
 	if !jobFound {
-	    err = fmt.Errorf("job %s not found for product %s", jobName, productName)
+		err = fmt.Errorf("job %s not found for product %s", jobName, productName)
 	}
 	return
 }
 
 //GetPropertyValues - returns map[string]string for a given product, job and property identifier
 func (s *DefaultPivotalCF) GetPropertyValues(productName, jobName, identifier string) (propertyMap map[string]string, err error) {
-    var properties []cfbackup.Properties
-    
+	var properties []cfbackup.Properties
+
 	properties, err = s.GetJobProperties(productName, jobName)
 	propertyMap = make(map[string]string)
 	for _, property := range properties {
@@ -92,11 +84,11 @@ func (s *DefaultPivotalCF) GetPropertyValues(productName, jobName, identifier st
 		if property.Identifier == identifier {
 			pMap := property.Value.(map[string]interface{})
 			for key, value := range pMap {
-			    propertyMap[key]  = value.(string)
+				propertyMap[key] = value.(string)
 			}
 		}
 	}
-    return
+	return
 }
 
 //NewPivotalCF - creates the default pivotacf
