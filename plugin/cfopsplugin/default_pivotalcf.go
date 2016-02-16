@@ -4,10 +4,19 @@ import (
 	"fmt"
 	"io"
 	"path"
+	"strings"
 
 	"github.com/cloudfoundry-community/go-cfenv"
 	"github.com/pivotalservices/cfbackup"
 	"github.com/pivotalservices/cfops/tileregistry"
+	"github.com/pivotalservices/gtils/command"
+)
+
+const (
+	vmCredentialsName     = "vm_credentials"
+	identityName          = "identity"
+	passwordName          = "password"
+	defaultSSHPort    int = 22
 )
 
 //GetHostDetails - return all of the host and archive details in the form of a tile spec object
@@ -53,23 +62,48 @@ func (s *DefaultPivotalCF) NewArchiveReader(name string) (reader io.ReadCloser, 
 	return
 }
 
-//GetJobProperties - returns []cfbackup.Properties for a given product and job
-func (s *DefaultPivotalCF) GetJobProperties(productName, jobName string) (properties []cfbackup.Properties, err error) {
-	var jobFound = false
+func (s *DefaultPivotalCF) getProduct(productName string) (product cfbackup.Products, err error) {
 	if _, ok := s.GetProducts()[productName]; ok {
-		product := s.GetProducts()[productName]
-		for _, job := range product.Jobs {
-			if job.Identifier == jobName {
-				properties = job.Properties
-				jobFound = true
-			}
-		}
+		product = s.GetProducts()[productName]
 	} else {
 		err = fmt.Errorf("product %s not found", productName)
+	}
+	return
+}
+func (s *DefaultPivotalCF) getJob(productName, jobName string) (job cfbackup.Jobs, err error) {
+	var product cfbackup.Products
+	var jobFound = false
+
+	product, err = s.getProduct(productName)
+	if err != nil {
+		return
+	}
+	for _, theJob := range product.Jobs {
+		if theJob.Identifier == jobName {
+			job = theJob
+			jobFound = true
+			break
+		}
 	}
 	if !jobFound {
 		err = fmt.Errorf("job %s not found for product %s", jobName, productName)
 	}
+	return
+}
+
+func (s *DefaultPivotalCF) getSSLKey(productName, jobName string) (sslKey string, err error) {
+	//sslKey = ""
+	return
+}
+
+//GetJobProperties - returns []cfbackup.Properties for a given product and job
+func (s *DefaultPivotalCF) GetJobProperties(productName, jobName string) (properties []cfbackup.Properties, err error) {
+	var job cfbackup.Jobs
+	job, err = s.getJob(productName, jobName)
+	if err != nil {
+		return
+	}
+	properties = job.Properties
 	return
 }
 
@@ -84,9 +118,71 @@ func (s *DefaultPivotalCF) GetPropertyValues(productName, jobName, identifier st
 		if property.Identifier == identifier {
 			pMap := property.Value.(map[string]interface{})
 			for key, value := range pMap {
-				propertyMap[key] = value.(string)
+				propertyMap[key] = fmt.Sprintf("%v", value)
 			}
 		}
+	}
+	return
+}
+
+//GetSSHConfig - returns command.SshConfig for a given product, job vm
+func (s *DefaultPivotalCF) GetSSHConfig(productName, jobName string) (sshConfig command.SshConfig, err error) {
+	var userid, password, ip, sslKey string
+	var props map[string]string
+
+	props, err = s.GetPropertyValues(productName, jobName, vmCredentialsName)
+	if err != nil {
+		return
+	}
+
+	ip, err = s.GetJobIP(productName, jobName)
+	if err != nil {
+		return
+	}
+	
+	sslKey, err = s.getSSLKey(productName, jobName)
+	if err != nil {
+		return
+	}
+
+	userid = props[identityName]
+	password = props[passwordName]
+
+	sshConfig = command.SshConfig{
+		Username: userid,
+		Password: password,
+		Host:     ip,
+		Port:     defaultSSHPort,
+		SSLKey:   sslKey,
+	}
+
+	return
+}
+
+//GetJobIP - returns ip for a given product, job vm
+func (s *DefaultPivotalCF) GetJobIP(productName, jobName string) (ip string, err error) {
+	var ipFound = false
+	var job cfbackup.Jobs
+	var product cfbackup.Products
+
+	product, err = s.getProduct(productName)
+	if err != nil {
+		return
+	}
+	job, err = s.getJob(productName, jobName)
+	if err != nil {
+		return
+	}
+
+	for vmName, ipList := range product.IPS {
+		if strings.HasPrefix(vmName, job.GUID) {
+			ip = ipList[0]
+			ipFound = true
+			break
+		}
+	}
+	if !ipFound {
+		err = fmt.Errorf("ip not found for job %s and product %s", jobName, productName)
 	}
 	return
 }
