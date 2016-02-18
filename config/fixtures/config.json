@@ -1,0 +1,17 @@
+{
+	"opsManagerHost": "theOpsManagerHost",
+	"adminUser": "theAdminUser",
+	"adminPass": "theAdminPassword",
+	"opsManagerUser": "theOpsManagerUser",
+	"opsManagerPass": "theOpsManagerPassword",
+	"myTestKey": "myTestValue",
+	"myTestKeyInt": 4,
+	"myTestKeyBool": true,
+	"mysql-tile": {
+		"name": "value",
+		"name2": "value2",
+		"sub-config": {
+			"name": "value"
+		}
+	}
+}
