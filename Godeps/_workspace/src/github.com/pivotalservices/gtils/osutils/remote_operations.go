@@ -56,11 +56,9 @@ func (s *RemoteOperations) Path() string {
 	return s.remotePath
 }
 
-//GetRemoteFile - get a file from a remote system and return a writecloser to it
-func (s *RemoteOperations) GetRemoteFile() (rfile io.WriteCloser, err error) {
+func (s *RemoteOperations) getClient() (sftpclient *sftp.Client, err error) {
 	var (
-		sshconn    *ssh.Client
-		sftpclient *sftp.Client
+		sshconn *ssh.Client
 	)
 
 	clientconfig := &ssh.ClientConfig{
@@ -69,12 +67,32 @@ func (s *RemoteOperations) GetRemoteFile() (rfile io.WriteCloser, err error) {
 			ssh.Password(s.sshCfg.Password),
 		},
 	}
-
 	if sshconn, err = ssh.Dial("tcp", fmt.Sprintf("%s:%d", s.sshCfg.Host, s.sshCfg.Port), clientconfig); err == nil {
-
-		if sftpclient, err = sftp.NewClient(sshconn); err == nil {
-			rfile, err = SafeCreateSSH(sftpclient, s.remotePath)
-		}
+		sftpclient, err = sftp.NewClient(sshconn)
 	}
+	return
+}
+
+//Remove Remote File - get a file from a remote system and return a writecloser to it
+func (s *RemoteOperations) RemoveRemoteFile() (err error) {
+	var sftpclient *sftp.Client
+	sftpclient, err = s.getClient()
+
+	if err == nil {
+		err = SafeRemoveSSH(sftpclient, s.remotePath)
+	}
+
+	return
+}
+
+//GetRemoteFile - get a file from a remote system and return a writecloser to it
+func (s *RemoteOperations) GetRemoteFile() (rfile io.WriteCloser, err error) {
+	var sftpclient *sftp.Client
+	sftpclient, err = s.getClient()
+
+	if err == nil {
+		rfile, err = SafeCreateSSH(sftpclient, s.remotePath)
+	}
+
 	return
 }

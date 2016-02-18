@@ -249,6 +249,11 @@ func (s *mockRemoteOps) UploadFile(lfile io.Reader) error {
 	return s.Err
 }
 
+func (s *mockRemoteOps) RemoveRemoteFile() (err error) {
+	err = s.Err
+	return
+}
+
 //GetNfs ---
 var GetNfs = func(lf io.Writer, cmdexec command.Executer) *cfbackup.NFSBackup {
 	return &cfbackup.NFSBackup{
