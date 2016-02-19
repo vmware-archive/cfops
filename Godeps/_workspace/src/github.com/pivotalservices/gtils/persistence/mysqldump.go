@@ -49,6 +49,14 @@ func (s *MysqlDump) Import(lfile io.Reader) (err error) {
 		err = s.restore()
 	}
 	lo.G.Debug("mysqldump Import called: ", err)
+	
+	if err != nil {
+	    return
+	}
+	
+	err = s.RemoteOps.RemoveRemoteFile()
+	
+	lo.G.Debug("mysqldump remove remote file called: ", err)
 	return
 }
 
