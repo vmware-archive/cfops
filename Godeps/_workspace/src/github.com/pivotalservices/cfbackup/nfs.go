@@ -53,7 +53,7 @@ func (s *NFSBackup) Import(lfile io.Reader) (err error) {
 }
 
 func (s *NFSBackup) getRestoreCommand() string {
-	return fmt.Sprintf("cd %s && tar zx %s", NfsDirPath, s.RemoteOps.Path())
+	return fmt.Sprintf("cd %s && tar zxf %s", NfsDirPath, s.RemoteOps.Path())
 }
 
 func (s *NFSBackup) getDumpCommand() string {
