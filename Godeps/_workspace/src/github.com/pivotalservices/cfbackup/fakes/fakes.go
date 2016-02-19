@@ -250,7 +250,7 @@ func (s *mockRemoteOps) UploadFile(lfile io.Reader) error {
 }
 
 func (s *mockRemoteOps) RemoveRemoteFile() (err error) {
-	err = s.Err
+	
 	return
 }
 
