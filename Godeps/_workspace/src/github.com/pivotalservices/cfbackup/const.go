@@ -82,6 +82,9 @@ const (
 	SDVcapUser string = "VcapUser"
 	//SDVcapPass --
 	SDVcapPass string = "VcapPass"
+	
+	//SDIdentifier
+	SDIdentifier string = "Identifier"
 )
 
 const (

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"io/ioutil"
+
 	"github.com/xchapter7x/lo"
 )
 
@@ -45,46 +46,21 @@ func (s *ConfigurationParser) GetIaaS() (config IaaSConfiguration, hasSSHKey boo
 }
 
 // FindJobsByProductID finds all the jobs in an installation by product id
-func (s *ConfigurationParser) FindJobsByProductID(id string) []Jobs {
-	cfJobs := []Jobs{}
+func (s *ConfigurationParser) FindJobsByProductID(id string) (jobs []Jobs) {
+	jobs = s.InstallationSettings.FindJobsByProductID(id)
+	return
+}
 
-	for _, product := range s.GetProducts() {
-		identifier := product.Identifier
-		if identifier == id {
-			for _, job := range product.Jobs {
-				cfJobs = append(cfJobs, job)
-			}
-		}
-	}
-	return cfJobs
+// FindByProductID finds a product by product id
+func (s *ConfigurationParser) FindByProductID(id string) (productResponse Products, err error) {
+	productResponse, err = s.InstallationSettings.FindByProductID(id)
+	return
 }
 
 // FindCFPostgresJobs finds all the postgres jobs in the cf product
-func (s *ConfigurationParser) FindCFPostgresJobs() []Jobs {
-	jobs := []Jobs{}
-
-	for _, job := range s.FindJobsByProductID("cf") {
-		if isPostgres(job.Identifier, job.Instances) {
-			jobs = append(jobs, job)
-		}
-	}
-	return jobs
-}
-
-func isPostgres(job string, instances []Instances) bool {
-	pgdbs := []string{"ccdb", "uaadb", "consoledb"}
-
-	for _, pgdb := range pgdbs {
-		if pgdb == job {
-			for _, instances := range instances {
-				val := instances.Value
-				if val >= 1 {
-					return true
-				}
-			}
-		}
-	}
-	return false
+func (s *ConfigurationParser) FindCFPostgresJobs() (jobs []Jobs) {
+	jobs = s.InstallationSettings.FindCFPostgresJobs()
+	return
 }
 
 //GetProducts - get the products array
