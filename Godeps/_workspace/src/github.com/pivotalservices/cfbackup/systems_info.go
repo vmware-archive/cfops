@@ -21,7 +21,7 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo 
 				SystemInfo: SystemInfo{
 					Product:           "cf",
 					Component:         "consoledb",
-					Identity:          "root",
+					Identifier:        "credentials",
 					SSHPrivateKey:     sshKey,
 					RemoteArchivePath: defaultRemoteArchivePath,
 				},
@@ -32,7 +32,7 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo 
 				SystemInfo: SystemInfo{
 					Product:           "cf",
 					Component:         "ccdb",
-					Identity:          "admin",
+					Identifier:        "credentials",
 					SSHPrivateKey:     sshKey,
 					RemoteArchivePath: defaultRemoteArchivePath,
 				},
@@ -43,7 +43,7 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo 
 				SystemInfo: SystemInfo{
 					Product:           "cf",
 					Component:         "uaadb",
-					Identity:          "root",
+					Identifier:        "credentials",
 					SSHPrivateKey:     sshKey,
 					RemoteArchivePath: defaultRemoteArchivePath,
 				},
@@ -55,7 +55,7 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo 
 		SystemInfo: SystemInfo{
 			Product:           "cf",
 			Component:         "mysql",
-			Identity:          "root",
+			Identifier:          "mysql_admin_credentials",
 			SSHPrivateKey:     sshKey,
 			RemoteArchivePath: mysqlRemoteArchivePath,
 		},
@@ -65,7 +65,7 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo 
 	systemDumps[ERDirector] = &SystemInfo{
 		Product:           BoshName(),
 		Component:         "director",
-		Identity:          "director",
+		Identifier:          "director_credentials",
 		SSHPrivateKey:     sshKey,
 		RemoteArchivePath: defaultRemoteArchivePath,
 	}
@@ -73,7 +73,7 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo 
 		SystemInfo: SystemInfo{
 			Product:           "cf",
 			Component:         "nfs_server",
-			Identity:          "vcap",
+			Identifier:          "vm_credentials",
 			SSHPrivateKey:     sshKey,
 			RemoteArchivePath: nfsRemoteArchivePath,
 		},

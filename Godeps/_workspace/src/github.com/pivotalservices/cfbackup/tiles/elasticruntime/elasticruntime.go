@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"os"
 	"path"
 
 	"github.com/cloudfoundry-community/go-cfenv"
@@ -150,47 +149,45 @@ func (context *ElasticRuntime) readWriterArchive(dbInfo cfbackup.SystemDump, dat
 
 //ReadAllUserCredentials - get all user creds from the installation json
 func (context *ElasticRuntime) ReadAllUserCredentials() (err error) {
-	var (
-		fileRef *os.File
-		jsonObj cfbackup.InstallationCompareObject
-	)
-	defer fileRef.Close()
+	configParser := cfbackup.NewConfigurationParser(context.JSONFile)
+	installationSettings := configParser.InstallationSettings
+	err = context.assignCredentialsAndInstallationName(installationSettings)
+	return
+}
 
-	if fileRef, err = os.Open(context.JSONFile); err == nil {
-		if jsonObj, err = cfbackup.ReadAndUnmarshal(fileRef); err == nil {
-			err = context.assignCredentialsAndInstallationName(jsonObj)
-		}
+func (context *ElasticRuntime) assignCredentialsAndInstallationName(installationSettings cfbackup.InstallationSettings) (err error) {
+
+	if err = context.assignCredentials(installationSettings); err == nil {
+		context.InstallationName, err = context.getDeploymentName(installationSettings)
 	}
 	return
 }
 
-func (context *ElasticRuntime) assignCredentialsAndInstallationName(jsonObj cfbackup.InstallationCompareObject) (err error) {
-
-	if err = context.assignCredentials(jsonObj); err == nil {
-		context.InstallationName, err = cfbackup.GetDeploymentName(jsonObj)
-	}
-	return
-}
-
-func (context *ElasticRuntime) assignCredentials(jsonObj cfbackup.InstallationCompareObject) (err error) {
+func (context *ElasticRuntime) assignCredentials(installationSettings cfbackup.InstallationSettings) (err error) {
 
 	for name, sysInfo := range context.SystemsInfo.SystemDumps {
 		var (
-			ip    string
-			pass  string
-			vpass string
+			userID string
+			ip     string
+			pass   string
 		)
-		sysInfo.Set(cfbackup.SDVcapUser, ERDefaultSystemUser)
-		sysInfo.Set(cfbackup.SDUser, sysInfo.Get(cfbackup.SDIdentity))
+		//sysInfo.Set(cfbackup.SDVcapUser, ERDefaultSystemUser)
+		//sysInfo.Set(cfbackup.SDUser, sysInfo.Get(cfbackup.SDIdentity))
 
-		if ip, pass, err = cfbackup.GetPasswordAndIP(jsonObj, sysInfo.Get(cfbackup.SDProduct), sysInfo.Get(cfbackup.SDComponent), sysInfo.Get(cfbackup.SDIdentity)); err == nil {
+		productName := sysInfo.Get(cfbackup.SDProduct)
+		jobName := sysInfo.Get(cfbackup.SDComponent)
+		identifier := sysInfo.Get(cfbackup.SDIdentifier)
+		
+		if userID, pass, ip, err = context.getVMUserIDPasswordAndIP(installationSettings, productName, jobName); err == nil {
 			sysInfo.Set(cfbackup.SDIP, ip)
-			sysInfo.Set(cfbackup.SDPass, pass)
-			lo.G.Debug("%s credentials for %s from installation.json are %s", name, sysInfo.Get(cfbackup.SDComponent), sysInfo.Get(cfbackup.SDIdentity), pass)
-			_, vpass, err = cfbackup.GetPasswordAndIP(jsonObj, sysInfo.Get(cfbackup.SDProduct), sysInfo.Get(cfbackup.SDComponent), sysInfo.Get(cfbackup.SDVcapUser))
-			sysInfo.Set(cfbackup.SDVcapPass, vpass)
-			context.SystemsInfo.SystemDumps[name] = sysInfo
+			sysInfo.Set(cfbackup.SDVcapPass, pass)
+			sysInfo.Set(cfbackup.SDVcapUser, userID)
+			if userID, pass, err = context.getUserIDPasswordForIdentifier(installationSettings, productName, jobName, identifier); err == nil {
+				sysInfo.Set(cfbackup.SDUser, userID)
+				sysInfo.Set(cfbackup.SDPass, pass)
+			}
 		}
+		context.SystemsInfo.SystemDumps[name] = sysInfo
 	}
 	return
 }
@@ -227,4 +224,38 @@ func (context *ElasticRuntime) getManifest() (manifest string, err error) {
 		return
 	}
 	return string(data), nil
+}
+
+func (context *ElasticRuntime) getDeploymentName(installationSettings cfbackup.InstallationSettings) (deploymentName string, err error) {
+	var product cfbackup.Products
+	if product, err = installationSettings.FindByProductID("cf"); err == nil {
+		deploymentName = product.InstallationName
+	}
+	return
+}
+
+func (context *ElasticRuntime) getUserIDPasswordForIdentifier(installationSettings cfbackup.InstallationSettings, product, component, identifier string) (userID, password string, err error) {
+	var propertyMap map[string]string
+	if propertyMap, err = installationSettings.FindPropertyValues(product, component, identifier); err == nil {
+		userID = propertyMap["identity"]
+		password = propertyMap["password"]
+	}
+	return
+}
+
+func (context *ElasticRuntime) getVMUserIDPasswordAndIP(installationSettings cfbackup.InstallationSettings, product, component string) (userID, password, ip string, err error) {
+	var ips []string
+	if ips, err = installationSettings.FindIPsByProductAndJob(product, component); err == nil {
+		if len(ips) > 0 {
+			ip = ips[0]
+		} else {
+		    err = fmt.Errorf("No IPs found for %s, %s", product, component)
+		}
+		var vmCredential cfbackup.VMCredentials
+		if vmCredential, err = installationSettings.FindVMCredentialsByProductAndJob(product, component); err == nil {
+			userID = vmCredential.UserID
+			password = vmCredential.Password
+		}
+	}
+	return
 }

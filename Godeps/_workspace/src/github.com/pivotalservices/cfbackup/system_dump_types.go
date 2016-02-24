@@ -81,7 +81,7 @@ func (s *SystemInfo) GetPersistanceBackup() (dumper PersistanceBackup, err error
 func (s *SystemInfo) Error() (err error) {
 	if s.Product == "" ||
 		s.Component == "" ||
-		s.Identity == "" ||
+		s.Identifier == "" ||
 		s.Ip == "" ||
 		s.User == "" ||
 		s.Pass == "" ||

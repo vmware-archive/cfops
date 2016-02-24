@@ -41,8 +41,20 @@ type (
 	InstallationSettings struct {
 		Infrastructure Infrastructure `json:"infrastructure"`
 		Products       []Products     `json:"products"`
+		IPAssignments  IPAssignments  `json:"ip_assignments"`
 	}
 
+    //AssignmentsProduct - a map string representing product assignments
+	AssignmentsProduct map[string]AssignmentsJob
+	//AssignmentsJob - a map representing job assignments
+	AssignmentsJob     map[string]AssignmentsAZ
+	//AssignmentsAZ - a map []string representing a list of az assignments
+	AssignmentsAZ      map[string][]string
+
+	//IPAssignments - an object to house ip_assignments elements from the json
+	IPAssignments struct {
+		Assignments AssignmentsProduct `json:"assignments"`
+	}
 	//Infrastructure - a struct to house Infrastructure block elements from the json
 	Infrastructure struct {
 		Type       string            `json:"type"`
@@ -63,11 +75,11 @@ type (
 		AZReference                        []string            `json:"availability_zone_references"`
 		DisabledPostDeployErrandNames      []string            `json:"disabled_post_deploy_errand_names"`
 		DeploymentNetworkReference         string              `json:"deployment_network_reference"`
-		GUID                               string              `json: "guid"`
+		GUID                               string              `json:"guid"`
 		InfrastructureNetworkReference     string              `json:"infrastructure_network_reference"`
 		InstallationName                   string              `json:"installation_name"`
-		SingletonAvailabilityZoneReference string              `json: "sigleton_availability_zone_reference"`
-		Stemcell                           interface{}         `json: "stemcell"`
+		SingletonAvailabilityZoneReference string              `json:"sigleton_availability_zone_reference"`
+		Stemcell                           interface{}         `json:"stemcell"`
 	}
 
 	// Jobs contains job settings for a product
@@ -75,10 +87,18 @@ type (
 		Identifier       string                   `json:"identifier"`
 		Properties       []Properties             `json:"properties"`
 		Instances        []Instances              `json:"instances"`
-		GUID             string                   `json: "guid"`
-		InstallationName string                   `json: "installation_name"`
-		Partitions       []map[string]interface{} `json: "partitions"`
-		Resources        []map[string]interface{} `json: "resources"`
+		GUID             string                   `json:"guid"`
+		InstallationName string                   `json:"installation_name"`
+		Partitions       []map[string]interface{} `json:"partitions"`
+		Resources        []map[string]interface{} `json:"resources"`
+		VMCredentials    map[string]string        `json:"vm_credentials"`
+	}
+
+	// VMCredentials contains property settings for a job
+	VMCredentials struct {
+		UserID   string
+		Password string
+		SSLKey   string
 	}
 
 	// Properties contains property settings for a job
@@ -126,7 +146,7 @@ type (
 		systemInfo        map[string]SystemDump
 		Product           string
 		Component         string
-		Identity          string
+		Identifier        string
 		Ip                string
 		User              string
 		Pass              string
