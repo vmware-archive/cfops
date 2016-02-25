@@ -9,6 +9,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/ghttp"
+	opsfakes "github.com/pivotalservices/cfbackup/tiles/opsmanager/fakes"
 	. "github.com/pivotalservices/cfops/plugin/cfopsplugin"
 	"github.com/pivotalservices/cfops/tileregistry"
 )
@@ -27,14 +28,7 @@ var _ = Describe("given a plugin tile builder", func() {
 
 		BeforeEach(func() {
 			fileBytes, _ := ioutil.ReadFile("./fixtures/installation-settings-1-6-default.json")
-			server = ghttp.NewTLSServer()
-			server.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyBasicAuth(fakeUser, fakePass),
-					ghttp.RespondWith(http.StatusOK, string(fileBytes[:])),
-				),
-			)
-
+			server = opsfakes.NewFakeOpsManagerServer(ghttp.NewTLSServer(), http.StatusInternalServerError, "{}", http.StatusOK, string(fileBytes[:]))
 			pluginTileBuilder = new(PluginTileBuilder)
 			pluginTileBuilder.FilePath = "../load/fixture_plugins/" + runtime.GOOS + "/sample"
 			pluginTileBuilder.Meta = Meta{Name: "backuprestore"}

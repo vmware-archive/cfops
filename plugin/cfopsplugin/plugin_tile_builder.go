@@ -24,5 +24,6 @@ func (s *PluginTileBuilder) New(tileSpec tileregistry.TileSpec) (tile tileregist
 		brPlugin.Setup(pcf)
 		tile = brPlugin
 	}
+	lo.G.Debug("error from getinstallationsettings: ", err)
 	return
 }

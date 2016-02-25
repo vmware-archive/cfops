@@ -164,9 +164,6 @@ func (a *App) Run(arguments []string) (err error) {
 	if a.Before != nil {
 		err := a.Before(context)
 		if err != nil {
-			fmt.Fprintln(a.Writer, err)
-			fmt.Fprintln(a.Writer)
-			ShowAppHelp(context)
 			return err
 		}
 	}

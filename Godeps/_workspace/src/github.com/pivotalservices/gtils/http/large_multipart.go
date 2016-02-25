@@ -27,7 +27,11 @@ var LargeMultiPartUpload = func(conn ConnAuth, paramName, filename string, fileS
 
 	ms.WriteReader(paramName, filename, fileSize, fileRef)
 	if req, err = http.NewRequest("POST", conn.Url, nil); err == nil {
-		if conn.Username != "" && conn.Password != "" {
+
+		if conn.BearerToken != "" {
+			req.Header.Add("Authorization", "Bearer "+conn.BearerToken)
+
+		} else if conn.Username != "" && conn.Password != "" {
 			req.SetBasicAuth(conn.Username, conn.Password)
 		}
 		ms.SetupRequest(req)
