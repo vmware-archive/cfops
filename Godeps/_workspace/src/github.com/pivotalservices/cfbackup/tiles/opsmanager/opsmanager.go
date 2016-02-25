@@ -8,6 +8,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	urllib "net/url"
 	"path"
 
 	"github.com/cloudfoundry-community/go-cfenv"
@@ -15,6 +16,7 @@ import (
 	"github.com/pivotalservices/gtils/command"
 	ghttp "github.com/pivotalservices/gtils/http"
 	"github.com/pivotalservices/gtils/log"
+	"github.com/pivotalservices/gtils/uaa"
 	"github.com/xchapter7x/lo"
 )
 
@@ -122,17 +124,18 @@ func (context *OpsManager) exportFile(urlFormat string, filename string) (err er
 }
 
 func (context *OpsManager) saveHTTPResponse(url string, dest io.Writer) (err error) {
-	requestor := context.SettingsRequestor
-	resp, err := requestor.Get(ghttp.HttpRequestEntity{
-		Url:         url,
-		Username:    context.Username,
-		Password:    context.Password,
-		ContentType: "application/octet-stream",
-	})()
+	var resp *http.Response
+	lo.G.Debug("attempting to auth against", url)
+
+	if resp, err = context.oauthHTTPGet(url); err != nil {
+		lo.G.Info("falling back to basic auth for legacy system", err)
+		resp, err = context.legacyHTTPGet(url)
+	}
 
 	if err == nil && resp.StatusCode == http.StatusOK {
 		defer resp.Body.Close()
 		_, err = io.Copy(dest, resp.Body)
+
 	} else if resp != nil && resp.StatusCode != http.StatusOK {
 		errMsg, _ := ioutil.ReadAll(resp.Body)
 		err = errors.New(string(errMsg[:]))
@@ -140,6 +143,39 @@ func (context *OpsManager) saveHTTPResponse(url string, dest io.Writer) (err err
 
 	if err != nil {
 		lo.G.Error("error in save http request", err)
+	}
+	return
+}
+
+func (context *OpsManager) legacyHTTPGet(url string) (resp *http.Response, err error) {
+	requestor := context.SettingsRequestor
+	resp, err = requestor.Get(ghttp.HttpRequestEntity{
+		Url:         url,
+		Username:    context.Username,
+		Password:    context.Password,
+		ContentType: "application/octet-stream",
+	})()
+	lo.G.Debug("called basic auth on legacy ops manager", url, err)
+	return
+}
+
+func (context *OpsManager) oauthHTTPGet(urlString string) (resp *http.Response, err error) {
+	var token string
+	var uaaURL, _ = urllib.Parse(urlString)
+	var opsManagerUsername = context.Username
+	var opsManagerPassword = context.Password
+	var clientID = "opsman"
+	var clientSecret = ""
+	lo.G.Debug("aquiring your token from: ", uaaURL, urlString)
+
+	if token, err = uaa.GetToken("https://"+uaaURL.Host+"/uaa", opsManagerUsername, opsManagerPassword, clientID, clientSecret); err == nil {
+		lo.G.Debug("your token", token, "https://"+uaaURL.Host+"/uaa")
+		requestor := context.SettingsRequestor
+		resp, err = requestor.Get(ghttp.HttpRequestEntity{
+			Url:           urlString,
+			ContentType:   "application/octet-stream",
+			Authorization: "Bearer " + token,
+		})()
 	}
 	return
 }
@@ -171,23 +207,27 @@ func (context *OpsManager) importInstallationPart(url, filename, fieldname strin
 	if backupReader, err = context.Reader(context.TargetDir, context.OpsmanagerBackupDir, filename); err == nil {
 		defer backupReader.Close()
 		var resp *http.Response
+		var uaaURL, _ = urllib.Parse(url)
+		var clientID = "opsman"
+		var clientSecret = ""
+		var token, _ = uaa.GetToken("https://"+uaaURL.Host+"/uaa", context.Username, context.Password, clientID, clientSecret)
 		conn := ghttp.ConnAuth{
-			Url:      url,
-			Username: context.Username,
-			Password: context.Password,
+			Url:         url,
+			Username:    context.Username,
+			Password:    context.Password,
+			BearerToken: token,
 		}
-
 		filePath := path.Join(context.TargetDir, context.OpsmanagerBackupDir, filename)
 		bufferedReader := bufio.NewReader(backupReader)
-
 		lo.G.Debug("upload request", log.Data{"fieldname": fieldname, "filePath": filePath, "conn": conn})
-
 		creds := map[string]string{
 			"password": context.Password,
 		}
 		resp, err = upload(conn, fieldname, filePath, -1, bufferedReader, creds)
+
 		if err == nil && resp.StatusCode == http.StatusOK {
 			lo.G.Debug("Request for %s succeeded with status: %s", url, resp.Status)
+
 		} else if resp != nil && resp.StatusCode != http.StatusOK {
 			err = fmt.Errorf("Request for %s failed with status: %s", url, resp.Status)
 		}

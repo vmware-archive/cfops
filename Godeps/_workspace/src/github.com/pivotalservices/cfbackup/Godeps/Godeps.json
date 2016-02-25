@@ -1,6 +1,6 @@
 {
 	"ImportPath": "github.com/pivotalservices/cfbackup",
-	"GoVersion": "go1.5",
+	"GoVersion": "go1.5.2",
 	"Packages": [
 		"./..."
 	],
@@ -12,7 +12,7 @@
 		},
 		{
 			"ImportPath": "github.com/golang/protobuf/proto",
-			"Rev": "0dfe8f37844c14cb32c7247925270e0f7ba90973"
+			"Rev": "2402d76f3d41f928c7902a765dfc872356dd3aad"
 		},
 		{
 			"ImportPath": "github.com/kr/fs",
@@ -24,13 +24,13 @@
 		},
 		{
 			"ImportPath": "github.com/onsi/ginkgo",
-			"Comment": "v1.2.0-42-g07d85e6",
-			"Rev": "07d85e6b10c4289c7d612f9b13f45ba36f66d55b"
+			"Comment": "v1.2.0-34-ge43390e",
+			"Rev": "e43390e35a4a88f3f95d5ddf9055efb7a1170469"
 		},
 		{
 			"ImportPath": "github.com/onsi/gomega",
-			"Comment": "v1.0-81-gad93e46",
-			"Rev": "ad93e463829d54602c66e94813bc1eb9b10d454c"
+			"Comment": "v1.0-75-g0fe2044",
+			"Rev": "0fe204460da2c8fa1babcaac196e694de8f1aaa1"
 		},
 		{
 			"ImportPath": "github.com/op/go-logging",
@@ -42,52 +42,57 @@
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/cfops/tileregistry",
-			"Comment": "v2.0.42-40-gc7afea7",
-			"Rev": "c7afea750eb165579e26082ec359fe37c5951cbc"
+			"Comment": "v2.0.42-45-ga0a6e7d",
+			"Rev": "a0a6e7d11389f14d1063c8d4ce472c6ec677f0f4"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/bosh",
-			"Comment": "v0.1.3-68-gf7f21bb",
-			"Rev": "f7f21bb1b2a6fd5dd0833e5b77fd49e229e5210e"
+			"Comment": "v0.1.3-76-gfc2595b",
+			"Rev": "fc2595bd78d37dab40ac4520052b1bf5794db25e"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/command",
-			"Comment": "v0.1.3-68-gf7f21bb",
-			"Rev": "f7f21bb1b2a6fd5dd0833e5b77fd49e229e5210e"
+			"Comment": "v0.1.3-76-gfc2595b",
+			"Rev": "fc2595bd78d37dab40ac4520052b1bf5794db25e"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/http",
-			"Comment": "v0.1.3-68-gf7f21bb",
-			"Rev": "f7f21bb1b2a6fd5dd0833e5b77fd49e229e5210e"
+			"Comment": "v0.1.3-76-gfc2595b",
+			"Rev": "fc2595bd78d37dab40ac4520052b1bf5794db25e"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/log",
-			"Comment": "v0.1.3-68-gf7f21bb",
-			"Rev": "f7f21bb1b2a6fd5dd0833e5b77fd49e229e5210e"
+			"Comment": "v0.1.3-76-gfc2595b",
+			"Rev": "fc2595bd78d37dab40ac4520052b1bf5794db25e"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/mock",
-			"Comment": "v0.1.3-68-gf7f21bb",
-			"Rev": "f7f21bb1b2a6fd5dd0833e5b77fd49e229e5210e"
+			"Comment": "v0.1.3-76-gfc2595b",
+			"Rev": "fc2595bd78d37dab40ac4520052b1bf5794db25e"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/osutils",
-			"Comment": "v0.1.3-68-gf7f21bb",
-			"Rev": "f7f21bb1b2a6fd5dd0833e5b77fd49e229e5210e"
+			"Comment": "v0.1.3-76-gfc2595b",
+			"Rev": "fc2595bd78d37dab40ac4520052b1bf5794db25e"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/persistence",
-			"Comment": "v0.1.3-68-gf7f21bb",
-			"Rev": "f7f21bb1b2a6fd5dd0833e5b77fd49e229e5210e"
+			"Comment": "v0.1.3-76-gfc2595b",
+			"Rev": "fc2595bd78d37dab40ac4520052b1bf5794db25e"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/storage",
-			"Comment": "v0.1.3-68-gf7f21bb",
-			"Rev": "f7f21bb1b2a6fd5dd0833e5b77fd49e229e5210e"
+			"Comment": "v0.1.3-76-gfc2595b",
+			"Rev": "fc2595bd78d37dab40ac4520052b1bf5794db25e"
+		},
+		{
+			"ImportPath": "github.com/pivotalservices/gtils/uaa",
+			"Comment": "v0.1.3-76-gfc2595b",
+			"Rev": "fc2595bd78d37dab40ac4520052b1bf5794db25e"
 		},
 		{
 			"ImportPath": "github.com/pkg/sftp",
-			"Rev": "e84cc8c755ca39b7b64f510fe1fffc1b51f210a5"
+			"Rev": "8a7343c6ed99a2934aea9c08c923c11df775b6db"
 		},
 		{
 			"ImportPath": "github.com/rlmcpherson/s3gof3r",
@@ -108,12 +113,9 @@
 			"Rev": "aa2602d0e8e8647f0ce7b53109b37040941915aa"
 		},
 		{
-			"ImportPath": "golang.org/x/crypto/curve25519",
-			"Rev": "1f22c0103821b9390939b6776727195525381532"
-		},
-		{
 			"ImportPath": "golang.org/x/crypto/ssh",
-			"Rev": "1f22c0103821b9390939b6776727195525381532"
+			"Comment": "null-236",
+			"Rev": "'69e2a90ed92d03812364aeb947b7068dc42e561e'"
 		},
 		{
 			"ImportPath": "gopkg.in/yaml.v1",

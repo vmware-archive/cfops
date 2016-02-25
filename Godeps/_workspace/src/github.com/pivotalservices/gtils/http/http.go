@@ -9,10 +9,11 @@ import (
 const NO_CONTENT_TYPE string = ""
 
 type HttpRequestEntity struct {
-	Url         string
-	Username    string
-	Password    string
-	ContentType string
+	Url           string
+	Username      string
+	Password      string
+	ContentType   string
+	Authorization string
 }
 
 type RequestFunc func(HttpRequestEntity, string, io.Reader) (*http.Response, error)
@@ -23,7 +24,14 @@ func Request(entity HttpRequestEntity, method string, body io.Reader) (response 
 	if err != nil {
 		return
 	}
-	req.SetBasicAuth(entity.Username, entity.Password)
+
+	if entity.Authorization == "" {
+		req.SetBasicAuth(entity.Username, entity.Password)
+
+	} else {
+		req.Header.Add("Authorization", entity.Authorization)
+	}
+
 	if entity.ContentType != NO_CONTENT_TYPE {
 		req.Header.Add("Content-Type", entity.ContentType)
 	}

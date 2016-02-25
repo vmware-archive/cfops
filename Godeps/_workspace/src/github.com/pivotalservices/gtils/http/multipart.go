@@ -9,9 +9,10 @@ import (
 )
 
 type ConnAuth struct {
-	Url      string
-	Username string
-	Password string
+	Url         string
+	Username    string
+	Password    string
+	BearerToken string
 }
 
 type MultiPartBodyFunc func(string, string, io.Reader, map[string]string) (io.ReadWriter, string, error)
@@ -46,7 +47,10 @@ var MultiPartUpload = func(conn ConnAuth, paramName, filename string, fileSize i
 
 		if req, err = http.NewRequest("POST", conn.Url, rbody); err == nil {
 
-			if conn.Username != "" && conn.Password != "" {
+			if conn.BearerToken != "" {
+				req.Header.Add("Authorization", "Bearer "+conn.BearerToken)
+
+			} else if conn.Username != "" && conn.Password != "" {
 				req.SetBasicAuth(conn.Username, conn.Password)
 			}
 			req.Header.Set("Content-Type", contentType)
