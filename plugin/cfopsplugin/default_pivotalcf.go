@@ -14,6 +14,11 @@ func (s *DefaultPivotalCF) GetHostDetails() tileregistry.TileSpec {
 	return s.TileSpec
 }
 
+//GetInstallationSettings - return installation settings
+func (s *DefaultPivotalCF) GetInstallationSettings() cfbackup.InstallationSettings {
+	return s.InstallationSettings
+}
+
 //NewArchiveWriter - creates a writer to a named resource using the given name on the cfops defined target (s3, local, etc)
 func (s *DefaultPivotalCF) NewArchiveWriter(name string) (writer io.WriteCloser, err error) {
 	backupContext := cfbackup.NewBackupContext(s.TileSpec.ArchiveDirectory, cfenv.CurrentEnv())
