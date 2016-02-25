@@ -25,7 +25,7 @@ var _ = Describe("DefaultPivotalCF initialized with valid installationSettings &
 	}
 	BeforeEach(func() {
 		configParser = cfbackup.NewConfigurationParser("./fixtures/installation-settings-1-6-aws.json")
-		pivotalCF = NewPivotalCF(configParser, controlTileSpec)
+		pivotalCF = NewPivotalCF(configParser.InstallationSettings, controlTileSpec)
 	})
 
 	Context("when GetHostDetails is called", func() {

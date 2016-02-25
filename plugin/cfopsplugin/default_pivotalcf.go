@@ -34,10 +34,10 @@ func (s *DefaultPivotalCF) NewArchiveReader(name string) (reader io.ReadCloser, 
 }
 
 //NewPivotalCF - creates the default pivotacf
-var NewPivotalCF = func(installationSettings *cfbackup.ConfigurationParser, ts tileregistry.TileSpec) PivotalCF {
+var NewPivotalCF = func(installationSettings cfbackup.InstallationSettings, ts tileregistry.TileSpec) PivotalCF {
 
 	return &DefaultPivotalCF{
 		TileSpec:             ts,
-		InstallationSettings: installationSettings.InstallationSettings,
+		InstallationSettings: installationSettings,
 	}
 }
