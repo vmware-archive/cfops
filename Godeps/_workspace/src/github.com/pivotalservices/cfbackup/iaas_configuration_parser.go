@@ -15,7 +15,7 @@ func NewConfigurationParser(installationFilePath string) *ConfigurationParser {
 	if err := json.Unmarshal(b, &is); err != nil {
 		lo.G.Error("Unmarshal installation settings error", err)
 	}
-
+    is.SetPGDumpUtilVersions()
 	return &ConfigurationParser{
 		InstallationSettings: is,
 	}
@@ -28,7 +28,8 @@ func NewConfigurationParserFromReader(settings io.Reader) *ConfigurationParser {
 	if err := json.Unmarshal(b, &is); err != nil {
 		lo.G.Error("Unmarshal installation settings error", err)
 	}
-
+	
+    is.SetPGDumpUtilVersions()
 	return &ConfigurationParser{
 		InstallationSettings: is,
 	}

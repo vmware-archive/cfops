@@ -2,23 +2,10 @@ package cfbackup
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/pivotalservices/gtils/command"
 	"github.com/pivotalservices/gtils/persistence"
 )
-
-//SetPGDumpUtilVersions -- set version paths for pgdump/pgrestore utils
-func SetPGDumpUtilVersions() {
-	switch os.Getenv(ERVersionEnvFlag) {
-	case ERVersion16:
-		persistence.PGDmpDumpBin = "/var/vcap/packages/postgres-9.4.2/bin/pg_dump"
-		persistence.PGDmpRestoreBin = "/var/vcap/packages/postgres-9.4.2/bin/pg_restore"
-	default:
-		persistence.PGDmpDumpBin = "/var/vcap/packages/postgres/bin/pg_dump"
-		persistence.PGDmpRestoreBin = "/var/vcap/packages/postgres/bin/pg_restore"
-	}
-}
 
 //Get - a getter for a systeminfo object
 func (s *SystemInfo) Get(name string) string {

@@ -171,18 +171,18 @@ func (context *ElasticRuntime) assignCredentials(installationSettings cfbackup.I
 			ip     string
 			pass   string
 		)
-		//sysInfo.Set(cfbackup.SDVcapUser, ERDefaultSystemUser)
-		//sysInfo.Set(cfbackup.SDUser, sysInfo.Get(cfbackup.SDIdentity))
-
 		productName := sysInfo.Get(cfbackup.SDProduct)
 		jobName := sysInfo.Get(cfbackup.SDComponent)
 		identifier := sysInfo.Get(cfbackup.SDIdentifier)
-		
+
 		if userID, pass, ip, err = context.getVMUserIDPasswordAndIP(installationSettings, productName, jobName); err == nil {
 			sysInfo.Set(cfbackup.SDIP, ip)
 			sysInfo.Set(cfbackup.SDVcapPass, pass)
 			sysInfo.Set(cfbackup.SDVcapUser, userID)
-			if userID, pass, err = context.getUserIDPasswordForIdentifier(installationSettings, productName, jobName, identifier); err == nil {
+			if identifier == "vm_credentials" {
+                sysInfo.Set(cfbackup.SDUser, userID)
+				sysInfo.Set(cfbackup.SDPass, pass)
+			} else if userID, pass, err = context.getUserIDPasswordForIdentifier(installationSettings, productName, jobName, identifier); err == nil {
 				sysInfo.Set(cfbackup.SDUser, userID)
 				sysInfo.Set(cfbackup.SDPass, pass)
 			}
@@ -198,16 +198,22 @@ func (context *ElasticRuntime) directorCredentialsValid() (ok bool) {
 	if directorInfo, ok = context.SystemsInfo.SystemDumps[cfbackup.ERDirector]; ok {
 		connectionURL := fmt.Sprintf(cfbackup.ERDirectorInfoURL, directorInfo.Get(cfbackup.SDIP))
 		gateway := context.HTTPGateway
+		userId := directorInfo.Get(cfbackup.SDUser)
+		password := directorInfo.Get(cfbackup.SDPass)
 		if gateway == nil {
 			gateway = ghttp.NewHttpGateway()
 		}
-		_, err := gateway.Get(ghttp.HttpRequestEntity{
+		if _, err := gateway.Get(ghttp.HttpRequestEntity{
 			Url:         connectionURL,
-			Username:    directorInfo.Get(cfbackup.SDUser),
-			Password:    directorInfo.Get(cfbackup.SDPass),
+			Username:    userId,
+			Password:    password,
 			ContentType: "application/json",
-		})()
-		ok = (err == nil)
+		})(); err == nil {
+			ok = true
+		} else {
+			ok = false
+			lo.G.Debug("Error connecting to director using %s, UserId-[%s] and Password[%s]", connectionURL, userId, password)
+		}
 	}
 	return
 }
@@ -249,7 +255,7 @@ func (context *ElasticRuntime) getVMUserIDPasswordAndIP(installationSettings cfb
 		if len(ips) > 0 {
 			ip = ips[0]
 		} else {
-		    err = fmt.Errorf("No IPs found for %s, %s", product, component)
+			err = fmt.Errorf("No IPs found for %s, %s", product, component)
 		}
 		var vmCredential cfbackup.VMCredentials
 		if vmCredential, err = installationSettings.FindVMCredentialsByProductAndJob(product, component); err == nil {

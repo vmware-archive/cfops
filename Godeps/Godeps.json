@@ -1,6 +1,6 @@
 {
 	"ImportPath": "github.com/pivotalservices/cfops",
-	"GoVersion": "go1.5.2",
+	"GoVersion": "go1.5",
 	"Packages": [
 		"./..."
 	],
@@ -12,12 +12,12 @@
 		},
 		{
 			"ImportPath": "github.com/codegangsta/cli",
-			"Comment": "1.2.0-187-gc31a797",
-			"Rev": "c31a7975863e7810c92e2e288a9ab074f9a88f29"
+			"Comment": "1.2.0-197-gcf1f63a",
+			"Rev": "cf1f63a7274872768d4037305d572b70b1199397"
 		},
 		{
 			"ImportPath": "github.com/golang/protobuf/proto",
-			"Rev": "2402d76f3d41f928c7902a765dfc872356dd3aad"
+			"Rev": "0dfe8f37844c14cb32c7247925270e0f7ba90973"
 		},
 		{
 			"ImportPath": "github.com/hashicorp/go-plugin",
@@ -41,13 +41,13 @@
 		},
 		{
 			"ImportPath": "github.com/onsi/ginkgo",
-			"Comment": "v1.2.0-34-ge43390e",
-			"Rev": "e43390e35a4a88f3f95d5ddf9055efb7a1170469"
+			"Comment": "v1.2.0-42-g07d85e6",
+			"Rev": "07d85e6b10c4289c7d612f9b13f45ba36f66d55b"
 		},
 		{
 			"ImportPath": "github.com/onsi/gomega",
-			"Comment": "v1.0-75-g0fe2044",
-			"Rev": "0fe204460da2c8fa1babcaac196e694de8f1aaa1"
+			"Comment": "v1.0-81-gad93e46",
+			"Rev": "ad93e463829d54602c66e94813bc1eb9b10d454c"
 		},
 		{
 			"ImportPath": "github.com/op/go-logging",
@@ -59,8 +59,8 @@
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/cfbackup",
-			"Comment": "v0.1.0-151-gc347a0e",
-			"Rev": "c347a0e5dea245141e5c8e21db64b5ae9d72aa3c"
+			"Comment": "v0.1.0-155-g8a947a0",
+			"Rev": "8a947a08d9e48405044f2b649d364a9fdc3b8329"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/bosh",
@@ -104,7 +104,7 @@
 		},
 		{
 			"ImportPath": "github.com/pkg/sftp",
-			"Rev": "8a7343c6ed99a2934aea9c08c923c11df775b6db"
+			"Rev": "e84cc8c755ca39b7b64f510fe1fffc1b51f210a5"
 		},
 		{
 			"ImportPath": "github.com/rlmcpherson/s3gof3r",
@@ -125,9 +125,12 @@
 			"Rev": "aa2602d0e8e8647f0ce7b53109b37040941915aa"
 		},
 		{
+			"ImportPath": "golang.org/x/crypto/curve25519",
+			"Rev": "1f22c0103821b9390939b6776727195525381532"
+		},
+		{
 			"ImportPath": "golang.org/x/crypto/ssh",
-			"Comment": "null-236",
-			"Rev": "'69e2a90ed92d03812364aeb947b7068dc42e561e'"
+			"Rev": "1f22c0103821b9390939b6776727195525381532"
 		},
 		{
 			"ImportPath": "gopkg.in/yaml.v1",
