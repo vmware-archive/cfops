@@ -39,17 +39,18 @@ type (
 
 	//InstallationSettings - an object to house installationsettings elements from the json
 	InstallationSettings struct {
+		Version        string         `json:"installation_schema_version"`
 		Infrastructure Infrastructure `json:"infrastructure"`
 		Products       []Products     `json:"products"`
 		IPAssignments  IPAssignments  `json:"ip_assignments"`
 	}
 
-    //AssignmentsProduct - a map string representing product assignments
+	//AssignmentsProduct - a map string representing product assignments
 	AssignmentsProduct map[string]AssignmentsJob
 	//AssignmentsJob - a map representing job assignments
-	AssignmentsJob     map[string]AssignmentsAZ
+	AssignmentsJob map[string]AssignmentsAZ
 	//AssignmentsAZ - a map []string representing a list of az assignments
-	AssignmentsAZ      map[string][]string
+	AssignmentsAZ map[string][]string
 
 	//IPAssignments - an object to house ip_assignments elements from the json
 	IPAssignments struct {
@@ -78,7 +79,7 @@ type (
 		GUID                               string              `json:"guid"`
 		InfrastructureNetworkReference     string              `json:"infrastructure_network_reference"`
 		InstallationName                   string              `json:"installation_name"`
-		SingletonAvailabilityZoneReference string              `json:"sigleton_availability_zone_reference"`
+		SingletonAvailabilityZoneReference string              `json:"singleton_availability_zone_reference"`
 		Stemcell                           interface{}         `json:"stemcell"`
 	}
 

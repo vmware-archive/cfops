@@ -1,6 +1,37 @@
 package cfbackup
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/pivotalservices/gtils/persistence"
+)
+
+var (
+	boshVersionNames = map[string]string{
+		"1.5": legacyBoshName,
+		"1.4": legacyBoshName,
+		"":    legacyBoshName,
+	}
+	pgDumpBin = map[string]string{
+		"1.5": legacyPGDumpBin,
+		"1.4": legacyPGDumpBin,
+		"":    legacyPGDumpBin,
+	}
+	pgRestoreBin = map[string]string{
+		"1.5": legacyPGRestoreBin,
+		"1.4": legacyPGRestoreBin,
+		"":    legacyPGRestoreBin,
+	}
+)
+
+const (
+	defaultBoshName     = "p-bosh"
+	legacyBoshName      = "microbosh"
+	defaultPGDumpBin    = "/var/vcap/packages/postgres-9.4.2/bin/pg_dump"
+	defaultPGRestoreBin = "/var/vcap/packages/postgres-9.4.2/bin/pg_restore"
+	legacyPGDumpBin     = "/var/vcap/packages/postgres/bin/pg_dump"
+	legacyPGRestoreBin  = "/var/vcap/packages/postgres/bin/pg_restore"
+)
 
 //FindPropertyValues - returns a map of property values for a given product, job and identifier
 func (s *InstallationSettings) FindPropertyValues(productName, jobName, identifier string) (propertyMap map[string]string, err error) {
@@ -64,7 +95,7 @@ func (s *InstallationSettings) extractIPsForProductAndJob(productName, jobName s
 
 func (s *InstallationSettings) findIPs(product Products, job Jobs) (IPs []string, err error) {
 	var IPsResponse []string
-	for _, azGUID := range product.AZReference {
+	for _, azGUID := range product.GetAvailabilityZoneNames() {
 		if IPsResponse, err = s.IPAssignments.FindIPsByProductGUIDAndJobGUIDAndAvailabilityZoneGUID(product.GUID, job.GUID, azGUID); err == nil {
 			for _, ip := range IPsResponse {
 				IPs = append(IPs, ip)
@@ -138,4 +169,28 @@ func isPostgres(job string, instances []Instances) bool {
 
 func (s *InstallationSettings) isLegacyFormat() bool {
 	return s.IPAssignments.Assignments == nil
+}
+
+//GetBoshName - returns name of BoshProduct
+func (s *InstallationSettings) GetBoshName() (boshName string) {
+	var ok bool
+	if boshName, ok = boshVersionNames[s.Version]; !ok {
+		boshName = defaultBoshName
+	}
+	return
+}
+
+//SetPGDumpUtilVersions - initializes the correct dump commands
+func (s *InstallationSettings) SetPGDumpUtilVersions() {
+	var ok bool
+	var pgDump, pgRestore string
+	if pgDump, ok = pgDumpBin[s.Version]; !ok {
+		pgDump = defaultPGDumpBin
+	}
+	persistence.PGDmpDumpBin = pgDump
+
+	if pgRestore, ok = pgRestoreBin[s.Version]; !ok {
+		pgRestore = defaultPGRestoreBin
+	}
+	persistence.PGDmpRestoreBin = pgRestore
 }

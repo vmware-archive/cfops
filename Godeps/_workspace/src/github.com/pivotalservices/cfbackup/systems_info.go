@@ -5,6 +5,7 @@ package cfbackup
 func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo {
 
 	configParser := NewConfigurationParser(installationSettingsFile)
+	installationSettings := configParser.InstallationSettings
 
 	const (
 		defaultRemoteArchivePath = "/tmp/archive.backup"
@@ -63,7 +64,7 @@ func NewSystemsInfo(installationSettingsFile string, sshKey string) SystemsInfo 
 	}
 
 	systemDumps[ERDirector] = &SystemInfo{
-		Product:           BoshName(),
+		Product:           installationSettings.GetBoshName(),
 		Component:         "director",
 		Identifier:          "director_credentials",
 		SSHPrivateKey:     sshKey,

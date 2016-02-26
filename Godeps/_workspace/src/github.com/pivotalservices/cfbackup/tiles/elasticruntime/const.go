@@ -36,10 +36,6 @@ const (
 	ERFileDoesNotExist = "file does not exist"
 	//ErrERDBBackupFailure -- error message for backup failure
 	ErrERDBBackupFailure = "failed to backup database"
-	//ERVersionEnvFlag -- env flag from ER version toggle
-	ERVersionEnvFlag = "ER_VERSION"
-	//ERVersion16 -- value for 1.6 toggle
-	ERVersion16 = "1.6"
 )
 
 var (

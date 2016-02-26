@@ -3,15 +3,13 @@ package cfbackup
 import (
 	"fmt"
 	"strings"
-
-	"github.com/xchapter7x/lo"
 )
 
 //GetIPsByJob - get array of ips for a job
 func (s *Products) GetIPsByJob(jobname string) (ips []string) {
 	for vmName, ipList := range s.IPS {
-	    if strings.HasPrefix(vmName, jobname+"-") {
-			ips = append(ips,ipList...)
+		if strings.HasPrefix(vmName, jobname+"-") {
+			ips = append(ips, ipList...)
 		}
 	}
 	return
@@ -60,7 +58,6 @@ func (s *Products) GetVMCredentialsByJob(jobName string) (vmCredentials VMCreden
 }
 
 func (s *Products) extractLegacyCredentials(job Jobs) (vmCredentials VMCredentials) {
-	lo.G.Debug("legacy: ", job)
 	propMap := s.GetPropertyValues(job, "vm_credentials")
 	vmCredentials.UserID = propMap["identity"]
 	vmCredentials.Password = propMap["password"]
@@ -68,7 +65,6 @@ func (s *Products) extractLegacyCredentials(job Jobs) (vmCredentials VMCredentia
 }
 
 func (s *Products) extractCredentials(job Jobs) (vmCredentials VMCredentials) {
-	lo.G.Debug("new: ", job)
 	vmCredentials.UserID = job.VMCredentials["identity"]
 	vmCredentials.Password = job.VMCredentials["password"]
 	return
@@ -90,6 +86,16 @@ func (s *Products) GetPropertyValues(job Jobs, identifier string) (propertyMap m
 				propertyMap[key] = fmt.Sprintf("%v", value)
 			}
 		}
+	}
+	return
+}
+
+//GetAvailabilityZoneNames - returns a list of availability zones
+func (s *Products) GetAvailabilityZoneNames() (availablityZoneNames []string) {
+	if len(s.AZReference) > 0 {
+		availablityZoneNames = s.AZReference
+	} else {
+		availablityZoneNames = append(availablityZoneNames, s.SingletonAvailabilityZoneReference)
 	}
 	return
 }
