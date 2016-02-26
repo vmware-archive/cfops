@@ -6,7 +6,6 @@ import (
 
 	"github.com/pivotalservices/cfbackup"
 	"github.com/pivotalservices/cfops/tileregistry"
-	"github.com/pivotalservices/gtils/command"
 )
 
 //Meta - plugin meta data storage object
@@ -33,14 +32,9 @@ type Plugin interface {
 //PivotalCF - interface representing a pivotalcf
 type PivotalCF interface {
 	GetHostDetails() tileregistry.TileSpec
-	GetProducts() map[string]cfbackup.Products
-	GetCredentials() map[string]map[string][]cfbackup.Properties
 	NewArchiveReader(name string) (io.ReadCloser, error)
 	NewArchiveWriter(name string) (io.WriteCloser, error)
-	GetJobProperties(productName, jobName string) (properties []cfbackup.Properties, err error)
-	GetPropertyValues(productName, jobName, identifier string) (propertyMap map[string]string, err error)
-	GetSSHConfig(productName, jobName string) (command.SshConfig, error)
-	GetJobIP(productName, jobName string) (string, error)
+	GetInstallationSettings() cfbackup.InstallationSettings
 }
 
 //BackupRestorePlugin - this is an implementation of the rpc client and server wrapper
@@ -62,7 +56,7 @@ type BackupRestoreRPC struct {
 //DefaultPivotalCF - default implementation of PivotalCF interface
 type DefaultPivotalCF struct {
 	TileSpec             tileregistry.TileSpec
-	InstallationSettings *cfbackup.ConfigurationParser
+	InstallationSettings cfbackup.InstallationSettings
 }
 
 //PluginTileBuilder - factory for a tile wrapped plugin

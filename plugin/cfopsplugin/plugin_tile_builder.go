@@ -18,7 +18,7 @@ func (s *PluginTileBuilder) New(tileSpec tileregistry.TileSpec) (tile tileregist
 	if settingsReader, err = opsManager.GetInstallationSettings(); err == nil {
 		var brPlugin BackupRestorer
 		installationSettings := cfbackup.NewConfigurationParserFromReader(settingsReader)
-		pcf := NewPivotalCF(installationSettings, tileSpec)
+		pcf := NewPivotalCF(installationSettings.InstallationSettings, tileSpec)
 		lo.G.Debug("", s.Meta.Name, s.FilePath, pcf)
 		brPlugin, _ = Call(s.Meta.Name, s.FilePath)
 		brPlugin.Setup(pcf)
