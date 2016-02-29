@@ -64,14 +64,6 @@ COMMANDS:
    help, h	Shows a list of commands or help for one command
 ```
 
-**setting pcf versions**
-
-If using PCF 1.6 or above you need to set the `ER_VERSION` variable.
-
-```
-ER_VERSION=1.6 ./cfops backup ...
-```
-
 **setting log levels**
 
 ```
