@@ -21,8 +21,8 @@ import (
 )
 
 // NewOpsManager initializes an OpsManager instance
-var NewOpsManager = func(opsManagerHostname string, adminUsername string, adminPassword string, opsManagerUsername string, opsManagerPassword string, target string) (context *OpsManager, err error) {
-	backupContext := cfbackup.NewBackupContext(target, cfenv.CurrentEnv())
+var NewOpsManager = func(opsManagerHostname string, adminUsername string, adminPassword string, opsManagerUsername string, opsManagerPassword string, target string, cryptKey string) (context *OpsManager, err error) {
+	backupContext := cfbackup.NewBackupContext(target, cfenv.CurrentEnv(), cryptKey)
 	settingsHTTPRequestor := ghttp.NewHttpGateway()
 	settingsMultiHTTPRequestor := httpUploader(cfbackup.GetUploader(backupContext))
 	assetsHTTPRequestor := ghttp.NewHttpGateway()

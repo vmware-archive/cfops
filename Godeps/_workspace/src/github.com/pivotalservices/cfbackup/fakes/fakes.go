@@ -250,7 +250,7 @@ func (s *mockRemoteOps) UploadFile(lfile io.Reader) error {
 }
 
 func (s *mockRemoteOps) RemoveRemoteFile() (err error) {
-	
+
 	return
 }
 
@@ -300,7 +300,7 @@ func (s *mockTile) Restore() error {
 
 //NewFakeBackupContext --
 func NewFakeBackupContext(target string, env map[string]string, storageProvider cfbackup.StorageProvider) (backupContext cfbackup.BackupContext) {
-	backupContext = cfbackup.NewBackupContext(target, env)
+	backupContext = cfbackup.NewBackupContext(target, env, "")
 	backupContext.StorageProvider = storageProvider
 	return
 }
@@ -319,4 +319,33 @@ func (d *FakeStorageProvider) Reader(path ...string) (io.ReadCloser, error) {
 //Writer --
 func (d *FakeStorageProvider) Writer(path ...string) (closer io.WriteCloser, err error) {
 	return closer, nil
+}
+
+//NewMockStringStorageProvider ---
+func NewMockStringStorageProvider() *MockStringStorageProvider {
+	return &MockStringStorageProvider{
+		Buffer: bytes.NewBufferString(""),
+	}
+}
+
+//MockStringStorageProvider ----
+type MockStringStorageProvider struct {
+	*bytes.Buffer
+	ErrFakeResponse      error
+	ErrFakeCloseResponse error
+}
+
+//Close ----
+func (s *MockStringStorageProvider) Close() (err error) {
+	return s.ErrFakeCloseResponse
+}
+
+//Reader ---
+func (s *MockStringStorageProvider) Reader(path ...string) (read io.ReadCloser, err error) {
+	return s, s.ErrFakeResponse
+}
+
+//Writer ----
+func (s *MockStringStorageProvider) Writer(path ...string) (writer io.WriteCloser, err error) {
+	return s, s.ErrFakeResponse
 }

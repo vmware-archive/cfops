@@ -85,6 +85,7 @@ func getTileFromRegistry(fs *flagSet, commandName string) (tile tileregistry.Til
 				OpsManagerUser:   fs.OpsManagerUser(),
 				OpsManagerPass:   fs.OpsManagerPass(),
 				ArchiveDirectory: fs.Dest(),
+				CryptKey:         fs.EncryptionKey(),
 			})
 			if err != nil {
 				return nil, fmt.Errorf("failure to connect to ops manager host: %s", err.Error())
@@ -124,6 +125,7 @@ const (
 	opsManagerPass string = "opsManagerPass"
 	dest           string = "destination"
 	tile           string = "tile"
+	encryptionKey  string = "encryptionKey"
 )
 
 var (
@@ -167,6 +169,11 @@ var (
 			Desc:   "a tile you would like to run the operation on",
 			EnvVar: "CFOPS_TILE",
 		},
+		encryptionKey: flagBucket{
+			Flag:   []string{"encryptionkey", "k"},
+			Desc:   "encryption key to encrypt/decrypt your archive (key lengths supported are 16, 24, 32 for AES-128, AES-192, or AES-256)",
+			EnvVar: "CFOPS_ENCRYPTION_KEY",
+		},
 	}
 )
 
@@ -179,6 +186,7 @@ type (
 		opsManagerPass string
 		dest           string
 		tile           string
+		encryptionKey  string
 	}
 
 	flagBucket struct {
@@ -214,6 +222,10 @@ func (s *flagSet) Dest() string {
 
 func (s *flagSet) Tile() string {
 	return s.tile
+}
+
+func (s *flagSet) EncryptionKey() string {
+	return s.encryptionKey
 }
 
 func hasValidBackupRestoreFlags(fs *flagSet) bool {
