@@ -13,7 +13,7 @@ import (
 func (s *PluginTileBuilder) New(tileSpec tileregistry.TileSpec) (tile tileregistry.Tile, err error) {
 	var opsManager *opsmanager.OpsManager
 	var settingsReader io.Reader
-	opsManager, err = opsmanager.NewOpsManager(tileSpec.OpsManagerHost, tileSpec.AdminUser, tileSpec.AdminPass, tileSpec.OpsManagerUser, tileSpec.OpsManagerPass, tileSpec.ArchiveDirectory)
+	opsManager, err = opsmanager.NewOpsManager(tileSpec.OpsManagerHost, tileSpec.AdminUser, tileSpec.AdminPass, tileSpec.OpsManagerUser, tileSpec.OpsManagerPass, tileSpec.ArchiveDirectory, tileSpec.CryptKey)
 
 	if settingsReader, err = opsManager.GetInstallationSettings(); err == nil {
 		var brPlugin BackupRestorer
