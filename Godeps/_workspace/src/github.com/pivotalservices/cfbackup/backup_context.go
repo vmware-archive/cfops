@@ -1,7 +1,13 @@
 package cfbackup
 
+import (
+	"fmt"
+
+	"github.com/xchapter7x/lo"
+)
+
 // NewBackupContext initializes a BackupContext
-func NewBackupContext(targetDir string, env map[string]string) (backupContext BackupContext) {
+func NewBackupContext(targetDir string, env map[string]string, cryptKey string) (backupContext BackupContext) {
 	backupContext = BackupContext{
 		TargetDir: targetDir,
 	}
@@ -10,6 +16,27 @@ func NewBackupContext(targetDir string, env map[string]string) (backupContext Ba
 		backupContext.IsS3 = true
 	} else {
 		backupContext.StorageProvider = NewDiskProvider()
+	}
+
+	if isValidCryptKey(cryptKey) {
+		var err error
+
+		if backupContext.StorageProvider, err = NewEncryptedStorageProvider(backupContext.StorageProvider, cryptKey); err != nil {
+			lo.G.Error("something went wrong when applying encryption to storage provider: ", err)
+			panic(err)
+		}
+	}
+	return
+}
+
+func isValidCryptKey(key string) (valid bool) {
+	l := len(key)
+	valid = l != 0 && (l == 16 || l == 24 || l == 32)
+
+	if l > 0 && !valid {
+		s := fmt.Sprintf("key is not valid failing now. length should be 16,24 or 32: len is %v", l)
+		lo.G.Panic(s)
+		panic(s)
 	}
 	return
 }

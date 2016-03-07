@@ -27,7 +27,7 @@ func (s *ElasticRuntimeBuilder) New(tileSpec tileregistry.TileSpec) (elasticRunt
 		if iaas, hasKey := config.GetIaaS(); hasKey {
 			sshKey = iaas.SSHPrivateKey
 		}
-		elasticRuntime = NewElasticRuntime(installationTmpFile.Name(), tileSpec.ArchiveDirectory, sshKey)
+		elasticRuntime = NewElasticRuntime(installationTmpFile.Name(), tileSpec.ArchiveDirectory, sshKey, tileSpec.CryptKey)
 	}
 	return
 }
@@ -38,7 +38,7 @@ var GetInstallationSettings = func(tileSpec tileregistry.TileSpec) (settings io.
 		opsManager *opsmanager.OpsManager
 	)
 
-	if opsManager, err = opsmanager.NewOpsManager(tileSpec.OpsManagerHost, tileSpec.AdminUser, tileSpec.AdminPass, tileSpec.OpsManagerUser, tileSpec.OpsManagerPass, tileSpec.ArchiveDirectory); err == nil {
+	if opsManager, err = opsmanager.NewOpsManager(tileSpec.OpsManagerHost, tileSpec.AdminUser, tileSpec.AdminPass, tileSpec.OpsManagerUser, tileSpec.OpsManagerPass, tileSpec.ArchiveDirectory, tileSpec.CryptKey); err == nil {
 		settings, err = opsManager.GetInstallationSettings()
 	}
 	return

@@ -1,6 +1,7 @@
 package cfbackup
 
 import (
+	"crypto/cipher"
 	"io"
 	"net/http"
 
@@ -22,6 +23,18 @@ type (
 		TargetDir string
 		IsS3      bool
 		StorageProvider
+	}
+
+	//StreamReadCloser - wrapper for a cipher.StreadReader to implement Closer interface as well
+	StreamReadCloser struct {
+		cipher.StreamReader
+		io.Closer
+	}
+
+	//EncryptedStorageProvider - a storage provider wrapper that applies encryption
+	EncryptedStorageProvider struct {
+		EncryptionKey          string
+		wrappedStorageProvider StorageProvider
 	}
 
 	// StorageProvider is responsible for obtaining/managing a reader/writer to

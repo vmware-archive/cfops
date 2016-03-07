@@ -21,10 +21,12 @@ func main() {
 	var (
 		readOnly    bool
 		debugStderr bool
+		rootDir     string
 	)
 
 	flag.BoolVar(&readOnly, "R", false, "read-only server")
 	flag.BoolVar(&debugStderr, "e", false, "debug to stderr")
+	flag.StringVar(&rootDir, "root", "", "root directory")
 	flag.Parse()
 
 	debugStream := ioutil.Discard
@@ -121,6 +123,7 @@ func main() {
 		server, err := sftp.NewServer(
 			channel,
 			channel,
+			rootDir,
 			sftp.WithDebug(debugStream),
 			sftp.ReadOnly(),
 		)
