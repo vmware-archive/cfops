@@ -34,6 +34,7 @@ func buraAction(commandName string, eh *ErrorHandler) (action func(*cli.Context)
 				opsManagerPass: c.String(flagList[opsManagerPass].Flag[0]),
 				dest:           c.String(flagList[dest].Flag[0]),
 				tile:           c.String(flagList[tile].Flag[0]),
+				encryptionKey:  c.String(flagList[encryptionKey].Flag[0]),
 			}
 		)
 
