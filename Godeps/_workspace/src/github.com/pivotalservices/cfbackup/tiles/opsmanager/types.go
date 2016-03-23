@@ -31,6 +31,7 @@ type (
 		SSHUsername         string
 		SSHPassword         string
 		SSHPort             int
+		ClearBoshManifest   bool
 	}
 
 	//OpsManagerBuilder - an object that can build ops manager objects

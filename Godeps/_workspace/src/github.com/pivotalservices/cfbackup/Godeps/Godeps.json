@@ -42,8 +42,8 @@
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/cfops/tileregistry",
-			"Comment": "v2.0.42-56-g0e7abce",
-			"Rev": "0e7abce71ea095de5714f33943d7ac61263f57ad"
+			"Comment": "v2.0.42-62-g7ffc7d1",
+			"Rev": "7ffc7d1ba58c06fad47a440475885243b84dfacb"
 		},
 		{
 			"ImportPath": "github.com/pivotalservices/gtils/bosh",
