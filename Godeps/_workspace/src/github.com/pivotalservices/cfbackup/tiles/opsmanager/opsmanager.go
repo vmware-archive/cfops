@@ -43,6 +43,7 @@ var NewOpsManager = func(opsManagerHostname string, adminUsername string, adminP
 		SSHUsername:         opsManagerUsername,
 		SSHPassword:         opsManagerPassword,
 		SSHPort:             OpsMgrDefaultSSHPort,
+		ClearBoshManifest:   false,
 	}
 	err = context.createExecuter()
 	return
@@ -190,7 +191,7 @@ func (context *OpsManager) Restore() (err error) {
 
 func (context *OpsManager) importInstallation() (err error) {
 	defer func() {
-		if err == nil {
+		if err == nil && context.ClearBoshManifest {
 			lo.G.Debug("removing deployment files")
 			err = context.removeExistingDeploymentFiles()
 		}
