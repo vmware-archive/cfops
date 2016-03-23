@@ -179,7 +179,7 @@ var (
 			EnvVar: "CFOPS_ENCRYPTION_KEY",
 		},
 		clearBoshManifest: flagBucket{
-			Flag:   []string{"clear-bosh-manifest", "r"},
+			Flag:   []string{"clear-bosh-manifest"},
 			Desc:   "set this flag if you would like to clear the bosh-deployments.yml (this should only affect a restore of Ops-Manager)",
 			EnvVar: "CFOPS_CLEAR_BOSH_MANIFEST",
 		},
