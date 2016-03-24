@@ -5,19 +5,11 @@ import (
 	"os"
 
 	cfopsplugin "github.com/pivotalservices/cfops/plugin/cfopsplugin"
-	"github.com/pivotalservices/cfops/plugin/fake"
 	"github.com/xchapter7x/lo"
 )
 
 func main() {
-
-	if len(os.Args) == 2 {
-		lo.G.Debug("executing run plugin", os.Args)
-		runPlugin()
-	} else {
-		lo.G.Debug("executing call plugin", os.Args)
-		callPlugin()
-	}
+	runPlugin()
 }
 
 // Here is a real implementation of a plugin
@@ -46,6 +38,7 @@ func (BackupRestoreTest) Backup() error {
 //Restore --
 func (BackupRestoreTest) Restore() error {
 	lo.G.Debug("restore!")
+	lo.G.Debug("Arguments %s", os.Args[2:])
 	return nil
 }
 
@@ -55,10 +48,10 @@ func runPlugin() {
 	cfopsplugin.Start(brt)
 }
 
-func callPlugin() {
-	p, c := cfopsplugin.Call("backuprestore", os.Args[0])
-	defer c.Kill()
-	lo.G.Debug("", p.Setup(new(fake.PivotalCF)))
-	lo.G.Debug("", p.Backup())
-	lo.G.Debug("", p.Restore())
-}
+// func callPlugin() {
+// 	p, c := cfopsplugin.Call("backuprestore", os.Args[0])
+// 	defer c.Kill()
+// 	lo.G.Debug("", p.Setup(new(fake.PivotalCF)))
+// 	lo.G.Debug("", p.Backup())
+// 	lo.G.Debug("", p.Restore())
+// }

@@ -3,6 +3,7 @@ package cfopsplugin
 import (
 	"io"
 	"net/rpc"
+	"os/exec"
 
 	"github.com/pivotalservices/cfbackup"
 	"github.com/pivotalservices/cfops/tileregistry"
@@ -61,6 +62,10 @@ type DefaultPivotalCF struct {
 
 //PluginTileBuilder - factory for a tile wrapped plugin
 type PluginTileBuilder struct {
-	FilePath string
-	Meta     Meta
+	FilePath   string
+	Meta       Meta
+	CmdBuilder BuildCmd
 }
+
+//BuildCmd Command func
+type BuildCmd func(filePath string, args string) *exec.Cmd

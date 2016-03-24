@@ -32,6 +32,7 @@ var _ = Describe("given a plugin tile builder", func() {
 			pluginTileBuilder = new(PluginTileBuilder)
 			pluginTileBuilder.FilePath = "../load/fixture_plugins/" + runtime.GOOS + "/sample"
 			pluginTileBuilder.Meta = Meta{Name: "backuprestore"}
+			pluginTileBuilder.CmdBuilder = DefaultCmdBuilder
 			pluginTile, err = pluginTileBuilder.New(tileregistry.TileSpec{
 				OpsManagerHost:   strings.Replace(server.URL(), "https://", "", 1),
 				AdminUser:        fakeUser,
@@ -48,6 +49,28 @@ var _ = Describe("given a plugin tile builder", func() {
 		It("should return a plugin tile object", func() {
 			Ω(err).ShouldNot(HaveOccurred())
 			Ω(pluginTile).Should(BeAssignableToTypeOf(new(BackupRestoreRPC)))
+		})
+		It("should yield results from its methods", func() {
+			Ω(pluginTile.Backup()).Should(HaveOccurred())
+		})
+		It("should yield results from its methods", func() {
+			Ω(pluginTile.Restore()).ShouldNot(HaveOccurred())
+		})
+	})
+})
+
+var _ = Describe("given the default command builder", func() {
+	Context("when a string with argument passed in", func() {
+		var arguments = "--arg1 value1 --arg2 value2"
+		var filePath = "path"
+		It("should return a command with space delimited args", func() {
+			cmd := DefaultCmdBuilder(filePath, arguments)
+			Ω(cmd.Path).Should(Equal(filePath))
+			Ω(cmd.Args[1]).Should(Equal("plugin"))
+			Ω(cmd.Args[2]).Should(Equal("--arg1"))
+			Ω(cmd.Args[3]).Should(Equal("value1"))
+			Ω(cmd.Args[4]).Should(Equal("--arg2"))
+			Ω(cmd.Args[5]).Should(Equal("value2"))
 		})
 	})
 })
