@@ -64,6 +64,7 @@ func testTileAction(actionName string) {
 					set.String("opsmanageruser", "*****", "")
 					set.String("opsmanagerpass", "*****", "")
 					set.String("destination", "*****", "")
+					set.String("pluginargs", "*****", "")
 					controlCliContext = cli.NewContext(cli.NewApp(), set, nil)
 					controlCmd = CreateBURACliCommand(controlName, controlUsage, controlErrorHandler)
 					controlCliContext.Command = controlCmd
