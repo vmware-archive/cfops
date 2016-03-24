@@ -20,5 +20,6 @@ type (
 		ArchiveDirectory  string
 		CryptKey          string
 		ClearBoshManifest bool
+		PluginArgs        string
 	}
 )

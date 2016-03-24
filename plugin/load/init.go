@@ -59,8 +59,9 @@ func loadPlugin(dir string, fileInfo os.FileInfo) (err error) {
 
 			} else {
 				ptb := &cfopsplugin.PluginTileBuilder{
-					FilePath: filePath,
-					Meta:     meta,
+					FilePath:   filePath,
+					Meta:       meta,
+					CmdBuilder: cfopsplugin.DefaultCmdBuilder,
 				}
 				lo.G.Debug("registering plugin: ", ptb)
 				tileregistry.Register(meta.Name, ptb)

@@ -36,6 +36,7 @@ func buraAction(commandName string, eh *ErrorHandler) (action func(*cli.Context)
 				tile:              c.String(flagList[tile].Flag[0]),
 				encryptionKey:     c.String(flagList[encryptionKey].Flag[0]),
 				clearBoshManifest: c.Bool(flagList[clearBoshManifest].Flag[0]),
+				pluginArgs:        c.String(flagList[pluginArgs].Flag[0]),
 			}
 		)
 
@@ -89,6 +90,7 @@ func getTileFromRegistry(fs *flagSet, commandName string) (tile tileregistry.Til
 				ArchiveDirectory:  fs.Dest(),
 				CryptKey:          fs.EncryptionKey(),
 				ClearBoshManifest: fs.ClearBoshManifest(),
+				PluginArgs:        fs.PluginArgs(),
 			})
 			if err != nil {
 				return nil, fmt.Errorf("failure to connect to ops manager host: %s", err.Error())
@@ -130,6 +132,7 @@ const (
 	tile              string = "tile"
 	encryptionKey     string = "encryptionKey"
 	clearBoshManifest string = "clearboshmanifest"
+	pluginArgs        string = "pluginArgs"
 )
 
 var (
@@ -183,6 +186,11 @@ var (
 			Desc:   "set this flag if you would like to clear the bosh-deployments.yml (this should only affect a restore of Ops-Manager)",
 			EnvVar: "CFOPS_CLEAR_BOSH_MANIFEST",
 		},
+		pluginArgs: flagBucket{
+			Flag:   []string{"pluginargs", "p"},
+			Desc:   "Arguments for plugin to execute",
+			EnvVar: "PLUGIN_ARGS",
+		},
 	}
 )
 
@@ -197,6 +205,7 @@ type (
 		tile              string
 		encryptionKey     string
 		clearBoshManifest bool
+		pluginArgs        string
 	}
 
 	flagBucket struct {
@@ -240,6 +249,10 @@ func (s *flagSet) EncryptionKey() string {
 
 func (s *flagSet) ClearBoshManifest() bool {
 	return s.clearBoshManifest
+}
+
+func (s *flagSet) PluginArgs() string {
+	return s.pluginArgs
 }
 
 func hasValidBackupRestoreFlags(fs *flagSet) bool {
