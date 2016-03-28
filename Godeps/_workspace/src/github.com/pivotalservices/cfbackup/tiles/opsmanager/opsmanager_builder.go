@@ -20,7 +20,7 @@ func (s *OpsManagerBuilder) New(tileSpec tileregistry.TileSpec) (opsManagerTile 
 			opsManager.SetSSHPrivateKey(iaas.SSHPrivateKey)
 
 		} else {
-			lo.G.Error("Can't find IaaS error: ", err)
+			lo.G.Debug("No IaaS PEM key found. Defaulting to using ssh username and password credentials")
 		}
 	}
 	opsManagerTile = opsManager

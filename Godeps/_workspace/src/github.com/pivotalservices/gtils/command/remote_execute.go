@@ -73,6 +73,7 @@ func NewRemoteExecutor(sshCfg SshConfig) (executor Executer, err error) {
 	remoteExecutor.LazyClientDial = func() {
 		client, err := ssh.Dial("tcp", fmt.Sprintf("%s:%d", sshCfg.Host, sshCfg.Port), clientconfig)
 		if err != nil {
+			lo.G.Error("ssh connection issue:", err)
 			return
 		}
 		remoteExecutor.Client = NewClientWrapper(client)
@@ -90,24 +91,31 @@ type SSHSession interface {
 
 // Copy the output from a command to the specified io.Writer
 func (executor *DefaultRemoteExecutor) Execute(dest io.Writer, command string) (err error) {
-	executor.once.Do(executor.LazyClientDial)
-	session, err := executor.Client.NewSession()
-	defer session.Close()
-	if err != nil {
-		return
+	var session SSHSession
+	var stdoutReader io.Reader
+
+	if executor.once.Do(executor.LazyClientDial); executor.Client != nil {
+		session, err = executor.Client.NewSession()
+		defer session.Close()
+		if err != nil {
+			return
+		}
+		stdoutReader, err = session.StdoutPipe()
+		if err != nil {
+			return
+		}
+		err = session.Start(command)
+		if err != nil {
+			return
+		}
+		_, err = io.Copy(dest, stdoutReader)
+		if err != nil {
+			return
+		}
+		err = session.Wait()
+	} else {
+		err = fmt.Errorf("un-initialized client executor")
+		lo.G.Error(err.Error())
 	}
-	stdoutReader, err := session.StdoutPipe()
-	if err != nil {
-		return
-	}
-	err = session.Start(command)
-	if err != nil {
-		return
-	}
-	_, err = io.Copy(dest, stdoutReader)
-	if err != nil {
-		return
-	}
-	err = session.Wait()
 	return
 }

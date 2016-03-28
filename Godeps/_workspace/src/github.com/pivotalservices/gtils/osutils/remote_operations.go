@@ -61,9 +61,7 @@ func (s *RemoteOperations) Path() string {
 func (s *RemoteOperations) getClient() (sftpclient SFTPClient, err error) {
 	clientconfig := &ssh.ClientConfig{
 		User: s.sshCfg.Username,
-		Auth: []ssh.AuthMethod{
-			ssh.Password(s.sshCfg.Password),
-		},
+		Auth: s.sshCfg.GetAuthMethod(),
 	}
 	sftpclient, err = s.GetSSHConnection(s.sshCfg, clientconfig)
 	return
