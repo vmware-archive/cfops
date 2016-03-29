@@ -47,11 +47,3 @@ func runPlugin() {
 	brt.Meta = cfopsplugin.Meta{Name: "backuprestore", Role: "backup-restore"}
 	cfopsplugin.Start(brt)
 }
-
-// func callPlugin() {
-// 	p, c := cfopsplugin.Call("backuprestore", os.Args[0])
-// 	defer c.Kill()
-// 	lo.G.Debug("", p.Setup(new(fake.PivotalCF)))
-// 	lo.G.Debug("", p.Backup())
-// 	lo.G.Debug("", p.Restore())
-// }
