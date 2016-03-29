@@ -189,7 +189,7 @@ var (
 		pluginArgs: flagBucket{
 			Flag:   []string{"pluginargs", "p"},
 			Desc:   "Arguments for plugin to execute",
-			EnvVar: "PLUGIN_ARGS",
+			EnvVar: "CFOPS_PLUGIN_ARGS",
 		},
 	}
 )
