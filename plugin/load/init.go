@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"strings"
 
 	"github.com/pivotalservices/cfops/plugin/cfopsplugin"
 	"github.com/pivotalservices/cfops/tileregistry"
@@ -18,10 +17,7 @@ func init() {
 	if dir := os.Getenv(PluginDirEnv); dir != "" {
 		PluginDir = dir
 	}
-
-	if strings.ToUpper(os.Getenv(PluginSupport)) == "TRUE" {
-		Plugins(PluginDir)
-	}
+	Plugins(PluginDir)
 }
 
 //Plugins - function to register plugins residing in a given directory with cfops
@@ -39,7 +35,7 @@ func Plugins(dir string) (err error) {
 		}
 
 	} else if err != nil {
-		lo.G.Error("error loading plugins: ", err, fileInfoArray)
+		lo.G.Debug("not loading plugins: ", err, fileInfoArray)
 		err = fmt.Errorf("error loading plugins: %v %v", err, fileInfoArray)
 	}
 	return
