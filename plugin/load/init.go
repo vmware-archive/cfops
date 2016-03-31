@@ -39,7 +39,7 @@ func Plugins(dir string) (err error) {
 		}
 
 	} else if err != nil {
-		lo.G.Error("error loading plugins: ", err, fileInfoArray)
+		lo.G.Debug("not loading plugins: ", err, fileInfoArray)
 		err = fmt.Errorf("error loading plugins: %v %v", err, fileInfoArray)
 	}
 	return
