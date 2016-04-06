@@ -31,6 +31,8 @@ _builds
 _projects
 _steps
 
+plugins/
+
 .envrc
 !plugin/load/fixture_plugins/windows/sample.exe
 plugin/cfopsplugin/sample/sample
