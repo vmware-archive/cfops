@@ -15,10 +15,16 @@ import (
 )
 
 var _ = Describe("given a plugin tile builder", func() {
+	testNewPluginTileBuilder("when new is called on a default PCF installation", "./fixtures/installation-settings-1-6-default.json")
+	testNewPluginTileBuilder("when new is called on a AWS PCF installation", "./fixtures/installation-settings-1-6-aws.json")
+	testNewPluginTileBuilder("when new is called on a PCF installation w/ RabbitMQ", "./fixtures/installation-settings-with-rabbit.json")
+})
+
+func testNewPluginTileBuilder(behavior string, fixtureInstallationSettingsPath string) {
 	var pluginTileBuilder *PluginTileBuilder
 	var pluginTile tileregistry.Tile
 	var err error
-	Context("when New is called", func() {
+	Context(behavior, func() {
 
 		var (
 			server   *ghttp.Server
@@ -27,7 +33,7 @@ var _ = Describe("given a plugin tile builder", func() {
 		)
 
 		BeforeEach(func() {
-			fileBytes, _ := ioutil.ReadFile("./fixtures/installation-settings-1-6-default.json")
+			fileBytes, _ := ioutil.ReadFile(fixtureInstallationSettingsPath)
 			server = opsfakes.NewFakeOpsManagerServer(ghttp.NewTLSServer(), http.StatusInternalServerError, "{}", http.StatusOK, string(fileBytes[:]))
 			pluginTileBuilder = new(PluginTileBuilder)
 			pluginTileBuilder.FilePath = "../load/fixture_plugins/" + runtime.GOOS + "/sample"
@@ -57,7 +63,7 @@ var _ = Describe("given a plugin tile builder", func() {
 			Ω(pluginTile.Restore()).ShouldNot(HaveOccurred())
 		})
 	})
-})
+}
 
 var _ = Describe("given the default command builder", func() {
 	Context("when a string with argument passed in", func() {
