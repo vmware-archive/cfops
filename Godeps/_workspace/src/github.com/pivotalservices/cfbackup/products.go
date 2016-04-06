@@ -81,8 +81,7 @@ func (s *Products) GetPropertyValues(job Jobs, identifier string) (propertyMap m
 	for _, property := range properties {
 
 		if property.Identifier == identifier {
-			pMap := property.Value.(map[string]interface{})
-			for key, value := range pMap {
+			for key, value := range property.Value.MapValue {
 				propertyMap[key] = fmt.Sprintf("%v", value)
 			}
 		}
