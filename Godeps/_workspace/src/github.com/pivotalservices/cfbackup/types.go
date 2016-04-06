@@ -117,8 +117,17 @@ type (
 
 	// Properties contains property settings for a job
 	Properties struct {
-		Identifier string      `json:"identifier"`
-		Value      interface{} `json:"value"`
+		Identifier string        `json:"identifier"`
+		Value      PropertyValue `json:"value"`
+	}
+
+	// PropertyValue contains a composite value
+	PropertyValue struct {
+		ArrayValue  []interface{}
+		MapValue    map[string]interface{}
+		StringValue string
+		IntValue    uint64
+		BoolValue   bool
 	}
 
 	// Instances contains instances for a job
