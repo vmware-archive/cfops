@@ -21,7 +21,7 @@ import (
 )
 
 // NewOpsManager initializes an OpsManager instance
-var NewOpsManager = func(opsManagerHostname string, adminUsername string, adminPassword string, opsManagerUsername string, opsManagerPassword string, target string, cryptKey string) (context *OpsManager, err error) {
+var NewOpsManager = func(opsManagerHostname string, adminUsername string, adminPassword string, opsManagerUsername string, opsManagerPassword string, opsManagerPassphrase string, target string, cryptKey string) (context *OpsManager, err error) {
 	backupContext := cfbackup.NewBackupContext(target, cfenv.CurrentEnv(), cryptKey)
 	settingsHTTPRequestor := ghttp.NewHttpGateway()
 	settingsMultiHTTPRequestor := httpUploader(cfbackup.GetUploader(backupContext))
@@ -42,6 +42,7 @@ var NewOpsManager = func(opsManagerHostname string, adminUsername string, adminP
 		OpsmanagerBackupDir: OpsMgrBackupDir,
 		SSHUsername:         opsManagerUsername,
 		SSHPassword:         opsManagerPassword,
+		Passphrase:          opsManagerPassphrase,
 		SSHPort:             OpsMgrDefaultSSHPort,
 		ClearBoshManifest:   false,
 	}
@@ -208,21 +209,17 @@ func (context *OpsManager) importInstallationPart(url, filename, fieldname strin
 	if backupReader, err = context.Reader(context.TargetDir, context.OpsmanagerBackupDir, filename); err == nil {
 		defer backupReader.Close()
 		var resp *http.Response
-		var uaaURL, _ = urllib.Parse(url)
-		var clientID = "opsman"
-		var clientSecret = ""
-		var token, _ = uaa.GetToken("https://"+uaaURL.Host+"/uaa", context.Username, context.Password, clientID, clientSecret)
 		conn := ghttp.ConnAuth{
-			Url:         url,
-			Username:    context.Username,
-			Password:    context.Password,
-			BearerToken: token,
+			Url:      url,
+			Username: context.Username,
+			Password: context.Password,
 		}
 		filePath := path.Join(context.TargetDir, context.OpsmanagerBackupDir, filename)
 		bufferedReader := bufio.NewReader(backupReader)
 		lo.G.Debug("upload request", log.Data{"fieldname": fieldname, "filePath": filePath, "conn": conn})
 		creds := map[string]string{
-			"password": context.Password,
+			"password":   context.Password,
+			"passphrase": context.Passphrase,
 		}
 		resp, err = upload(conn, fieldname, filePath, -1, bufferedReader, creds)
 

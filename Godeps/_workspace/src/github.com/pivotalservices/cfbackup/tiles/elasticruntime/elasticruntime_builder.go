@@ -38,7 +38,7 @@ var GetInstallationSettings = func(tileSpec tileregistry.TileSpec) (settings io.
 		opsManager *opsmanager.OpsManager
 	)
 
-	if opsManager, err = opsmanager.NewOpsManager(tileSpec.OpsManagerHost, tileSpec.AdminUser, tileSpec.AdminPass, tileSpec.OpsManagerUser, tileSpec.OpsManagerPass, tileSpec.ArchiveDirectory, tileSpec.CryptKey); err == nil {
+	if opsManager, err = opsmanager.NewOpsManager(tileSpec.OpsManagerHost, tileSpec.AdminUser, tileSpec.AdminPass, tileSpec.OpsManagerUser, tileSpec.OpsManagerPass, tileSpec.OpsManagerPassphrase, tileSpec.ArchiveDirectory, tileSpec.CryptKey); err == nil {
 		settings, err = opsManager.GetInstallationSettings()
 	}
 	return
