@@ -171,7 +171,7 @@ var (
 		},
 		opsManagerPassphrase: flagBucket{
 			Flag:   []string{"opsmanagerpassphrase", "omr"},
-			Desc:   "passphrase for Ops Mgr admin (Ops Manager Passphrase Credentials)",
+			Desc:   "passphrase is used by Ops Manager 1.7 to decrypt the installation files during restore",
 			EnvVar: "CFOPS_OM_PASSPHRASE",
 		},
 		dest: flagBucket{
