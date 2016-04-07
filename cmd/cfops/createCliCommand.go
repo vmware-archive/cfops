@@ -27,16 +27,17 @@ func buraAction(commandName string, eh *ErrorHandler) (action func(*cli.Context)
 	action = func(c *cli.Context) {
 		var (
 			fs = &flagSet{
-				host:              c.String(flagList[opsManagerHost].Flag[0]),
-				adminUser:         c.String(flagList[adminUser].Flag[0]),
-				adminPass:         c.String(flagList[adminPass].Flag[0]),
-				opsManagerUser:    c.String(flagList[opsManagerUser].Flag[0]),
-				opsManagerPass:    c.String(flagList[opsManagerPass].Flag[0]),
-				dest:              c.String(flagList[dest].Flag[0]),
-				tile:              c.String(flagList[tile].Flag[0]),
-				encryptionKey:     c.String(flagList[encryptionKey].Flag[0]),
-				clearBoshManifest: c.Bool(flagList[clearBoshManifest].Flag[0]),
-				pluginArgs:        c.String(flagList[pluginArgs].Flag[0]),
+				host:                 c.String(flagList[opsManagerHost].Flag[0]),
+				adminUser:            c.String(flagList[adminUser].Flag[0]),
+				adminPass:            c.String(flagList[adminPass].Flag[0]),
+				opsManagerUser:       c.String(flagList[opsManagerUser].Flag[0]),
+				opsManagerPass:       c.String(flagList[opsManagerPass].Flag[0]),
+				opsManagerPassphrase: c.String(flagList[opsManagerPassphrase].Flag[0]),
+				dest:                 c.String(flagList[dest].Flag[0]),
+				tile:                 c.String(flagList[tile].Flag[0]),
+				encryptionKey:        c.String(flagList[encryptionKey].Flag[0]),
+				clearBoshManifest:    c.Bool(flagList[clearBoshManifest].Flag[0]),
+				pluginArgs:           c.String(flagList[pluginArgs].Flag[0]),
 			}
 		)
 
@@ -82,15 +83,16 @@ func getTileFromRegistry(fs *flagSet, commandName string) (tile tileregistry.Til
 		if hasValidBackupRestoreFlags(fs) {
 			lo.G.Debug("we have all required flags and a proper builder")
 			tile, err = tileBuilder.New(tileregistry.TileSpec{
-				OpsManagerHost:    fs.Host(),
-				AdminUser:         fs.AdminUser(),
-				AdminPass:         fs.AdminPass(),
-				OpsManagerUser:    fs.OpsManagerUser(),
-				OpsManagerPass:    fs.OpsManagerPass(),
-				ArchiveDirectory:  fs.Dest(),
-				CryptKey:          fs.EncryptionKey(),
-				ClearBoshManifest: fs.ClearBoshManifest(),
-				PluginArgs:        fs.PluginArgs(),
+				OpsManagerHost:       fs.Host(),
+				AdminUser:            fs.AdminUser(),
+				AdminPass:            fs.AdminPass(),
+				OpsManagerUser:       fs.OpsManagerUser(),
+				OpsManagerPass:       fs.OpsManagerPass(),
+				OpsManagerPassphrase: fs.OpsManagerPassphrase(),
+				ArchiveDirectory:     fs.Dest(),
+				CryptKey:             fs.EncryptionKey(),
+				ClearBoshManifest:    fs.ClearBoshManifest(),
+				PluginArgs:           fs.PluginArgs(),
 			})
 			if err != nil {
 				return nil, fmt.Errorf("failure to connect to ops manager host: %s", err.Error())
@@ -120,19 +122,20 @@ var buraFlags = func() (flags []cli.Flag) {
 }()
 
 const (
-	errExitCode              = 1
-	helpExitCode             = 2
-	cleanExitCode            = 0
-	opsManagerHost    string = "opsmanagerHost"
-	adminUser         string = "adminUser"
-	adminPass         string = "adminPass"
-	opsManagerUser    string = "opsManagerUser"
-	opsManagerPass    string = "opsManagerPass"
-	dest              string = "destination"
-	tile              string = "tile"
-	encryptionKey     string = "encryptionKey"
-	clearBoshManifest string = "clearboshmanifest"
-	pluginArgs        string = "pluginArgs"
+	errExitCode                 = 1
+	helpExitCode                = 2
+	cleanExitCode               = 0
+	opsManagerHost       string = "opsmanagerHost"
+	adminUser            string = "adminUser"
+	adminPass            string = "adminPass"
+	opsManagerUser       string = "opsManagerUser"
+	opsManagerPass       string = "opsManagerPass"
+	opsManagerPassphrase string = "opsManagerPassphrase"
+	dest                 string = "destination"
+	tile                 string = "tile"
+	encryptionKey        string = "encryptionKey"
+	clearBoshManifest    string = "clearboshmanifest"
+	pluginArgs           string = "pluginArgs"
 )
 
 var (
@@ -166,6 +169,11 @@ var (
 			Desc:   "password for Ops Manager VM Access (used for ssh connections)",
 			EnvVar: "CFOPS_OM_PASS",
 		},
+		opsManagerPassphrase: flagBucket{
+			Flag:   []string{"opsmanagerpassphrase", "omr"},
+			Desc:   "passphrase for Ops Mgr admin (Ops Manager Passphrase Credentials)",
+			EnvVar: "CFOPS_OM_PASSPHRASE",
+		},
 		dest: flagBucket{
 			Flag:   []string{"destination", "d"},
 			Desc:   "path of the Cloud Foundry archive",
@@ -196,16 +204,17 @@ var (
 
 type (
 	flagSet struct {
-		host              string
-		adminUser         string
-		adminPass         string
-		opsManagerUser    string
-		opsManagerPass    string
-		dest              string
-		tile              string
-		encryptionKey     string
-		clearBoshManifest bool
-		pluginArgs        string
+		host                 string
+		adminUser            string
+		adminPass            string
+		opsManagerUser       string
+		opsManagerPass       string
+		opsManagerPassphrase string
+		dest                 string
+		tile                 string
+		encryptionKey        string
+		clearBoshManifest    bool
+		pluginArgs           string
 	}
 
 	flagBucket struct {
@@ -233,6 +242,10 @@ func (s *flagSet) OpsManagerUser() string {
 
 func (s *flagSet) OpsManagerPass() string {
 	return s.opsManagerPass
+}
+
+func (s *flagSet) OpsManagerPassphrase() string {
+	return s.opsManagerPassphrase
 }
 
 func (s *flagSet) Dest() string {
