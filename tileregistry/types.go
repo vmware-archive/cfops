@@ -12,14 +12,15 @@ type (
 	}
 	//TileSpec -- defines what a tile would need to be initialized
 	TileSpec struct {
-		OpsManagerHost    string
-		AdminUser         string
-		AdminPass         string
-		OpsManagerUser    string
-		OpsManagerPass    string
-		ArchiveDirectory  string
-		CryptKey          string
-		ClearBoshManifest bool
-		PluginArgs        string
+		OpsManagerHost       string
+		AdminUser            string
+		AdminPass            string
+		OpsManagerUser       string
+		OpsManagerPass       string
+		OpsManagerPassphrase string
+		ArchiveDirectory     string
+		CryptKey             string
+		ClearBoshManifest    bool
+		PluginArgs           string
 	}
 )
