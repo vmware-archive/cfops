@@ -36,3 +36,4 @@ plugins/
 .envrc
 !plugin/load/fixture_plugins/windows/sample.exe
 plugin/cfopsplugin/sample/sample
+/vendor

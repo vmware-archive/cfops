@@ -1,7 +1,0 @@
-{
-  "OpsManagerHost": "opsmgr.cf.nono.com",
-  "TempestPassword": "tempest",
-  "OpsManagerAdminUser": "admin",
-  "OpsManagerAdminPassword": "admin",
-  "BackupFileLocation": "/tmp"
-}
