@@ -1,8 +1,0 @@
-{
-  "access_token":"%s",
-  "token_type":"bearer",
-  "refresh_token":"%s",
-  "expires_in":3599,
-  "scope":"opsman.user uaa.admin scim.read opsman.admin scim.write",
-  "jti":"%s"
-}

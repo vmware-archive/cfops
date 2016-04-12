@@ -1,0 +1,16 @@
+package: github.com/pivotalservices/cfops
+import:
+- package: github.com/cloudfoundry-community/go-cfenv
+- package: github.com/codegangsta/cli
+- package: github.com/hashicorp/go-plugin
+- package: github.com/pivotalservices/cfbackup
+  subpackages:
+  - tiles
+  - tiles/opsmanager
+- package: github.com/xchapter7x/lo
+- package: github.com/onsi/ginkgo
+- package: github.com/onsi/gomega
+- package: github.com/nu7hatch/gouuid
+- package: github.com/golang/protobuf
+  subpackages:
+  - proto
