@@ -5,9 +5,9 @@ import (
 	"os"
 
 	"github.com/codegangsta/cli"
+	"github.com/pivotalservices/cfbackup/tileregistry"
 	_ "github.com/pivotalservices/cfbackup/tiles"
 	_ "github.com/pivotalservices/cfops/plugin/load"
-	"github.com/pivotalservices/cfops/tileregistry"
 )
 
 var (

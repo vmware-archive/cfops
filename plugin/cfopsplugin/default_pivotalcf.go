@@ -6,7 +6,7 @@ import (
 
 	"github.com/cloudfoundry-community/go-cfenv"
 	"github.com/pivotalservices/cfbackup"
-	"github.com/pivotalservices/cfops/tileregistry"
+	"github.com/pivotalservices/cfbackup/tileregistry"
 )
 
 //GetHostDetails - return all of the host and archive details in the form of a tile spec object

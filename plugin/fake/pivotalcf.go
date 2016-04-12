@@ -4,7 +4,7 @@ import (
 	"io"
 
 	"github.com/pivotalservices/cfbackup"
-	"github.com/pivotalservices/cfops/tileregistry"
+	"github.com/pivotalservices/cfbackup/tileregistry"
 )
 
 //PivotalCF --
