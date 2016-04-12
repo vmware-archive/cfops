@@ -10,8 +10,8 @@ import (
 
 	"github.com/hashicorp/go-plugin"
 	"github.com/pivotalservices/cfbackup"
+	"github.com/pivotalservices/cfbackup/tileregistry"
 	"github.com/pivotalservices/cfbackup/tiles/opsmanager"
-	"github.com/pivotalservices/cfops/tileregistry"
 	"github.com/xchapter7x/lo"
 )
 

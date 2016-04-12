@@ -7,8 +7,8 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/pivotalservices/cfbackup/tileregistry"
 	"github.com/pivotalservices/cfops/plugin/cfopsplugin"
-	"github.com/pivotalservices/cfops/tileregistry"
 	"github.com/xchapter7x/lo"
 )
 

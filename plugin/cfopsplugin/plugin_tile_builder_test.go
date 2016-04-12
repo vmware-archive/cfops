@@ -9,9 +9,9 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/ghttp"
+	"github.com/pivotalservices/cfbackup/tileregistry"
 	opsfakes "github.com/pivotalservices/cfbackup/tiles/opsmanager/fakes"
 	. "github.com/pivotalservices/cfops/plugin/cfopsplugin"
-	"github.com/pivotalservices/cfops/tileregistry"
 )
 
 var _ = Describe("given a plugin tile builder", func() {

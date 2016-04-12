@@ -6,7 +6,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	. "github.com/pivotalservices/cfops/plugin/load"
-	"github.com/pivotalservices/cfops/tileregistry"
+	"github.com/pivotalservices/cfbackup/tileregistry"
 )
 
 var _ = Describe("given Plugins", func() {
