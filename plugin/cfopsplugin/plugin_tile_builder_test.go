@@ -22,7 +22,7 @@ var _ = Describe("given a plugin tile builder", func() {
 
 func testNewPluginTileBuilder(behavior string, fixtureInstallationSettingsPath string) {
 	var pluginTileBuilder *PluginTileBuilder
-	var pluginTile tileregistry.Tile
+	var pluginTile tileregistry.TileCloser
 	var err error
 	Context(behavior, func() {
 
@@ -51,10 +51,10 @@ func testNewPluginTileBuilder(behavior string, fixtureInstallationSettingsPath s
 
 		AfterEach(func() {
 			server.Close()
+			pluginTile.Close()
 		})
 		It("should return a plugin tile object", func() {
 			Ω(err).ShouldNot(HaveOccurred())
-			Ω(pluginTile).Should(BeAssignableToTypeOf(new(BackupRestoreRPC)))
 		})
 		It("should yield results from its methods", func() {
 			Ω(pluginTile.Backup()).Should(HaveOccurred())
