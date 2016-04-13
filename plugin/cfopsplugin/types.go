@@ -5,6 +5,7 @@ import (
 	"net/rpc"
 	"os/exec"
 
+	"github.com/hashicorp/go-plugin"
 	"github.com/pivotalservices/cfbackup"
 	"github.com/pivotalservices/cfbackup/tileregistry"
 )
@@ -69,3 +70,8 @@ type PluginTileBuilder struct {
 
 //BuildCmd Command func
 type BuildCmd func(filePath string, args string) *exec.Cmd
+
+//ClientCloser This is an adaptor to transform the client kill method to Close method
+type ClientCloser struct {
+	Client *plugin.Client
+}

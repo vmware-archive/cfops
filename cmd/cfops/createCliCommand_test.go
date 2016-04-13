@@ -8,9 +8,9 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	. "github.com/pivotalservices/cfops/cmd/cfops"
 	"github.com/pivotalservices/cfbackup/tileregistry"
 	"github.com/pivotalservices/cfbackup/tileregistry/fake"
+	. "github.com/pivotalservices/cfops/cmd/cfops"
 )
 
 var _ = Describe("given a CreateBURACliCommand func", func() {
@@ -50,11 +50,14 @@ func testTileAction(actionName string) {
 					controlTileName      = "fake-tile"
 					controlTileGenerator *fake.TileGenerator
 					controlTile          *fake.Tile
+					controlCloser        *fake.Closer
 				)
 				BeforeEach(func() {
 					controlTile = new(fake.Tile)
+					controlCloser = &fake.Closer{Executions: 0}
 					controlTileGenerator = new(fake.TileGenerator)
 					controlTileGenerator.TileSpy = controlTile
+					controlTileGenerator.Closer = controlCloser
 					tileregistry.Register(controlTileName, controlTileGenerator)
 					set := flag.NewFlagSet("", 0)
 					set.String("tile", controlTileName, "")
@@ -73,6 +76,7 @@ func testTileAction(actionName string) {
 					controlCmd.Action(controlCliContext)
 					Ω(controlErrorHandler.ExitCode).Should(Equal(controlExit))
 					Ω(controlErrorHandler.Error).ShouldNot(HaveOccurred())
+					Ω(controlCloser.Executions).Should(Equal(1))
 					switch controlName {
 					case "backup":
 						Ω(controlTile.BackupCallCount).ShouldNot(Equal(0))
@@ -107,12 +111,15 @@ func testTileAction(actionName string) {
 					controlTileName      = "fake-tile"
 					controlTileGenerator *fake.TileGenerator
 					controlTile          *fake.Tile
+					controlCloser        *fake.Closer
 				)
 				BeforeEach(func() {
 					controlTile = new(fake.Tile)
+					controlCloser = &fake.Closer{Executions: 0}
 					controlTile.ErrFake = fmt.Errorf("operation failed")
 					controlTileGenerator = new(fake.TileGenerator)
 					controlTileGenerator.TileSpy = controlTile
+					controlTileGenerator.Closer = controlCloser
 					tileregistry.Register(controlTileName, controlTileGenerator)
 					set := flag.NewFlagSet("", 0)
 					set.String("tile", controlTileName, "")

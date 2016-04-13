@@ -41,8 +41,9 @@ func buraAction(commandName string, eh *ErrorHandler) (action func(*cli.Context)
 			}
 		)
 
-		if tile, err := getTileFromRegistry(fs, commandName); err == nil {
-			if err = runTileAction(commandName, tile); err != nil {
+		if tileCloser, err := getTileFromRegistry(fs, commandName); err == nil {
+			defer tileCloser.Close()
+			if err = runTileAction(commandName, tileCloser); err != nil {
 				lo.G.Errorf("there was an error: %s running %s on %s tile:%v", err.Error(), commandName, fs.Tile(), tile)
 				exitOnError(eh, c, commandName, err)
 				return
@@ -74,7 +75,7 @@ func runTileAction(commandName string, tile tileregistry.Tile) (err error) {
 	return
 }
 
-func getTileFromRegistry(fs *flagSet, commandName string) (tile tileregistry.Tile, err error) {
+func getTileFromRegistry(fs *flagSet, commandName string) (tileCloser tileregistry.TileCloser, err error) {
 	lo.G.Debug("checking registry for '%s' tile", fs.Tile())
 
 	if tileBuilder, ok := tileregistry.GetRegistry()[fs.Tile()]; ok {
@@ -82,7 +83,7 @@ func getTileFromRegistry(fs *flagSet, commandName string) (tile tileregistry.Til
 
 		if hasValidBackupRestoreFlags(fs) {
 			lo.G.Debug("we have all required flags and a proper builder")
-			tile, err = tileBuilder.New(tileregistry.TileSpec{
+			tileCloser, err = tileBuilder.New(tileregistry.TileSpec{
 				OpsManagerHost:       fs.Host(),
 				AdminUser:            fs.AdminUser(),
 				AdminPass:            fs.AdminPass(),
