@@ -1,7 +1,7 @@
 ---
 name: cfops
 icon_file: resources/icon.png
-label: Automation tool for Pivotal CF
+label: CFOps, an automation tool for Pivotal CF
 description: A CLI tool for running backup and restore operations on Pivotal Cloud Foundry products
 
 packages:
