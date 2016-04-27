@@ -12,7 +12,7 @@ Supports PivotalCF on:
          - postgres datastore (backup/restore `verified`)
          - mysql datastore (backup/restore `verified`)
          - external datastore (backup/restore `no yet supported`)
-   - **AWS** 
+   - **AWS**
       - ops-manager (backup `verified`)
       - elastic-runtime (`not yet supported`)
 
@@ -34,7 +34,41 @@ https://github.com/pivotalservices/cfops/releases/latest
 
 ### Contributing
 
-PRs welcome.
+PRs welcome. To get started follow these steps:
+
+
+* Install [Go 1.6.x](https://golang.org)
+* Create a directory where you would like to store the source for Go projects and their binaries (e.g. `$HOME/go`)
+* Set an environment variable, `GOPATH`, pointing at the directory you created
+* Get the `cf` source: `go get github.com/pivotalservices/cfops` (Ignore any warnings about "no buildable Go source files")
+* [Fork this repository](https://help.github.com/articles/fork-a-repo/), adding your fork as a remote
+* Install all the required tools - [glide](https://github.com/Masterminds/glide), [wercker cli](http://wercker.com/cli/)
+```
+$ brew install glide
+$ brew tap wercker/wercker
+$ brew install wercker-cli
+```
+* Wrecker requires a local installation of docker, ensure you have docker in place with the relevant environments set.
+```
+$ docker ps -a # should return something meaningful
+```
+* Pull in glide managed dependencies:
+```
+  $ cd $GOPATH/src/github.com/pivotalservices/cfops
+  $ glide install
+```
+* Build the project:
+```
+  $ cd cmd/cfops/
+  $ go build
+```
+* At this point you should see the cfops binary in the cmd/cfops folder
+* Run wercker integration tests
+```
+$ cd $GOPATH/src/github.com/pivotalservices/cfops
+$ ./testrunner
+```
+* At this point you have everything needed for local development, hack away and submit a [pull request](https://help.github.com/articles/using-pull-requests/) to the `develop` branch
 
 
 ### Differences between v1 and v2
