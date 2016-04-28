@@ -123,6 +123,12 @@ $ cfops version
 cfops version v2.0.0
 ```
 
+** setting S3 domain **
+
+```
+export S3_DOMAIN=<some_compatible_s3_store_url>
+```
+
 **run a backup on a tile**
 
 ```
