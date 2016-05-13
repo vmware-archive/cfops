@@ -1,10 +1,10 @@
 hash: 19fd631083567f6c748fb9146ed51a50e53e34fa896f1c4586154ef141eae4b1
-updated: 2016-04-28T09:44:47.65368993-07:00
+updated: 2016-05-13T10:08:20.368138526-04:00
 imports:
 - name: github.com/cloudfoundry-community/go-cfenv
-  version: b4bebec47a425334d2a076cf99329464c9e611f3
+  version: e01ad520da25cfac51386ef5143fdc2268a6f3b9
 - name: github.com/codegangsta/cli
-  version: 4733699ce30faa633c4db36ebfbe427963593d7d
+  version: 7f0ca9a34958d6702ac8f38530d19001fa5b1560
 - name: github.com/golang/protobuf
   version: 7cc19b78d562895b13596ddce7aafb59dd789318
   subpackages:
@@ -20,15 +20,15 @@ imports:
 - name: github.com/nu7hatch/gouuid
   version: 179d4d0c4d8d407a32af483c2354df1d2c91e6c3
 - name: github.com/onsi/ginkgo
-  version: 2c2e9bb47b4e44067024f29339588cac8b34dd12
+  version: 5437a97bf824dec14e58d68c56ee36e772670c2e
 - name: github.com/onsi/gomega
-  version: 7ce781ea776b2fd506491011353bded2e40c8467
+  version: 815512bce8c889153a13104c9d9b2416153c1e02
 - name: github.com/op/go-logging
   version: 970db520ece77730c7e4724c61121037378659d9
 - name: github.com/pivotal-golang/lager
   version: 7639e31ce6622c55c15aa64144b85d5f4873d127
 - name: github.com/pivotalservices/cfbackup
-  version: 479f65cd2a3de08e6938c9cfd57991bbcc34ab2a
+  version: e9ac914a3dc2d489ca579aab0830b2cf35052486
   subpackages:
   - tiles
   - tiles/opsmanager
@@ -46,7 +46,7 @@ imports:
   - log
   - uaa
 - name: github.com/pkg/sftp
-  version: e84cc8c755ca39b7b64f510fe1fffc1b51f210a5
+  version: 9683e1ed9152e4fb052773355eb1b8cdcbac2058
 - name: github.com/rlmcpherson/s3gof3r
   version: 39f5507f61031141057f3f880d9fb9eb97b8afd7
 - name: github.com/technoweenie/multipartstreamer
@@ -58,10 +58,12 @@ imports:
 - name: github.com/xchapter7x/lo
   version: aa2602d0e8e8647f0ce7b53109b37040941915aa
 - name: golang.org/x/crypto
-  version: 285fb2ed20d1dc450fc743a1b3ff7c36bef372b9
+  version: 1e61df8d9ea476e2e1504cd9a32b40280c7c6c7e
   subpackages:
   - ssh
   - curve25519
+  - ed25519
+  - ed25519/internal/edwards25519
 - name: gopkg.in/yaml.v1
   version: 9f9df34309c04878acc86042b16630b0f696e1de
 devImports: []
