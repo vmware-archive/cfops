@@ -38,18 +38,20 @@ func NewApp(eh *ErrorHandler) *cli.App {
 		cli.Command{
 			Name:  "version",
 			Usage: "shows the application version currently in use",
-			Action: func(c *cli.Context) {
+			Action: func(c *cli.Context) error {
 				cli.ShowVersion(c)
+				return nil
 			},
 		},
 		cli.Command{
 			Name:  "list-tiles",
 			Usage: "shows a list of available backup/restore target tiles",
-			Action: func(c *cli.Context) {
+			Action: func(c *cli.Context) error {
 				fmt.Println("Available Tiles:")
 				for n, _ := range tileregistry.GetRegistry() {
 					fmt.Println(n)
 				}
+				return nil
 			},
 		},
 		CreateBURACliCommand("backup", "creates a backup archive of the target tile", eh),
