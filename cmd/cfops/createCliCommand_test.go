@@ -73,7 +73,7 @@ func testTileAction(actionName string) {
 					controlCliContext.Command = controlCmd
 				})
 				It("then it should execute a call on the tiles Action func()", func() {
-					controlCmd.Action.(func(*cli.Context))(controlCliContext)
+					controlCmd.Action.(func(*cli.Context) error)(controlCliContext)
 					Ω(controlErrorHandler.ExitCode).Should(Equal(controlExit))
 					Ω(controlErrorHandler.Error).ShouldNot(HaveOccurred())
 					Ω(controlCloser.Executions).Should(Equal(1))
@@ -99,7 +99,7 @@ func testTileAction(actionName string) {
 				})
 
 				It("then it should set an error and failure exit code", func() {
-					controlCmd.Action.(func(*cli.Context))(controlCliContext)
+					controlCmd.Action.(func(*cli.Context) error)(controlCliContext)
 					Ω(controlErrorHandler.ExitCode).ShouldNot(Equal(controlExit))
 					Ω(controlErrorHandler.Error).Should(HaveOccurred())
 					Ω(controlErrorHandler.Error).Should(Equal(ErrInvalidTileSelection))
@@ -134,7 +134,7 @@ func testTileAction(actionName string) {
 					controlCliContext.Command = controlCmd
 				})
 				It("then it should set an error and failure exit code", func() {
-					controlCmd.Action.(func(*cli.Context))(controlCliContext)
+					controlCmd.Action.(func(*cli.Context) error)(controlCliContext)
 					Ω(controlErrorHandler.ExitCode).ShouldNot(Equal(controlExit))
 					Ω(controlErrorHandler.Error).Should(HaveOccurred())
 				})
@@ -153,7 +153,7 @@ func testTileAction(actionName string) {
 					controlCliContext.Command = controlCmd
 				})
 				It("then it should set an error and failure exit code", func() {
-					controlCmd.Action.(func(*cli.Context))(controlCliContext)
+					controlCmd.Action.(func(*cli.Context) error)(controlCliContext)
 					Ω(controlErrorHandler.ExitCode).ShouldNot(Equal(controlExit))
 					Ω(controlErrorHandler.Error).Should(HaveOccurred())
 					Ω(controlErrorHandler.Error).Should(Equal(ErrInvalidFlagArgs))
@@ -185,7 +185,7 @@ func testTileAction(actionName string) {
 					controlCliContext.Command = controlCmd
 				})
 				It("then it should set an error and failure exit code", func() {
-					controlCmd.Action.(func(*cli.Context))(controlCliContext)
+					controlCmd.Action.(func(*cli.Context) error)(controlCliContext)
 					Ω(controlErrorHandler.ExitCode).ShouldNot(Equal(controlExit))
 					Ω(controlErrorHandler.Error).Should(HaveOccurred())
 				})

@@ -23,8 +23,8 @@ func CreateBURACliCommand(name string, usage string, eh *ErrorHandler) (command 
 	return
 }
 
-func buraAction(commandName string, eh *ErrorHandler) (action func(*cli.Context)) {
-	action = func(c *cli.Context) {
+func buraAction(commandName string, eh *ErrorHandler) (action func(*cli.Context) error) {
+	action = func(c *cli.Context) error {
 		var (
 			fs = &flagSet{
 				host:                 c.String(flagList[opsManagerHost].Flag[0]),
@@ -46,14 +46,15 @@ func buraAction(commandName string, eh *ErrorHandler) (action func(*cli.Context)
 			if err = runTileAction(commandName, tileCloser); err != nil {
 				lo.G.Errorf("there was an error: %s running %s on %s tile:%v", err.Error(), commandName, fs.Tile(), tile)
 				exitOnError(eh, c, commandName, err)
-				return
+				return err
 			}
 		} else {
 			lo.G.Errorf("there was an error getting tile from registry: %s", err.Error())
 			exitOnError(eh, c, commandName, err)
-			return
+			return err
 		}
 		lo.G.Debug("Tile action completed successfully")
+		return nil
 	}
 	return
 }
