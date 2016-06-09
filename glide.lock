@@ -1,10 +1,8 @@
-hash: 59faa00f0caa2016f7937036a0c5cd7ad9dc05d4dc894d1bac40d59bd5f5e6c7
-updated: 2016-05-31T17:07:26.745808826-04:00
+hash: 38f9789d89ca00b55db1394fc440c6b35302f60decee79be68a235041354f224
+updated: 2016-06-01T14:24:16.303518674-07:00
 imports:
 - name: github.com/cloudfoundry-community/go-cfenv
   version: 96ad7376813bfd13c95af69ca5b4ef5725f6b335
-- name: github.com/codegangsta/cli
-  version: 9a18ffad6c548ca4d458d4c30a8aa4d181cf92fa
 - name: github.com/golang/protobuf
   version: 9e6977f30c91c78396e719e164e57f9287fff42c
   subpackages:
@@ -53,6 +51,8 @@ imports:
   version: 39f5507f61031141057f3f880d9fb9eb97b8afd7
 - name: github.com/technoweenie/multipartstreamer
   version: a90a01d73ae432e2611d178c18367fbaa13e0154
+- name: github.com/urfave/cli
+  version: 1433f8165e5413e63d8ade93530111c5a1f71a6a
 - name: github.com/xchapter7x/goutil
   version: 046742e03686eda64c6ac938594120d7fb5b3ecc
   subpackages:

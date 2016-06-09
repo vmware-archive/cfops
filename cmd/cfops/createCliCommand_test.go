@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/codegangsta/cli"
+	"github.com/urfave/cli"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

@@ -4,16 +4,19 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/codegangsta/cli"
 	"github.com/pivotalservices/cfbackup/tileregistry"
 	_ "github.com/pivotalservices/cfbackup/tiles"
 	_ "github.com/pivotalservices/cfops/plugin/load"
+	"github.com/urfave/cli"
 )
 
 var (
+	//VERSION holds information about the version of the project
 	VERSION string
 )
 
+//ErrorHandler holds the exit code and any message after the
+// command execution
 type ErrorHandler struct {
 	ExitCode int
 	Error    error
@@ -48,7 +51,7 @@ func NewApp(eh *ErrorHandler) *cli.App {
 			Usage: "shows a list of available backup/restore target tiles",
 			Action: func(c *cli.Context) error {
 				fmt.Println("Available Tiles:")
-				for n, _ := range tileregistry.GetRegistry() {
+				for n := range tileregistry.GetRegistry() {
 					fmt.Println(n)
 				}
 				return nil

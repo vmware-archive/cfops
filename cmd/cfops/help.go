@@ -1,6 +1,7 @@
 package main
 
 const (
+	//CfopsHelpTemplate holds the help structure of CLI
 	CfopsHelpTemplate = `
 NAME:
    {{.Name}} - {{.Usage}}
