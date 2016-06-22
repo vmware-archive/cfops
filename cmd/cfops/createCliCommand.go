@@ -66,7 +66,7 @@ func exitOnError(eh *ErrorHandler, c *cli.Context, commandName string, err error
 }
 
 func runTileAction(commandName string, tile tileregistry.Tile) (err error) {
-	lo.G.Debug("Running %s for tile: %+v", commandName, tile)
+	lo.G.Debugf("Running %s for tile: %+v", commandName, tile)
 	switch commandName {
 	case "backup":
 		err = tile.Backup()
@@ -77,7 +77,7 @@ func runTileAction(commandName string, tile tileregistry.Tile) (err error) {
 }
 
 func getTileFromRegistry(fs *flagSet, commandName string) (tileCloser tileregistry.TileCloser, err error) {
-	lo.G.Debug("checking registry for '%s' tile", fs.Tile())
+	lo.G.Debugf("checking registry for '%s' tile", fs.Tile())
 
 	if tileBuilder, ok := tileregistry.GetRegistry()[fs.Tile()]; ok {
 		lo.G.Debug("found tile in registry")
