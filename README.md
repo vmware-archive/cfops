@@ -17,6 +17,11 @@ Supports PivotalCF on:
    - **AWS**
       - ops-manager (backup `verified`)
       - elastic-runtime (`not yet supported`)
+   - **OpenStack**
+      - ops-manager (backup `verified`)
+      - elastic-runtime
+         - mysql datastore (backup/restore `verified`)
+
 
 
 ### Overview
