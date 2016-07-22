@@ -10,4 +10,5 @@ popd
 
 cd src/github.com/pivotalservices/cfops
 glide install
-go test $(glide novendor) -v race
+
+go test $(glide novendor | grep -v integration) -v race
