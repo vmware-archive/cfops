@@ -17,6 +17,7 @@ jobs:
 - name: integration
   plan:
   - get: cfops
+    trigger: true
     passed: [unit]
   - task: integration
     file: cfops/ci/tasks/integration.yml

@@ -1,0 +1,11 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: golang
+inputs:
+  - name: cfops
+    path: src/github.com/pivotalservices/cfops
+run:
+  path: src/github.com/pivotalservices/cfops/ci/scripts/integration

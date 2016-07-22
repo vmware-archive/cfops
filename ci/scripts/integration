@@ -1,0 +1,4 @@
+#!/bin/bash -eux
+
+echo "Integration tests go here"
+exit 1
