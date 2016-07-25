@@ -95,6 +95,7 @@ func getTileFromRegistry(fs *flagSet, commandName string) (tileCloser tileregist
 				CryptKey:             fs.EncryptionKey(),
 				ClearBoshManifest:    fs.ClearBoshManifest(),
 				PluginArgs:           fs.PluginArgs(),
+				SkipNFS:              fs.SkipNFS(),
 			})
 			if err != nil {
 				return nil, fmt.Errorf("failure to connect to ops manager host: %s", err.Error())
@@ -138,6 +139,7 @@ const (
 	encryptionKey        string = "encryptionKey"
 	clearBoshManifest    string = "clearboshmanifest"
 	pluginArgs           string = "pluginArgs"
+	skipNFS              string = "skipnfs"
 )
 
 var (
@@ -146,6 +148,11 @@ var (
 	//ErrInvalidTileSelection - error for invalid tile
 	ErrInvalidTileSelection = errors.New("invalid tile selected. try the 'list-tiles' option to see a list of available tiles")
 	flagList                = map[string]flagBucket{
+		skipNFS: flagBucket{
+			Flag:   []string{"skip-nfs"},
+			Desc:   "setting this flag to true will skip the NFS Blobstore phase",
+			EnvVar: "SKIP_NFS",
+		},
 		opsManagerHost: flagBucket{
 			Flag:   []string{"opsmanagerhost", "omh"},
 			Desc:   "hostname for Ops Manager",
@@ -217,6 +224,7 @@ type (
 		encryptionKey        string
 		clearBoshManifest    bool
 		pluginArgs           string
+		skipNFS              string
 	}
 
 	flagBucket struct {
@@ -225,6 +233,13 @@ type (
 		EnvVar string
 	}
 )
+
+func (s *flagSet) SkipNFS() bool {
+	if s.skipNFS == "true" {
+		return true
+	}
+	return false
+}
 
 func (s *flagSet) Host() string {
 	return s.host
