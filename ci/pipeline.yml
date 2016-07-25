@@ -1,0 +1,23 @@
+---
+resources:
+- name: cfops
+  type: git
+  source:
+    branch: develop
+    uri: https://github.com/henryaj/cfops
+
+jobs:
+- name: unit
+  plan:
+  - get: cfops
+    trigger: true
+  - task: unit
+    file: cfops/ci/tasks/unit.yml
+
+- name: integration
+  plan:
+  - get: cfops
+    trigger: true
+    passed: [unit]
+  - task: integration
+    file: cfops/ci/tasks/integration.yml
