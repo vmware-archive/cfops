@@ -1,8 +1,13 @@
-hash: aafa28c64aa76d4c02dbd08f6444736c212e5da4665f31527ffe749871e96ac7
-updated: 2016-07-28T17:16:16.809270449+01:00
+hash: e20f3a394585abb793f85e69465324463860daf0ba7e6be74d4f0f7a8120161d
+updated: 2016-08-01T14:22:45.859625258+01:00
 imports:
 - name: github.com/cloudfoundry-community/go-cfenv
   version: 96ad7376813bfd13c95af69ca5b4ef5725f6b335
+- name: github.com/cloudfoundry-incubator/cf-test-helpers
+  version: c72f0dd76d910df0b56d5fe5c83c5c190b8be9e1
+  subpackages:
+  - cf
+  - runner
 - name: github.com/codegangsta/cli
   version: 4205e9c4ee9672a8df5bb4fe486a8aa07e1e4037
 - name: github.com/golang/protobuf
@@ -16,13 +21,41 @@ imports:
 - name: github.com/kr/fs
   version: 2788f0dbd16903de03cb8186e5c7d97b69ad387b
 - name: github.com/mitchellh/mapstructure
-  version: d2dd0262208475919e1a362f675cfc0e7c10e905
+  version: 281073eb9eb092240d33ef253c404f1cca550309
 - name: github.com/nu7hatch/gouuid
   version: 179d4d0c4d8d407a32af483c2354df1d2c91e6c3
 - name: github.com/onsi/ginkgo
-  version: 059cec02d342bab423425a99b191186a03255e9e
+  version: 75d0cd9c7ee52e99b13e6ccfd9e58b4f92b7795e
+  subpackages:
+  - config
+  - internal/codelocation
+  - internal/failer
+  - internal/remote
+  - internal/suite
+  - internal/testingtproxy
+  - internal/writer
+  - reporters
+  - reporters/stenographer
+  - types
+  - internal/containernode
+  - internal/leafnodes
+  - internal/spec
+  - internal/specrunner
 - name: github.com/onsi/gomega
-  version: 3e93f011213c200aadafcb19ed56eb718381cfbd
+  version: 835b5e4242c715976b98ed6bc6ece1d9c7879f66
+  subpackages:
+  - gexec
+  - internal/assertion
+  - internal/asyncassertion
+  - internal/testingtsupport
+  - matchers
+  - types
+  - format
+  - gbytes
+  - matchers/support/goraph/bipartitegraph
+  - matchers/support/goraph/edge
+  - matchers/support/goraph/node
+  - matchers/support/goraph/util
 - name: github.com/op/go-logging
   version: 970db520ece77730c7e4724c61121037378659d9
 - name: github.com/pivotal-golang/lager
@@ -60,7 +93,7 @@ imports:
 - name: github.com/xchapter7x/lo
   version: aa2602d0e8e8647f0ce7b53109b37040941915aa
 - name: golang.org/x/crypto
-  version: f3241ce8505855877cc8a9717bd61a0f7c4ea83c
+  version: bc89c496413265e715159bdc8478ee9a92fdc265
   subpackages:
   - ssh
   - curve25519
@@ -70,4 +103,6 @@ imports:
   version: 9f9df34309c04878acc86042b16630b0f696e1de
 - name: gopkg.in/yaml.v2
   version: a83829b6f1293c91addabc89d0571c246397bbf4
-testImports: []
+testImports:
+- name: github.com/pborman/uuid
+  version: c55201b036063326c5b1b89ccfe45a184973d073

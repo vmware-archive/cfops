@@ -17,3 +17,4 @@ import:
   subpackages:
   - proto
 - package: gopkg.in/yaml.v2
+- package: github.com/cloudfoundry-incubator/cf-test-helpers
