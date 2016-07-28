@@ -125,21 +125,22 @@ var buraFlags = func() (flags []cli.Flag) {
 }()
 
 const (
-	errExitCode                 = 1
-	helpExitCode                = 2
-	cleanExitCode               = 0
-	opsManagerHost       string = "opsmanagerHost"
-	adminUser            string = "adminUser"
-	adminPass            string = "adminPass"
-	opsManagerUser       string = "opsManagerUser"
-	opsManagerPass       string = "opsManagerPass"
-	opsManagerPassphrase string = "opsManagerPassphrase"
-	dest                 string = "destination"
-	tile                 string = "tile"
-	encryptionKey        string = "encryptionKey"
-	clearBoshManifest    string = "clearboshmanifest"
-	pluginArgs           string = "pluginArgs"
-	skipNFS              string = "skipnfs"
+	errExitCode                  = 1
+	helpExitCode                 = 2
+	cleanExitCode                = 0
+	opsManagerHost        string = "opsmanagerHost"
+	adminUser             string = "adminUser"
+	adminPass             string = "adminPass"
+	opsManagerUser        string = "opsManagerUser"
+	opsManagerPass        string = "opsManagerPass"
+	opsManagerPassphrase  string = "opsManagerPassphrase"
+	dest                  string = "destination"
+	tile                  string = "tile"
+	encryptionKey         string = "encryptionKey"
+	clearBoshManifest     string = "clearboshmanifest"
+	pluginArgs            string = "pluginArgs"
+	skipNFS               string = "skipnfs"
+	skipNFSResourcesCache string = "skipnfsresourcescache"
 )
 
 var (
@@ -148,9 +149,14 @@ var (
 	//ErrInvalidTileSelection - error for invalid tile
 	ErrInvalidTileSelection = errors.New("invalid tile selected. try the 'list-tiles' option to see a list of available tiles")
 	flagList                = map[string]flagBucket{
+		skipNFSResourcesCache: flagBucket{
+			Flag:   []string{"skip-nfs-resources-cache"},
+			Desc:   "setting this flag to true will not backup the cloud controller app bit upload cache, stored in cc-resources(this will only apply to elastic-runtime). This will have no effect in the running of apps on restore, but will make app uploads potentially slower until cache is rehydrated.",
+			EnvVar: "SKIP_NFS_RESOURCES_CACHE",
+		},
 		skipNFS: flagBucket{
 			Flag:   []string{"skip-nfs"},
-			Desc:   "setting this flag to true will skip the NFS Blobstore phase",
+			Desc:   "setting this flag to true will skip the NFS Blobstore phase (this will only apply to elastic-runtime)",
 			EnvVar: "SKIP_NFS",
 		},
 		opsManagerHost: flagBucket{
@@ -213,18 +219,19 @@ var (
 
 type (
 	flagSet struct {
-		host                 string
-		adminUser            string
-		adminPass            string
-		opsManagerUser       string
-		opsManagerPass       string
-		opsManagerPassphrase string
-		dest                 string
-		tile                 string
-		encryptionKey        string
-		clearBoshManifest    bool
-		pluginArgs           string
-		skipNFS              string
+		host                  string
+		adminUser             string
+		adminPass             string
+		opsManagerUser        string
+		opsManagerPass        string
+		opsManagerPassphrase  string
+		dest                  string
+		tile                  string
+		encryptionKey         string
+		clearBoshManifest     bool
+		pluginArgs            string
+		skipNFS               string
+		skipNFSResourcesCache string
 	}
 
 	flagBucket struct {

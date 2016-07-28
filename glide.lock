@@ -1,5 +1,5 @@
 hash: aafa28c64aa76d4c02dbd08f6444736c212e5da4665f31527ffe749871e96ac7
-updated: 2016-07-25T12:15:53.135060367+01:00
+updated: 2016-07-28T17:16:16.809270449+01:00
 imports:
 - name: github.com/cloudfoundry-community/go-cfenv
   version: 96ad7376813bfd13c95af69ca5b4ef5725f6b335
@@ -28,7 +28,7 @@ imports:
 - name: github.com/pivotal-golang/lager
   version: 7639e31ce6622c55c15aa64144b85d5f4873d127
 - name: github.com/pivotalservices/cfbackup
-  version: 776618a12f471570f60216f469bfb370e8b8ad78
+  version: 66f5f193ae0672f88b07c9bac89950e26f861b96
   subpackages:
   - tiles
   - tiles/opsmanager

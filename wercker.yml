@@ -19,10 +19,18 @@ build:
           export PATH=$WERCKER_SOURCE_DIR/bin:$PATH
           glide install
 
+    - script:
+        name: setup ssh for integration tests
+        code: |
+          sudo apt-get update
+          sudo apt-get install -y openssh-server
+          service ssh start
+
     # Test the project
     - script:
         name: go test
         code: |
+          mkdir -p /var/vcap/store
           go test $(glide novendor) -v -race
 
     # Setting the coverage watermark low.
