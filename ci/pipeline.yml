@@ -16,7 +16,7 @@ resources:
   type: pool
   source:
     branch: master
-    pool: aws-envs
+    pool: aws-1.7-envs
     private_key: {{git-private-key}}
     uri: git@github.com:pivotal-cf-experimental/london-services-locks.git
 

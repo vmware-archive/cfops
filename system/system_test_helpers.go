@@ -20,7 +20,7 @@ import (
 func pushTestApp(config Config) {
 	fmt.Println("Pushing test app...")
 
-	cfDo("api", config.ApiEndpoint, "--skip-ssl-validation")
+	cfDo("api", config.APIEndpoint, "--skip-ssl-validation")
 	cfDo("auth", config.AdminUser, config.AdminPassword)
 	cfDo("create-org", config.OrgName)
 	cfDo("target", "-o", config.OrgName)
@@ -66,7 +66,7 @@ func remoteExecute(sshuser, host string, port int, pemkeycontents, remotecommand
 func deleteTestApp(config Config) {
 	fmt.Println("Deleting test app...")
 
-	cfDo("api", config.ApiEndpoint, "--skip-ssl-validation")
+	cfDo("api", config.APIEndpoint, "--skip-ssl-validation")
 	cfDo("auth", config.AdminUser, config.AdminPassword)
 	cfDo("target", "-o", config.OrgName, "-s", config.SpaceName)
 	cfDo("delete", "-f", config.AppName)
@@ -113,8 +113,9 @@ func cfDo(cmd ...string) {
 	)
 }
 
+//Config ...
 type Config struct {
-	ApiEndpoint     string
+	APIEndpoint     string
 	AdminUser       string
 	AdminPassword   string
 	AppName         string

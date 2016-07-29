@@ -28,7 +28,7 @@ var _ = BeforeSuite(func() {
 	cfopsExecutablePath, err = gexec.Build("github.com/pivotalservices/cfops/cmd/cfops")
 	Expect(err).NotTo(HaveOccurred())
 
-	cfConfig.ApiEndpoint = CfAPI
+	cfConfig.APIEndpoint = CfAPI
 	cfConfig.AdminUser = CfUser
 	cfConfig.AdminPassword = CfPassword
 	cfConfig.OMAdminUser = OMAdminUser
