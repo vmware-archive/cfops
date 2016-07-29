@@ -1,7 +1,39 @@
-#!/bin/bash -eux
+#!/bin/bash -eu
+
+apt-get update && apt-get install jq
 
 export GOPATH=$PWD
 export PATH=$PATH:$GOPATH/bin
+
+export ENV_NAME
+export ENV_METADATA
+export OM_SSH_KEY
+export OM_USER
+export OM_PASSWORD
+export OM_HOSTNAME
+export CF_API_URL
+# export CF_USER
+# export CF_PASSWORD
+
+if [ -z "$AWS_ACCESS_KEY_ID" ]; then
+  echo "Need to set AWS_ACCESS_KEY_ID"
+  exit 1
+fi
+
+if [ -z "$AWS_SECRET_ACCESS_KEY" ]; then
+  echo "Need to set AWS_SECRET_ACCESS_KEY"
+  exit 1
+fi
+
+ENV_NAME=$(cat environment-lock/name)
+ENV_METADATA=$(cat environment-lock/metadata)
+OM_SSH_KEY=$(cat london-meta/aws-environments/"$ENV_NAME"/"$ENV_NAME"-pcf.pem)
+OM_USER=$(echo "$ENV_METADATA" | jq -r .tempest.username)
+OM_PASSWORD=$(echo "$ENV_METADATA" | jq -r .tempest.password)
+OM_HOSTNAME=$(echo "$ENV_METADATA" | jq -r .tempest.url | cut -d '/' -f 3)
+CF_API_URL=$(echo "$ENV_METADATA" | jq -r .tempest.url | cut -d '/' -f 3 | sed 's/pcf/api/')
+# CF_USER
+# CF_PASSWORD
 
 export GO15VENDOREXPERIMENT=1
 
@@ -15,4 +47,4 @@ popd
 
 cd src/github.com/pivotalservices/cfops
 glide install
-ginkgo -v system/
+LOG_LEVEL=debug ginkgo -v system/

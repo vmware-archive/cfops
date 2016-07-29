@@ -5,7 +5,13 @@ resources:
   source:
     branch: develop
     uri: https://github.com/henryaj/cfops
-- name: 1.7-environment-lock
+- name: london-meta
+  type: git
+  source:
+    branch: master
+    private_key: {{git-private-key}}
+    uri: git@github.com:pivotal-cf/london-meta.git
+- name: environment-lock-1.7
   type: pool
   source:
     branch: master
@@ -29,15 +35,21 @@ jobs:
   - task: integration
     file: cfops/ci/tasks/integration.yml
 
-- name: system
+- name: system-1.7
   plan:
   - aggregate:
-    - put: 1.7-environment-lock
+    - put: environment-lock-1.7
       params: { acquire: true }
+    - get: london-meta
     - get: cfops
       trigger: true
       passed: [integration]
   - task: system
     file: cfops/ci/tasks/system.yml
-  - put: 1.7-environment-lock
-    params: {release: 1.7-environment-lock}
+    params:
+      AWS_ACCESS_KEY_ID: {{aws-access-key-id}}
+      AWS_SECRET_ACCESS_KEY: {{aws-secret-access-key}}
+      AWS_SECURITY_GROUP: {{aws-security-group}}
+      OPSMAN_AMI: {{opsman-1-7-ami}}
+  - put: environment-lock-1.7
+    params: {release: environment-lock-1.7}

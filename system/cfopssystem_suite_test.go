@@ -15,6 +15,8 @@ var OMAdminUser string
 var OMAdminPassword string
 var OMHostname string
 var OMSSHKey string
+var AmiID string
+var SecurityGroup string
 
 func TestBrokerintegration(t *testing.T) {
 	CfAPI = os.Getenv("CF_API_URL")
@@ -24,6 +26,8 @@ func TestBrokerintegration(t *testing.T) {
 	OMAdminPassword = os.Getenv("OM_PASSWORD")
 	OMHostname = os.Getenv("OM_HOSTNAME")
 	OMSSHKey = os.Getenv("OM_SSH_KEY")
+	AmiID = os.Getenv("OPSMAN_AMI")
+	SecurityGroup = os.Getenv("AWS_SECURITY_GROUP")
 
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "cfops System Test Suite")

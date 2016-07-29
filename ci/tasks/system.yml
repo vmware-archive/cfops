@@ -5,7 +5,14 @@ image_resource:
   source:
     repository: golang
 inputs:
+  - name: environment-lock
+  - name: london-meta
   - name: cfops
     path: src/github.com/pivotalservices/cfops
+params:
+  AWS_ACCESS_KEY_ID:
+  AWS_SECRET_ACCESS_KEY:
+  AWS_SECURITY_GROUP:
+  OPSMAN_AMI:
 run:
   path: src/github.com/pivotalservices/cfops/ci/scripts/system

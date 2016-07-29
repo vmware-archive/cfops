@@ -7,9 +7,12 @@ import (
 
 	"golang.org/x/crypto/ssh"
 
+	librssh "github.com/apcera/libretto/ssh"
+	"github.com/apcera/libretto/virtualmachine/aws"
 	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gexec"
+	"github.com/pborman/uuid"
 	"github.com/pivotalservices/gtils/command"
 	"github.com/pivotalservices/gtils/osutils"
 )
@@ -49,7 +52,7 @@ func scpHelper(sshuser, host string, port int, localpath, remotepath, pemkeycont
 	Expect(err).ToNot(HaveOccurred())
 }
 
-func rexecHelper(sshuser, host string, port int, pemkeycontents, remotecommand string, rstdout io.Writer) (err error) {
+func remoteExecute(sshuser, host string, port int, pemkeycontents, remotecommand string, rstdout io.Writer) (err error) {
 	remoteConn, err := command.NewRemoteExecutor(command.SshConfig{
 		Username: sshuser,
 		Host:     host,
@@ -72,6 +75,38 @@ func deleteTestApp(config Config) {
 	fmt.Println("Done deleting test app.")
 }
 
+func createInstance(amznkeyname string, amiID string, securityGroup string) *aws.VM {
+	fmt.Println("Creating AWS VM...")
+
+	vm := &aws.VM{
+		Name:         "cfops-test-" + uuid.NewRandom().String(),
+		AMI:          amiID,
+		InstanceType: "m3.large",
+		SSHCreds: librssh.Credentials{
+			SSHUser:       "ubuntu",
+			SSHPrivateKey: amznkeyname,
+		},
+		Volumes: []aws.EBSVolume{
+			{
+				DeviceName: "/dev/sda1",
+				VolumeSize: 100,
+			},
+		},
+		Region:        "eu-west-1",
+		KeyPair:       amznkeyname,
+		SecurityGroup: securityGroup,
+	}
+
+	err := aws.ValidCredentials(vm.Region)
+	Expect(err).NotTo(HaveOccurred())
+
+	err = vm.Provision()
+	Expect(err).NotTo(HaveOccurred())
+	fmt.Println("AWS VM created.")
+
+	return vm
+}
+
 func cfDo(cmd ...string) {
 	Eventually(cf.Cf(cmd...), 90).Should(gexec.Exit(0),
 		fmt.Sprintf("Command `cf %s` failed", cmd),
@@ -90,4 +125,6 @@ type Config struct {
 	OMAdminPassword string
 	OMHostname      string
 	OMSSHKey        string
+	AmiID           string
+	SecurityGroup   string
 }
