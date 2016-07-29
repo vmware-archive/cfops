@@ -31,7 +31,7 @@ build:
         name: go test
         code: |
           mkdir -p /var/vcap/store
-          go test $(glide novendor) -v -race
+          go test $(glide novendor | grep -v system) -v -race
 
     # Setting the coverage watermark low.
     # This should be raised as we gain more coverage...
