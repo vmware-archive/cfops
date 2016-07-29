@@ -12,11 +12,11 @@ resources:
     branch: master
     private_key: {{git-private-key}}
     uri: git@github.com:pivotal-cf/london-meta.git
-- name: environment-lock-1.7
+- name: environment-lock
   type: pool
   source:
     branch: master
-    pool: aws-1.7-envs
+    pool: aws-envs
     private_key: {{git-private-key}}
     uri: git@github.com:pivotal-cf-experimental/london-services-locks.git
 
@@ -36,10 +36,10 @@ jobs:
   - task: integration
     file: cfops/ci/tasks/integration.yml
 
-- name: system-1.7
+- name: system
   plan:
   - aggregate:
-    - put: environment-lock-1.7
+    - put: environment-lock
       params: { acquire: true }
     - get: london-meta
     - get: cfops
@@ -52,5 +52,5 @@ jobs:
       AWS_SECRET_ACCESS_KEY: {{aws-secret-access-key}}
       AWS_SECURITY_GROUP: {{aws-security-group}}
       OPSMAN_AMI: {{opsman-1-7-ami}}
-  - put: environment-lock-1.7
-    params: {release: environment-lock-1.7}
+  - put: environment-lock
+    params: {release: environment-lock}
