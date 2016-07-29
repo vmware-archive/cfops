@@ -3,8 +3,9 @@ resources:
 - name: cfops
   type: git
   source:
-    branch: develop
-    uri: https://github.com/henryaj/cfops
+    branch: WIP-systests
+    private_key: {{git-private-key}}
+    uri: git@github.com:pivotalservices/cfops.git
 - name: london-meta
   type: git
   source:
