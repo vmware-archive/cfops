@@ -1,0 +1,161 @@
+hash: f7d3f8d16ba65739e87cf2b9ed7c93dec917f0178086e3234e15863c36788003
+updated: 2016-08-01T14:25:29.200275145+01:00
+imports:
+- name: code.cloudfoundry.org/lager
+  version: 62951a8009ab331bb21dc418074fa54e66eb9b6a
+- name: github.com/apcera/libretto
+  version: 8eaec6ac987b6039aa70953b5edfefc4fddc1567
+  subpackages:
+  - ssh
+  - virtualmachine/aws
+  - util
+  - virtualmachine
+- name: github.com/apcera/util
+  version: 5be235938229da74a2adac74ee88b947e0e1c8fc
+  repo: https://github.com/apcera/util
+  subpackages:
+  - uuid
+- name: github.com/aws/aws-sdk-go
+  version: 565027b24171359f23f883d0fc48c228cdde301d
+  repo: https://github.com/aws/aws-sdk-go
+  subpackages:
+  - aws
+  - private/endpoints
+  - private/protocol
+  - private/waiter
+  - service/ec2
+  - service/sts
+  - aws/awserr
+  - aws/credentials
+  - aws/session
+  - aws/client
+  - aws/corehandlers
+  - aws/defaults
+  - aws/request
+  - aws/awsutil
+  - aws/client/metadata
+  - aws/signer/v4
+  - private/protocol/ec2query
+  - aws/credentials/ec2rolecreds
+  - aws/credentials/endpointcreds
+  - aws/ec2metadata
+  - private/protocol/rest
+  - private/protocol/query/queryutil
+  - private/protocol/xml/xmlutil
+- name: github.com/cloudfoundry-community/go-cfenv
+  version: 96ad7376813bfd13c95af69ca5b4ef5725f6b335
+- name: github.com/cloudfoundry-incubator/cf-test-helpers
+  version: c72f0dd76d910df0b56d5fe5c83c5c190b8be9e1
+  subpackages:
+  - cf
+  - runner
+- name: github.com/codegangsta/cli
+  version: 4205e9c4ee9672a8df5bb4fe486a8aa07e1e4037
+- name: github.com/enaml-ops/omg-cli
+  version: a9b58cb6350e4c6f8fe7cad065d04fd660d98a8a
+- name: github.com/go-ini/ini
+  version: 060d7da055ba6ec5ea7a31f116332fe5efa04ce0
+  repo: https://github.com/go-ini/ini
+- name: github.com/golang/protobuf
+  version: 0c1f6d65b5a189c2250d10e71a5506f06f9fa0a0
+  subpackages:
+  - proto
+- name: github.com/hashicorp/go-plugin
+  version: 8cf118f7a2f0c7ef1c82f66d4f6ac77c7e27dc12
+- name: github.com/hashicorp/yamux
+  version: badf81fca035b8ebac61b5ab83330b72541056f4
+- name: github.com/jmespath/go-jmespath
+  version: 3433f3ea46d9f8019119e7dd41274e112a2359a9
+  repo: https://github.com/jmespath/go-jmespath
+- name: github.com/kr/fs
+  version: 2788f0dbd16903de03cb8186e5c7d97b69ad387b
+- name: github.com/mitchellh/mapstructure
+  version: 281073eb9eb092240d33ef253c404f1cca550309
+- name: github.com/nu7hatch/gouuid
+  version: 179d4d0c4d8d407a32af483c2354df1d2c91e6c3
+- name: github.com/onsi/ginkgo
+  version: 75d0cd9c7ee52e99b13e6ccfd9e58b4f92b7795e
+  subpackages:
+  - config
+  - internal/codelocation
+  - internal/failer
+  - internal/remote
+  - internal/suite
+  - internal/testingtproxy
+  - internal/writer
+  - reporters
+  - reporters/stenographer
+  - types
+  - internal/containernode
+  - internal/leafnodes
+  - internal/spec
+  - internal/specrunner
+- name: github.com/onsi/gomega
+  version: 835b5e4242c715976b98ed6bc6ece1d9c7879f66
+  subpackages:
+  - gexec
+  - gbytes
+  - internal/assertion
+  - internal/asyncassertion
+  - internal/testingtsupport
+  - matchers
+  - types
+  - format
+  - matchers/support/goraph/bipartitegraph
+  - matchers/support/goraph/edge
+  - matchers/support/goraph/node
+  - matchers/support/goraph/util
+- name: github.com/op/go-logging
+  version: 970db520ece77730c7e4724c61121037378659d9
+- name: github.com/pborman/uuid
+  version: c55201b036063326c5b1b89ccfe45a184973d073
+- name: github.com/pivotal-golang/lager
+  version: 7639e31ce6622c55c15aa64144b85d5f4873d127
+- name: github.com/pivotalservices/cfbackup
+  version: 66f5f193ae0672f88b07c9bac89950e26f861b96
+  subpackages:
+  - tiles
+  - tiles/opsmanager
+  - tileregistry
+  - tiles/elasticruntime
+- name: github.com/pivotalservices/gtils
+  version: 02f6e3fc7007ce437a04c201c60025dcda26fe04
+  subpackages:
+  - command
+  - osutils
+  - bosh
+  - http
+  - persistence
+  - storage
+  - log
+  - uaa
+- name: github.com/pkg/errors
+  version: cbd18b5440315aa74a17dee2e50b67675b872b49
+- name: github.com/pkg/sftp
+  version: 57fcf4a640a942eb05181f929601f8f4409eda3e
+- name: github.com/rlmcpherson/s3gof3r
+  version: 39f5507f61031141057f3f880d9fb9eb97b8afd7
+- name: github.com/technoweenie/multipartstreamer
+  version: a90a01d73ae432e2611d178c18367fbaa13e0154
+- name: github.com/tmc/scp
+  version: 8734282bd23b160cc07954a157106fe59e0f3993
+- name: github.com/xchapter7x/goutil
+  version: 046742e03686eda64c6ac938594120d7fb5b3ecc
+  subpackages:
+  - itertools
+- name: github.com/xchapter7x/lo
+  version: aa2602d0e8e8647f0ce7b53109b37040941915aa
+- name: golang.org/x/crypto
+  version: bc89c496413265e715159bdc8478ee9a92fdc265
+  repo: https://go.googlesource.com/crypto
+  subpackages:
+  - curve25519
+  - ed25519
+  - pkcs12
+  - ssh
+  - ed25519/internal/edwards25519
+- name: gopkg.in/yaml.v1
+  version: 9f9df34309c04878acc86042b16630b0f696e1de
+- name: gopkg.in/yaml.v2
+  version: a83829b6f1293c91addabc89d0571c246397bbf4
+testImports: []

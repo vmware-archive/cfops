@@ -20,6 +20,7 @@ import:
 - package: github.com/cloudfoundry-incubator/cf-test-helpers
 - package: github.com/tmc/scp
 - package: github.com/apcera/libretto
-  version: master 
+  version: master
 - package: github.com/enaml-ops/omg-cli
   version: ~0.0.10
+- package: code.cloudfoundry.org/lager

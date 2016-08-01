@@ -5,6 +5,9 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"time"
+
+	"code.cloudfoundry.org/lager"
 
 	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
 	. "github.com/onsi/ginkgo"
@@ -16,31 +19,19 @@ import (
 
 var cfopsExecutablePath string
 var cfopsLinuxExecutablePath string
+var logger lager.Logger
 var err error
 
-var cfConfig Config
-
 var _ = BeforeSuite(func() {
+	logger = lager.NewLogger("Test Logs")
+	logger.RegisterSink(lager.NewWriterSink(GinkgoWriter, lager.DEBUG))
+
 	os.Setenv("GOOS", "linux")
 	cfopsLinuxExecutablePath, err = gexec.Build("github.com/pivotalservices/cfops/cmd/cfops")
 	os.Unsetenv("GOOS")
 
 	cfopsExecutablePath, err = gexec.Build("github.com/pivotalservices/cfops/cmd/cfops")
 	Expect(err).NotTo(HaveOccurred())
-
-	cfConfig.APIEndpoint = CfAPI
-	cfConfig.AdminUser = CfUser
-	cfConfig.AdminPassword = CfPassword
-	cfConfig.OMAdminUser = OMAdminUser
-	cfConfig.OMAdminPassword = OMAdminPassword
-	cfConfig.OMHostname = OMHostname
-	cfConfig.AppName = uuid.NewRandom().String()
-	cfConfig.OrgName = uuid.NewRandom().String()
-	cfConfig.SpaceName = uuid.NewRandom().String()
-	cfConfig.AppPath = "assets/test-app"
-	cfConfig.OMSSHKey = OMSSHKey
-	cfConfig.AmiID = AmiID
-	cfConfig.SecurityGroup = SecurityGroup
 })
 
 var _ = AfterSuite(func() {
@@ -56,7 +47,7 @@ var _ = Describe("CFOps Ops Manager plugin", func() {
 		newVMIP := ips[0].String()
 		Expect(err).NotTo(HaveOccurred())
 
-		backupCmd := exec.Command(
+		backupCommand := exec.Command(
 			cfopsExecutablePath,
 			"backup",
 			"--opsmanagerhost="+cfConfig.OMHostname,
@@ -67,7 +58,7 @@ var _ = Describe("CFOps Ops Manager plugin", func() {
 			"--tile=ops-manager",
 		)
 
-		restoreCmd := exec.Command(
+		restoreCommand := exec.Command(
 			cfopsExecutablePath,
 			"restore",
 			"--opsmanagerhost="+newVMIP,
@@ -79,18 +70,33 @@ var _ = Describe("CFOps Ops Manager plugin", func() {
 			"--tile=ops-manager",
 		)
 
-		backupSession, err := gexec.Start(backupCmd, GinkgoWriter, GinkgoWriter)
+		backupSession, err := gexec.Start(backupCommand, GinkgoWriter, GinkgoWriter)
 		Expect(err).NotTo(HaveOccurred())
 		Eventually(backupSession, 1200).Should(gexec.Exit(0))
 
-		restoreSession, err := gexec.Start(restoreCmd, GinkgoWriter, GinkgoWriter)
+		restoreSession, err := gexec.Start(restoreCommand, GinkgoWriter, GinkgoWriter)
 		Expect(err).NotTo(HaveOccurred())
 		Eventually(restoreSession, 1800).Should(gexec.Exit(0))
 
-		// TODO get installation_settings from new machine
-		// should broadly match installation.json on disk
+		time.Sleep(2 * time.Minute) // wait for new OM machine to be ready after restore
+
+		checkOpsManagersIdentical(cfConfig.OMHostname, newVMIP)
 	})
 })
+
+func checkOpsManagersIdentical(oldHost, newHost string) {
+	opsManager, err := NewOpsManagerClient(oldHost, cfConfig.OMAdminUser, cfConfig.OMAdminPassword, logger)
+	Expect(err).NotTo(HaveOccurred())
+	opsManagerProducts, _ := opsManager.GetStagedProducts()
+	Expect(err).NotTo(HaveOccurred())
+
+	restoredOpsManager, err := NewOpsManagerClient(newHost, cfConfig.OMAdminUser, cfConfig.OMAdminPassword, logger)
+	Expect(err).NotTo(HaveOccurred())
+	restoredOpsManagerProducts, _ := restoredOpsManager.GetStagedProducts()
+	Expect(err).NotTo(HaveOccurred())
+
+	Expect(opsManagerProducts).To(Equal(restoredOpsManagerProducts))
+}
 
 var _ = XDescribe("CFOps Elastic Runtime plugin", func() {
 	cfopsPath := "/tmp/cfops"
