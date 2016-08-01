@@ -3,7 +3,7 @@ resources:
 - name: cfops
   type: git
   source:
-    branch: WIP-systests
+    branch: develop
     private_key: {{git-private-key}}
     uri: git@github.com:pivotalservices/cfops.git
 - name: london-meta
