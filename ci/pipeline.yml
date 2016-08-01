@@ -3,8 +3,22 @@ resources:
 - name: cfops
   type: git
   source:
-    branch: develop
-    uri: https://github.com/henryaj/cfops
+    branch: WIP-systests
+    private_key: {{git-private-key}}
+    uri: git@github.com:pivotalservices/cfops.git
+- name: london-meta
+  type: git
+  source:
+    branch: master
+    private_key: {{git-private-key}}
+    uri: git@github.com:pivotal-cf/london-meta.git
+- name: environment-lock
+  type: pool
+  source:
+    branch: master
+    pool: aws-1.7-envs
+    private_key: {{git-private-key}}
+    uri: git@github.com:pivotal-cf-experimental/london-services-locks.git
 
 jobs:
 - name: unit
@@ -21,3 +35,22 @@ jobs:
     passed: [unit]
   - task: integration
     file: cfops/ci/tasks/integration.yml
+
+- name: system
+  plan:
+  - aggregate:
+    - put: environment-lock
+      params: { acquire: true }
+    - get: london-meta
+    - get: cfops
+      trigger: true
+      passed: [integration]
+  - task: system
+    file: cfops/ci/tasks/system.yml
+    params:
+      AWS_ACCESS_KEY_ID: {{aws-access-key-id}}
+      AWS_SECRET_ACCESS_KEY: {{aws-secret-access-key}}
+      AWS_SECURITY_GROUP: {{aws-security-group}}
+      OPSMAN_AMI: {{opsman-1-7-ami}}
+  - put: environment-lock
+    params: {release: environment-lock}

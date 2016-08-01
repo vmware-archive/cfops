@@ -38,3 +38,5 @@ plugins/
 plugin/cfopsplugin/sample/sample
 /vendor
 .wercker/
+/tmp
+secrets.*
