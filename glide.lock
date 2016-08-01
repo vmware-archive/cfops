@@ -1,5 +1,5 @@
 hash: f7d3f8d16ba65739e87cf2b9ed7c93dec917f0178086e3234e15863c36788003
-updated: 2016-08-01T14:25:29.200275145+01:00
+updated: 2016-08-01T15:08:51.838384316+01:00
 imports:
 - name: code.cloudfoundry.org/lager
   version: 62951a8009ab331bb21dc418074fa54e66eb9b6a
@@ -91,7 +91,7 @@ imports:
   - internal/spec
   - internal/specrunner
 - name: github.com/onsi/gomega
-  version: 835b5e4242c715976b98ed6bc6ece1d9c7879f66
+  version: 3e93f011213c200aadafcb19ed56eb718381cfbd
   subpackages:
   - gexec
   - gbytes
