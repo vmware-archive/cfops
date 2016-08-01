@@ -97,7 +97,7 @@ func checkOpsManagersIdentical(oldHost, newHost string) {
 	restoredOpsManagerProducts, _ := restoredOpsManager.GetStagedProducts()
 	Expect(err).NotTo(HaveOccurred())
 
-	Expect(opsManagerProducts).To(Equal(restoredOpsManagerProducts))
+	Expect(opsManagerProducts).To(ConsistOf(restoredOpsManagerProducts))
 }
 
 var _ = Describe("CFOps Elastic Runtime plugin", func() {
