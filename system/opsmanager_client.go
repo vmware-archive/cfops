@@ -14,6 +14,7 @@ import (
 //Client ...
 type Client interface {
 	GetStagedProducts() ([]stagedProduct, error)
+	GetAdminCredentials() (username, password string, err error)
 }
 
 type opsmanClient struct {
@@ -26,6 +27,16 @@ type opsmanClient struct {
 type stagedProduct struct {
 	Type string `json:"type"`
 	GUID string `json:"GUID"`
+}
+
+type credentials struct {
+	Credential struct {
+		Type  string `json:"simple_credentials"`
+		Value struct {
+			Username string `json:"identity"`
+			Password string `json:"password"`
+		}
+	}
 }
 
 //NewOpsManagerClient ...
@@ -51,6 +62,29 @@ func (client *opsmanClient) GetStagedProducts() ([]stagedProduct, error) {
 	stagedProducts := []stagedProduct{}
 	err := client.httpClient.Get(&stagedProducts)
 	return stagedProducts, err
+}
+
+func (client *opsmanClient) GetAdminCredentials() (username, password string, err error) {
+	var cfDeploymentID string
+	stagedProducts, error := client.GetStagedProducts()
+	if error != nil {
+		return "", "", error
+	}
+
+	for _, product := range stagedProducts {
+		if strings.Contains(product.GUID, "cf-") {
+			cfDeploymentID = product.GUID
+		}
+	}
+
+	client.httpClient.NewRequest("api/v0/deployed/products/"+cfDeploymentID+"/credentials/.uaa.admin_credentials", nil)
+	credentials := credentials{}
+	err = client.httpClient.Get(&credentials)
+	if err != nil {
+		return "", "", err
+	}
+
+	return credentials.Credential.Value.Username, credentials.Credential.Value.Password, nil
 }
 
 func getAuthToken(opsManagerURL, username, password string) (string, error) {

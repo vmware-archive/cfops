@@ -12,8 +12,6 @@ export OM_USER
 export OM_PASSWORD
 export OM_HOSTNAME
 export CF_API_URL
-# export CF_USER
-# export CF_PASSWORD
 
 if [ -z "$AWS_ACCESS_KEY_ID" ]; then
   echo "Need to set AWS_ACCESS_KEY_ID"
@@ -32,8 +30,6 @@ OM_USER=$(echo "$ENV_METADATA" | jq -r .tempest.username)
 OM_PASSWORD=$(echo "$ENV_METADATA" | jq -r .tempest.password)
 OM_HOSTNAME=$(echo "$ENV_METADATA" | jq -r .tempest.url | cut -d '/' -f 3)
 CF_API_URL=$(echo "$ENV_METADATA" | jq -r .tempest.url | cut -d '/' -f 3 | sed 's/pcf/api/')
-# CF_USER
-# CF_PASSWORD
 
 export GO15VENDOREXPERIMENT=1
 

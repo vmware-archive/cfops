@@ -20,14 +20,16 @@ import (
 var cfopsExecutablePath string
 var cfopsLinuxExecutablePath string
 var logger lager.Logger
-var err error
 
 var _ = BeforeSuite(func() {
+	var err error
+
 	logger = lager.NewLogger("Test Logs")
 	logger.RegisterSink(lager.NewWriterSink(GinkgoWriter, lager.DEBUG))
 
 	os.Setenv("GOOS", "linux")
 	cfopsLinuxExecutablePath, err = gexec.Build("github.com/pivotalservices/cfops/cmd/cfops")
+	Expect(err).NotTo(HaveOccurred())
 	os.Unsetenv("GOOS")
 
 	cfopsExecutablePath, err = gexec.Build("github.com/pivotalservices/cfops/cmd/cfops")
@@ -98,10 +100,16 @@ func checkOpsManagersIdentical(oldHost, newHost string) {
 	Expect(opsManagerProducts).To(Equal(restoredOpsManagerProducts))
 }
 
-var _ = XDescribe("CFOps Elastic Runtime plugin", func() {
+var _ = Describe("CFOps Elastic Runtime plugin", func() {
 	cfopsPath := "/tmp/cfops"
 	backupPath := "/tmp/cfops-backup-" + uuid.NewRandom().String()
+
 	BeforeEach(func() {
+		opsManager, _ := NewOpsManagerClient(cfConfig.OMHostname, cfConfig.OMAdminUser, cfConfig.OMAdminPassword, logger)
+		adminUser, adminPassword, err := opsManager.GetAdminCredentials()
+		Expect(err).NotTo(HaveOccurred())
+		cfConfig.AdminUser, cfConfig.AdminPassword = adminUser, adminPassword
+
 		pushTestApp(cfConfig)
 	})
 
