@@ -38,7 +38,7 @@ var _ = BeforeSuite(func() {
 	cfopsExecutablePath, err = gexec.Build("github.com/pivotalservices/cfops/cmd/cfops")
 	Expect(err).NotTo(HaveOccurred())
 
-	Expect(directoryExists("/var/vcap/store")).To(BeTrue(), "need the vcap store directory to run tests")
+	Expect(directoryExists("/var/vcap/store")).To(BeTrue(), "need the /var/vcap/store directory to run tests")
 })
 
 var _ = AfterSuite(func() {
@@ -77,26 +77,12 @@ var _ = Describe("cfops cmd", func() {
 		var additionalFlag string
 		var boshDirectorServer *ghttp.Server
 		var opsmanServer *ghttp.Server
+		var session *gexec.Session
 		BeforeEach(func() {
 			boshDirectorServer = ghttp.NewUnstartedServer()
 			boshDirectorServer.HTTPTestServer.Listener, err = net.Listen("tcp", "127.0.0.1:25555")
 			Expect(err).NotTo(HaveOccurred())
 			boshDirectorServer.HTTPTestServer.StartTLS()
-
-			boshDirectorServer.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", "/info"),
-					ghttp.RespondWith(http.StatusOK, `{}`),
-				),
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", "/deployments/cf-f21eea2dbdb8555f89fb"),
-					ghttp.RespondWith(http.StatusOK, `---`),
-				),
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", "/deployments/cf-f21eea2dbdb8555f89fb/vms"),
-					ghttp.RespondWith(http.StatusOK, `{}`),
-				),
-			)
 
 			opsmanServer = ghttp.NewTLSServer()
 			opsmanServer.AppendHandlers(
@@ -118,6 +104,21 @@ var _ = Describe("cfops cmd", func() {
 			opsmanUri, err = url.Parse(opsmanServer.URL())
 			Expect(err).NotTo(HaveOccurred())
 
+			boshDirectorServer.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", "/info"),
+					ghttp.RespondWith(http.StatusOK, `{}`),
+				),
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", "/deployments/cf-f21eea2dbdb8555f89fb"),
+					ghttp.RespondWith(http.StatusOK, `---`),
+				),
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", "/deployments/cf-f21eea2dbdb8555f89fb/vms"),
+					ghttp.RespondWith(http.StatusOK, `{}`),
+				),
+			)
+
 			createTestFiles("/var/vcap/store", []string{
 				"shared/cc-resources/09/4d/094dc37299e8d0c68e8e22e8f72a7b1632d26cc3",
 				"shared/cc-buildpacks/07/7a/077a250e-fdc4-40e5-8d0b-2b8e9cbd1aba_886bd2888127429f7f75120d98a187cbf7289c16",
@@ -136,14 +137,17 @@ var _ = Describe("cfops cmd", func() {
 		JustBeforeEach(func() {
 			command := exec.Command(cfopsExecutablePath, "backup", "--opsmanagerhost", opsmanUri.Host, "--adminuser", "<usr>", "--adminpass", "<pass>", "--opsmanageruser", "<opsuser>", "-d", destinationDirectory, "--tile", "elastic-runtime", additionalFlag)
 
-			session, err := gexec.Start(command, GinkgoWriter, GinkgoWriter)
+			session, err = gexec.Start(command, GinkgoWriter, GinkgoWriter)
 			Expect(err).ShouldNot(HaveOccurred())
 			session.Wait(executionTimeout)
-			Eventually(session).Should(gexec.Exit(0))
 		})
+
 		Context("without any additional flags", func() {
 			BeforeEach(func() {
 				additionalFlag = ""
+			})
+			It("should Succeed", func() {
+				Eventually(session).Should(gexec.Exit(0))
 			})
 			It("backups all the files", func() {
 				nfsBackupPath := filepath.Join(destinationDirectory, "nfs_server.backup")
@@ -154,13 +158,66 @@ var _ = Describe("cfops cmd", func() {
 			})
 		})
 
-		Context("with the ignore blobstore flag", func() {
+		Context("with nfs flag set to full", func() {
 			BeforeEach(func() {
-				additionalFlag = "-skip-nfs"
+				additionalFlag = "-nfs=full"
+			})
+			It("should succeed", func() {
+				Eventually(session).Should(gexec.Exit(0))
 			})
 			It("backups all the files", func() {
 				nfsBackupPath := filepath.Join(destinationDirectory, "nfs_server.backup")
+				Expect(filesInTar(nfsBackupPath)).To(ConsistOf("shared/cc-resources/09/4d/094dc37299e8d0c68e8e22e8f72a7b1632d26cc3",
+					"shared/cc-buildpacks/07/7a/077a250e-fdc4-40e5-8d0b-2b8e9cbd1aba_886bd2888127429f7f75120d98a187cbf7289c16",
+					"shared/cc-droplets/63/94/63945b8b-b3f4-4736-bb46-edb5a5dae80a/01f1938d589f3e2aa6e3dfa9d4308e215061a5b6",
+					"shared/cc-packages/63/94/63945b8b-b3f4-4736-bb46-edb5a5dae80a"))
+			})
+		})
+
+		Context("with nfs flag set to skip", func() {
+			BeforeEach(func() {
+				additionalFlag = "-nfs=skip"
+			})
+			It("should succeed", func() {
+				Eventually(session).Should(gexec.Exit(0))
+			})
+			It("does not back up NFS", func() {
+				nfsBackupPath := filepath.Join(destinationDirectory, "nfs_server.backup")
 				Expect(nfsBackupPath).NotTo(BeAnExistingFile())
+			})
+		})
+
+		Context("with nfs flag set to a invalid valid", func() {
+			BeforeEach(func() {
+				additionalFlag = "-nfs=invalid"
+			})
+			It("does not run the backup", func() {
+				Expect(session.Err).Should(gbytes.Say("invalid cli flag args"))
+			})
+			It("should fail", func() {
+				Eventually(session).ShouldNot(gexec.Exit(0))
+			})
+			It("does not back up NFS", func() {
+				nfsBackupPath := filepath.Join(destinationDirectory, "nfs_server.backup")
+				Expect(nfsBackupPath).NotTo(BeAnExistingFile())
+			})
+		})
+
+		Context("with nfs flag set to lite", func() {
+			BeforeEach(func() {
+				additionalFlag = "-nfs=lite"
+			})
+
+			It("should succeed", func() {
+				Eventually(session).Should(gexec.Exit(0))
+			})
+
+			It("backs up NFS without cc-resources dir", func() {
+				nfsBackupPath := filepath.Join(destinationDirectory, "nfs_server.backup")
+				Expect(filesInTar(nfsBackupPath)).To(ConsistOf(
+					"shared/cc-buildpacks/07/7a/077a250e-fdc4-40e5-8d0b-2b8e9cbd1aba_886bd2888127429f7f75120d98a187cbf7289c16",
+					"shared/cc-droplets/63/94/63945b8b-b3f4-4736-bb46-edb5a5dae80a/01f1938d589f3e2aa6e3dfa9d4308e215061a5b6",
+					"shared/cc-packages/63/94/63945b8b-b3f4-4736-bb46-edb5a5dae80a"))
 			})
 		})
 	})

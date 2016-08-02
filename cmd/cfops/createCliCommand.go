@@ -6,7 +6,9 @@ import (
 	"strings"
 
 	"github.com/codegangsta/cli"
+	"github.com/pivotalservices/cfbackup"
 	"github.com/pivotalservices/cfbackup/tileregistry"
+
 	"github.com/xchapter7x/lo"
 )
 
@@ -38,9 +40,9 @@ func buraAction(commandName string, eh *ErrorHandler) (action func(*cli.Context)
 				encryptionKey:        c.String(flagList[encryptionKey].Flag[0]),
 				clearBoshManifest:    c.Bool(flagList[clearBoshManifest].Flag[0]),
 				pluginArgs:           c.String(flagList[pluginArgs].Flag[0]),
+				nfs:                  c.String(flagList[nfs].Flag[0]),
 			}
 		)
-
 		if tileCloser, err := getTileFromRegistry(fs, commandName); err == nil {
 			defer tileCloser.Close()
 			if err = runTileAction(commandName, tileCloser); err != nil {
@@ -95,7 +97,7 @@ func getTileFromRegistry(fs *flagSet, commandName string) (tileCloser tileregist
 				CryptKey:             fs.EncryptionKey(),
 				ClearBoshManifest:    fs.ClearBoshManifest(),
 				PluginArgs:           fs.PluginArgs(),
-				SkipNFS:              fs.SkipNFS(),
+				NFS:                  fs.NFS(),
 			})
 			if err != nil {
 				return nil, fmt.Errorf("failure to connect to ops manager host: %s", err.Error())
@@ -116,7 +118,7 @@ var buraFlags = func() (flags []cli.Flag) {
 	for _, v := range flagList {
 		flags = append(flags, cli.StringFlag{
 			Name:   strings.Join(v.Flag, ", "),
-			Value:  "",
+			Value:  v.DefaultValue,
 			Usage:  v.Desc,
 			EnvVar: v.EnvVar,
 		})
@@ -125,22 +127,21 @@ var buraFlags = func() (flags []cli.Flag) {
 }()
 
 const (
-	errExitCode                  = 1
-	helpExitCode                 = 2
-	cleanExitCode                = 0
-	opsManagerHost        string = "opsmanagerHost"
-	adminUser             string = "adminUser"
-	adminPass             string = "adminPass"
-	opsManagerUser        string = "opsManagerUser"
-	opsManagerPass        string = "opsManagerPass"
-	opsManagerPassphrase  string = "opsManagerPassphrase"
-	dest                  string = "destination"
-	tile                  string = "tile"
-	encryptionKey         string = "encryptionKey"
-	clearBoshManifest     string = "clearboshmanifest"
-	pluginArgs            string = "pluginArgs"
-	skipNFS               string = "skipnfs"
-	skipNFSResourcesCache string = "skipnfsresourcescache"
+	errExitCode                 = 1
+	helpExitCode                = 2
+	cleanExitCode               = 0
+	opsManagerHost       string = "opsmanagerHost"
+	adminUser            string = "adminUser"
+	adminPass            string = "adminPass"
+	opsManagerUser       string = "opsManagerUser"
+	opsManagerPass       string = "opsManagerPass"
+	opsManagerPassphrase string = "opsManagerPassphrase"
+	dest                 string = "destination"
+	tile                 string = "tile"
+	encryptionKey        string = "encryptionKey"
+	clearBoshManifest    string = "clearboshmanifest"
+	pluginArgs           string = "pluginArgs"
+	nfs                  string = "nfs"
 )
 
 var (
@@ -149,15 +150,11 @@ var (
 	//ErrInvalidTileSelection - error for invalid tile
 	ErrInvalidTileSelection = errors.New("invalid tile selected. try the 'list-tiles' option to see a list of available tiles")
 	flagList                = map[string]flagBucket{
-		skipNFSResourcesCache: flagBucket{
-			Flag:   []string{"skip-nfs-resources-cache"},
-			Desc:   "setting this flag to true will not backup the cloud controller app bit upload cache, stored in cc-resources(this will only apply to elastic-runtime). This will have no effect in the running of apps on restore, but will make app uploads potentially slower until cache is rehydrated.",
-			EnvVar: "SKIP_NFS_RESOURCES_CACHE",
-		},
-		skipNFS: flagBucket{
-			Flag:   []string{"skip-nfs"},
-			Desc:   "setting this flag to true will skip the NFS Blobstore phase (this will only apply to elastic-runtime)",
-			EnvVar: "SKIP_NFS",
+		nfs: flagBucket{
+			Flag:         []string{"nfs"},
+			Desc:         "options are 'lite' (skips optional parts of blobstore), 'full' (backs up whole blobstore) or 'skip' (does not backup blobstore). This will only apply to elastic-runtime. Defaults to 'full'",
+			DefaultValue: "full",
+			EnvVar:       "NFS_BACKUP",
 		},
 		opsManagerHost: flagBucket{
 			Flag:   []string{"opsmanagerhost", "omh"},
@@ -219,33 +216,30 @@ var (
 
 type (
 	flagSet struct {
-		host                  string
-		adminUser             string
-		adminPass             string
-		opsManagerUser        string
-		opsManagerPass        string
-		opsManagerPassphrase  string
-		dest                  string
-		tile                  string
-		encryptionKey         string
-		clearBoshManifest     bool
-		pluginArgs            string
-		skipNFS               string
-		skipNFSResourcesCache string
+		host                 string
+		adminUser            string
+		adminPass            string
+		opsManagerUser       string
+		opsManagerPass       string
+		opsManagerPassphrase string
+		dest                 string
+		tile                 string
+		encryptionKey        string
+		clearBoshManifest    bool
+		pluginArgs           string
+		nfs                  string
 	}
 
 	flagBucket struct {
-		Flag   []string
-		Desc   string
-		EnvVar string
+		Flag         []string
+		Desc         string
+		EnvVar       string
+		DefaultValue string
 	}
 )
 
-func (s *flagSet) SkipNFS() bool {
-	if s.skipNFS == "true" {
-		return true
-	}
-	return false
+func (s *flagSet) NFS() string {
+	return s.nfs
 }
 
 func (s *flagSet) Host() string {
@@ -298,7 +292,8 @@ func hasValidBackupRestoreFlags(fs *flagSet) bool {
 		fs.AdminPass() != "" &&
 		fs.OpsManagerUser() != "" &&
 		fs.Dest() != "" &&
-		fs.Tile() != "")
+		fs.Tile() != "" &&
+		validateNfsType(fs.NFS()))
 
 	if res == false {
 		lo.G.Debug("OpsManagerHost: ", fs.Host())
@@ -309,4 +304,7 @@ func hasValidBackupRestoreFlags(fs *flagSet) bool {
 		lo.G.Debug("Destination: ", fs.Dest())
 	}
 	return res
+}
+func validateNfsType(nfsflag string) bool {
+	return nfsflag == cfbackup.NFSBackupTypeNone || nfsflag == cfbackup.NFSBackupTypeLite || nfsflag == cfbackup.NFSBackupTypeFull
 }
