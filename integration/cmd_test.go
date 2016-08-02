@@ -228,10 +228,15 @@ func filesInTar(filename string) []string {
 	defer nfsBackupFile.Close()
 	Expect(err).ShouldNot(HaveOccurred())
 
+	var tarReader *tar.Reader
 	gzf, err := gzip.NewReader(nfsBackupFile)
 	Expect(err).ShouldNot(HaveOccurred())
+	if err == nil {
+		tarReader = tar.NewReader(gzf)
+	} else {
+		tarReader = tar.NewReader(nfsBackupFile)
+	}
 
-	tarReader := tar.NewReader(gzf)
 	files := []string{}
 	for {
 		hdr, err := tarReader.Next()
