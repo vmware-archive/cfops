@@ -265,7 +265,7 @@ func readFixture(filename string, variables interface{}) string {
 }
 
 func createSSHKey(sshKeyUsername string) (string, string) {
-	sshKeys, err := ioutil.TempDir("", "scp-unit-tests")
+	sshKeys, err := ioutil.TempDir("", "integration-ssh-keys")
 	Expect(err).ToNot(HaveOccurred())
 	privateKeyPath := filepath.Join(sshKeys, "id_rsa")
 	Expect(exec.Command("ssh-keygen", "-t", "rsa", "-b", "4096", "-C", sshKeyUsername,
@@ -274,6 +274,7 @@ func createSSHKey(sshKeyUsername string) (string, string) {
 	Expect(err).ToNot(HaveOccurred())
 	publicKeyContents, err := ioutil.ReadFile(filepath.Join(sshKeys, "id_rsa.pub"))
 	Expect(err).ToNot(HaveOccurred())
+	os.RemoveAll(sshKeys)
 	return string(publicKeyContents), string(privateKeyContents)
 }
 
