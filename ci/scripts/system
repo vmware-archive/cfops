@@ -11,15 +11,15 @@ export OM_PASSWORD
 export OM_HOSTNAME
 export CF_API_URL
 
-if [ -z "$AWS_ACCESS_KEY_ID" ]; then
-  echo "Need to set AWS_ACCESS_KEY_ID"
-  exit 1
-fi
-
-if [ -z "$AWS_SECRET_ACCESS_KEY" ]; then
-  echo "Need to set AWS_SECRET_ACCESS_KEY"
-  exit 1
-fi
+# if [ -z "$AWS_ACCESS_KEY_ID" ]; then
+#   echo "Need to set AWS_ACCESS_KEY_ID"
+#   exit 1
+# fi
+#
+# if [ -z "$AWS_SECRET_ACCESS_KEY" ]; then
+#   echo "Need to set AWS_SECRET_ACCESS_KEY"
+#   exit 1
+# fi
 
 ENV_NAME=$(cat environment-lock/name)
 ENV_METADATA=$(cat environment-lock/metadata)

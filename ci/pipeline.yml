@@ -26,6 +26,21 @@ resources:
     pool: aws-1.6-envs
     private_key: {{git-private-key}}
     uri: git@github.com:pivotal-cf-experimental/london-services-locks.git
+- name: environment-lock-vsphere-1.6
+  type: pool
+  source:
+    branch: master
+    pool: vsphere-1.6-envs
+    private_key: {{git-private-key}}
+    uri: git@github.com:pivotal-cf-experimental/london-services-locks.git
+- name: environment-lock-vsphere-1.7
+  type: pool
+  source:
+    branch: master
+    pool: vsphere-1.7-envs
+    private_key: {{git-private-key}}
+    uri: git@github.com:pivotal-cf-experimental/london-services-locks.git
+
 
 jobs:
 - name: unit
@@ -43,10 +58,11 @@ jobs:
   - task: integration
     file: cfops/ci/tasks/integration.yml
 
-- name: system-1.7
+- name: system-aws-1.7
   plan:
   - aggregate:
-    - put: environment-lock-1.7
+    - put: environment-lock
+      resource: environment-lock-1.7
       params: { acquire: true }
     - get: london-meta
     - get: cfops
@@ -63,10 +79,11 @@ jobs:
       put: environment-lock-1.7
       params: { release: environment-lock-1.7 }
 
-- name: system-1.6
+- name: system-aws-1.6
   plan:
   - aggregate:
-    - put: environment-lock-1.6
+    - put: environment-lock
+      resource: environment-lock-1.6
       params: { acquire: true }
     - get: london-meta
     - get: cfops
@@ -82,3 +99,39 @@ jobs:
     ensure:
       put: environment-lock-1.6
       params: { release: environment-lock-1.6 }
+
+- name: system-vsphere-1.6
+  plan:
+  - aggregate:
+    - put: environment-lock
+      resource: environment-lock-vsphere-1.6
+      params: { acquire: true }
+    - get: london-meta
+    - get: cfops
+      trigger: true
+      passed: [integration]
+  - task: system
+    file: cfops/ci/tasks/system.yml
+    params:
+      ONLY_ERT: true
+    ensure:
+      put: environment-lock-vsphere-1.6
+      params: { release: environment-lock-vsphere-1.6 }
+
+- name: system-vsphere-1.7
+  plan:
+  - aggregate:
+    - put: environment-lock
+      resource: environment-lock-vsphere-1.7
+      params: { acquire: true }
+    - get: london-meta
+    - get: cfops
+      trigger: true
+      passed: [integration]
+  - task: system
+    file: cfops/ci/tasks/system.yml
+    params:
+      ONLY_ERT: true
+    ensure:
+      put: environment-lock-vsphere-1.7
+      params: { release: environment-lock-vsphere-1.7 }

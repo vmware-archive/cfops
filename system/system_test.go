@@ -42,6 +42,10 @@ var _ = AfterSuite(func() {
 
 var _ = Describe("CFOps Ops Manager plugin", func() {
 	It("backs up and restores successfully", func() {
+		if os.Getenv("ONLY_ERT") == "true" {
+			return
+		}
+
 		vm := createInstance("cfops-test", cfConfig.AmiID, cfConfig.SecurityGroup)
 		defer vm.Destroy()
 
