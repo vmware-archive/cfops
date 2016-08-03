@@ -10,5 +10,6 @@ inputs:
   - name: cfops
     path: src/github.com/pivotalservices/cfops
 params:
+  IAAS:
 run:
   path: src/github.com/pivotalservices/cfops/ci/scripts/system

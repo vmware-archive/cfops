@@ -30,7 +30,7 @@ resources:
   type: pool
   source:
     branch: master
-    pool: vsphere-1.6-envs
+    pool: vsphere-1.6-multiaz
     private_key: {{git-private-key}}
     uri: git@github.com:pivotal-cf-experimental/london-services-locks.git
 - name: environment-lock-vsphere-1.7
@@ -75,6 +75,7 @@ jobs:
       AWS_SECRET_ACCESS_KEY: {{aws-secret-access-key}}
       AWS_SECURITY_GROUP: {{aws-security-group}}
       OPSMAN_AMI: ami-c064f7b3 # OpsMan 1.7.5.0
+      IAAS: aws
     ensure:
       put: environment-lock-1.7
       params: { release: environment-lock-1.7 }
@@ -96,6 +97,7 @@ jobs:
       AWS_SECRET_ACCESS_KEY: {{aws-secret-access-key}}
       AWS_SECURITY_GROUP: {{aws-security-group}}
       OPSMAN_AMI: ami-f25ee281 # OpsMan 1.6.11.0
+      IAAS: aws
     ensure:
       put: environment-lock-1.6
       params: { release: environment-lock-1.6 }
@@ -114,6 +116,7 @@ jobs:
     file: cfops/ci/tasks/system.yml
     params:
       ONLY_ERT: true
+      IAAS: vsphere
     ensure:
       put: environment-lock-vsphere-1.6
       params: { release: environment-lock-vsphere-1.6 }
@@ -132,6 +135,7 @@ jobs:
     file: cfops/ci/tasks/system.yml
     params:
       ONLY_ERT: true
+      IAAS: vsphere
     ensure:
       put: environment-lock-vsphere-1.7
       params: { release: environment-lock-vsphere-1.7 }

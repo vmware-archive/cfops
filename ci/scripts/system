@@ -21,9 +21,14 @@ export CF_API_URL
 #   exit 1
 # fi
 
+if [ -z "$IAAS" ]; then
+  echo "Need to set IAAS"
+  exit 1
+fi
+
 ENV_NAME=$(cat environment-lock/name)
 ENV_METADATA=$(cat environment-lock/metadata)
-OM_SSH_KEY=$(cat london-meta/aws-environments/"$ENV_NAME"/"$ENV_NAME"-pcf.pem)
+OM_SSH_KEY=$(cat london-meta/"$IAAS"-environments/"$ENV_NAME"/"$ENV_NAME"-pcf.pem)
 OM_USER=$(echo "$ENV_METADATA" | jq -r .tempest.username)
 OM_PASSWORD=$(echo "$ENV_METADATA" | jq -r .tempest.password)
 OM_HOSTNAME=$(echo "$ENV_METADATA" | jq -r .tempest.url | cut -d '/' -f 3)
