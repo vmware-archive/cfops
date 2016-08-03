@@ -1,5 +1,7 @@
 #!/bin/bash -eu
 
+pushd $(dirname $0)
+
 SSH_KEY=$(lpass show "Shared-London Services"/london-ci/git-ssh-key --notes)
 
 lpass show Shared-PCF-Backup-and-Restore/concourse-secrets --notes > \
@@ -10,3 +12,5 @@ fly -t london set-pipeline \
   --config pipeline.yml \
   --load-vars-from secrets.yml \
   --var git-private-key="${SSH_KEY}"
+
+popd
