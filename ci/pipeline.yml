@@ -52,5 +52,6 @@ jobs:
       AWS_SECRET_ACCESS_KEY: {{aws-secret-access-key}}
       AWS_SECURITY_GROUP: {{aws-security-group}}
       OPSMAN_AMI: {{opsman-1-7-ami}}
-  - put: environment-lock
-    params: {release: environment-lock}
+    ensure:
+      put: environment-lock
+      params: { release: environment-lock }
