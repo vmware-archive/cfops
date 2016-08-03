@@ -17,4 +17,4 @@ popd
 
 cd src/github.com/pivotalservices/cfops
 glide install
-ginkgo integration/
+LOG_LEVEL=debug ginkgo integration/
