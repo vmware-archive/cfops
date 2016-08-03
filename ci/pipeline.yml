@@ -12,11 +12,18 @@ resources:
     branch: master
     private_key: {{git-private-key}}
     uri: git@github.com:pivotal-cf/london-meta.git
-- name: environment-lock
+- name: environment-lock-1.7
   type: pool
   source:
     branch: master
     pool: aws-1.7-envs
+    private_key: {{git-private-key}}
+    uri: git@github.com:pivotal-cf-experimental/london-services-locks.git
+- name: environment-lock-1.6
+  type: pool
+  source:
+    branch: master
+    pool: aws-1.6-envs
     private_key: {{git-private-key}}
     uri: git@github.com:pivotal-cf-experimental/london-services-locks.git
 
@@ -36,10 +43,10 @@ jobs:
   - task: integration
     file: cfops/ci/tasks/integration.yml
 
-- name: system
+- name: system-1.7
   plan:
   - aggregate:
-    - put: environment-lock
+    - put: environment-lock-1.7
       params: { acquire: true }
     - get: london-meta
     - get: cfops
@@ -51,7 +58,27 @@ jobs:
       AWS_ACCESS_KEY_ID: {{aws-access-key-id}}
       AWS_SECRET_ACCESS_KEY: {{aws-secret-access-key}}
       AWS_SECURITY_GROUP: {{aws-security-group}}
-      OPSMAN_AMI: {{opsman-1-7-ami}}
+      OPSMAN_AMI: ami-c064f7b3 # OpsMan 1.7.5.0
     ensure:
-      put: environment-lock
-      params: { release: environment-lock }
+      put: environment-lock-1.7
+      params: { release: environment-lock-1.7 }
+
+- name: system-1.6
+  plan:
+  - aggregate:
+    - put: environment-lock-1.6
+      params: { acquire: true }
+    - get: london-meta
+    - get: cfops
+      trigger: true
+      passed: [integration]
+  - task: system
+    file: cfops/ci/tasks/system.yml
+    params:
+      AWS_ACCESS_KEY_ID: {{aws-access-key-id}}
+      AWS_SECRET_ACCESS_KEY: {{aws-secret-access-key}}
+      AWS_SECURITY_GROUP: {{aws-security-group}}
+      OPSMAN_AMI: ami-f25ee281 # OpsMan 1.6.11.0
+    ensure:
+      put: environment-lock-1.6
+      params: { release: environment-lock-1.6 }
