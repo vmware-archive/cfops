@@ -143,7 +143,7 @@ var _ = Describe("cfops cmd", func() {
 			session.Wait(executionTimeout)
 		})
 		Context("dosen't log secrets", func() {
-			FIt("should Succeed", func() {
+			It("should Succeed", func() {
 
 				Consistently(session.Err.Contents()).ShouldNot(ContainSubstring("SECRET"))
 				Consistently(session.Err.Contents()).ShouldNot(ContainSubstring("BEGIN RSA PRIVATE KEY"))
