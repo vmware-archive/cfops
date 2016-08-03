@@ -74,6 +74,12 @@ var _ = Describe("CFOps Ops Manager plugin", func() {
 
 		backupSession, err := gexec.Start(backupCommand, GinkgoWriter, GinkgoWriter)
 		Expect(err).NotTo(HaveOccurred())
+		Consistently(backupSession.Out.Contents()).ShouldNot(ContainSubstring(cfConfig.OMAdminPassword))
+		Consistently(backupSession.Out.Contents()).ShouldNot(ContainSubstring("RSA PRIVATE KEY"))
+
+		Consistently(backupSession.Err.Contents()).ShouldNot(ContainSubstring(cfConfig.OMAdminPassword))
+		Consistently(backupSession.Err.Contents()).ShouldNot(ContainSubstring("RSA PRIVATE KEY"))
+
 		Eventually(backupSession, 1200).Should(gexec.Exit(0))
 
 		restoreSession, err := gexec.Start(restoreCommand, GinkgoWriter, GinkgoWriter)

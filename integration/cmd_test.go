@@ -35,6 +35,7 @@ const (
 )
 
 var _ = BeforeSuite(func() {
+	os.Setenv("LOG_LEVEL", "debug")
 	cfopsExecutablePath, err = gexec.Build("github.com/pivotalservices/cfops/cmd/cfops")
 	Expect(err).NotTo(HaveOccurred())
 
@@ -99,7 +100,7 @@ var _ = Describe("cfops cmd", func() {
 							NFSSshUser     string
 							NFSSshPassword string
 							SSHPrivateKey  string
-						}{DirectorHost: "127.0.0.1", NfsServerIP: "127.0.0.1", NFSSshUser: currentUser.Name, NFSSshPassword: "asdf", SSHPrivateKey: strings.Replace(privateKey, "\n", "\\n", -1)})),
+						}{DirectorHost: "127.0.0.1", NfsServerIP: "127.0.0.1", NFSSshUser: currentUser.Name, NFSSshPassword: "SECRET_nfs_ssh_password", SSHPrivateKey: strings.Replace(privateKey, "\n", "\\n", -1)})),
 				))
 			opsmanUri, err = url.Parse(opsmanServer.URL())
 			Expect(err).NotTo(HaveOccurred())
@@ -135,11 +136,20 @@ var _ = Describe("cfops cmd", func() {
 			boshDirectorServer.Close()
 		})
 		JustBeforeEach(func() {
-			command := exec.Command(cfopsExecutablePath, "backup", "--opsmanagerhost", opsmanUri.Host, "--adminuser", "<usr>", "--adminpass", "<pass>", "--opsmanageruser", "<opsuser>", "-d", destinationDirectory, "--tile", "elastic-runtime", additionalFlag)
+			command := exec.Command(cfopsExecutablePath, "backup", "--opsmanagerhost", opsmanUri.Host, "--adminuser", "<usr>", "--adminpass", "SECRET_admin_password", "--opsmanageruser", "<opsuser>", "-d", destinationDirectory, "--tile", "elastic-runtime", additionalFlag)
 
 			session, err = gexec.Start(command, GinkgoWriter, GinkgoWriter)
 			Expect(err).ShouldNot(HaveOccurred())
 			session.Wait(executionTimeout)
+		})
+		Context("dosen't log secrets", func() {
+			It("should Succeed", func() {
+
+				Consistently(session.Err.Contents()).ShouldNot(ContainSubstring("SECRET"))
+				Consistently(session.Err.Contents()).ShouldNot(ContainSubstring("BEGIN RSA PRIVATE KEY"))
+				Consistently(session.Out.Contents()).ShouldNot(ContainSubstring("SECRET"))
+				Consistently(session.Out.Contents()).ShouldNot(ContainSubstring("BEGIN RSA PRIVATE KEY"))
+			})
 		})
 
 		Context("without any additional flags", func() {

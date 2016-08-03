@@ -68,7 +68,7 @@ func exitOnError(eh *ErrorHandler, c *cli.Context, commandName string, err error
 }
 
 func runTileAction(commandName string, tile tileregistry.Tile) (err error) {
-	lo.G.Debugf("Running %s for tile: %+v", commandName, tile)
+	lo.G.Debugf("Running %s for tile: %#v", commandName, tile)
 	switch commandName {
 	case "backup":
 		err = tile.Backup()
