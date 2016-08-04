@@ -4,6 +4,9 @@ export GOPATH=$PWD
 export GO15VENDOREXPERIMENT=1
 
 go get github.com/Masterminds/glide
+go get github.com/onsi/ginkgo/ginkgo
+go get github.com/onsi/gomega
+
 pushd src/github.com/Masterminds/glide
   make install
 popd
@@ -12,3 +15,4 @@ cd src/github.com/pivotalservices/cfops
 glide install
 
 go test $(glide novendor | grep 'cmd\|plugin') -v race
+ginkgo -dryRun system/
