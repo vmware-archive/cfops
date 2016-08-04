@@ -10,6 +10,7 @@ export OM_USER
 export OM_PASSWORD
 export OM_HOSTNAME
 export CF_API_URL
+export OM_PROXY_INFO
 
 # if [ -z "$AWS_ACCESS_KEY_ID" ]; then
 #   echo "Need to set AWS_ACCESS_KEY_ID"
