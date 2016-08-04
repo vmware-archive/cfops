@@ -160,7 +160,7 @@ var _ = Describe("CFOps Elastic Runtime plugin", func() {
 			"--tile=elastic-runtime",
 		}, " ")
 
-		scpHelper("ubuntu", cfConfig.OMHostname, 22, cfopsLinuxExecutablePath, cfopsPath, cfConfig.OMSSHKey)
+		scpHelper(cfConfig.OMHostInfo, cfopsLinuxExecutablePath, cfopsPath)
 		remoteExecute("ubuntu", cfConfig.OMHostname, 22, cfConfig.OMSSHKey, "chmod +x /tmp/cfops", os.Stdout)
 
 		fmt.Println("Backing up ERT...")

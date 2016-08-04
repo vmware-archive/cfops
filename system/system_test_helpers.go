@@ -39,26 +39,46 @@ func getAuthMethod(pemkeycontents []byte) (authMethod []ssh.AuthMethod) {
 	return
 }
 
-func scpHelper(sshuser, host string, port int, localpath, remotepath, pemkeycontents string) {
+func scpHelper(hostInfo HostInfo, localpath, remotepath string) {
 	f, err := os.Open(localpath)
 	Expect(err).ToNot(HaveOccurred())
-	remoteConn := osutils.NewRemoteOperationsWithPath(command.SshConfig{
-		Username: sshuser,
-		Host:     host,
-		Port:     port,
-		SSLKey:   pemkeycontents,
-	}, remotepath)
+	var remoteConn *osutils.RemoteOperations
+	if hostInfo.Password == "" {
+		remoteConn = osutils.NewRemoteOperationsWithPath(command.SshConfig{
+			Username: hostInfo.Username,
+			Host:     hostInfo.Hostname,
+			Port:     22,
+			SSLKey:   hostInfo.SSHKey,
+		}, remotepath)
+	} else {
+		remoteConn = osutils.NewRemoteOperationsWithPath(command.SshConfig{
+			Username: hostInfo.Username,
+			Host:     hostInfo.Hostname,
+			Password: hostInfo.Password,
+			Port:     22,
+		}, remotepath)
+	}
 	err = remoteConn.UploadFile(f)
 	Expect(err).ToNot(HaveOccurred())
 }
 
-func remoteExecute(sshuser, host string, port int, pemkeycontents, remotecommand string, rstdout io.Writer) (err error) {
-	remoteConn, err := command.NewRemoteExecutor(command.SshConfig{
-		Username: sshuser,
-		Host:     host,
-		Port:     port,
-		SSLKey:   pemkeycontents,
-	})
+func remoteExecute(hostInfo HostInfo, remotecommand string, rstdout io.Writer) (err error) {
+	var remoteConn command.Executer
+	if hostInfo.Password == "" {
+		remoteConn, err = command.NewRemoteExecutor(command.SshConfig{
+			Username: hostInfo.Username,
+			Host:     hostInfo.Hostname,
+			Port:     22,
+			SSLKey:   hostInfo.SSHKey,
+		})
+	} else {
+		remoteConn, err = command.NewRemoteExecutor(command.SshConfig{
+			Username: hostInfo.Username,
+			Host:     hostInfo.Hostname,
+			Port:     22,
+			Password: hostInfo.Password,
+		})
+	}
 	Expect(err).ToNot(HaveOccurred())
 	return remoteConn.Execute(rstdout, remotecommand)
 }
@@ -125,7 +145,15 @@ type Config struct {
 	OMAdminUser     string
 	OMAdminPassword string
 	OMHostname      string
-	OMSSHKey        string
-	AmiID           string
-	SecurityGroup   string
+
+	AmiID         string
+	SecurityGroup string
+	OMHostInfo    HostInfo
+}
+
+type HostInfo struct {
+	Username string
+	Password string
+	Hostname string
+	SSHKey   string
 }

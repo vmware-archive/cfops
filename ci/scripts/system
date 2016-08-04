@@ -28,6 +28,7 @@ fi
 
 ENV_NAME=$(cat environment-lock/name)
 ENV_METADATA=$(cat environment-lock/metadata)
+OM_PROXY_INFO=$(echo "$ENV_METADATA" | jq -r .proxy)
 OM_SSH_KEY=$(cat london-meta/"$IAAS"-environments/"$ENV_NAME"/"$ENV_NAME"-pcf.pem)
 OM_USER=$(echo "$ENV_METADATA" | jq -r .tempest.username)
 OM_PASSWORD=$(echo "$ENV_METADATA" | jq -r .tempest.password)

@@ -1,6 +1,7 @@
 package system
 
 import (
+	"encoding/json"
 	"os"
 	"testing"
 
@@ -16,7 +17,6 @@ func TestBrokerintegration(t *testing.T) {
 	cfConfig.OMAdminUser = os.Getenv("OM_USER")
 	cfConfig.OMAdminPassword = os.Getenv("OM_PASSWORD")
 	cfConfig.OMHostname = os.Getenv("OM_HOSTNAME")
-	cfConfig.OMSSHKey = os.Getenv("OM_SSH_KEY")
 	cfConfig.AmiID = os.Getenv("OPSMAN_AMI")
 	cfConfig.SecurityGroup = os.Getenv("AWS_SECURITY_GROUP")
 
@@ -24,6 +24,9 @@ func TestBrokerintegration(t *testing.T) {
 	cfConfig.OrgName = uuid.NewRandom().String()
 	cfConfig.SpaceName = uuid.NewRandom().String()
 	cfConfig.AppPath = "assets/test-app"
+
+	Expect(json.Unmarshal([]byte(os.Getenv("OM_PROXY_INFO")), &cfConfig.OMHostInfo)).To(Succeed())
+	cfConfig.OMHostInfo.SSHKey = os.Getenv("OM_SSH_KEY")
 
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "cfops System Test Suite")
