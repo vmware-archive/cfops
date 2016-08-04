@@ -1,6 +1,7 @@
 #!/bin/bash -eux
 
 export GOPATH=$PWD
+export PATH=$PATH:$GOPATH/bin
 export GO15VENDOREXPERIMENT=1
 
 go get github.com/Masterminds/glide
