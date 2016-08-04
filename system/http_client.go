@@ -13,23 +13,23 @@ import (
 )
 
 type httpClient struct {
-	baseURL string
-	token   string
-	client  *http.Client
-	request *http.Request
-	logger  lager.Logger
+	baseURL       string
+	authorization string
+	client        *http.Client
+	request       *http.Request
+	logger        lager.Logger
 }
 
 //newHttpClient ...
-func newHttpClient(url, token string, logger lager.Logger) httpClient {
+func newHttpClient(url, authorization string, logger lager.Logger) httpClient {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 	return httpClient{
-		baseURL: url,
-		token:   token,
-		client:  &http.Client{Transport: tr},
-		logger:  logger.Session("http"),
+		baseURL:       url,
+		authorization: authorization,
+		client:        &http.Client{Transport: tr},
+		logger:        logger.Session("http"),
 	}
 }
 
@@ -66,9 +66,11 @@ func (client *httpClient) Get(responseObject interface{}) error {
 	if err != nil {
 		return err
 	}
-	json.NewDecoder(responseBody).Decode(&responseObject)
-	client.logger.Debug("Response body", lager.Data{"response": responseObject})
-	return nil
+	err = json.NewDecoder(responseBody).Decode(&responseObject)
+	// TODO: Add logging again, it fails case we have a json.RawMessage in a struct
+	// TODO: uncomment when https://github.com/cloudfoundry/lager/pull/20 is fixed
+	// client.logger.Debug("Response body", lager.Data{"response": responseObject})
+	return err
 }
 
 func (client *httpClient) processRequest() (io.ReadCloser, error) {
@@ -93,5 +95,5 @@ func (client *httpClient) processRequest() (io.ReadCloser, error) {
 
 func (client *httpClient) addCommonHeaders() {
 	client.request.Header.Set("Content-Type", "application/json")
-	client.request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", client.token))
+	client.request.Header.Set("Authorization", client.authorization)
 }

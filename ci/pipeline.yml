@@ -77,8 +77,9 @@ jobs:
       OPSMAN_AMI: ami-c064f7b3 # OpsMan 1.7.5.0
       IAAS: aws
     ensure:
-      put: environment-lock-1.7
-      params: { release: environment-lock-1.7 }
+      put: environment-lock
+      resource: environment-lock-1.7
+      params: { release: environment-lock }
 
 - name: system-aws-1.6
   plan:
@@ -99,8 +100,9 @@ jobs:
       OPSMAN_AMI: ami-f25ee281 # OpsMan 1.6.11.0
       IAAS: aws
     ensure:
-      put: environment-lock-1.6
-      params: { release: environment-lock-1.6 }
+      put: environment-lock
+      resource: environment-lock-1.6
+      params: { release: environment-lock }
 
 - name: system-vsphere-1.6
   plan:
@@ -113,13 +115,15 @@ jobs:
       trigger: true
       passed: [integration]
   - task: system
+    tags: [vsphere]
     file: cfops/ci/tasks/system.yml
     params:
       ONLY_ERT: true
       IAAS: vsphere
     ensure:
-      put: environment-lock-vsphere-1.6
-      params: { release: environment-lock-vsphere-1.6 }
+      put: environment-lock
+      resource: environment-lock-vsphere-1.6
+      params: { release: environment-lock }
 
 - name: system-vsphere-1.7
   plan:
@@ -132,10 +136,12 @@ jobs:
       trigger: true
       passed: [integration]
   - task: system
+    tags: [vsphere]
     file: cfops/ci/tasks/system.yml
     params:
       ONLY_ERT: true
       IAAS: vsphere
     ensure:
-      put: environment-lock-vsphere-1.7
-      params: { release: environment-lock-vsphere-1.7 }
+      put: environment-lock
+      resource: environment-lock-vsphere-1.7
+      params: { release: environment-lock }
