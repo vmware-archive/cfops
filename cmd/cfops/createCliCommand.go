@@ -14,7 +14,7 @@ import (
 
 //CreateBURACliCommand - this will create a cli command object for backup / restore
 func CreateBURACliCommand(name string, usage string, eh *ErrorHandler) (command cli.Command) {
-	desc := fmt.Sprintf("%s --opsmanagerhost <host> --adminuser <usr> --adminpass <pass> --opsmanageruser <opsuser> --opsmanagerpass <opspass> -d <dir> --tile elastic-runtime", name)
+	desc := fmt.Sprintf("%s --opsmanagerhost <host> --adminuser <usr> --adminpass <pass> --opsmanageruser <opsuser> --opsmanagerpass <opspass> --omr <opsmanager-encryption-password> -d <dir> --tile elastic-runtime", name)
 	command = cli.Command{
 		Name:        name,
 		Usage:       usage,
