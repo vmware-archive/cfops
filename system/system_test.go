@@ -1,6 +1,7 @@
 package system
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -22,6 +23,21 @@ var cfopsLinuxExecutablePath string
 var logger lager.Logger
 
 var _ = BeforeSuite(func() {
+	cfConfig.APIEndpoint = os.Getenv("CF_API_URL")
+	cfConfig.OMAdminUser = os.Getenv("OM_USER")
+	cfConfig.OMAdminPassword = os.Getenv("OM_PASSWORD")
+	cfConfig.OMHostname = os.Getenv("OM_HOSTNAME")
+	cfConfig.AmiID = os.Getenv("OPSMAN_AMI")
+	cfConfig.SecurityGroup = os.Getenv("AWS_SECURITY_GROUP")
+
+	cfConfig.AppName = uuid.NewRandom().String()
+	cfConfig.OrgName = uuid.NewRandom().String()
+	cfConfig.SpaceName = uuid.NewRandom().String()
+	cfConfig.AppPath = "assets/test-app"
+
+	Expect(json.Unmarshal([]byte(os.Getenv("OM_PROXY_INFO")), &cfConfig.OMHostInfo)).To(Succeed())
+	cfConfig.OMHostInfo.SSHKey = os.Getenv("OM_SSH_KEY")
+
 	var err error
 
 	logger = lager.NewLogger("Test Logs")
@@ -78,19 +94,24 @@ var _ = Describe("CFOps Ops Manager plugin", func() {
 
 		backupSession, err := gexec.Start(backupCommand, GinkgoWriter, GinkgoWriter)
 		Expect(err).NotTo(HaveOccurred())
-		Consistently(backupSession.Out.Contents()).ShouldNot(ContainSubstring(cfConfig.OMAdminPassword))
+		if cfConfig.OMAdminPassword != "" {
+			Consistently(backupSession.Out.Contents()).ShouldNot(ContainSubstring(cfConfig.OMAdminPassword))
+			Consistently(backupSession.Err.Contents()).ShouldNot(ContainSubstring(cfConfig.OMAdminPassword))
+		}
 		Consistently(backupSession.Out.Contents()).ShouldNot(ContainSubstring("RSA PRIVATE KEY"))
-
-		Consistently(backupSession.Err.Contents()).ShouldNot(ContainSubstring(cfConfig.OMAdminPassword))
 		Consistently(backupSession.Err.Contents()).ShouldNot(ContainSubstring("RSA PRIVATE KEY"))
 
 		Eventually(backupSession, 1200).Should(gexec.Exit(0))
+
+		if os.Getenv("OM_VERSION") == "1.6" {
+			createAdminUser(newVMIP, cfConfig.OMAdminUser, cfConfig.OMAdminPassword)
+		}
 
 		restoreSession, err := gexec.Start(restoreCommand, GinkgoWriter, GinkgoWriter)
 		Expect(err).NotTo(HaveOccurred())
 		Eventually(restoreSession, 1800).Should(gexec.Exit(0))
 
-		time.Sleep(2 * time.Minute) // wait for new OM machine to be ready after restore
+		time.Sleep(2 * time.Minute) // TODO make this better
 
 		checkOpsManagersIdentical(cfConfig.OMHostname, newVMIP)
 	})
@@ -127,11 +148,11 @@ var _ = Describe("CFOps Elastic Runtime plugin", func() {
 		deleteTestApp(cfConfig)
 
 		if cfopsPath != "" {
-			remoteExecute("ubuntu", cfConfig.OMHostname, 22, cfConfig.OMSSHKey, "rm -rf "+cfopsPath, os.Stdout)
+			remoteExecute(cfConfig.OMHostInfo, "rm -rf "+cfopsPath, os.Stdout)
 		}
 
 		if backupPath != "" {
-			remoteExecute("ubuntu", cfConfig.OMHostname, 22, cfConfig.OMSSHKey, "rm -rf "+backupPath, os.Stdout)
+			remoteExecute(cfConfig.OMHostInfo, "rm -rf "+backupPath, os.Stdout)
 		}
 	})
 
@@ -160,16 +181,16 @@ var _ = Describe("CFOps Elastic Runtime plugin", func() {
 			"--tile=elastic-runtime",
 		}, " ")
 
-		scpHelper("ubuntu", cfConfig.OMHostname, 22, cfopsLinuxExecutablePath, cfopsPath, cfConfig.OMSSHKey)
-		remoteExecute("ubuntu", cfConfig.OMHostname, 22, cfConfig.OMSSHKey, "chmod +x /tmp/cfops", os.Stdout)
+		scpHelper(cfConfig.OMHostInfo, cfopsLinuxExecutablePath, cfopsPath)
+		remoteExecute(cfConfig.OMHostInfo, "chmod +x /tmp/cfops", os.Stdout)
 
 		fmt.Println("Backing up ERT...")
-		remoteExecute("ubuntu", cfConfig.OMHostname, 22, cfConfig.OMSSHKey, backupCmd, os.Stdout)
+		remoteExecute(cfConfig.OMHostInfo, backupCmd, os.Stdout)
 
 		deleteTestApp(cfConfig)
 
 		fmt.Println("Restoring ERT...")
-		remoteExecute("ubuntu", cfConfig.OMHostname, 22, cfConfig.OMSSHKey, restoreCmd, os.Stdout)
+		remoteExecute(cfConfig.OMHostInfo, restoreCmd, os.Stdout)
 
 		cfDo("target", "-o", cfConfig.OrgName, "-s", cfConfig.SpaceName)
 		Eventually(cf.Cf("apps")).Should(gbytes.Say(cfConfig.AppName))

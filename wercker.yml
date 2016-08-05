@@ -5,8 +5,6 @@ build:
     # Sets the go workspace and places you package
     # at the right place in the workspace tree
     - setup-go-workspace
-    - wercker/golint:
-        exclude: "^vendor\\|fakes"
 
     # Get the dependencies
     - script:

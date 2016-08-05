@@ -2,20 +2,17 @@ package system
 
 import (
 	"crypto/tls"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
 
+	. "github.com/onsi/ginkgo"
+
 	"code.cloudfoundry.org/lager"
 )
-
-//Client ...
-type Client interface {
-	GetStagedProducts() ([]stagedProduct, error)
-	GetAdminCredentials() (username, password string, err error)
-}
 
 type opsmanClient struct {
 	httpClient    httpClient
@@ -40,10 +37,11 @@ type credentials struct {
 }
 
 //NewOpsManagerClient ...
-func NewOpsManagerClient(hostname, username, password string, logger lager.Logger) (Client, error) {
+func NewOpsManagerClient(hostname, username, password string, logger lager.Logger) (*opsmanClient, error) {
 	url := "https://" + hostname
 
-	token, err := getAuthToken(url, username, password)
+	token, err := getAuthorization(url, username, password)
+
 	if err != nil {
 		return &opsmanClient{}, err
 	}
@@ -64,30 +62,88 @@ func (client *opsmanClient) GetStagedProducts() ([]stagedProduct, error) {
 	return stagedProducts, err
 }
 
-func (client *opsmanClient) GetAdminCredentials() (username, password string, err error) {
-	var cfDeploymentID string
-	stagedProducts, error := client.GetStagedProducts()
-	if error != nil {
-		return "", "", error
-	}
+type installationSettings struct {
+	Products products `json:"products"`
+}
+type products []product
 
-	for _, product := range stagedProducts {
-		if strings.Contains(product.GUID, "cf-") {
-			cfDeploymentID = product.GUID
+func (products products) CF() product {
+	for _, p := range products {
+		if strings.HasPrefix(p.InstallationName, "cf-") {
+			return p
 		}
 	}
+	Fail("Cant find cf product in installation settings")
+	return product{}
+}
 
-	client.httpClient.NewRequest("api/v0/deployed/products/"+cfDeploymentID+"/credentials/.uaa.admin_credentials", nil)
-	credentials := credentials{}
-	err = client.httpClient.Get(&credentials)
+type product struct {
+	InstallationName string `json:"installation_name"`
+	Jobs             jobs   `json:"jobs"`
+}
+type jobs []job
+
+func (jobs jobs) UAA() job {
+	for _, j := range jobs {
+		if j.InstallationName == "uaa" {
+			return j
+		}
+	}
+	Fail("Cant find uaa job in product settings")
+	return job{}
+}
+
+type job struct {
+	InstallationName string `json:"installation_name"`
+	Properties       properties
+}
+
+type properties []property
+
+func (properties properties) AdminCredentials() property {
+	for _, p := range properties {
+		if p.Identifier == "admin_credentials" {
+			return p
+		}
+	}
+	Fail("Cant find admin_credentials in uaa job")
+	return property{}
+}
+
+type property struct {
+	Identifier string          `json:"identifier"`
+	Value      json.RawMessage `json:"value"`
+}
+
+type credentialsValue struct {
+	Username string `json:"identity"`
+	Password string `json:"password"`
+}
+
+func (property property) Credentials() (username, password string, err error) {
+	creds := credentialsValue{}
+	fmt.Printf("property.Value %s\n", string(property.Value))
+	err = json.Unmarshal(property.Value, &creds)
+	return creds.Username, creds.Password, err
+}
+
+func (client *opsmanClient) GetInstallationSettings() (installationSettings, error) {
+	client.httpClient.NewRequest("api/installation_settings", nil)
+	installationSetting := installationSettings{}
+	err := client.httpClient.Get(&installationSetting)
+	return installationSetting, err
+}
+
+func (client *opsmanClient) GetAdminCredentials() (username, password string, err error) {
+	installationSetting, err := client.GetInstallationSettings()
 	if err != nil {
 		return "", "", err
 	}
-
-	return credentials.Credential.Value.Username, credentials.Credential.Value.Password, nil
+	fmt.Printf("installationSetting.Products.CF().Jobs %d\n", len(installationSetting.Products.CF().Jobs))
+	return installationSetting.Products.CF().Jobs.UAA().Properties.AdminCredentials().Credentials()
 }
 
-func getAuthToken(opsManagerURL, username, password string) (string, error) {
+func getAuthorization(opsManagerURL, username, password string) (string, error) {
 	body := url.Values{
 		"grant_type": {"password"},
 		"username":   {username},
@@ -107,21 +163,24 @@ func getAuthToken(opsManagerURL, username, password string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	responseToken := token{}
 
-	if response.StatusCode != 200 {
+	if response.StatusCode == 200 {
+		responseToken := token{}
+		err = json.NewDecoder(response.Body).Decode(&responseToken)
+		if err != nil {
+			return "", err
+		}
+		if responseToken.AccessToken == "" {
+			return "", fmt.Errorf("No token returned")
+		}
+		return "Bearer " + responseToken.AccessToken, nil
+	} else if response.StatusCode == 404 {
+		// Assume basic auth
+		auth := base64.StdEncoding.EncodeToString([]byte(username + ":" + password))
+		return "Basic " + auth, nil
+	} else {
 		return "", fmt.Errorf("Unexpected response code %d", response.StatusCode)
 	}
-
-	err = json.NewDecoder(response.Body).Decode(&responseToken)
-	if err != nil {
-		return "", err
-	}
-	if responseToken.AccessToken == "" {
-		return "", fmt.Errorf("No token returned")
-	}
-
-	return responseToken.AccessToken, nil
 }
 
 type token struct {
