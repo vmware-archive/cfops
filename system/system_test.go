@@ -94,19 +94,24 @@ var _ = Describe("CFOps Ops Manager plugin", func() {
 
 		backupSession, err := gexec.Start(backupCommand, GinkgoWriter, GinkgoWriter)
 		Expect(err).NotTo(HaveOccurred())
-		Consistently(backupSession.Out.Contents()).ShouldNot(ContainSubstring(cfConfig.OMAdminPassword))
+		if cfConfig.OMAdminPassword != "" {
+			Consistently(backupSession.Out.Contents()).ShouldNot(ContainSubstring(cfConfig.OMAdminPassword))
+			Consistently(backupSession.Err.Contents()).ShouldNot(ContainSubstring(cfConfig.OMAdminPassword))
+		}
 		Consistently(backupSession.Out.Contents()).ShouldNot(ContainSubstring("RSA PRIVATE KEY"))
-
-		Consistently(backupSession.Err.Contents()).ShouldNot(ContainSubstring(cfConfig.OMAdminPassword))
 		Consistently(backupSession.Err.Contents()).ShouldNot(ContainSubstring("RSA PRIVATE KEY"))
 
 		Eventually(backupSession, 1200).Should(gexec.Exit(0))
+
+		if os.Getenv("OM_VERSION") == "1.6" {
+			createAdminUser(newVMIP, cfConfig.OMAdminUser, cfConfig.OMAdminPassword)
+		}
 
 		restoreSession, err := gexec.Start(restoreCommand, GinkgoWriter, GinkgoWriter)
 		Expect(err).NotTo(HaveOccurred())
 		Eventually(restoreSession, 1800).Should(gexec.Exit(0))
 
-		time.Sleep(2 * time.Minute) // wait for new OM machine to be ready after restore
+		time.Sleep(2 * time.Minute) // TODO make this better
 
 		checkOpsManagersIdentical(cfConfig.OMHostname, newVMIP)
 	})

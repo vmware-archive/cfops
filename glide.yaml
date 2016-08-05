@@ -26,3 +26,9 @@ import:
 - package: github.com/enaml-ops/omg-cli
   version: ~0.0.10
 - package: code.cloudfoundry.org/lager
+- package: golang.org/x/net
+  subpackages:
+  - html
+- package: github.com/PuerkitoBio/goquery
+  version: ^1.0.0
+- package: github.com/andybalholm/cascadia

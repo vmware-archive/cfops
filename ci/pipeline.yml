@@ -99,6 +99,7 @@ jobs:
       AWS_SECURITY_GROUP: {{aws-security-group}}
       OPSMAN_AMI: ami-f25ee281 # OpsMan 1.6.11.0
       IAAS: aws
+      OM_VERSION: 1.6
     ensure:
       put: environment-lock
       resource: environment-lock-1.6
@@ -120,6 +121,7 @@ jobs:
     params:
       ONLY_ERT: true
       IAAS: vsphere
+      OM_VERSION: 1.6
     ensure:
       put: environment-lock
       resource: environment-lock-vsphere-1.6

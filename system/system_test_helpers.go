@@ -1,12 +1,18 @@
 package system
 
 import (
+	"bytes"
+	"crypto/tls"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"net/http"
+	"net/url"
 	"os"
 
 	"golang.org/x/crypto/ssh"
 
+	"github.com/PuerkitoBio/goquery"
 	librssh "github.com/apcera/libretto/ssh"
 	"github.com/apcera/libretto/virtualmachine/aws"
 	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
@@ -133,6 +139,37 @@ func cfDo(cmd ...string) {
 	)
 }
 
+func createAdminUser(hostname, username, password string) {
+	transport := &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}
+	client := &http.Client{Transport: transport}
+	setupResp, err := client.Get(fmt.Sprintf("https://%s/setup", hostname))
+	Expect(err).NotTo(HaveOccurred())
+
+	doc, err := goquery.NewDocumentFromReader(setupResp.Body)
+	Expect(err).NotTo(HaveOccurred())
+
+	token, exists := doc.Find(`input[name="authenticity_token"]`).First().Attr("value")
+	Expect(exists).To(BeTrue())
+
+	data := url.Values{}
+	data.Add("setup[user_name]", username)
+	data.Add("setup[password]", password)
+	data.Add("setup[password_confirmation]", password)
+	data.Add("setup[eula_accepted]", "0")
+	data.Add("setup[eula_accepted]", "true")
+	data.Add("authenticity_token", token)
+
+	makeUserRequest, err := http.NewRequest(http.MethodPost, "https://"+hostname+"/setup", bytes.NewBufferString(data.Encode()))
+	Expect(err).NotTo(HaveOccurred())
+	for _, cookie := range setupResp.Cookies() {
+		makeUserRequest.AddCookie(cookie)
+	}
+
+	resp, err := client.Do(makeUserRequest)
+	body, _ := ioutil.ReadAll(resp.Body)
+	Expect(err).NotTo(HaveOccurred(), string(body))
+}
+
 //Config ...
 type Config struct {
 	APIEndpoint     string
@@ -152,8 +189,8 @@ type Config struct {
 }
 
 type HostInfo struct {
-	Username string
-	Password string
-	Hostname string
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Hostname string `json:"host"`
 	SSHKey   string
 }

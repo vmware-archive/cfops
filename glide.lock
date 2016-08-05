@@ -1,8 +1,10 @@
-hash: b30e2456570cfe6378ed182e011a232eacdd1ae81f004116de6bd0308a211a0f
-updated: 2016-08-03T16:01:42.072264989+01:00
+hash: 88052bce02ae977a057f8833c1b530d194a864ad94999a39e02f4ee7c293c210
+updated: 2016-08-05T11:02:35.350506947+01:00
 imports:
 - name: code.cloudfoundry.org/lager
   version: 62951a8009ab331bb21dc418074fa54e66eb9b6a
+- name: github.com/andybalholm/cascadia
+  version: 3ad29d1ad1c4f2023e355603324348cf1f4b2d48
 - name: github.com/apcera/libretto
   version: 4a46558efd4c02a543a49c52488a7ebf1f91c8fe
   subpackages:
@@ -52,7 +54,7 @@ imports:
 - name: github.com/codegangsta/cli
   version: 4205e9c4ee9672a8df5bb4fe486a8aa07e1e4037
 - name: github.com/enaml-ops/omg-cli
-  version: a9b58cb6350e4c6f8fe7cad065d04fd660d98a8a
+  version: cf8fa3a920fadb8e9677aa09bb1a47c288bd2e34
 - name: github.com/go-ini/ini
   version: 060d7da055ba6ec5ea7a31f116332fe5efa04ce0
   repo: https://github.com/go-ini/ini
@@ -134,6 +136,8 @@ imports:
   version: cbd18b5440315aa74a17dee2e50b67675b872b49
 - name: github.com/pkg/sftp
   version: 57fcf4a640a942eb05181f929601f8f4409eda3e
+- name: github.com/PuerkitoBio/goquery
+  version: 7f4291566cf7cac3be222a933e01a2bed97532b1
 - name: github.com/rlmcpherson/s3gof3r
   version: 39f5507f61031141057f3f880d9fb9eb97b8afd7
 - name: github.com/technoweenie/multipartstreamer
@@ -155,6 +159,11 @@ imports:
   - pkcs12
   - ssh
   - ed25519/internal/edwards25519
+- name: golang.org/x/net
+  version: 1d9fd3b8333e891c0e7353e1adcfe8a612573033
+  subpackages:
+  - html
+  - html/atom
 - name: golang.org/x/sys
   version: a646d33e2ee3172a661fc09bca23bb4889a41bc8
   subpackages:
