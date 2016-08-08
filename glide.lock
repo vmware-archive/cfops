@@ -1,5 +1,5 @@
 hash: 88052bce02ae977a057f8833c1b530d194a864ad94999a39e02f4ee7c293c210
-updated: 2016-08-05T11:02:35.350506947+01:00
+updated: 2016-08-08T10:57:30.685845516+01:00
 imports:
 - name: code.cloudfoundry.org/lager
   version: 62951a8009ab331bb21dc418074fa54e66eb9b6a
@@ -54,7 +54,7 @@ imports:
 - name: github.com/codegangsta/cli
   version: 4205e9c4ee9672a8df5bb4fe486a8aa07e1e4037
 - name: github.com/enaml-ops/omg-cli
-  version: cf8fa3a920fadb8e9677aa09bb1a47c288bd2e34
+  version: 84aa905e6c26cd09e6c3f3fb8b8f519149bd3821
 - name: github.com/go-ini/ini
   version: 060d7da055ba6ec5ea7a31f116332fe5efa04ce0
   repo: https://github.com/go-ini/ini
@@ -115,7 +115,7 @@ imports:
 - name: github.com/pivotal-golang/lager
   version: 7639e31ce6622c55c15aa64144b85d5f4873d127
 - name: github.com/pivotalservices/cfbackup
-  version: bb0f2c39db5f15602536f041712b6d3246fa5d50
+  version: 6defee4cc3ede7c68042c524aedf23391df19995
   subpackages:
   - tiles
   - tiles/opsmanager

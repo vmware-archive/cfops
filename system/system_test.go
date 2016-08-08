@@ -94,14 +94,9 @@ var _ = Describe("CFOps Ops Manager plugin", func() {
 
 		backupSession, err := gexec.Start(backupCommand, GinkgoWriter, GinkgoWriter)
 		Expect(err).NotTo(HaveOccurred())
-		if cfConfig.OMAdminPassword != "" {
-			Consistently(backupSession.Out.Contents()).ShouldNot(ContainSubstring(cfConfig.OMAdminPassword))
-			Consistently(backupSession.Err.Contents()).ShouldNot(ContainSubstring(cfConfig.OMAdminPassword))
-		}
-		Consistently(backupSession.Out.Contents()).ShouldNot(ContainSubstring("RSA PRIVATE KEY"))
-		Consistently(backupSession.Err.Contents()).ShouldNot(ContainSubstring("RSA PRIVATE KEY"))
 
 		Eventually(backupSession, 1200).Should(gexec.Exit(0))
+		checkNoSecretsInSesssion(backupSession)
 
 		if os.Getenv("OM_VERSION") == "1.6" {
 			createAdminUser(newVMIP, cfConfig.OMAdminUser, cfConfig.OMAdminPassword)
@@ -109,13 +104,23 @@ var _ = Describe("CFOps Ops Manager plugin", func() {
 
 		restoreSession, err := gexec.Start(restoreCommand, GinkgoWriter, GinkgoWriter)
 		Expect(err).NotTo(HaveOccurred())
+
 		Eventually(restoreSession, 1800).Should(gexec.Exit(0))
+		checkNoSecretsInSesssion(backupSession)
 
 		time.Sleep(2 * time.Minute) // TODO make this better
 
 		checkOpsManagersIdentical(cfConfig.OMHostname, newVMIP)
 	})
 })
+
+func checkNoSecretsInSesssion(session *gexec.Session) {
+	Expect(session.Out.Contents()).NotTo(ContainSubstring(cfConfig.OMAdminPassword))
+	Expect(session.Out.Contents()).NotTo(ContainSubstring("RSA PRIVATE KEY"))
+
+	Expect(session.Err.Contents()).NotTo(ContainSubstring(cfConfig.OMAdminPassword))
+	Expect(session.Err.Contents()).NotTo(ContainSubstring("RSA PRIVATE KEY"))
+}
 
 func checkOpsManagersIdentical(oldHost, newHost string) {
 	opsManager, err := NewOpsManagerClient(oldHost, cfConfig.OMAdminUser, cfConfig.OMAdminPassword, logger)
