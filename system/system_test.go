@@ -1,8 +1,10 @@
 package system
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"strings"
@@ -96,7 +98,8 @@ var _ = Describe("CFOps Ops Manager plugin", func() {
 		Expect(err).NotTo(HaveOccurred())
 
 		Eventually(backupSession, 1200).Should(gexec.Exit(0))
-		checkNoSecretsInSesssion(backupSession)
+		checkNoSecretsInSession(backupSession.Out.Contents())
+		checkNoSecretsInSession(backupSession.Err.Contents())
 
 		if os.Getenv("OM_VERSION") == "1.6" {
 			createAdminUser(newVMIP, cfConfig.OMAdminUser, cfConfig.OMAdminPassword)
@@ -106,7 +109,8 @@ var _ = Describe("CFOps Ops Manager plugin", func() {
 		Expect(err).NotTo(HaveOccurred())
 
 		Eventually(restoreSession, 1800).Should(gexec.Exit(0))
-		checkNoSecretsInSesssion(backupSession)
+		checkNoSecretsInSession(restoreSession.Out.Contents())
+		checkNoSecretsInSession(restoreSession.Err.Contents())
 
 		time.Sleep(2 * time.Minute) // TODO make this better
 
@@ -114,12 +118,11 @@ var _ = Describe("CFOps Ops Manager plugin", func() {
 	})
 })
 
-func checkNoSecretsInSesssion(session *gexec.Session) {
-	Expect(session.Out.Contents()).NotTo(ContainSubstring(cfConfig.OMAdminPassword))
-	Expect(session.Out.Contents()).NotTo(ContainSubstring("RSA PRIVATE KEY"))
-
-	Expect(session.Err.Contents()).NotTo(ContainSubstring(cfConfig.OMAdminPassword))
-	Expect(session.Err.Contents()).NotTo(ContainSubstring("RSA PRIVATE KEY"))
+func checkNoSecretsInSession(session []byte) {
+	if cfConfig.OMAdminPassword != "" {
+		Expect(session).NotTo(ContainSubstring(cfConfig.OMAdminPassword))
+	}
+	Expect(session).NotTo(ContainSubstring("RSA PRIVATE KEY"))
 }
 
 func checkOpsManagersIdentical(oldHost, newHost string) {
@@ -189,13 +192,18 @@ var _ = Describe("CFOps Elastic Runtime plugin", func() {
 		scpHelper(cfConfig.OMHostInfo, cfopsLinuxExecutablePath, cfopsPath)
 		remoteExecute(cfConfig.OMHostInfo, "chmod +x /tmp/cfops", os.Stdout)
 
+		backupOutputBuffer := bytes.NewBuffer([]byte{})
+		restoreOutputBuffer := bytes.NewBuffer([]byte{})
+
 		fmt.Println("Backing up ERT...")
-		remoteExecute(cfConfig.OMHostInfo, backupCmd, os.Stdout)
+		remoteExecute(cfConfig.OMHostInfo, backupCmd, io.MultiWriter(os.Stdout, backupOutputBuffer))
+		checkNoSecretsInSession(backupOutputBuffer.Bytes())
 
 		deleteTestApp(cfConfig)
 
 		fmt.Println("Restoring ERT...")
-		remoteExecute(cfConfig.OMHostInfo, restoreCmd, os.Stdout)
+		remoteExecute(cfConfig.OMHostInfo, restoreCmd, io.MultiWriter(os.Stdout, restoreOutputBuffer))
+		checkNoSecretsInSession(restoreOutputBuffer.Bytes())
 
 		cfDo("target", "-o", cfConfig.OrgName, "-s", cfConfig.SpaceName)
 		Eventually(cf.Cf("apps")).Should(gbytes.Say(cfConfig.AppName))
