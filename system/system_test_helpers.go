@@ -68,25 +68,65 @@ func scpHelper(hostInfo HostInfo, localpath, remotepath string) {
 	Expect(err).ToNot(HaveOccurred())
 }
 
-func remoteExecute(hostInfo HostInfo, remotecommand string, rstdout io.Writer) (err error) {
-	var remoteConn command.Executer
-	if hostInfo.Password == "" {
-		remoteConn, err = command.NewRemoteExecutor(command.SshConfig{
-			Username: hostInfo.Username,
-			Host:     hostInfo.Hostname,
-			Port:     22,
-			SSLKey:   hostInfo.SSHKey,
-		})
-	} else {
-		remoteConn, err = command.NewRemoteExecutor(command.SshConfig{
-			Username: hostInfo.Username,
-			Host:     hostInfo.Hostname,
-			Port:     22,
-			Password: hostInfo.Password,
-		})
+type wrappedClientToEnableDebugging struct {
+	innerClient  command.ClientInterface
+	session      *ssh.Session
+	outputWriter io.Writer
+}
+
+func (wc wrappedClientToEnableDebugging) NewSession() (command.SSHSession, error) {
+	session, err := wc.innerClient.NewSession()
+	if err != nil {
+		return nil, err
 	}
-	Expect(err).ToNot(HaveOccurred())
-	return remoteConn.Execute(rstdout, remotecommand)
+	sess := session.(*ssh.Session)
+	sess.Setenv("LOG_LEVEL", "debug")
+	wc.session = sess
+	stderrReader, err := sess.StderrPipe()
+	if err != nil {
+		return nil, err
+	}
+	_, err = io.Copy(wc.outputWriter, stderrReader)
+	if err != nil {
+		return nil, err
+	}
+	return sess, nil
+}
+
+func remoteExecute(hostInfo HostInfo, remotecommand string) ([]byte, error) {
+	var authMethod []ssh.AuthMethod
+	if hostInfo.Password == "" {
+		keySigner, err := ssh.ParsePrivateKey([]byte(hostInfo.SSHKey))
+		if err != nil {
+			return nil, err
+		}
+
+		authMethod = []ssh.AuthMethod{
+			ssh.PublicKeys(keySigner),
+		}
+
+	} else {
+		authMethod = []ssh.AuthMethod{
+			ssh.Password(hostInfo.Password),
+		}
+	}
+	clientconfig := &ssh.ClientConfig{
+		User: hostInfo.Username,
+		Auth: authMethod,
+	}
+	client, err := ssh.Dial("tcp", fmt.Sprintf("%s:%d", hostInfo.Hostname, 22), clientconfig)
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+	session, err := client.NewSession()
+	if err != nil {
+		return nil, err
+	}
+	defer session.Close()
+	session.Setenv("LOG_LEVEL", "debug")
+
+	return session.CombinedOutput(remotecommand)
 }
 
 func deleteTestApp(config Config) {

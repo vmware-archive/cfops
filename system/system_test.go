@@ -1,10 +1,8 @@
 package system
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"os"
 	"os/exec"
 	"strings"
@@ -156,11 +154,11 @@ var _ = Describe("CFOps Elastic Runtime plugin", func() {
 		deleteTestApp(cfConfig)
 
 		if cfopsPath != "" {
-			remoteExecute(cfConfig.OMHostInfo, "rm -rf "+cfopsPath, os.Stdout)
+			remoteExecute(cfConfig.OMHostInfo, "rm -rf "+cfopsPath)
 		}
 
 		if backupPath != "" {
-			remoteExecute(cfConfig.OMHostInfo, "rm -rf "+backupPath, os.Stdout)
+			remoteExecute(cfConfig.OMHostInfo, "rm -rf "+backupPath)
 		}
 	})
 
@@ -190,20 +188,23 @@ var _ = Describe("CFOps Elastic Runtime plugin", func() {
 		}, " ")
 
 		scpHelper(cfConfig.OMHostInfo, cfopsLinuxExecutablePath, cfopsPath)
-		remoteExecute(cfConfig.OMHostInfo, "chmod +x /tmp/cfops", os.Stdout)
+		_, err := remoteExecute(cfConfig.OMHostInfo, "chmod +x /tmp/cfops")
 
-		backupOutputBuffer := bytes.NewBuffer([]byte{})
-		restoreOutputBuffer := bytes.NewBuffer([]byte{})
+		Expect(err).NotTo(HaveOccurred())
 
 		fmt.Println("Backing up ERT...")
-		remoteExecute(cfConfig.OMHostInfo, backupCmd, io.MultiWriter(os.Stdout, backupOutputBuffer))
-		checkNoSecretsInSession(backupOutputBuffer.Bytes())
+		output, err := remoteExecute(cfConfig.OMHostInfo, backupCmd)
+		Expect(err).NotTo(HaveOccurred())
+		GinkgoWriter.Write(output)
+		checkNoSecretsInSession(output)
 
 		deleteTestApp(cfConfig)
 
 		fmt.Println("Restoring ERT...")
-		remoteExecute(cfConfig.OMHostInfo, restoreCmd, io.MultiWriter(os.Stdout, restoreOutputBuffer))
-		checkNoSecretsInSession(restoreOutputBuffer.Bytes())
+		output, err = remoteExecute(cfConfig.OMHostInfo, restoreCmd)
+		Expect(err).NotTo(HaveOccurred())
+		GinkgoWriter.Write(output)
+		checkNoSecretsInSession(output)
 
 		cfDo("target", "-o", cfConfig.OrgName, "-s", cfConfig.SpaceName)
 		Eventually(cf.Cf("apps")).Should(gbytes.Say(cfConfig.AppName))
