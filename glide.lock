@@ -1,5 +1,5 @@
 hash: 88052bce02ae977a057f8833c1b530d194a864ad94999a39e02f4ee7c293c210
-updated: 2016-08-09T14:36:28.020899618+01:00
+updated: 2016-08-09T17:23:22.401956185+01:00
 imports:
 - name: code.cloudfoundry.org/lager
   version: 62951a8009ab331bb21dc418074fa54e66eb9b6a
@@ -143,7 +143,7 @@ imports:
 - name: github.com/pivotal-golang/lager
   version: 7639e31ce6622c55c15aa64144b85d5f4873d127
 - name: github.com/pivotalservices/cfbackup
-  version: ad53ec8fd48fa09dffbf3f4ea0832222547b483c
+  version: 9a0360c4cc94db42fefe49a9483e4305d494cec6
   subpackages:
   - tileregistry
   - tiles
