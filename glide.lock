@@ -1,5 +1,5 @@
 hash: 88052bce02ae977a057f8833c1b530d194a864ad94999a39e02f4ee7c293c210
-updated: 2016-08-09T11:23:34.093139058+01:00
+updated: 2016-08-09T14:36:28.020899618+01:00
 imports:
 - name: code.cloudfoundry.org/lager
   version: 62951a8009ab331bb21dc418074fa54e66eb9b6a
@@ -9,9 +9,9 @@ imports:
   version: 4a46558efd4c02a543a49c52488a7ebf1f91c8fe
   subpackages:
   - ssh
-  - virtualmachine/aws
   - util
   - virtualmachine
+  - virtualmachine/aws
 - name: github.com/apcera/util
   version: 5be235938229da74a2adac74ee88b947e0e1c8fc
   repo: https://github.com/apcera/util
@@ -22,28 +22,28 @@ imports:
   repo: https://github.com/aws/aws-sdk-go
   subpackages:
   - aws
+  - aws/awserr
+  - aws/awsutil
+  - aws/client
+  - aws/client/metadata
+  - aws/corehandlers
+  - aws/credentials
+  - aws/credentials/ec2rolecreds
+  - aws/credentials/endpointcreds
+  - aws/defaults
+  - aws/ec2metadata
+  - aws/request
+  - aws/session
+  - aws/signer/v4
   - private/endpoints
   - private/protocol
+  - private/protocol/ec2query
+  - private/protocol/query/queryutil
+  - private/protocol/rest
+  - private/protocol/xml/xmlutil
   - private/waiter
   - service/ec2
   - service/sts
-  - aws/awserr
-  - aws/credentials
-  - aws/session
-  - aws/client
-  - aws/corehandlers
-  - aws/defaults
-  - aws/request
-  - aws/awsutil
-  - aws/client/metadata
-  - aws/signer/v4
-  - private/protocol/ec2query
-  - aws/credentials/ec2rolecreds
-  - aws/credentials/endpointcreds
-  - aws/ec2metadata
-  - private/protocol/rest
-  - private/protocol/query/queryutil
-  - private/protocol/xml/xmlutil
 - name: github.com/cloudfoundry-community/go-cfenv
   version: 96ad7376813bfd13c95af69ca5b4ef5725f6b335
 - name: github.com/cloudfoundry-incubator/cf-test-helpers
@@ -71,6 +71,28 @@ imports:
   repo: https://github.com/jmespath/go-jmespath
 - name: github.com/kr/fs
   version: 2788f0dbd16903de03cb8186e5c7d97b69ad387b
+- name: github.com/Masterminds/glide
+  version: 015133a9ac9ef87f8a522139b03fef4e6c35bb78
+  subpackages:
+  - action
+  - cache
+  - cfg
+  - dependency
+  - gb
+  - godep
+  - godep/strip
+  - gom
+  - gpm
+  - importer
+  - msg
+  - path
+  - repo
+  - tree
+  - util
+- name: github.com/Masterminds/semver
+  version: 8d0431362b544d1a3536cca26684828866a7de09
+- name: github.com/Masterminds/vcs
+  version: fbe9fb6ad5b5f35b3e82a7c21123cfc526cbf895
 - name: github.com/mitchellh/mapstructure
   version: 281073eb9eb092240d33ef253c404f1cca550309
 - name: github.com/nu7hatch/gouuid
@@ -79,35 +101,41 @@ imports:
   version: 74c678d97c305753605c338c6c78c49ec104b5e7
   subpackages:
   - config
+  - ginkgo/convert
+  - ginkgo/interrupthandler
+  - ginkgo/nodot
+  - ginkgo/testrunner
+  - ginkgo/testsuite
+  - ginkgo/watch
   - internal/codelocation
+  - internal/containernode
   - internal/failer
+  - internal/leafnodes
   - internal/remote
+  - internal/spec
+  - internal/specrunner
   - internal/suite
   - internal/testingtproxy
   - internal/writer
   - reporters
   - reporters/stenographer
   - types
-  - internal/containernode
-  - internal/leafnodes
-  - internal/spec
-  - internal/specrunner
 - name: github.com/onsi/gomega
   version: 9ed8da19f2156b87a803a8fdf6d126f627a12db1
   subpackages:
-  - gexec
+  - format
   - gbytes
+  - gexec
   - internal/assertion
   - internal/asyncassertion
+  - internal/oraclematcher
   - internal/testingtsupport
   - matchers
-  - types
-  - format
-  - internal/oraclematcher
   - matchers/support/goraph/bipartitegraph
   - matchers/support/goraph/edge
   - matchers/support/goraph/node
   - matchers/support/goraph/util
+  - types
 - name: github.com/op/go-logging
   version: 970db520ece77730c7e4724c61121037378659d9
 - name: github.com/pborman/uuid
@@ -115,22 +143,22 @@ imports:
 - name: github.com/pivotal-golang/lager
   version: 7639e31ce6622c55c15aa64144b85d5f4873d127
 - name: github.com/pivotalservices/cfbackup
-  version: 6defee4cc3ede7c68042c524aedf23391df19995
+  version: ad53ec8fd48fa09dffbf3f4ea0832222547b483c
   subpackages:
-  - tiles
-  - tiles/opsmanager
   - tileregistry
+  - tiles
   - tiles/elasticruntime
+  - tiles/opsmanager
 - name: github.com/pivotalservices/gtils
   version: 2605eda5a33230d9613738bba5271d1c040e4a15
   subpackages:
-  - command
-  - osutils
   - bosh
+  - command
   - http
+  - log
+  - osutils
   - persistence
   - storage
-  - log
   - uaa
 - name: github.com/pkg/errors
   version: a22138067af1c4942683050411a841ade67fe1eb
@@ -156,9 +184,9 @@ imports:
   subpackages:
   - curve25519
   - ed25519
+  - ed25519/internal/edwards25519
   - pkcs12
   - ssh
-  - ed25519/internal/edwards25519
 - name: golang.org/x/net
   version: 1d9fd3b8333e891c0e7353e1adcfe8a612573033
   subpackages:
