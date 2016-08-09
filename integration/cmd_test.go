@@ -193,7 +193,8 @@ var _ = Describe("cfops cmd", func() {
 			})
 			It("does not back up NFS", func() {
 				nfsBackupPath := filepath.Join(destinationDirectory, "nfs_server.backup")
-				Expect(nfsBackupPath).NotTo(BeAnExistingFile())
+				Expect(filesInTar(nfsBackupPath)).To(ConsistOf(
+					"shared/cc-buildpacks/07/7a/077a250e-fdc4-40e5-8d0b-2b8e9cbd1aba_886bd2888127429f7f75120d98a187cbf7289c16"))
 			})
 		})
 
