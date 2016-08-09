@@ -1,5 +1,5 @@
 hash: 88052bce02ae977a057f8833c1b530d194a864ad94999a39e02f4ee7c293c210
-updated: 2016-08-08T10:57:30.685845516+01:00
+updated: 2016-08-09T11:23:34.093139058+01:00
 imports:
 - name: code.cloudfoundry.org/lager
   version: 62951a8009ab331bb21dc418074fa54e66eb9b6a
@@ -54,7 +54,7 @@ imports:
 - name: github.com/codegangsta/cli
   version: 4205e9c4ee9672a8df5bb4fe486a8aa07e1e4037
 - name: github.com/enaml-ops/omg-cli
-  version: 84aa905e6c26cd09e6c3f3fb8b8f519149bd3821
+  version: ba666eb056ff4e2cdba83c30e9b9b24c087b05b7
 - name: github.com/go-ini/ini
   version: 060d7da055ba6ec5ea7a31f116332fe5efa04ce0
   repo: https://github.com/go-ini/ini
@@ -122,7 +122,7 @@ imports:
   - tileregistry
   - tiles/elasticruntime
 - name: github.com/pivotalservices/gtils
-  version: 02f6e3fc7007ce437a04c201c60025dcda26fe04
+  version: 2605eda5a33230d9613738bba5271d1c040e4a15
   subpackages:
   - command
   - osutils
@@ -133,9 +133,9 @@ imports:
   - log
   - uaa
 - name: github.com/pkg/errors
-  version: cbd18b5440315aa74a17dee2e50b67675b872b49
+  version: a22138067af1c4942683050411a841ade67fe1eb
 - name: github.com/pkg/sftp
-  version: 57fcf4a640a942eb05181f929601f8f4409eda3e
+  version: a71e8f580e3b622ebff585309160b1cc549ef4d2
 - name: github.com/PuerkitoBio/goquery
   version: 7f4291566cf7cac3be222a933e01a2bed97532b1
 - name: github.com/rlmcpherson/s3gof3r
