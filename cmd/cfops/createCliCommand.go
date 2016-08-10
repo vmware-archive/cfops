@@ -152,7 +152,7 @@ var (
 	flagList                = map[string]flagBucket{
 		nfs: flagBucket{
 			Flag:         []string{"nfs"},
-			Desc:         "options are 'lite' (skips optional parts of blobstore), 'full' (backs up whole blobstore) or 'skip' (does not backup blobstore). This will only apply to elastic-runtime. Defaults to 'full'",
+			Desc:         "options are 'lite' (skips optional parts of blobstore), 'full' (backs up whole blobstore) or 'bp' (only backs up buildpacks). This will only apply to elastic-runtime. Defaults to 'full'",
 			DefaultValue: "full",
 			EnvVar:       "NFS_BACKUP",
 		},
@@ -306,5 +306,5 @@ func hasValidBackupRestoreFlags(fs *flagSet) bool {
 	return res
 }
 func validateNfsType(nfsflag string) bool {
-	return nfsflag == cfbackup.NFSBackupTypeNone || nfsflag == cfbackup.NFSBackupTypeLite || nfsflag == cfbackup.NFSBackupTypeFull
+	return nfsflag == cfbackup.NFSBackupTypeBP || nfsflag == cfbackup.NFSBackupTypeLite || nfsflag == cfbackup.NFSBackupTypeFull
 }
