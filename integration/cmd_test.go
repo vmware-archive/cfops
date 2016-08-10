@@ -184,14 +184,14 @@ var _ = Describe("cfops cmd", func() {
 			})
 		})
 
-		Context("with nfs flag set to skip", func() {
+		Context("with nfs flag set to bp", func() {
 			BeforeEach(func() {
-				additionalFlag = "-nfs=skip"
+				additionalFlag = "-nfs=bp"
 			})
 			It("should succeed", func() {
 				Eventually(session).Should(gexec.Exit(0))
 			})
-			It("does not back up NFS", func() {
+			It("backups only the buildbacks", func() {
 				nfsBackupPath := filepath.Join(destinationDirectory, "nfs_server.backup")
 				Expect(filesInTar(nfsBackupPath)).To(ConsistOf(
 					"shared/cc-buildpacks/07/7a/077a250e-fdc4-40e5-8d0b-2b8e9cbd1aba_886bd2888127429f7f75120d98a187cbf7289c16"))
