@@ -1,4 +1,4 @@
-# Compiled Object files, Static and Dynamic libs (Shared Objects)
+ Compiled Object files, Static and Dynamic libs (Shared Objects)
 *.o
 *.a
 *.so
@@ -40,3 +40,4 @@ plugin/cfopsplugin/sample/sample
 .wercker/
 /tmp
 secrets.*
+/system_test_workspace
