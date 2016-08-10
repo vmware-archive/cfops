@@ -1,0 +1,21 @@
+#!/usr/bin/env ruby
+
+`rm -rf system_test_workspace`
+raise 'cant use without ENV_NAME' unless ENV['ENV_NAME']
+raise 'cant use without IAAS' unless ENV['IAAS']
+raise 'cant use without OM_VERSION' unless ENV['OM_VERSION']
+
+`mkdir -p system_test_workspace`
+
+`ln -s ~/workspace/london-meta system_test_workspace/london-meta`
+
+`mkdir -p system_test_workspace/environment-lock`
+`echo $ENV_NAME > system_test_workspace/environment-lock/name`
+`cat ~/workspace/london-services-locks/$IAAS-$OM_VERSION-envs/claimed/$ENV_NAME > system_test_workspace/environment-lock/metadata`
+
+`mkdir -p system_test_workspace/src/github.com/pivotalservices/`
+
+puts `ln -s #{`pwd`.strip} system_test_workspace/src/github.com/pivotalservices/cfops`
+
+exec("cd system_test_workspace && ../ci/scripts/system")
+
