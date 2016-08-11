@@ -1,5 +1,5 @@
 hash: 88052bce02ae977a057f8833c1b530d194a864ad94999a39e02f4ee7c293c210
-updated: 2016-08-10T11:37:24.828508513+01:00
+updated: 2016-08-11T16:47:04.672940978+01:00
 imports:
 - name: code.cloudfoundry.org/lager
   version: 62951a8009ab331bb21dc418074fa54e66eb9b6a
@@ -54,7 +54,7 @@ imports:
 - name: github.com/codegangsta/cli
   version: 4205e9c4ee9672a8df5bb4fe486a8aa07e1e4037
 - name: github.com/enaml-ops/omg-cli
-  version: 8a6e365e271c25e62bdc93afd0a91209cbcf3630
+  version: 89c8cff816ad0d3ea883b3c98902db98ca5bf8b2
 - name: github.com/go-ini/ini
   version: 060d7da055ba6ec5ea7a31f116332fe5efa04ce0
   repo: https://github.com/go-ini/ini
@@ -138,12 +138,10 @@ imports:
   - types
 - name: github.com/op/go-logging
   version: 970db520ece77730c7e4724c61121037378659d9
-- name: github.com/pborman/uuid
-  version: c55201b036063326c5b1b89ccfe45a184973d073
 - name: github.com/pivotal-golang/lager
   version: 7639e31ce6622c55c15aa64144b85d5f4873d127
 - name: github.com/pivotalservices/cfbackup
-  version: 18b52adfe3ea710c3d2bffbfe627f57a032e7366
+  version: 1f9df28644ca8c946c570858e25bca2807118dd7
   subpackages:
   - tileregistry
   - tiles
@@ -200,4 +198,6 @@ imports:
   version: 9f9df34309c04878acc86042b16630b0f696e1de
 - name: gopkg.in/yaml.v2
   version: a83829b6f1293c91addabc89d0571c246397bbf4
-testImports: []
+testImports:
+- name: github.com/pborman/uuid
+  version: c55201b036063326c5b1b89ccfe45a184973d073
