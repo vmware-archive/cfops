@@ -12,6 +12,13 @@ resources:
     branch: master
     private_key: {{git-private-key}}
     uri: git@github.com:pivotal-cf/london-meta.git
+- name: environment-lock-1.8
+  type: pool
+  source:
+    branch: master
+    pool: aws-1.8-envs
+    private_key: {{git-private-key}}
+    uri: git@github.com:pivotal-cf-experimental/london-services-locks.git
 - name: environment-lock-1.7
   type: pool
   source:
@@ -38,6 +45,14 @@ resources:
   source:
     branch: master
     pool: vsphere-1.7-envs
+    private_key: {{git-private-key}}
+    uri: git@github.com:pivotal-cf-experimental/london-services-locks.git
+
+- name: environment-lock-vsphere-1.8
+  type: pool
+  source:
+    branch: master
+    pool: vsphere-1.8-envs
     private_key: {{git-private-key}}
     uri: git@github.com:pivotal-cf-experimental/london-services-locks.git
 
@@ -81,6 +96,30 @@ jobs:
       resource: environment-lock-1.7
       params: { release: environment-lock }
 
+- name: system-aws-1.8
+  plan:
+  - aggregate:
+    - put: environment-lock
+      resource: environment-lock-1.8
+      params: { acquire: true }
+    - get: london-meta
+    - get: cfops
+      trigger: true
+      passed: [integration]
+  - task: system
+    file: cfops/ci/tasks/system.yml
+    params:
+      AWS_ACCESS_KEY_ID: {{aws-access-key-id}}
+      AWS_SECRET_ACCESS_KEY: {{aws-secret-access-key}}
+      AWS_SECURITY_GROUP: {{aws-security-group}}
+      OPSMAN_AMI: ami-841b70f7 # OpsMan pivotal-ops-manager-v1.8-RC2
+      IAAS: aws
+    ensure:
+      put: environment-lock
+      resource: environment-lock-1.8
+      params: { release: environment-lock }
+
+
 - name: system-aws-1.6
   plan:
   - aggregate:
@@ -97,7 +136,7 @@ jobs:
       AWS_ACCESS_KEY_ID: {{aws-access-key-id}}
       AWS_SECRET_ACCESS_KEY: {{aws-secret-access-key}}
       AWS_SECURITY_GROUP: {{aws-security-group}}
-      OPSMAN_AMI: ami-f25ee281 # OpsMan 1.6.11.0
+      OPSMAN_AMI: ami-1da13b6e # OpsMan 1.6.18.0
       IAAS: aws
       OM_VERSION: 1.6
     ensure:
@@ -146,4 +185,25 @@ jobs:
     ensure:
       put: environment-lock
       resource: environment-lock-vsphere-1.7
+      params: { release: environment-lock }
+
+- name: system-vsphere-1.8
+  plan:
+  - aggregate:
+    - put: environment-lock
+      resource: environment-lock-vsphere-1.8
+      params: { acquire: true }
+    - get: london-meta
+    - get: cfops
+      trigger: true
+      passed: [integration]
+  - task: system
+    tags: [vsphere]
+    file: cfops/ci/tasks/system.yml
+    params:
+      ONLY_ERT: true
+      IAAS: vsphere
+    ensure:
+      put: environment-lock
+      resource: environment-lock-vsphere-1.8
       params: { release: environment-lock }
