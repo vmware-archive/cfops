@@ -18,7 +18,6 @@ import (
 	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gexec"
-	"github.com/pborman/uuid"
 	"github.com/pivotalservices/gtils/command"
 	"github.com/pivotalservices/gtils/osutils"
 )
@@ -145,7 +144,7 @@ func createInstance(amznkeyname string, amiID string, securityGroup string) *aws
 	fmt.Println("Creating AWS VM...")
 
 	vm := &aws.VM{
-		Name:         "cfops-test-" + uuid.NewRandom().String(),
+		Name:         "cfops-test",
 		AMI:          amiID,
 		InstanceType: "m3.large",
 		SSHCreds: librssh.Credentials{
