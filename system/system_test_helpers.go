@@ -174,7 +174,7 @@ func createInstance(amznkeyname string, amiID string, securityGroup string) *aws
 }
 
 func cfDo(cmd ...string) {
-	Eventually(cf.Cf(cmd...), 180).Should(gexec.Exit(0),
+	Eventually(cf.Cf(cmd...), 300).Should(gexec.Exit(0),
 		fmt.Sprintf("Command `cf %s` failed", cmd),
 	)
 }
