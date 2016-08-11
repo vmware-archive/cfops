@@ -63,7 +63,6 @@ var _ = Describe("CFOps Ops Manager plugin", func() {
 		}
 
 		vm := createInstance("cfops-test", cfConfig.AmiID, cfConfig.SecurityGroup)
-		defer vm.Destroy()
 
 		ips, err := vm.GetIPs()
 		newVMIP := ips[0].String()
@@ -113,6 +112,8 @@ var _ = Describe("CFOps Ops Manager plugin", func() {
 		time.Sleep(2 * time.Minute) // TODO make this better
 
 		checkOpsManagersIdentical(cfConfig.OMHostname, newVMIP)
+
+		vm.Destroy()
 	})
 })
 
