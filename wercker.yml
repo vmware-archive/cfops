@@ -62,8 +62,6 @@ build:
         name: cross platform release
         code: |
           (cd cmd/cfops/ && GOOS=linux GOARCH=amd64 go build -ldflags "-X main.VERSION=${NEXT_VERSION}" && mkdir -p ${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/linux64 && mv cfops ${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/linux64)
-          (cd cmd/cfops/ && GOOS=darwin GOARCH=amd64 go build -ldflags "-X main.VERSION=${NEXT_VERSION}" && mkdir -p ${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/osx && mv cfops ${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/osx)
-          (cd cmd/cfops/ && GOOS=windows GOARCH=amd64 go build -ldflags "-X main.VERSION=${NEXT_VERSION}" && mkdir -p ${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/win64 && mv cfops.exe ${WERCKER_OUTPUT_DIR}/${BUILD_DIR}/win64)
 
     - script:
         name: create tarball
@@ -138,16 +136,3 @@ deploy:
         source-dir: ./${BUILD_DIR}/linux64
         delete-removed: false
 
-    - s3sync:
-        key-id: $S3_KEY
-        key-secret: $S3_SECRET
-        bucket-url: ${S3_BUCKET}/${S3_FOLDER}/osx/${VERSION_TAG}/
-        source-dir: ./${BUILD_DIR}/osx
-        delete-removed: false
-
-    - s3sync:
-        key-id: $S3_KEY
-        key-secret: $S3_SECRET
-        bucket-url: ${S3_BUCKET}/${S3_FOLDER}/win64/${VERSION_TAG}/
-        source-dir: ./${BUILD_DIR}/win64
-        delete-removed: false
