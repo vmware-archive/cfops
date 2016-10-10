@@ -71,6 +71,163 @@ var _ = Describe("cfops cmd", func() {
 	AfterEach(func() {
 		removeKeyFromAuthorized(currentUser)
 	})
+	Describe("authenication methods", func() {
+		var destinationDirectory string
+		var opsmanUri *url.URL
+		var boshDirectorServer *ghttp.Server
+		BeforeEach(func() {
+			boshDirectorServer = ghttp.NewUnstartedServer()
+			boshDirectorServer.HTTPTestServer.Listener, err = net.Listen("tcp", "127.0.0.1:25555")
+			Expect(err).NotTo(HaveOccurred())
+			boshDirectorServer.HTTPTestServer.StartTLS()
+			boshDirectorServer.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", "/info"),
+					ghttp.RespondWith(http.StatusOK, `{}`),
+				),
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", "/deployments/cf-f21eea2dbdb8555f89fb"),
+					ghttp.RespondWith(http.StatusOK, `---`),
+				),
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", "/deployments/cf-f21eea2dbdb8555f89fb/vms"),
+					ghttp.RespondWith(http.StatusOK, `{}`),
+				),
+			)
+
+			createTestFiles("/var/vcap/store", []string{
+				"shared/cc-resources/09/4d/094dc37299e8d0c68e8e22e8f72a7b1632d26cc3",
+			})
+
+			destinationDirectory, err = ioutil.TempDir("", "cfops_destination")
+			Expect(err).NotTo(HaveOccurred())
+		})
+		AfterEach(func() {
+			os.RemoveAll(destinationDirectory)
+			boshDirectorServer.Close()
+		})
+
+		Context("with username/password", func() {
+			var opsmanServer *ghttp.Server
+			var session *gexec.Session
+
+			BeforeEach(func() {
+				opsmanServer = ghttp.NewTLSServer()
+				opsmanServer.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("POST", "/uaa/oauth/token"),
+						ghttp.RespondWith(http.StatusOK, `{"access_token": "MAGIC_TOKEN"}`),
+					),
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", "/api/installation_settings"),
+						ghttp.VerifyHeaderKV("Authorization", "Bearer MAGIC_TOKEN"),
+						ghttp.RespondWith(http.StatusOK, readFixture("fixtures/nfs_blobstore_test_installation_settings.json",
+							struct {
+								DirectorHost   string
+								NfsServerIP    string
+								NFSSshUser     string
+								NFSSshPassword string
+								SSHPrivateKey  string
+							}{DirectorHost: "127.0.0.1", NfsServerIP: "127.0.0.1", NFSSshUser: currentUser.Name, NFSSshPassword: "SECRET_nfs_ssh_password", SSHPrivateKey: strings.Replace(privateKey, "\n", "\\n", -1)})),
+					))
+				opsmanUri, err = url.Parse(opsmanServer.URL())
+				Expect(err).NotTo(HaveOccurred())
+			})
+			AfterEach(func() {
+				opsmanServer.Close()
+			})
+			JustBeforeEach(func() {
+				command := exec.Command(cfopsExecutablePath, "backup", "--opsmanagerhost", opsmanUri.Host, "--adminuser", "<usr>", "--adminpass", "SECRET_admin_password", "--opsmanageruser", "<opsuser>", "-d", destinationDirectory, "--tile", "elastic-runtime")
+
+				session, err = gexec.Start(command, GinkgoWriter, GinkgoWriter)
+				Expect(err).ShouldNot(HaveOccurred())
+				session.Wait(executionTimeout)
+			})
+			It("should accept the flags", func() {
+				Expect(session.Err.Contents()).ToNot(ContainSubstring("invalid cli flag args"))
+			})
+
+			It("should succeed", func() {
+				Eventually(session).Should(gexec.Exit(0))
+			})
+		})
+
+		Context("with auth token", func() {
+			var opsmanServer *ghttp.Server
+			var session *gexec.Session
+
+			BeforeEach(func() {
+				opsmanServer = ghttp.NewTLSServer()
+				opsmanServer.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", "/api/installation_settings"),
+						ghttp.VerifyHeaderKV("Authorization", "Bearer MAGIC_TOKEN"),
+						ghttp.RespondWith(http.StatusOK, readFixture("fixtures/nfs_blobstore_test_installation_settings.json",
+							struct {
+								DirectorHost   string
+								NfsServerIP    string
+								NFSSshUser     string
+								NFSSshPassword string
+								SSHPrivateKey  string
+							}{DirectorHost: "127.0.0.1", NfsServerIP: "127.0.0.1", NFSSshUser: currentUser.Name, NFSSshPassword: "SECRET_nfs_ssh_password", SSHPrivateKey: strings.Replace(privateKey, "\n", "\\n", -1)})),
+					))
+				opsmanUri, err = url.Parse(opsmanServer.URL())
+				Expect(err).NotTo(HaveOccurred())
+			})
+			AfterEach(func() {
+				opsmanServer.Close()
+			})
+			JustBeforeEach(func() {
+				command := exec.Command(cfopsExecutablePath, "backup", "--opsmanagerhost", opsmanUri.Host, "--admintoken", "MAGIC_TOKEN", "--opsmanageruser", "<opsuser>", "-d", destinationDirectory, "--tile", "elastic-runtime")
+
+				session, err = gexec.Start(command, GinkgoWriter, GinkgoWriter)
+				Expect(err).ShouldNot(HaveOccurred())
+				session.Wait(executionTimeout)
+			})
+			It("should accept the flags", func() {
+				Expect(session.Err.Contents()).ToNot(ContainSubstring("invalid cli flag args"))
+			})
+
+			It("should succeed", func() {
+				Eventually(session).Should(gexec.Exit(0))
+			})
+		})
+
+		Context("with both username/password and token", func() {
+			var session *gexec.Session
+			JustBeforeEach(func() {
+				command := exec.Command(cfopsExecutablePath, "backup", "--opsmanagerhost", opsmanUri.Host, "--adminuser", "<usr>", "--adminpass", "SECRET_admin_password", "--admintoken", "token", "--opsmanageruser", "<opsuser>", "-d", destinationDirectory, "--tile", "elastic-runtime")
+
+				session, err = gexec.Start(command, GinkgoWriter, GinkgoWriter)
+				Expect(err).ShouldNot(HaveOccurred())
+				session.Wait(executionTimeout)
+			})
+			It("should not accept the flags", func() {
+				Expect(session.Err.Contents()).To(ContainSubstring("invalid cli flag args"))
+			})
+
+			It("should succeed", func() {
+				Eventually(session).ShouldNot(gexec.Exit(0))
+			})
+		})
+		Context("without username/password nor token", func() {
+			var session *gexec.Session
+			JustBeforeEach(func() {
+				command := exec.Command(cfopsExecutablePath, "backup", "--opsmanagerhost", opsmanUri.Host, "--opsmanageruser", "<opsuser>", "-d", destinationDirectory, "--tile", "elastic-runtime")
+
+				session, err = gexec.Start(command, GinkgoWriter, GinkgoWriter)
+				Expect(err).ShouldNot(HaveOccurred())
+				session.Wait(executionTimeout)
+			})
+			It("should not accept the flags", func() {
+				Expect(session.Err.Contents()).To(ContainSubstring("invalid cli flag args"))
+			})
+
+			It("should succeed", func() {
+				Eventually(session).ShouldNot(gexec.Exit(0))
+			})
+		})
+	})
 
 	Describe("backup blobstore", func() {
 		var destinationDirectory string

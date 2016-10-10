@@ -1,17 +1,17 @@
 hash: 88052bce02ae977a057f8833c1b530d194a864ad94999a39e02f4ee7c293c210
-updated: 2016-08-11T16:47:04.672940978+01:00
+updated: 2016-10-10T12:15:51.399771468+01:00
 imports:
 - name: code.cloudfoundry.org/lager
   version: 62951a8009ab331bb21dc418074fa54e66eb9b6a
 - name: github.com/andybalholm/cascadia
   version: 3ad29d1ad1c4f2023e355603324348cf1f4b2d48
 - name: github.com/apcera/libretto
-  version: 4a46558efd4c02a543a49c52488a7ebf1f91c8fe
+  version: b6eb8c18af384d6286ff2e256e6c06f2c2b4fe55
   subpackages:
   - ssh
+  - virtualmachine/aws
   - util
   - virtualmachine
-  - virtualmachine/aws
 - name: github.com/apcera/util
   version: 5be235938229da74a2adac74ee88b947e0e1c8fc
   repo: https://github.com/apcera/util
@@ -22,28 +22,28 @@ imports:
   repo: https://github.com/aws/aws-sdk-go
   subpackages:
   - aws
-  - aws/awserr
-  - aws/awsutil
-  - aws/client
-  - aws/client/metadata
-  - aws/corehandlers
-  - aws/credentials
-  - aws/credentials/ec2rolecreds
-  - aws/credentials/endpointcreds
-  - aws/defaults
-  - aws/ec2metadata
-  - aws/request
-  - aws/session
-  - aws/signer/v4
   - private/endpoints
   - private/protocol
-  - private/protocol/ec2query
-  - private/protocol/query/queryutil
-  - private/protocol/rest
-  - private/protocol/xml/xmlutil
   - private/waiter
   - service/ec2
   - service/sts
+  - aws/awserr
+  - aws/credentials
+  - aws/session
+  - aws/client
+  - aws/corehandlers
+  - aws/defaults
+  - aws/request
+  - aws/awsutil
+  - aws/client/metadata
+  - aws/signer/v4
+  - private/protocol/ec2query
+  - aws/credentials/ec2rolecreds
+  - aws/credentials/endpointcreds
+  - aws/ec2metadata
+  - private/protocol/rest
+  - private/protocol/query/queryutil
+  - private/protocol/xml/xmlutil
 - name: github.com/cloudfoundry-community/go-cfenv
   version: 96ad7376813bfd13c95af69ca5b4ef5725f6b335
 - name: github.com/cloudfoundry-incubator/cf-test-helpers
@@ -54,7 +54,7 @@ imports:
 - name: github.com/codegangsta/cli
   version: 4205e9c4ee9672a8df5bb4fe486a8aa07e1e4037
 - name: github.com/enaml-ops/omg-cli
-  version: 89c8cff816ad0d3ea883b3c98902db98ca5bf8b2
+  version: 7a0299e2051cf8f1461d25260771826c15d08a48
 - name: github.com/go-ini/ini
   version: 060d7da055ba6ec5ea7a31f116332fe5efa04ce0
   repo: https://github.com/go-ini/ini
@@ -76,19 +76,19 @@ imports:
   subpackages:
   - action
   - cache
+  - msg
+  - path
+  - repo
+  - util
   - cfg
   - dependency
   - gb
   - godep
-  - godep/strip
   - gom
   - gpm
-  - importer
-  - msg
-  - path
-  - repo
   - tree
-  - util
+  - godep/strip
+  - importer
 - name: github.com/Masterminds/semver
   version: 8d0431362b544d1a3536cca26684828866a7de09
 - name: github.com/Masterminds/vcs
@@ -101,69 +101,69 @@ imports:
   version: 74c678d97c305753605c338c6c78c49ec104b5e7
   subpackages:
   - config
-  - ginkgo/convert
-  - ginkgo/interrupthandler
-  - ginkgo/nodot
-  - ginkgo/testrunner
-  - ginkgo/testsuite
-  - ginkgo/watch
   - internal/codelocation
-  - internal/containernode
   - internal/failer
-  - internal/leafnodes
   - internal/remote
-  - internal/spec
-  - internal/specrunner
   - internal/suite
   - internal/testingtproxy
   - internal/writer
   - reporters
   - reporters/stenographer
   - types
+  - ginkgo/convert
+  - ginkgo/interrupthandler
+  - ginkgo/nodot
+  - ginkgo/testrunner
+  - ginkgo/testsuite
+  - ginkgo/watch
+  - internal/leafnodes
+  - internal/containernode
+  - internal/spec
+  - internal/specrunner
 - name: github.com/onsi/gomega
   version: 9ed8da19f2156b87a803a8fdf6d126f627a12db1
   subpackages:
-  - format
-  - gbytes
   - gexec
   - internal/assertion
   - internal/asyncassertion
-  - internal/oraclematcher
   - internal/testingtsupport
   - matchers
+  - types
+  - format
+  - gbytes
+  - internal/oraclematcher
   - matchers/support/goraph/bipartitegraph
   - matchers/support/goraph/edge
   - matchers/support/goraph/node
   - matchers/support/goraph/util
-  - types
 - name: github.com/op/go-logging
   version: 970db520ece77730c7e4724c61121037378659d9
 - name: github.com/pivotal-golang/lager
   version: 7639e31ce6622c55c15aa64144b85d5f4873d127
 - name: github.com/pivotalservices/cfbackup
-  version: 1f9df28644ca8c946c570858e25bca2807118dd7
+  version: 052b091611e47eb52644c0cdf847562c6fb8384b
   subpackages:
-  - tileregistry
   - tiles
-  - tiles/elasticruntime
   - tiles/opsmanager
+  - tileregistry
+  - tiles/elasticruntime
 - name: github.com/pivotalservices/gtils
   version: 2605eda5a33230d9613738bba5271d1c040e4a15
   subpackages:
-  - bosh
   - command
-  - http
-  - log
   - osutils
+  - bosh
+  - http
   - persistence
   - storage
+  - log
   - uaa
 - name: github.com/pkg/errors
   version: a22138067af1c4942683050411a841ade67fe1eb
 - name: github.com/pkg/sftp
   version: a71e8f580e3b622ebff585309160b1cc549ef4d2
 - name: github.com/PuerkitoBio/goquery
-  version: 7f4291566cf7cac3be222a933e01a2bed97532b1
+  version: 56a198aba89cdf7a612e6c762eff9d788b9f2dae
 - name: github.com/rlmcpherson/s3gof3r
   version: 39f5507f61031141057f3f880d9fb9eb97b8afd7
 - name: github.com/technoweenie/multipartstreamer
@@ -182,9 +182,9 @@ imports:
   subpackages:
   - curve25519
   - ed25519
-  - ed25519/internal/edwards25519
   - pkcs12
   - ssh
+  - ed25519/internal/edwards25519
 - name: golang.org/x/net
   version: 1d9fd3b8333e891c0e7353e1adcfe8a612573033
   subpackages:

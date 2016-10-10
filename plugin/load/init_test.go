@@ -5,8 +5,8 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	. "github.com/pivotalservices/cfops/plugin/load"
 	"github.com/pivotalservices/cfbackup/tileregistry"
+	. "github.com/pivotalservices/cfops/plugin/load"
 )
 
 var _ = Describe("given Plugins", func() {
