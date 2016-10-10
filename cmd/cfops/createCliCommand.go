@@ -30,6 +30,7 @@ func buraAction(commandName string, eh *ErrorHandler) (action func(*cli.Context)
 		var (
 			fs = &flagSet{
 				host:                 c.String(flagList[opsManagerHost].Flag[0]),
+				adminToken:           c.String(flagList[adminToken].Flag[0]),
 				adminUser:            c.String(flagList[adminUser].Flag[0]),
 				adminPass:            c.String(flagList[adminPass].Flag[0]),
 				opsManagerUser:       c.String(flagList[opsManagerUser].Flag[0]),
@@ -90,6 +91,7 @@ func getTileFromRegistry(fs *flagSet, commandName string) (tileCloser tileregist
 				OpsManagerHost:       fs.Host(),
 				AdminUser:            fs.AdminUser(),
 				AdminPass:            fs.AdminPass(),
+				AdminToken:           fs.AdminToken(),
 				OpsManagerUser:       fs.OpsManagerUser(),
 				OpsManagerPass:       fs.OpsManagerPass(),
 				OpsManagerPassphrase: fs.OpsManagerPassphrase(),
@@ -131,6 +133,7 @@ const (
 	helpExitCode                = 2
 	cleanExitCode               = 0
 	opsManagerHost       string = "opsmanagerHost"
+	adminToken           string = "adminToken"
 	adminUser            string = "adminUser"
 	adminPass            string = "adminPass"
 	opsManagerUser       string = "opsManagerUser"
@@ -160,6 +163,11 @@ var (
 			Flag:   []string{"opsmanagerhost", "omh"},
 			Desc:   "hostname for Ops Manager",
 			EnvVar: "CFOPS_HOST",
+		},
+		adminToken: flagBucket{
+			Flag:   []string{"admintoken", "dt"},
+			Desc:   "Ops Mgr OAuth admin token (not required if adminuser and adminpass are provided)",
+			EnvVar: "CFOPS_ADMIN_TOKEN",
 		},
 		adminUser: flagBucket{
 			Flag:   []string{"adminuser", "du"},
@@ -217,6 +225,7 @@ var (
 type (
 	flagSet struct {
 		host                 string
+		adminToken           string
 		adminUser            string
 		adminPass            string
 		opsManagerUser       string
@@ -248,6 +257,10 @@ func (s *flagSet) Host() string {
 
 func (s *flagSet) AdminUser() string {
 	return s.adminUser
+}
+
+func (s *flagSet) AdminToken() string {
+	return s.adminToken
 }
 
 func (s *flagSet) AdminPass() string {
@@ -288,11 +301,10 @@ func (s *flagSet) PluginArgs() string {
 
 func hasValidBackupRestoreFlags(fs *flagSet) bool {
 	res := (fs.Host() != "" &&
-		fs.AdminUser() != "" &&
-		fs.AdminPass() != "" &&
 		fs.OpsManagerUser() != "" &&
 		fs.Dest() != "" &&
 		fs.Tile() != "" &&
+		validateAuth(fs.AdminPass(), fs.AdminUser(), fs.AdminToken()) &&
 		validateNfsType(fs.NFS()))
 
 	if res == false {
@@ -305,6 +317,14 @@ func hasValidBackupRestoreFlags(fs *flagSet) bool {
 	}
 	return res
 }
+
+func validateAuth(adminPassFlag, adminUserFlag, adminTokenFlag string) bool {
+	if adminPassFlag != "" && adminUserFlag != "" && adminTokenFlag != "" {
+		return false
+	}
+	return (adminPassFlag != "" && adminUserFlag != "") || adminTokenFlag != ""
+}
+
 func validateNfsType(nfsflag string) bool {
 	return nfsflag == cfbackup.NFSBackupTypeBP || nfsflag == cfbackup.NFSBackupTypeLite || nfsflag == cfbackup.NFSBackupTypeFull
 }
