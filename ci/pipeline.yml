@@ -86,10 +86,10 @@ jobs:
   - task: system
     file: cfops/ci/tasks/system.yml
     params:
-      AWS_ACCESS_KEY_ID: {{aws-access-key-id}}
-      AWS_SECRET_ACCESS_KEY: {{aws-secret-access-key}}
-      AWS_SECURITY_GROUP: {{aws-security-group}}
-      OPSMAN_AMI: ami-c064f7b3 # OpsMan 1.7.5.0
+      AWS_ACCESS_KEY_ID: {{cfops-aws-access-key-id}}
+      AWS_SECRET_ACCESS_KEY: {{cfops-aws-secret-access-key}}
+      AWS_SECURITY_GROUP: {{cfops-aws-security-group}}
+      OPSMAN_AMI: ami-f9e3ae8a # 1.7.16
       IAAS: aws
     ensure:
       put: environment-lock
@@ -109,9 +109,9 @@ jobs:
   - task: system
     file: cfops/ci/tasks/system.yml
     params:
-      AWS_ACCESS_KEY_ID: {{aws-access-key-id}}
-      AWS_SECRET_ACCESS_KEY: {{aws-secret-access-key}}
-      AWS_SECURITY_GROUP: {{aws-security-group}}
+      AWS_ACCESS_KEY_ID: {{cfops-aws-access-key-id}}
+      AWS_SECRET_ACCESS_KEY: {{cfops-aws-secret-access-key}}
+      AWS_SECURITY_GROUP: {{cfops-aws-security-group}}
       OPSMAN_AMI: ami-841b70f7 # OpsMan pivotal-ops-manager-v1.8-RC2
       IAAS: aws
     ensure:
@@ -133,10 +133,10 @@ jobs:
   - task: system
     file: cfops/ci/tasks/system.yml
     params:
-      AWS_ACCESS_KEY_ID: {{aws-access-key-id}}
-      AWS_SECRET_ACCESS_KEY: {{aws-secret-access-key}}
-      AWS_SECURITY_GROUP: {{aws-security-group}}
-      OPSMAN_AMI: ami-1da13b6e # OpsMan 1.6.18.0
+      AWS_ACCESS_KEY_ID: {{cfops-aws-access-key-id}}
+      AWS_SECRET_ACCESS_KEY: {{cfops-aws-secret-access-key}}
+      AWS_SECURITY_GROUP: {{cfops-aws-security-group}}
+      OPSMAN_AMI: ami-97bff1e4 # 1.6.25
       IAAS: aws
       OM_VERSION: 1.6
     ensure:
