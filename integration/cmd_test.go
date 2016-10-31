@@ -116,6 +116,11 @@ var _ = Describe("cfops cmd", func() {
 				opsmanServer.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("POST", "/uaa/oauth/token"),
+						ghttp.VerifyFormKV("grant_type", "password"),
+						ghttp.VerifyFormKV("username", "<usr>"),
+						ghttp.VerifyFormKV("password", "SECRET_admin_password"),
+						ghttp.VerifyFormKV("client_id", "opsman"),
+						ghttp.VerifyFormKV("client_secret", ""),
 						ghttp.RespondWith(http.StatusOK, `{"access_token": "MAGIC_TOKEN"}`),
 					),
 					ghttp.CombineHandlers(
@@ -193,27 +198,63 @@ var _ = Describe("cfops cmd", func() {
 			})
 		})
 
-		Context("with both username/password and token", func() {
+		Context("with client ID and secret", func() {
+			var opsmanServer *ghttp.Server
 			var session *gexec.Session
+
+			BeforeEach(func() {
+				opsmanServer = ghttp.NewTLSServer()
+				opsmanServer.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("POST", "/uaa/oauth/token"),
+						ghttp.VerifyFormKV("response_type", "token"),
+						ghttp.VerifyFormKV("grant_type", "client_credentials"),
+						ghttp.VerifyFormKV("username", ""),
+						ghttp.VerifyFormKV("password", ""),
+						ghttp.VerifyFormKV("client_id", "<client-id>"),
+						ghttp.VerifyFormKV("client_secret", "<client-secret>"),
+						ghttp.RespondWith(http.StatusOK, `{"access_token": "MAGIC_TOKEN"}`),
+					),
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", "/api/installation_settings"),
+						ghttp.VerifyHeaderKV("Authorization", "Bearer MAGIC_TOKEN"),
+						ghttp.RespondWith(http.StatusOK, readFixture("fixtures/nfs_blobstore_test_installation_settings.json",
+							struct {
+								DirectorHost   string
+								NfsServerIP    string
+								NFSSshUser     string
+								NFSSshPassword string
+								SSHPrivateKey  string
+							}{DirectorHost: "127.0.0.1", NfsServerIP: "127.0.0.1", NFSSshUser: currentUser.Name, NFSSshPassword: "SECRET_nfs_ssh_password", SSHPrivateKey: strings.Replace(privateKey, "\n", "\\n", -1)})),
+					))
+				opsmanUri, err = url.Parse(opsmanServer.URL())
+				Expect(err).NotTo(HaveOccurred())
+			})
+			AfterEach(func() {
+				opsmanServer.Close()
+			})
 			JustBeforeEach(func() {
-				command := exec.Command(cfopsExecutablePath, "backup", "--opsmanagerhost", opsmanUri.Host, "--adminuser", "<usr>", "--adminpass", "SECRET_admin_password", "--admintoken", "token", "--opsmanageruser", "<opsuser>", "-d", destinationDirectory, "--tile", "elastic-runtime")
+				command := exec.Command(cfopsExecutablePath, "backup", "--opsmanagerhost", opsmanUri.Host, "--clientid", "<client-id>", "--clientsecret", "<client-secret>", "--opsmanageruser", "<opsuser>", "-d", destinationDirectory, "--tile", "elastic-runtime")
 
 				session, err = gexec.Start(command, GinkgoWriter, GinkgoWriter)
 				Expect(err).ShouldNot(HaveOccurred())
 				session.Wait(executionTimeout)
 			})
-			It("should not accept the flags", func() {
-				Expect(session.Err.Contents()).To(ContainSubstring("invalid cli flag args"))
+			It("should accept the flags", func() {
+				Expect(session.Err.Contents()).ToNot(ContainSubstring("invalid cli flag args"))
 			})
 
 			It("should succeed", func() {
-				Eventually(session).ShouldNot(gexec.Exit(0))
+				Eventually(session).Should(gexec.Exit(0))
 			})
 		})
-		Context("without username/password nor token", func() {
+
+		var FlagsDontWork = func(authArgs ...string) {
 			var session *gexec.Session
 			JustBeforeEach(func() {
-				command := exec.Command(cfopsExecutablePath, "backup", "--opsmanagerhost", opsmanUri.Host, "--opsmanageruser", "<opsuser>", "-d", destinationDirectory, "--tile", "elastic-runtime")
+				defaultArgs := []string{"backup", "--opsmanagerhost", opsmanUri.Host, "-d", destinationDirectory, "--tile", "elastic-runtime", "--opsmanageruser", "<opsuser>"}
+
+				command := exec.Command(cfopsExecutablePath, append(defaultArgs, authArgs...)...)
 
 				session, err = gexec.Start(command, GinkgoWriter, GinkgoWriter)
 				Expect(err).ShouldNot(HaveOccurred())
@@ -226,6 +267,26 @@ var _ = Describe("cfops cmd", func() {
 			It("should succeed", func() {
 				Eventually(session).ShouldNot(gexec.Exit(0))
 			})
+		}
+
+		Context("with both username/password and token", func() {
+			FlagsDontWork("--adminuser", "<usr>", "--adminpass", "SECRET_admin_password", "--admintoken", "token")
+		})
+		Context("with both username/password and client id", func() {
+			FlagsDontWork("--adminuser", "<usr>", "--adminpass", "pass",
+				"--clientid", "<client-id>", "--clientsecret", "<client-secret>")
+		})
+		Context("with both token and client id", func() {
+			FlagsDontWork("--admintoken", "token",
+				"--clientid", "<client-id>", "--clientsecret", "<client-secret>")
+		})
+		Context("with username/password and token and clientID", func() {
+			FlagsDontWork("--admintoken", "token",
+				"--adminuser", "<usr>", "--adminpass", "pass",
+				"--clientid", "<client-id>", "--clientsecret", "<client-secret>")
+		})
+		Context("without username/password nor token nor clientID", func() {
+			FlagsDontWork()
 		})
 	})
 

@@ -31,7 +31,7 @@ func (clientCloser *ClientCloser) Close() {
 func (s *PluginTileBuilder) New(tileSpec tileregistry.TileSpec) (tileCloser tileregistry.TileCloser, err error) {
 	var opsManager *opsmanager.OpsManager
 	var settingsReader io.Reader
-	opsManager, err = opsmanager.NewOpsManager(tileSpec.OpsManagerHost, tileSpec.AdminUser, tileSpec.AdminPass, tileSpec.AdminToken, tileSpec.OpsManagerUser, tileSpec.OpsManagerPass, tileSpec.OpsManagerPassphrase, tileSpec.ArchiveDirectory, tileSpec.CryptKey)
+	opsManager, err = opsmanager.NewOpsManager(tileSpec.OpsManagerHost, tileSpec.AdminUser, tileSpec.AdminPass, tileSpec.AdminToken, tileSpec.OpsManagerUser, tileSpec.OpsManagerPass, tileSpec.OpsManagerPassphrase, tileSpec.ClientID, tileSpec.ClientSecret, tileSpec.ArchiveDirectory, tileSpec.CryptKey)
 
 	if settingsReader, err = opsManager.GetInstallationSettings(); err == nil {
 		var brPlugin BackupRestorer

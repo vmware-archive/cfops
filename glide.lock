@@ -1,12 +1,12 @@
 hash: 88052bce02ae977a057f8833c1b530d194a864ad94999a39e02f4ee7c293c210
-updated: 2016-10-10T12:15:51.399771468+01:00
+updated: 2016-10-31T14:53:42.434269294Z
 imports:
 - name: code.cloudfoundry.org/lager
   version: 62951a8009ab331bb21dc418074fa54e66eb9b6a
 - name: github.com/andybalholm/cascadia
   version: 3ad29d1ad1c4f2023e355603324348cf1f4b2d48
 - name: github.com/apcera/libretto
-  version: b6eb8c18af384d6286ff2e256e6c06f2c2b4fe55
+  version: aed42fb010abd7ce3329d7068098d94dd16c3857
   subpackages:
   - ssh
   - virtualmachine/aws
@@ -71,28 +71,6 @@ imports:
   repo: https://github.com/jmespath/go-jmespath
 - name: github.com/kr/fs
   version: 2788f0dbd16903de03cb8186e5c7d97b69ad387b
-- name: github.com/Masterminds/glide
-  version: 015133a9ac9ef87f8a522139b03fef4e6c35bb78
-  subpackages:
-  - action
-  - cache
-  - msg
-  - path
-  - repo
-  - util
-  - cfg
-  - dependency
-  - gb
-  - godep
-  - gom
-  - gpm
-  - tree
-  - godep/strip
-  - importer
-- name: github.com/Masterminds/semver
-  version: 8d0431362b544d1a3536cca26684828866a7de09
-- name: github.com/Masterminds/vcs
-  version: fbe9fb6ad5b5f35b3e82a7c21123cfc526cbf895
 - name: github.com/mitchellh/mapstructure
   version: 281073eb9eb092240d33ef253c404f1cca550309
 - name: github.com/nu7hatch/gouuid
@@ -110,27 +88,21 @@ imports:
   - reporters
   - reporters/stenographer
   - types
-  - ginkgo/convert
-  - ginkgo/interrupthandler
-  - ginkgo/nodot
-  - ginkgo/testrunner
-  - ginkgo/testsuite
-  - ginkgo/watch
-  - internal/leafnodes
   - internal/containernode
+  - internal/leafnodes
   - internal/spec
   - internal/specrunner
 - name: github.com/onsi/gomega
   version: 9ed8da19f2156b87a803a8fdf6d126f627a12db1
   subpackages:
   - gexec
+  - gbytes
   - internal/assertion
   - internal/asyncassertion
   - internal/testingtsupport
   - matchers
   - types
   - format
-  - gbytes
   - internal/oraclematcher
   - matchers/support/goraph/bipartitegraph
   - matchers/support/goraph/edge
@@ -141,14 +113,14 @@ imports:
 - name: github.com/pivotal-golang/lager
   version: 7639e31ce6622c55c15aa64144b85d5f4873d127
 - name: github.com/pivotalservices/cfbackup
-  version: 052b091611e47eb52644c0cdf847562c6fb8384b
+  version: 2c977eb37634d8a385e5e64296131193eca77d91
   subpackages:
   - tiles
   - tiles/opsmanager
   - tileregistry
   - tiles/elasticruntime
 - name: github.com/pivotalservices/gtils
-  version: 2605eda5a33230d9613738bba5271d1c040e4a15
+  version: 65c0f332bafc62dc7e1824982ac31b5c21f927b2
   subpackages:
   - command
   - osutils
@@ -175,7 +147,7 @@ imports:
   subpackages:
   - itertools
 - name: github.com/xchapter7x/lo
-  version: aa2602d0e8e8647f0ce7b53109b37040941915aa
+  version: e33b245fc7a8186582208abc2458c2691bff681c
 - name: golang.org/x/crypto
   version: bc89c496413265e715159bdc8478ee9a92fdc265
   repo: https://go.googlesource.com/crypto
