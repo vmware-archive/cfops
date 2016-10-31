@@ -36,6 +36,8 @@ func buraAction(commandName string, eh *ErrorHandler) (action func(*cli.Context)
 				opsManagerUser:       c.String(flagList[opsManagerUser].Flag[0]),
 				opsManagerPass:       c.String(flagList[opsManagerPass].Flag[0]),
 				opsManagerPassphrase: c.String(flagList[opsManagerPassphrase].Flag[0]),
+				clientID:             c.String(flagList[clientID].Flag[0]),
+				clientSecret:         c.String(flagList[clientSecret].Flag[0]),
 				dest:                 c.String(flagList[dest].Flag[0]),
 				tile:                 c.String(flagList[tile].Flag[0]),
 				encryptionKey:        c.String(flagList[encryptionKey].Flag[0]),
@@ -87,7 +89,7 @@ func getTileFromRegistry(fs *flagSet, commandName string) (tileCloser tileregist
 
 		if hasValidBackupRestoreFlags(fs) {
 			lo.G.Debug("we have all required flags and a proper builder")
-			tileCloser, err = tileBuilder.New(tileregistry.TileSpec{
+			ts := tileregistry.TileSpec{
 				OpsManagerHost:       fs.Host(),
 				AdminUser:            fs.AdminUser(),
 				AdminPass:            fs.AdminPass(),
@@ -95,12 +97,15 @@ func getTileFromRegistry(fs *flagSet, commandName string) (tileCloser tileregist
 				OpsManagerUser:       fs.OpsManagerUser(),
 				OpsManagerPass:       fs.OpsManagerPass(),
 				OpsManagerPassphrase: fs.OpsManagerPassphrase(),
+				ClientID:             fs.ClientID(),
+				ClientSecret:         fs.ClientSecret(),
 				ArchiveDirectory:     fs.Dest(),
 				CryptKey:             fs.EncryptionKey(),
 				ClearBoshManifest:    fs.ClearBoshManifest(),
 				PluginArgs:           fs.PluginArgs(),
 				NFS:                  fs.NFS(),
-			})
+			}
+			tileCloser, err = tileBuilder.New(ts)
 			if err != nil {
 				return nil, fmt.Errorf("failure to connect to ops manager host: %s", err.Error())
 			}
@@ -139,6 +144,8 @@ const (
 	opsManagerUser       string = "opsManagerUser"
 	opsManagerPass       string = "opsManagerPass"
 	opsManagerPassphrase string = "opsManagerPassphrase"
+	clientID             string = "clientID"
+	clientSecret         string = "clientSecret"
 	dest                 string = "destination"
 	tile                 string = "tile"
 	encryptionKey        string = "encryptionKey"
@@ -194,6 +201,16 @@ var (
 			Desc:   "passphrase is used by Ops Manager 1.7 and above to decrypt the installation files during restore",
 			EnvVar: "CFOPS_OM_PASSPHRASE",
 		},
+		clientID: flagBucket{
+			Flag:   []string{"clientid", "cid"},
+			Desc:   "client ID if using a UAA client instead of a UAA user",
+			EnvVar: "CFOPS_CLIENT_ID",
+		},
+		clientSecret: flagBucket{
+			Flag:   []string{"clientsecret", "cis"},
+			Desc:   "client secret if using a UAA client instead of a UAA user",
+			EnvVar: "CFOPS_CLIENT_SECRET",
+		},
 		dest: flagBucket{
 			Flag:   []string{"destination", "d"},
 			Desc:   "path of the Cloud Foundry archive",
@@ -231,6 +248,8 @@ type (
 		opsManagerUser       string
 		opsManagerPass       string
 		opsManagerPassphrase string
+		clientID             string
+		clientSecret         string
 		dest                 string
 		tile                 string
 		encryptionKey        string
@@ -279,6 +298,14 @@ func (s *flagSet) OpsManagerPassphrase() string {
 	return s.opsManagerPassphrase
 }
 
+func (s *flagSet) ClientID() string {
+	return s.clientID
+}
+
+func (s *flagSet) ClientSecret() string {
+	return s.clientSecret
+}
+
 func (s *flagSet) Dest() string {
 	return s.dest
 }
@@ -304,7 +331,7 @@ func hasValidBackupRestoreFlags(fs *flagSet) bool {
 		fs.OpsManagerUser() != "" &&
 		fs.Dest() != "" &&
 		fs.Tile() != "" &&
-		validateAuth(fs.AdminPass(), fs.AdminUser(), fs.AdminToken()) &&
+		validateAuth(fs) &&
 		validateNfsType(fs.NFS()))
 
 	if res == false {
@@ -318,11 +345,34 @@ func hasValidBackupRestoreFlags(fs *flagSet) bool {
 	return res
 }
 
-func validateAuth(adminPassFlag, adminUserFlag, adminTokenFlag string) bool {
-	if adminPassFlag != "" && adminUserFlag != "" && adminTokenFlag != "" {
-		return false
-	}
-	return (adminPassFlag != "" && adminUserFlag != "") || adminTokenFlag != ""
+func validateAuth(fs *flagSet) bool {
+	return onlyUserAndPassIsSet(fs) ||
+		onlyTokenIsSet(fs) ||
+		onlyClientIDAndSecretIsSet(fs)
+}
+
+func onlyUserAndPassIsSet(fs *flagSet) bool {
+	return userAndPassIsSet(fs) && !tokenIsSet(fs) && !clientIDAndSecretIsSet(fs)
+}
+
+func onlyTokenIsSet(fs *flagSet) bool {
+	return !userAndPassIsSet(fs) && tokenIsSet(fs) && !clientIDAndSecretIsSet(fs)
+}
+
+func onlyClientIDAndSecretIsSet(fs *flagSet) bool {
+	return !userAndPassIsSet(fs) && !tokenIsSet(fs) && clientIDAndSecretIsSet(fs)
+}
+
+func userAndPassIsSet(fs *flagSet) bool {
+	return fs.AdminPass() != "" && fs.AdminUser() != ""
+}
+
+func tokenIsSet(fs *flagSet) bool {
+	return fs.AdminToken() != ""
+}
+
+func clientIDAndSecretIsSet(fs *flagSet) bool {
+	return fs.ClientID() != "" && fs.ClientSecret() != ""
 }
 
 func validateNfsType(nfsflag string) bool {
