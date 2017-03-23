@@ -12,6 +12,20 @@ resources:
     branch: master
     private_key: {{git-private-key}}
     uri: git@github.com:pivotal-cf/london-meta.git
+- name: environment-lock-1.10
+  type: pool
+  source:
+    branch: master
+    pool: aws-1.10-envs
+    private_key: {{git-private-key}}
+    uri: git@github.com:pivotal-cf-experimental/london-services-locks.git
+- name: environment-lock-1.9
+  type: pool
+  source:
+    branch: master
+    pool: aws-1.9-envs
+    private_key: {{git-private-key}}
+    uri: git@github.com:pivotal-cf-experimental/london-services-locks.git
 - name: environment-lock-1.8
   type: pool
   source:
@@ -47,12 +61,25 @@ resources:
     pool: vsphere-1.7-envs
     private_key: {{git-private-key}}
     uri: git@github.com:pivotal-cf-experimental/london-services-locks.git
-
 - name: environment-lock-vsphere-1.8
   type: pool
   source:
     branch: master
     pool: vsphere-1.8-envs
+    private_key: {{git-private-key}}
+    uri: git@github.com:pivotal-cf-experimental/london-services-locks.git
+- name: environment-lock-vsphere-1.9
+  type: pool
+  source:
+    branch: master
+    pool: vsphere-1.9-envs
+    private_key: {{git-private-key}}
+    uri: git@github.com:pivotal-cf-experimental/london-services-locks.git
+- name: environment-lock-vsphere-1.10
+  type: pool
+  source:
+    branch: master
+    pool: vsphere-1.10-envs
     private_key: {{git-private-key}}
     uri: git@github.com:pivotal-cf-experimental/london-services-locks.git
 
@@ -119,6 +146,51 @@ jobs:
       resource: environment-lock-1.8
       params: { release: environment-lock }
 
+- name: system-aws-1.9
+  plan:
+  - aggregate:
+    - put: environment-lock
+      resource: environment-lock-1.9
+      params: { acquire: true }
+    - get: london-meta
+    - get: cfops
+      trigger: true
+      passed: [integration]
+  - task: system
+    file: cfops/ci/tasks/system.yml
+    params:
+      AWS_ACCESS_KEY_ID: {{cfops-aws-access-key-id}}
+      AWS_SECRET_ACCESS_KEY: {{cfops-aws-secret-access-key}}
+      AWS_SECURITY_GROUP: {{cfops-aws-security-group}}
+      OPSMAN_AMI: ami-4ce5d02a # OM 1.9.7
+      IAAS: aws
+    ensure:
+      put: environment-lock
+      resource: environment-lock-1.9
+      params: { release: environment-lock }
+
+- name: system-aws-1.10
+  plan:
+  - aggregate:
+    - put: environment-lock
+      resource: environment-lock-1.10
+      params: { acquire: true }
+    - get: london-meta
+    - get: cfops
+      trigger: true
+      passed: [integration]
+  - task: system
+    file: cfops/ci/tasks/system.yml
+    params:
+      AWS_ACCESS_KEY_ID: {{cfops-aws-access-key-id}}
+      AWS_SECRET_ACCESS_KEY: {{cfops-aws-secret-access-key}}
+      AWS_SECURITY_GROUP: {{cfops-aws-security-group}}
+      OPSMAN_AMI: # TODO
+      IAAS: aws
+    ensure:
+      put: environment-lock
+      resource: environment-lock-1.10
+      params: { release: environment-lock }
 
 - name: system-aws-1.6
   plan:
@@ -206,4 +278,46 @@ jobs:
     ensure:
       put: environment-lock
       resource: environment-lock-vsphere-1.8
+      params: { release: environment-lock }
+
+- name: system-vsphere-1.9
+  plan:
+  - aggregate:
+    - put: environment-lock
+      resource: environment-lock-vsphere-1.9
+      params: { acquire: true }
+    - get: london-meta
+    - get: cfops
+      trigger: true
+      passed: [integration]
+  - task: system
+    tags: [vsphere]
+    file: cfops/ci/tasks/system.yml
+    params:
+      ONLY_ERT: true
+      IAAS: vsphere
+    ensure:
+      put: environment-lock
+      resource: environment-lock-vsphere-1.9
+      params: { release: environment-lock }
+
+- name: system-vsphere-1.10
+  plan:
+  - aggregate:
+    - put: environment-lock
+      resource: environment-lock-vsphere-1.10
+      params: { acquire: true }
+    - get: london-meta
+    - get: cfops
+      trigger: true
+      passed: [integration]
+  - task: system
+    tags: [vsphere]
+    file: cfops/ci/tasks/system.yml
+    params:
+      ONLY_ERT: true
+      IAAS: vsphere
+    ensure:
+      put: environment-lock
+      resource: environment-lock-vsphere-1.10
       params: { release: environment-lock }
