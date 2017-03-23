@@ -4,6 +4,8 @@
 [![wercker status](https://app.wercker.com/status/d0a50d426b77a9f73da0fe4f383ad624/s/master "wercker status")](https://app.wercker.com/project/bykey/d0a50d426b77a9f73da0fe4f383ad624) [![GoDoc](http://godoc.org/github.com/pivotalservices/cfops?status.png)](http://godoc.org/github.com/pivotalservices/cfops) [![Gitter](https://badges.gitter.im/pivotalservices/cfops.svg)](https://gitter.im/pivotalservices/cfops?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 ======
 
+[![Join the chat at https://gitter.im/pivotalservices/cfops](https://badges.gitter.im/pivotalservices/cfops.svg)](https://gitter.im/pivotalservices/cfops?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 ### Version Compatibility
 
 **IAAS**
