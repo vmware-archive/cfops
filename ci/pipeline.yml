@@ -185,7 +185,7 @@ jobs:
       AWS_ACCESS_KEY_ID: {{cfops-aws-access-key-id}}
       AWS_SECRET_ACCESS_KEY: {{cfops-aws-secret-access-key}}
       AWS_SECURITY_GROUP: {{cfops-aws-security-group}}
-      OPSMAN_AMI: # TODO
+      OPSMAN_AMI: ami-4ff3ca29 # 1.10.3
       IAAS: aws
     ensure:
       put: environment-lock

@@ -195,16 +195,16 @@ var _ = Describe("CFOps Elastic Runtime plugin", func() {
 
 		fmt.Println("Backing up ERT...")
 		output, err := remoteExecute(cfConfig.OMHostInfo, backupCmd)
-		Expect(err).NotTo(HaveOccurred())
 		GinkgoWriter.Write(output)
+		Expect(err).NotTo(HaveOccurred())
 		checkNoSecretsInSession(output)
 
 		deleteTestApp(cfConfig)
 
 		fmt.Println("Restoring ERT...")
 		output, err = remoteExecute(cfConfig.OMHostInfo, restoreCmd)
-		Expect(err).NotTo(HaveOccurred())
 		GinkgoWriter.Write(output)
+		Expect(err).NotTo(HaveOccurred())
 		checkNoSecretsInSession(output)
 
 		cfDo("target", "-o", cfConfig.OrgName, "-s", cfConfig.SpaceName)
