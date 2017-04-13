@@ -1,12 +1,12 @@
-hash: 1309ad8f7f0016b9fe357e0e3adedc8c341a3cf8536c8380b2e28451185a4cad
-updated: 2017-03-23T17:51:57.238654133Z
+hash: 9b725585c642cec9dceafe603759e00b196f0871ba1fbba2b2396eba28dc49f3
+updated: 2017-04-13T11:39:09.496956198-04:00
 imports:
 - name: code.cloudfoundry.org/lager
-  version: 62951a8009ab331bb21dc418074fa54e66eb9b6a
+  version: de8e9c6c6e474e5e3668aea1a9817bdb4ceeceb0
 - name: github.com/andybalholm/cascadia
-  version: 3ad29d1ad1c4f2023e355603324348cf1f4b2d48
+  version: 349dd0209470eabd9514242c688c403c0926d266
 - name: github.com/apcera/libretto
-  version: aed42fb010abd7ce3329d7068098d94dd16c3857
+  version: e65ad9589b793038fb5aff3cb83a9cd201bd92fa
   subpackages:
   - ssh
   - util
@@ -14,12 +14,10 @@ imports:
   - virtualmachine/aws
 - name: github.com/apcera/util
   version: 5be235938229da74a2adac74ee88b947e0e1c8fc
-  repo: https://github.com/apcera/util
   subpackages:
   - uuid
 - name: github.com/aws/aws-sdk-go
   version: 565027b24171359f23f883d0fc48c228cdde301d
-  repo: https://github.com/aws/aws-sdk-go
   subpackages:
   - aws
   - aws/awserr
@@ -43,36 +41,35 @@ imports:
   - private/protocol/xml/xmlutil
   - private/waiter
   - service/ec2
-  - service/sts
 - name: github.com/cloudfoundry-community/go-cfenv
-  version: 96ad7376813bfd13c95af69ca5b4ef5725f6b335
+  version: f920e9562d5f951cbf11785728f67258c38a10d0
 - name: github.com/cloudfoundry-incubator/cf-test-helpers
-  version: c72f0dd76d910df0b56d5fe5c83c5c190b8be9e1
+  version: 450e89c9222af06d14055af11da5cf89de765ef8
   subpackages:
   - cf
-  - runner
+  - commandreporter
+  - commandstarter
+  - internal
 - name: github.com/codegangsta/cli
-  version: 4205e9c4ee9672a8df5bb4fe486a8aa07e1e4037
+  version: 8ba6f23b6e36d03666a14bd9421f5e3efcb59aca
 - name: github.com/enaml-ops/omg-cli
   version: 7a0299e2051cf8f1461d25260771826c15d08a48
 - name: github.com/go-ini/ini
   version: 060d7da055ba6ec5ea7a31f116332fe5efa04ce0
-  repo: https://github.com/go-ini/ini
 - name: github.com/golang/protobuf
   version: 8616e8ee5e20a1704615e6c8d7afcdac06087a67
   subpackages:
   - proto
 - name: github.com/hashicorp/go-plugin
-  version: 8cf118f7a2f0c7ef1c82f66d4f6ac77c7e27dc12
+  version: b6691c5cfe7f0ec984114b056889cc90e51e38d0
 - name: github.com/hashicorp/yamux
-  version: badf81fca035b8ebac61b5ab83330b72541056f4
+  version: d1caa6c97c9fc1cc9e83bbe34d0603f9ff0ce8bd
 - name: github.com/jmespath/go-jmespath
   version: 3433f3ea46d9f8019119e7dd41274e112a2359a9
-  repo: https://github.com/jmespath/go-jmespath
 - name: github.com/kr/fs
   version: 2788f0dbd16903de03cb8186e5c7d97b69ad387b
 - name: github.com/mitchellh/mapstructure
-  version: 281073eb9eb092240d33ef253c404f1cca550309
+  version: 53818660ed4955e899c0bcafa97299a388bd7c8e
 - name: github.com/nu7hatch/gouuid
   version: 179d4d0c4d8d407a32af483c2354df1d2c91e6c3
 - name: github.com/onsi/ginkgo
@@ -112,7 +109,7 @@ imports:
 - name: github.com/op/go-logging
   version: 970db520ece77730c7e4724c61121037378659d9
 - name: github.com/pivotal-golang/lager
-  version: 7639e31ce6622c55c15aa64144b85d5f4873d127
+  version: de8e9c6c6e474e5e3668aea1a9817bdb4ceeceb0
 - name: github.com/pivotalservices/cfbackup
   version: 7158007d90a0d6f44902add9bcea5eabbc3bbbf0
   subpackages:
@@ -123,7 +120,7 @@ imports:
   - tiles/opsmanager
   - tiles/opsmanager/fakes
 - name: github.com/pivotalservices/gtils
-  version: 65c0f332bafc62dc7e1824982ac31b5c21f927b2
+  version: 935b450816267597de397b3da4bf3363be2f430c
   subpackages:
   - bosh
   - command
@@ -134,13 +131,13 @@ imports:
   - storage
   - uaa
 - name: github.com/pkg/errors
-  version: a22138067af1c4942683050411a841ade67fe1eb
+  version: ff09b135c25aae272398c51a07235b90a75aa4f0
 - name: github.com/pkg/sftp
-  version: a71e8f580e3b622ebff585309160b1cc549ef4d2
+  version: cb456b384cd3aae0ca1838cd59af8b6bb3363d67
 - name: github.com/PuerkitoBio/goquery
   version: e1271ee34c6a305e38566ecd27ae374944907ee9
 - name: github.com/rlmcpherson/s3gof3r
-  version: 39f5507f61031141057f3f880d9fb9eb97b8afd7
+  version: 864ae0bf7cf2e20c0002b7ea17f4d84fec1abc14
 - name: github.com/technoweenie/multipartstreamer
   version: a90a01d73ae432e2611d178c18367fbaa13e0154
 - name: github.com/tmc/scp
@@ -152,13 +149,9 @@ imports:
 - name: github.com/xchapter7x/lo
   version: e33b245fc7a8186582208abc2458c2691bff681c
 - name: golang.org/x/crypto
-  version: bc89c496413265e715159bdc8478ee9a92fdc265
-  repo: https://go.googlesource.com/crypto
+  version: 1f22c0103821b9390939b6776727195525381532
   subpackages:
   - curve25519
-  - ed25519
-  - ed25519/internal/edwards25519
-  - pkcs12
   - ssh
 - name: golang.org/x/net
   version: 1d9fd3b8333e891c0e7353e1adcfe8a612573033
@@ -166,7 +159,7 @@ imports:
   - html
   - html/atom
 - name: golang.org/x/sys
-  version: a646d33e2ee3172a661fc09bca23bb4889a41bc8
+  version: f3918c30c5c2cb527c0b071a27c35120a6c0719a
   subpackages:
   - unix
 - name: gopkg.in/yaml.v1
@@ -175,4 +168,4 @@ imports:
   version: a83829b6f1293c91addabc89d0571c246397bbf4
 testImports:
 - name: github.com/pborman/uuid
-  version: c55201b036063326c5b1b89ccfe45a184973d073
+  version: 1b00554d822231195d1babd97ff4a781231955c9
