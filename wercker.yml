@@ -37,7 +37,7 @@ build:
     - script:
         name: go test cover
         code: |
-          ./testCoverage $(glide novendor) $COVERAGE_WATERMARK
+          ./testCoverage $(glide novendor | grep -v system) $COVERAGE_WATERMARK
 
     # lets make sure we can build
     # the main executable (later we can cross compile and upload)

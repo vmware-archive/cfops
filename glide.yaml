@@ -4,7 +4,7 @@ import:
 - package: github.com/codegangsta/cli
 - package: github.com/hashicorp/go-plugin
 - package: github.com/pivotalservices/cfbackup
-  version: ^v0.1.138
+  version: v0.1.138
   subpackages:
   - tiles
   - tiles/opsmanager

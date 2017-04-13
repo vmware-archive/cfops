@@ -157,9 +157,9 @@ func createInstance(amznkeyname string, amiID string, securityGroup string) *aws
 				VolumeSize: 100,
 			},
 		},
-		Region:        "eu-west-1",
-		KeyPair:       amznkeyname,
-		SecurityGroup: securityGroup,
+		Region:         "eu-west-1",
+		KeyPair:        amznkeyname,
+		SecurityGroups: []string{securityGroup},
 	}
 
 	err := aws.ValidCredentials(vm.Region)
