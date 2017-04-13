@@ -60,6 +60,8 @@ var _ = Describe("cfops cmd", func() {
 	})
 	var currentUser *user.User
 	var privateKey string
+	const basicAuthBoshInfo = `{"name":"enaml-bosh","uuid":"31631ff9-ac41-4eba-a944-04c820633e7f","version":"1.3232.2.0 (00000000)","user":null,"cpi":"aws_cpi","user_authentication":{"type":"basic","options":{}},"features":{"dns":{"status":false,"extras":{"domain_name":null}},"compiled_package_cache":{"status":false,"extras":{"provider":null}},"snapshots":{"status":false}}}`
+
 	BeforeEach(func() {
 		currentUser, err = user.Current()
 		Expect(err).NotTo(HaveOccurred())
@@ -83,11 +85,23 @@ var _ = Describe("cfops cmd", func() {
 			boshDirectorServer.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest("GET", "/info"),
-					ghttp.RespondWith(http.StatusOK, `{}`),
+					ghttp.RespondWith(http.StatusOK, basicAuthBoshInfo),
+				),
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", "/info"),
+					ghttp.RespondWith(http.StatusOK, basicAuthBoshInfo),
+				),
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", "/info"),
+					ghttp.RespondWith(http.StatusOK, basicAuthBoshInfo),
 				),
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest("GET", "/deployments/cf-f21eea2dbdb8555f89fb"),
 					ghttp.RespondWith(http.StatusOK, `---`),
+				),
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", "/info"),
+					ghttp.RespondWith(http.StatusOK, basicAuthBoshInfo),
 				),
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest("GET", "/deployments/cf-f21eea2dbdb8555f89fb/vms"),
@@ -326,11 +340,23 @@ var _ = Describe("cfops cmd", func() {
 			boshDirectorServer.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest("GET", "/info"),
-					ghttp.RespondWith(http.StatusOK, `{}`),
+					ghttp.RespondWith(http.StatusOK, basicAuthBoshInfo),
+				),
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", "/info"),
+					ghttp.RespondWith(http.StatusOK, basicAuthBoshInfo),
+				),
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", "/info"),
+					ghttp.RespondWith(http.StatusOK, basicAuthBoshInfo),
 				),
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest("GET", "/deployments/cf-f21eea2dbdb8555f89fb"),
 					ghttp.RespondWith(http.StatusOK, `---`),
+				),
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", "/info"),
+					ghttp.RespondWith(http.StatusOK, basicAuthBoshInfo),
 				),
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest("GET", "/deployments/cf-f21eea2dbdb8555f89fb/vms"),
