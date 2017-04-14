@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net"
@@ -47,6 +48,101 @@ var _ = AfterSuite(func() {
 })
 
 var _ = Describe("cfops cmd", func() {
+	Context("bosh director with basic auth", func() {
+		cfopsWithDirectorConfig(basicAuthDirectorHandlers)
+	})
+
+	Context("bosh director with uaa auth", func() {
+		cfopsWithDirectorConfig(uaaAuthDirectorHandlers)
+	})
+})
+
+func basicAuthDirectorHandlers(directorURL string) []http.HandlerFunc {
+	const infoResponse = `{"name":"enaml-bosh","uuid":"31631ff9-ac41-4eba-a944-04c820633e7f","version":"1.3232.2.0 (00000000)","user":null,"cpi":"aws_cpi","user_authentication":{"type":"basic","options":{}},"features":{"dns":{"status":false,"extras":{"domain_name":null}},"compiled_package_cache":{"status":false,"extras":{"provider":null}},"snapshots":{"status":false}}}`
+	return []http.HandlerFunc{
+		ghttp.CombineHandlers(
+			ghttp.VerifyRequest("GET", "/info"),
+			ghttp.RespondWith(http.StatusOK, infoResponse),
+		),
+		ghttp.CombineHandlers(
+			ghttp.VerifyRequest("GET", "/info"),
+			ghttp.RespondWith(http.StatusOK, infoResponse),
+		),
+		ghttp.CombineHandlers(
+			ghttp.VerifyRequest("GET", "/info"),
+			ghttp.RespondWith(http.StatusOK, infoResponse),
+		),
+		ghttp.CombineHandlers(
+			ghttp.VerifyRequest("GET", "/deployments/cf-f21eea2dbdb8555f89fb"),
+			ghttp.RespondWith(http.StatusOK, `---`),
+		),
+		ghttp.CombineHandlers(
+			ghttp.VerifyRequest("GET", "/info"),
+			ghttp.RespondWith(http.StatusOK, infoResponse),
+		),
+		ghttp.CombineHandlers(
+			ghttp.VerifyRequest("GET", "/deployments/cf-f21eea2dbdb8555f89fb/vms"),
+			ghttp.RespondWith(http.StatusOK, `{}`),
+		),
+	}
+}
+
+func uaaAuthDirectorHandlers(directorURL string) []http.HandlerFunc {
+	const infoResponse = `{"name":"enaml-bosh","uuid":"9604f9ae-70bf-4c13-8d4d-69ff7f7f091b","version":"1.3232.2.0 (00000000)","user":null,"cpi":"aws_cpi","user_authentication":{"type":"uaa","options":{"url":"%s"}},"features":{"dns":{"status":false,"extras":{"domain_name":null}},"compiled_package_cache":{"status":false,"extras":{"provider":null}},"snapshots":{"status":false}}}`
+	const tokenResponse = `{
+  "access_token":"abcdef01234567890",
+  "token_type":"bearer",
+  "refresh_token":"0987654321fedcba",
+  "expires_in":3599,
+  "scope":"opsman.user uaa.admin scim.read opsman.admin scim.write",
+  "jti":"foo"
+}`
+	infoResponseWithURL := fmt.Sprintf(infoResponse, directorURL)
+
+	return []http.HandlerFunc{
+		ghttp.CombineHandlers(
+			ghttp.VerifyRequest("GET", "/info"),
+			ghttp.RespondWith(http.StatusOK, infoResponseWithURL),
+		),
+		ghttp.CombineHandlers(
+			ghttp.VerifyRequest("POST", "/oauth/token"),
+			ghttp.RespondWith(http.StatusOK, tokenResponse, http.Header{
+				"Content-Type": []string{"application/json"}}),
+		),
+		ghttp.CombineHandlers(
+			ghttp.VerifyRequest("GET", "/info"),
+			ghttp.RespondWith(http.StatusOK, infoResponseWithURL),
+		),
+		ghttp.CombineHandlers(
+			ghttp.VerifyRequest("GET", "/info"),
+			ghttp.RespondWith(http.StatusOK, infoResponseWithURL),
+		),
+		ghttp.CombineHandlers(
+			ghttp.VerifyRequest("POST", "/oauth/token"),
+			ghttp.RespondWith(http.StatusOK, tokenResponse, http.Header{
+				"Content-Type": []string{"application/json"}}),
+		),
+		ghttp.CombineHandlers(
+			ghttp.VerifyRequest("GET", "/deployments/cf-f21eea2dbdb8555f89fb"),
+			ghttp.RespondWith(http.StatusOK, `---`),
+		),
+		ghttp.CombineHandlers(
+			ghttp.VerifyRequest("GET", "/info"),
+			ghttp.RespondWith(http.StatusOK, infoResponseWithURL),
+		),
+		ghttp.CombineHandlers(
+			ghttp.VerifyRequest("POST", "/oauth/token"),
+			ghttp.RespondWith(http.StatusOK, tokenResponse, http.Header{
+				"Content-Type": []string{"application/json"}}),
+		),
+		ghttp.CombineHandlers(
+			ghttp.VerifyRequest("GET", "/deployments/cf-f21eea2dbdb8555f89fb/vms"),
+			ghttp.RespondWith(http.StatusOK, `{}`),
+		),
+	}
+}
+
+func cfopsWithDirectorConfig(generateHTTPHandlers func(string) []http.HandlerFunc) {
 	BeforeEach(func() {
 		os.RemoveAll("/var/vcap/store/shared")
 	})
@@ -60,7 +156,6 @@ var _ = Describe("cfops cmd", func() {
 	})
 	var currentUser *user.User
 	var privateKey string
-	const basicAuthBoshInfo = `{"name":"enaml-bosh","uuid":"31631ff9-ac41-4eba-a944-04c820633e7f","version":"1.3232.2.0 (00000000)","user":null,"cpi":"aws_cpi","user_authentication":{"type":"basic","options":{}},"features":{"dns":{"status":false,"extras":{"domain_name":null}},"compiled_package_cache":{"status":false,"extras":{"provider":null}},"snapshots":{"status":false}}}`
 
 	BeforeEach(func() {
 		currentUser, err = user.Current()
@@ -82,33 +177,8 @@ var _ = Describe("cfops cmd", func() {
 			boshDirectorServer.HTTPTestServer.Listener, err = net.Listen("tcp", "127.0.0.1:25555")
 			Expect(err).NotTo(HaveOccurred())
 			boshDirectorServer.HTTPTestServer.StartTLS()
-			boshDirectorServer.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", "/info"),
-					ghttp.RespondWith(http.StatusOK, basicAuthBoshInfo),
-				),
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", "/info"),
-					ghttp.RespondWith(http.StatusOK, basicAuthBoshInfo),
-				),
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", "/info"),
-					ghttp.RespondWith(http.StatusOK, basicAuthBoshInfo),
-				),
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", "/deployments/cf-f21eea2dbdb8555f89fb"),
-					ghttp.RespondWith(http.StatusOK, `---`),
-				),
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", "/info"),
-					ghttp.RespondWith(http.StatusOK, basicAuthBoshInfo),
-				),
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", "/deployments/cf-f21eea2dbdb8555f89fb/vms"),
-					ghttp.RespondWith(http.StatusOK, `{}`),
-				),
-			)
-
+			directorHandlers := generateHTTPHandlers(boshDirectorServer.URL())
+			boshDirectorServer.AppendHandlers(directorHandlers...)
 			createTestFiles("/var/vcap/store", []string{
 				"shared/cc-resources/09/4d/094dc37299e8d0c68e8e22e8f72a7b1632d26cc3",
 			})
@@ -336,33 +406,8 @@ var _ = Describe("cfops cmd", func() {
 				))
 			opsmanUri, err = url.Parse(opsmanServer.URL())
 			Expect(err).NotTo(HaveOccurred())
-
-			boshDirectorServer.AppendHandlers(
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", "/info"),
-					ghttp.RespondWith(http.StatusOK, basicAuthBoshInfo),
-				),
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", "/info"),
-					ghttp.RespondWith(http.StatusOK, basicAuthBoshInfo),
-				),
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", "/info"),
-					ghttp.RespondWith(http.StatusOK, basicAuthBoshInfo),
-				),
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", "/deployments/cf-f21eea2dbdb8555f89fb"),
-					ghttp.RespondWith(http.StatusOK, `---`),
-				),
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", "/info"),
-					ghttp.RespondWith(http.StatusOK, basicAuthBoshInfo),
-				),
-				ghttp.CombineHandlers(
-					ghttp.VerifyRequest("GET", "/deployments/cf-f21eea2dbdb8555f89fb/vms"),
-					ghttp.RespondWith(http.StatusOK, `{}`),
-				),
-			)
+			directorHandlers := generateHTTPHandlers(boshDirectorServer.URL())
+			boshDirectorServer.AppendHandlers(directorHandlers...)
 
 			createTestFiles("/var/vcap/store", []string{
 				"shared/cc-resources/09/4d/094dc37299e8d0c68e8e22e8f72a7b1632d26cc3",
@@ -476,7 +521,8 @@ var _ = Describe("cfops cmd", func() {
 			})
 		})
 	})
-})
+
+}
 
 func filesInTar(filename string) []string {
 	nfsBackupFile, err := os.Open(filename)
