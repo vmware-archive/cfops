@@ -1,5 +1,5 @@
-hash: eb82b9d2ae38ced738c999295bccd51ea5c213a76abea2d605872c6814d68542
-updated: 2017-04-19T11:58:56.365459506+01:00
+hash: 8cb0624c2f287d2b6ce4e6a1349389b3707047386226ba0cf5e364f45165e85d
+updated: 2017-04-19T13:53:23.172353629+01:00
 imports:
 - name: code.cloudfoundry.org/lager
   version: de8e9c6c6e474e5e3668aea1a9817bdb4ceeceb0
@@ -85,7 +85,7 @@ imports:
 - name: github.com/nu7hatch/gouuid
   version: 179d4d0c4d8d407a32af483c2354df1d2c91e6c3
 - name: github.com/onsi/ginkgo
-  version: 74c678d97c305753605c338c6c78c49ec104b5e7
+  version: 6adbc2648389a46e8ff0e96d07a07a9a9eb432de
   subpackages:
   - config
   - internal/codelocation
@@ -94,15 +94,18 @@ imports:
   - internal/leafnodes
   - internal/remote
   - internal/spec
+  - internal/spec_iterator
   - internal/specrunner
   - internal/suite
   - internal/testingtproxy
   - internal/writer
   - reporters
   - reporters/stenographer
+  - reporters/stenographer/support/go-colorable
+  - reporters/stenographer/support/go-isatty
   - types
 - name: github.com/onsi/gomega
-  version: 9ed8da19f2156b87a803a8fdf6d126f627a12db1
+  version: 9b8c753e8dfb382618ba8fa19b4197b5dcb0434c
   subpackages:
   - format
   - gbytes
