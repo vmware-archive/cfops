@@ -1,5 +1,5 @@
-hash: 8a1ab329d582418edfdc11c04590dfe244a7eabff9f479d38ae39813c01b90af
-updated: 2017-04-20T15:13:55.4338722-04:00
+hash: a461f84be43190eadf67051eb6ade26fcc6eb025f93c2c5c6cc533e3ae979499
+updated: 2017-04-21T12:22:41.009085633-04:00
 imports:
 - name: code.cloudfoundry.org/lager
   version: de8e9c6c6e474e5e3668aea1a9817bdb4ceeceb0
@@ -126,7 +126,7 @@ imports:
 - name: github.com/pivotal-golang/lager
   version: 95b2ada4cdf781bdcf07e5207879e034ac8c5314
 - name: github.com/pivotalservices/cfbackup
-  version: cce0d0d210850b0f773e556540444d3c9acb408e
+  version: a7bbe873db33e281eadcb6aa3949425fd15f41ad
   subpackages:
   - tileregistry
   - tileregistry/fake
@@ -135,7 +135,7 @@ imports:
   - tiles/opsmanager
   - tiles/opsmanager/fakes
 - name: github.com/pivotalservices/gtils
-  version: 809646825d7e4beecbdca7a92839107c6fd2f141
+  version: 92fbb15a9e8347eb7cd60fdb1fd80847ae989f34
   subpackages:
   - command
   - http
