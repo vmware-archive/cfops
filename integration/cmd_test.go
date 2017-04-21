@@ -180,7 +180,6 @@ func uaaAuthDirectorHandlers(directorURL string) []http.HandlerFunc {
 			ghttp.VerifyRequest("GET", "/deployments/cf-f21eea2dbdb8555f89fb/vms"),
 			ghttp.RespondWith(http.StatusOK, ccVmsResponse),
 		),
-
 		ghttp.CombineHandlers(
 			ghttp.VerifyRequest("GET", "/info"),
 			ghttp.RespondWith(http.StatusOK, infoResponse),

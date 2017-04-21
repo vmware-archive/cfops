@@ -20,6 +20,7 @@ import (
 	"github.com/onsi/gomega/gexec"
 	"github.com/pivotalservices/gtils/command"
 	"github.com/pivotalservices/gtils/osutils"
+	errwrap "github.com/pkg/errors"
 )
 
 func pushTestApp(config Config) {
@@ -97,7 +98,7 @@ func remoteExecute(hostInfo HostInfo, remotecommand string) ([]byte, error) {
 	if hostInfo.Password == "" {
 		keySigner, err := ssh.ParsePrivateKey([]byte(hostInfo.SSHKey))
 		if err != nil {
-			return nil, err
+			return nil, errwrap.Wrap(err, "failed parsing private key")
 		}
 
 		authMethod = []ssh.AuthMethod{
@@ -110,23 +111,27 @@ func remoteExecute(hostInfo HostInfo, remotecommand string) ([]byte, error) {
 		}
 	}
 	clientconfig := &ssh.ClientConfig{
-		User: hostInfo.Username,
-		Auth: authMethod,
+		User:            hostInfo.Username,
+		Auth:            authMethod,
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
 	client, err := ssh.Dial("tcp", fmt.Sprintf("%s:%d", hostInfo.Hostname, 22), clientconfig)
 	if err != nil {
-		return nil, err
+		return nil, errwrap.Wrap(err, "failed client dialing server")
 	}
 	defer client.Close()
 	session, err := client.NewSession()
 	if err != nil {
-		return nil, err
+		return nil, errwrap.Wrap(err, "failed client generating new session")
 	}
 	defer session.Close()
 	session.Setenv("LOG_LEVEL", "debug")
 
-	return session.CombinedOutput(remotecommand)
+	resp, err := session.CombinedOutput(remotecommand)
+	if err != nil {
+		return nil, errwrap.Wrap(err, "combinedoutput call failed")
+	}
+	return resp, nil
 }
 
 func deleteTestApp(config Config) {
