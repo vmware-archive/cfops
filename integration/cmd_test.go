@@ -57,8 +57,22 @@ var _ = Describe("cfops cmd", func() {
 	})
 })
 
+const ccVmsResponse = `[
+   {
+      "agent_id":"d4131496-4cdf-4309-907b-e2ce327be029",
+      "cid":"vm-8dfe3b38-6e31-4d9a-aeef-74cbf2143bd8",
+      "job":"cloud_controller-partition-7bc61fd2fa9d654696df",
+      "index":0
+   }
+]`
+
+func getTaskResponseOK(id string) string {
+	return fmt.Sprintf(`{"id": %s, "state": "done", "description":"foobar","result":"send help"}`, id)
+}
+
 func basicAuthDirectorHandlers(directorURL string) []http.HandlerFunc {
 	const infoResponse = `{"name":"enaml-bosh","uuid":"31631ff9-ac41-4eba-a944-04c820633e7f","version":"1.3232.2.0 (00000000)","user":null,"cpi":"aws_cpi","user_authentication":{"type":"basic","options":{}},"features":{"dns":{"status":false,"extras":{"domain_name":null}},"compiled_package_cache":{"status":false,"extras":{"provider":null}},"snapshots":{"status":false}}}`
+
 	return []http.HandlerFunc{
 		ghttp.CombineHandlers(
 			ghttp.VerifyRequest("GET", "/info"),
@@ -82,13 +96,41 @@ func basicAuthDirectorHandlers(directorURL string) []http.HandlerFunc {
 		),
 		ghttp.CombineHandlers(
 			ghttp.VerifyRequest("GET", "/deployments/cf-f21eea2dbdb8555f89fb/vms"),
-			ghttp.RespondWith(http.StatusOK, `{}`),
+			ghttp.RespondWith(http.StatusOK, ccVmsResponse),
+		),
+		ghttp.CombineHandlers(
+			ghttp.VerifyRequest("GET", "/info"),
+			ghttp.RespondWith(http.StatusOK, infoResponse),
+		),
+		ghttp.CombineHandlers(
+			ghttp.VerifyRequest("PUT", "/deployments/cf-f21eea2dbdb8555f89fb/jobs/cloud_controller-partition-7bc61fd2fa9d654696df/0", "state=stopped"),
+			ghttp.RespondWith(http.StatusFound, "", http.Header{"Content-Length": []string{"0"}, "Content-Type": []string{"application/json"}, "Location": []string{"/tasks/2"}}),
+		),
+		ghttp.CombineHandlers(
+			ghttp.VerifyRequest("GET", "/tasks/2"),
+			ghttp.RespondWith(http.StatusOK, getTaskResponseOK("2")),
+		),
+		ghttp.CombineHandlers(
+			ghttp.VerifyRequest("GET", "/tasks/2"),
+			ghttp.RespondWith(http.StatusOK, getTaskResponseOK("2")),
+		),
+		ghttp.CombineHandlers(
+			ghttp.VerifyRequest("PUT", "/deployments/cf-f21eea2dbdb8555f89fb/jobs/cloud_controller-partition-7bc61fd2fa9d654696df/0", "state=started"),
+			ghttp.RespondWith(http.StatusFound, "", http.Header{"Location": []string{"/tasks/3"}}),
+		),
+		ghttp.CombineHandlers(
+			ghttp.VerifyRequest("GET", "/tasks/3"),
+			ghttp.RespondWith(http.StatusOK, getTaskResponseOK("3")),
+		),
+		ghttp.CombineHandlers(
+			ghttp.VerifyRequest("GET", "/tasks/3"),
+			ghttp.RespondWith(http.StatusOK, getTaskResponseOK("3")),
 		),
 	}
 }
 
 func uaaAuthDirectorHandlers(directorURL string) []http.HandlerFunc {
-	const infoResponse = `{"name":"enaml-bosh","uuid":"9604f9ae-70bf-4c13-8d4d-69ff7f7f091b","version":"1.3232.2.0 (00000000)","user":null,"cpi":"aws_cpi","user_authentication":{"type":"uaa","options":{"url":"%s"}},"features":{"dns":{"status":false,"extras":{"domain_name":null}},"compiled_package_cache":{"status":false,"extras":{"provider":null}},"snapshots":{"status":false}}}`
+	infoResponse := fmt.Sprintf(`{"name":"enaml-bosh","uuid":"9604f9ae-70bf-4c13-8d4d-69ff7f7f091b","version":"1.3232.2.0 (00000000)","user":null,"cpi":"aws_cpi","user_authentication":{"type":"uaa","options":{"url":"%s"}},"features":{"dns":{"status":false,"extras":{"domain_name":null}},"compiled_package_cache":{"status":false,"extras":{"provider":null}},"snapshots":{"status":false}}}`, directorURL)
 	const tokenResponse = `{
   "access_token":"abcdef01234567890",
   "token_type":"bearer",
@@ -97,12 +139,11 @@ func uaaAuthDirectorHandlers(directorURL string) []http.HandlerFunc {
   "scope":"opsman.user uaa.admin scim.read opsman.admin scim.write",
   "jti":"foo"
 }`
-	infoResponseWithURL := fmt.Sprintf(infoResponse, directorURL)
 
 	return []http.HandlerFunc{
 		ghttp.CombineHandlers(
 			ghttp.VerifyRequest("GET", "/info"),
-			ghttp.RespondWith(http.StatusOK, infoResponseWithURL),
+			ghttp.RespondWith(http.StatusOK, infoResponse),
 		),
 		ghttp.CombineHandlers(
 			ghttp.VerifyRequest("POST", "/oauth/token"),
@@ -111,11 +152,11 @@ func uaaAuthDirectorHandlers(directorURL string) []http.HandlerFunc {
 		),
 		ghttp.CombineHandlers(
 			ghttp.VerifyRequest("GET", "/info"),
-			ghttp.RespondWith(http.StatusOK, infoResponseWithURL),
+			ghttp.RespondWith(http.StatusOK, infoResponse),
 		),
 		ghttp.CombineHandlers(
 			ghttp.VerifyRequest("GET", "/info"),
-			ghttp.RespondWith(http.StatusOK, infoResponseWithURL),
+			ghttp.RespondWith(http.StatusOK, infoResponse),
 		),
 		ghttp.CombineHandlers(
 			ghttp.VerifyRequest("POST", "/oauth/token"),
@@ -128,7 +169,7 @@ func uaaAuthDirectorHandlers(directorURL string) []http.HandlerFunc {
 		),
 		ghttp.CombineHandlers(
 			ghttp.VerifyRequest("GET", "/info"),
-			ghttp.RespondWith(http.StatusOK, infoResponseWithURL),
+			ghttp.RespondWith(http.StatusOK, infoResponse),
 		),
 		ghttp.CombineHandlers(
 			ghttp.VerifyRequest("POST", "/oauth/token"),
@@ -137,7 +178,41 @@ func uaaAuthDirectorHandlers(directorURL string) []http.HandlerFunc {
 		),
 		ghttp.CombineHandlers(
 			ghttp.VerifyRequest("GET", "/deployments/cf-f21eea2dbdb8555f89fb/vms"),
-			ghttp.RespondWith(http.StatusOK, `{}`),
+			ghttp.RespondWith(http.StatusOK, ccVmsResponse),
+		),
+
+		ghttp.CombineHandlers(
+			ghttp.VerifyRequest("GET", "/info"),
+			ghttp.RespondWith(http.StatusOK, infoResponse),
+		),
+		ghttp.CombineHandlers(
+			ghttp.VerifyRequest("POST", "/oauth/token"),
+			ghttp.RespondWith(http.StatusOK, tokenResponse, http.Header{
+				"Content-Type": []string{"application/json"}}),
+		),
+		ghttp.CombineHandlers(
+			ghttp.VerifyRequest("PUT", "/deployments/cf-f21eea2dbdb8555f89fb/jobs/cloud_controller-partition-7bc61fd2fa9d654696df/0", "state=stopped"),
+			ghttp.RespondWith(http.StatusFound, "", http.Header{"Content-Length": []string{"0"}, "Content-Type": []string{"application/json"}, "Location": []string{"/tasks/2"}}),
+		),
+		ghttp.CombineHandlers(
+			ghttp.VerifyRequest("GET", "/tasks/2"),
+			ghttp.RespondWith(http.StatusOK, getTaskResponseOK("2")),
+		),
+		ghttp.CombineHandlers(
+			ghttp.VerifyRequest("GET", "/tasks/2"),
+			ghttp.RespondWith(http.StatusOK, getTaskResponseOK("2")),
+		),
+		ghttp.CombineHandlers(
+			ghttp.VerifyRequest("PUT", "/deployments/cf-f21eea2dbdb8555f89fb/jobs/cloud_controller-partition-7bc61fd2fa9d654696df/0", "state=started"),
+			ghttp.RespondWith(http.StatusFound, "", http.Header{"Location": []string{"/tasks/3"}}),
+		),
+		ghttp.CombineHandlers(
+			ghttp.VerifyRequest("GET", "/tasks/3"),
+			ghttp.RespondWith(http.StatusOK, getTaskResponseOK("3")),
+		),
+		ghttp.CombineHandlers(
+			ghttp.VerifyRequest("GET", "/tasks/3"),
+			ghttp.RespondWith(http.StatusOK, getTaskResponseOK("3")),
 		),
 	}
 }

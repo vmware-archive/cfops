@@ -1,5 +1,5 @@
-hash: ab40435fc60bc80bd8275b6538f178d6c50ba4c16ea78b0f821ed7305ba99116
-updated: 2017-04-13T17:51:47.845612938-04:00
+hash: 8a1ab329d582418edfdc11c04590dfe244a7eabff9f479d38ae39813c01b90af
+updated: 2017-04-20T15:13:55.4338722-04:00
 imports:
 - name: code.cloudfoundry.org/lager
   version: de8e9c6c6e474e5e3668aea1a9817bdb4ceeceb0
@@ -65,7 +65,7 @@ imports:
 - name: github.com/go-ini/ini
   version: 060d7da055ba6ec5ea7a31f116332fe5efa04ce0
 - name: github.com/golang/protobuf
-  version: 8616e8ee5e20a1704615e6c8d7afcdac06087a67
+  version: 2402d76f3d41f928c7902a765dfc872356dd3aad
   subpackages:
   - proto
 - name: github.com/hashicorp/errwrap
@@ -85,7 +85,7 @@ imports:
 - name: github.com/nu7hatch/gouuid
   version: 179d4d0c4d8d407a32af483c2354df1d2c91e6c3
 - name: github.com/onsi/ginkgo
-  version: 74c678d97c305753605c338c6c78c49ec104b5e7
+  version: 6adbc2648389a46e8ff0e96d07a07a9a9eb432de
   subpackages:
   - config
   - internal/codelocation
@@ -94,15 +94,18 @@ imports:
   - internal/leafnodes
   - internal/remote
   - internal/spec
+  - internal/spec_iterator
   - internal/specrunner
   - internal/suite
   - internal/testingtproxy
   - internal/writer
   - reporters
   - reporters/stenographer
+  - reporters/stenographer/support/go-colorable
+  - reporters/stenographer/support/go-isatty
   - types
 - name: github.com/onsi/gomega
-  version: 9ed8da19f2156b87a803a8fdf6d126f627a12db1
+  version: 9b8c753e8dfb382618ba8fa19b4197b5dcb0434c
   subpackages:
   - format
   - gbytes
@@ -119,11 +122,11 @@ imports:
   - matchers/support/goraph/util
   - types
 - name: github.com/op/go-logging
-  version: 970db520ece77730c7e4724c61121037378659d9
+  version: dfaf3dff9b631bc4236201d90d41ee0de9202889
 - name: github.com/pivotal-golang/lager
-  version: de8e9c6c6e474e5e3668aea1a9817bdb4ceeceb0
+  version: 95b2ada4cdf781bdcf07e5207879e034ac8c5314
 - name: github.com/pivotalservices/cfbackup
-  version: 141cbefa6e51fe6b1739e386ba7be674b8aafd31
+  version: cce0d0d210850b0f773e556540444d3c9acb408e
   subpackages:
   - tileregistry
   - tileregistry/fake
@@ -132,7 +135,7 @@ imports:
   - tiles/opsmanager
   - tiles/opsmanager/fakes
 - name: github.com/pivotalservices/gtils
-  version: 935b450816267597de397b3da4bf3363be2f430c
+  version: 809646825d7e4beecbdca7a92839107c6fd2f141
   subpackages:
   - command
   - http
@@ -144,11 +147,11 @@ imports:
 - name: github.com/pkg/errors
   version: ff09b135c25aae272398c51a07235b90a75aa4f0
 - name: github.com/pkg/sftp
-  version: cb456b384cd3aae0ca1838cd59af8b6bb3363d67
+  version: 8a7343c6ed99a2934aea9c08c923c11df775b6db
 - name: github.com/PuerkitoBio/goquery
   version: e1271ee34c6a305e38566ecd27ae374944907ee9
 - name: github.com/rlmcpherson/s3gof3r
-  version: 864ae0bf7cf2e20c0002b7ea17f4d84fec1abc14
+  version: b574ee38528c51c2c8652b79e71245817c59bd61
 - name: github.com/technoweenie/multipartstreamer
   version: a90a01d73ae432e2611d178c18367fbaa13e0154
 - name: github.com/tedsuo/rata
@@ -160,14 +163,16 @@ imports:
   subpackages:
   - itertools
 - name: github.com/xchapter7x/lo
-  version: e33b245fc7a8186582208abc2458c2691bff681c
+  version: aa2602d0e8e8647f0ce7b53109b37040941915aa
 - name: golang.org/x/crypto
-  version: 1f22c0103821b9390939b6776727195525381532
+  version: 9ef620b9ca2f82b55030ffd4f41327fa9e77a92c
   subpackages:
   - curve25519
+  - ed25519
+  - ed25519/internal/edwards25519
   - ssh
 - name: golang.org/x/net
-  version: 1d9fd3b8333e891c0e7353e1adcfe8a612573033
+  version: d1e1b351919c6738fdeb9893d5c998b161464f0c
   subpackages:
   - context
   - html
@@ -193,7 +198,7 @@ imports:
 - name: gopkg.in/yaml.v1
   version: 9f9df34309c04878acc86042b16630b0f696e1de
 - name: gopkg.in/yaml.v2
-  version: a83829b6f1293c91addabc89d0571c246397bbf4
+  version: cd8b52f8269e0feb286dfeef29f8fe4d5b397e0b
 testImports:
 - name: github.com/pborman/uuid
-  version: 1b00554d822231195d1babd97ff4a781231955c9
+  version: a97ce2ca70fa5a848076093f05e639a89ca34d06
