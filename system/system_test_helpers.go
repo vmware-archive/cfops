@@ -112,6 +112,7 @@ func remoteExecute(hostInfo HostInfo, remotecommand string) ([]byte, error) {
 	clientconfig := &ssh.ClientConfig{
 		User: hostInfo.Username,
 		Auth: authMethod,
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
 	client, err := ssh.Dial("tcp", fmt.Sprintf("%s:%d", hostInfo.Hostname, 22), clientconfig)
 	if err != nil {
