@@ -65,7 +65,10 @@ const ccVmsResponse = `[
       "index":0
    }
 ]`
-const taskResponseOK = `{"id": 2, "state": "done", "description":"foobar","result":"send help"}`
+
+func getTaskResponseOK(id string) string {
+	return fmt.Sprintf(`{"id": %s, "state": "done", "description":"foobar","result":"send help"}`, id)
+}
 
 func basicAuthDirectorHandlers(directorURL string) []http.HandlerFunc {
 	const infoResponse = `{"name":"enaml-bosh","uuid":"31631ff9-ac41-4eba-a944-04c820633e7f","version":"1.3232.2.0 (00000000)","user":null,"cpi":"aws_cpi","user_authentication":{"type":"basic","options":{}},"features":{"dns":{"status":false,"extras":{"domain_name":null}},"compiled_package_cache":{"status":false,"extras":{"provider":null}},"snapshots":{"status":false}}}`
@@ -105,7 +108,11 @@ func basicAuthDirectorHandlers(directorURL string) []http.HandlerFunc {
 		),
 		ghttp.CombineHandlers(
 			ghttp.VerifyRequest("GET", "/tasks/2"),
-			ghttp.RespondWith(http.StatusOK, taskResponseOK),
+			ghttp.RespondWith(http.StatusOK, getTaskResponseOK("2")),
+		),
+		ghttp.CombineHandlers(
+			ghttp.VerifyRequest("GET", "/tasks/2"),
+			ghttp.RespondWith(http.StatusOK, getTaskResponseOK("2")),
 		),
 		ghttp.CombineHandlers(
 			ghttp.VerifyRequest("PUT", "/deployments/cf-f21eea2dbdb8555f89fb/jobs/cloud_controller-partition-7bc61fd2fa9d654696df/0", "state=started"),
@@ -113,7 +120,11 @@ func basicAuthDirectorHandlers(directorURL string) []http.HandlerFunc {
 		),
 		ghttp.CombineHandlers(
 			ghttp.VerifyRequest("GET", "/tasks/3"),
-			ghttp.RespondWith(http.StatusOK, taskResponseOK),
+			ghttp.RespondWith(http.StatusOK, getTaskResponseOK("3")),
+		),
+		ghttp.CombineHandlers(
+			ghttp.VerifyRequest("GET", "/tasks/3"),
+			ghttp.RespondWith(http.StatusOK, getTaskResponseOK("3")),
 		),
 	}
 }
@@ -185,7 +196,11 @@ func uaaAuthDirectorHandlers(directorURL string) []http.HandlerFunc {
 		),
 		ghttp.CombineHandlers(
 			ghttp.VerifyRequest("GET", "/tasks/2"),
-			ghttp.RespondWith(http.StatusOK, taskResponseOK),
+			ghttp.RespondWith(http.StatusOK, getTaskResponseOK("2")),
+		),
+		ghttp.CombineHandlers(
+			ghttp.VerifyRequest("GET", "/tasks/2"),
+			ghttp.RespondWith(http.StatusOK, getTaskResponseOK("2")),
 		),
 		ghttp.CombineHandlers(
 			ghttp.VerifyRequest("PUT", "/deployments/cf-f21eea2dbdb8555f89fb/jobs/cloud_controller-partition-7bc61fd2fa9d654696df/0", "state=started"),
@@ -193,7 +208,11 @@ func uaaAuthDirectorHandlers(directorURL string) []http.HandlerFunc {
 		),
 		ghttp.CombineHandlers(
 			ghttp.VerifyRequest("GET", "/tasks/3"),
-			ghttp.RespondWith(http.StatusOK, taskResponseOK),
+			ghttp.RespondWith(http.StatusOK, getTaskResponseOK("3")),
+		),
+		ghttp.CombineHandlers(
+			ghttp.VerifyRequest("GET", "/tasks/3"),
+			ghttp.RespondWith(http.StatusOK, getTaskResponseOK("3")),
 		),
 	}
 }
