@@ -129,7 +129,7 @@ func remoteExecute(hostInfo HostInfo, remotecommand string) ([]byte, error) {
 
 	resp, err := session.CombinedOutput(remotecommand)
 	if err != nil {
-		return nil, errwrap.Wrap(err, "combinedoutput call failed")
+		return resp, errwrap.Wrap(err, "combinedoutput call failed")
 	}
 	return resp, nil
 }
