@@ -3,13 +3,10 @@ package system
 import (
 	"strings"
 
-	"time"
-
 	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gbytes"
-	"github.com/onsi/gomega/gexec"
 	"github.com/pborman/uuid"
 )
 
@@ -69,19 +66,10 @@ var _ = Describe("CFOps Elastic Runtime plugin", func() {
 		Expect(err).NotTo(HaveOccurred())
 
 		By("Backing up ERT...")
-		stopCheckingAPIGoesDown, apiWasDown := CheckApiGoesDown()
-
 		output, err := remoteExecute(cfConfig.OMHostInfo, backupCmd)
 		GinkgoWriter.Write(output)
 		Expect(err).NotTo(HaveOccurred())
 		checkNoSecretsInSession(output)
-
-		By("ensuring CC API goes down")
-		stopCheckingAPIGoesDown <- true
-		Expect(<-apiWasDown).To(BeTrue(), "CC API did not go down while backing up")
-		By("ensuring CC API comes back up")
-		Expect(cf.Cf("orgs")).To(gexec.Exit(0), "CC API did not come back up")
-
 		deleteTestApp(cfConfig)
 
 		By("Restoring ERT...")
@@ -94,27 +82,3 @@ var _ = Describe("CFOps Elastic Runtime plugin", func() {
 		Eventually(cf.Cf("apps")).Should(gbytes.Say(cfConfig.AppName))
 	})
 })
-
-func CheckApiGoesDown() (chan<- bool, <-chan bool) {
-	doneChannel := make(chan bool)
-	valueApiWasDown := make(chan bool)
-	ticker := time.NewTicker(1 * time.Second)
-	tickerChannel := ticker.C
-	go func() {
-		var apiWasDown bool
-		defer GinkgoRecover()
-		for {
-			select {
-			case <-doneChannel:
-				valueApiWasDown <- apiWasDown
-				return
-			case <-tickerChannel:
-				if cf.Cf("orgs").ExitCode() == 1 {
-					apiWasDown = true
-					ticker.Stop()
-				}
-			}
-		}
-	}()
-	return doneChannel, valueApiWasDown
-}
