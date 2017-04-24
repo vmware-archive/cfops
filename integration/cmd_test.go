@@ -87,14 +87,6 @@ func basicAuthDirectorHandlers(directorURL string) []http.HandlerFunc {
 			ghttp.RespondWith(http.StatusOK, infoResponse),
 		),
 		ghttp.CombineHandlers(
-			ghttp.VerifyRequest("GET", "/deployments/cf-f21eea2dbdb8555f89fb"),
-			ghttp.RespondWith(http.StatusOK, `---`),
-		),
-		ghttp.CombineHandlers(
-			ghttp.VerifyRequest("GET", "/info"),
-			ghttp.RespondWith(http.StatusOK, infoResponse),
-		),
-		ghttp.CombineHandlers(
 			ghttp.VerifyRequest("GET", "/deployments/cf-f21eea2dbdb8555f89fb/vms"),
 			ghttp.RespondWith(http.StatusOK, ccVmsResponse),
 		),
@@ -104,6 +96,7 @@ func basicAuthDirectorHandlers(directorURL string) []http.HandlerFunc {
 		),
 		ghttp.CombineHandlers(
 			ghttp.VerifyRequest("PUT", "/deployments/cf-f21eea2dbdb8555f89fb/jobs/cloud_controller-partition-7bc61fd2fa9d654696df/0", "state=stopped"),
+			ghttp.VerifyBody([]byte(``)),
 			ghttp.RespondWith(http.StatusFound, "", http.Header{"Content-Length": []string{"0"}, "Content-Type": []string{"application/json"}, "Location": []string{"/tasks/2"}}),
 		),
 		ghttp.CombineHandlers(
@@ -116,6 +109,7 @@ func basicAuthDirectorHandlers(directorURL string) []http.HandlerFunc {
 		),
 		ghttp.CombineHandlers(
 			ghttp.VerifyRequest("PUT", "/deployments/cf-f21eea2dbdb8555f89fb/jobs/cloud_controller-partition-7bc61fd2fa9d654696df/0", "state=started"),
+			ghttp.VerifyBody([]byte(``)),
 			ghttp.RespondWith(http.StatusFound, "", http.Header{"Location": []string{"/tasks/3"}}),
 		),
 		ghttp.CombineHandlers(
@@ -164,19 +158,6 @@ func uaaAuthDirectorHandlers(directorURL string) []http.HandlerFunc {
 				"Content-Type": []string{"application/json"}}),
 		),
 		ghttp.CombineHandlers(
-			ghttp.VerifyRequest("GET", "/deployments/cf-f21eea2dbdb8555f89fb"),
-			ghttp.RespondWith(http.StatusOK, `---`),
-		),
-		ghttp.CombineHandlers(
-			ghttp.VerifyRequest("GET", "/info"),
-			ghttp.RespondWith(http.StatusOK, infoResponse),
-		),
-		ghttp.CombineHandlers(
-			ghttp.VerifyRequest("POST", "/oauth/token"),
-			ghttp.RespondWith(http.StatusOK, tokenResponse, http.Header{
-				"Content-Type": []string{"application/json"}}),
-		),
-		ghttp.CombineHandlers(
 			ghttp.VerifyRequest("GET", "/deployments/cf-f21eea2dbdb8555f89fb/vms"),
 			ghttp.RespondWith(http.StatusOK, ccVmsResponse),
 		),
@@ -191,6 +172,7 @@ func uaaAuthDirectorHandlers(directorURL string) []http.HandlerFunc {
 		),
 		ghttp.CombineHandlers(
 			ghttp.VerifyRequest("PUT", "/deployments/cf-f21eea2dbdb8555f89fb/jobs/cloud_controller-partition-7bc61fd2fa9d654696df/0", "state=stopped"),
+			ghttp.VerifyBody([]byte(``)),
 			ghttp.RespondWith(http.StatusFound, "", http.Header{"Content-Length": []string{"0"}, "Content-Type": []string{"application/json"}, "Location": []string{"/tasks/2"}}),
 		),
 		ghttp.CombineHandlers(
@@ -203,6 +185,7 @@ func uaaAuthDirectorHandlers(directorURL string) []http.HandlerFunc {
 		),
 		ghttp.CombineHandlers(
 			ghttp.VerifyRequest("PUT", "/deployments/cf-f21eea2dbdb8555f89fb/jobs/cloud_controller-partition-7bc61fd2fa9d654696df/0", "state=started"),
+			ghttp.VerifyBody([]byte(``)),
 			ghttp.RespondWith(http.StatusFound, "", http.Header{"Location": []string{"/tasks/3"}}),
 		),
 		ghttp.CombineHandlers(
