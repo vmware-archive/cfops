@@ -77,6 +77,13 @@ $ ./testrunner
 ```
 * At this point you have everything needed for local development, hack away and submit a [pull request](https://help.github.com/articles/using-pull-requests/) to the `develop` branch
 
+### Version 3+ notes:
+- v3.1.x introduces a breaking behavior compared to prior v3.x releases. In 3.1+
+  in the absense of any CC-Vms or if they are unable to be shutdown, cfops will
+  return an error and exit immediately.
+  - Prior to 3.1 cfops will continue regardless of if it was successful in
+    shutting down the cc-vms
+
 
 ### Differences between v1 and v2
 
