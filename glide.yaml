@@ -4,7 +4,7 @@ import:
 - package: github.com/codegangsta/cli
 - package: github.com/hashicorp/go-plugin
 - package: github.com/pivotalservices/cfbackup
-  version: v0.1.156
+  version: v0.1.157
   subpackages:
   - tiles
   - tiles/opsmanager
@@ -16,6 +16,7 @@ import:
   version: 9b8c753e8dfb382618ba8fa19b4197b5dcb0434c
 - package: github.com/nu7hatch/gouuid
 - package: github.com/golang/protobuf
+  version: master
   subpackages:
   - proto
 - package: gopkg.in/yaml.v2
