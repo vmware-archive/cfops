@@ -12,7 +12,7 @@ source /etc/profile.d/path.sh
 export GOPATH="/var/tmp/"
 
 #Get the source code
-go get github.com/pivotalservices/cfops
+go get github.com/pivotalservices/cfops || true
 
 #Install Glide
 export GOBIN="/usr/local/go/bin"
