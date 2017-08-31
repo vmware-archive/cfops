@@ -108,6 +108,10 @@ func basicAuthDirectorHandlers(directorURL string) []http.HandlerFunc {
 			ghttp.RespondWith(http.StatusOK, getTaskResponseOK("2")),
 		),
 		ghttp.CombineHandlers(
+			ghttp.VerifyRequest("GET", "/info"),
+			ghttp.RespondWith(http.StatusOK, infoResponse),
+		),
+		ghttp.CombineHandlers(
 			ghttp.VerifyRequest("PUT", "/deployments/cf-f21eea2dbdb8555f89fb/jobs/cloud_controller-partition-7bc61fd2fa9d654696df/0", "state=started"),
 			ghttp.VerifyBody([]byte(``)),
 			ghttp.RespondWith(http.StatusFound, "", http.Header{"Location": []string{"/tasks/3"}}),
@@ -182,6 +186,15 @@ func uaaAuthDirectorHandlers(directorURL string) []http.HandlerFunc {
 		ghttp.CombineHandlers(
 			ghttp.VerifyRequest("GET", "/tasks/2"),
 			ghttp.RespondWith(http.StatusOK, getTaskResponseOK("2")),
+		),
+		ghttp.CombineHandlers(
+			ghttp.VerifyRequest("GET", "/info"),
+			ghttp.RespondWith(http.StatusOK, infoResponse),
+		),
+		ghttp.CombineHandlers(
+			ghttp.VerifyRequest("POST", "/oauth/token"),
+			ghttp.RespondWith(http.StatusOK, tokenResponse, http.Header{
+				"Content-Type": []string{"application/json"}}),
 		),
 		ghttp.CombineHandlers(
 			ghttp.VerifyRequest("PUT", "/deployments/cf-f21eea2dbdb8555f89fb/jobs/cloud_controller-partition-7bc61fd2fa9d654696df/0", "state=started"),
