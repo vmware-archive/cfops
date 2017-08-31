@@ -1,5 +1,5 @@
-hash: 2cfecbde9c62762b13545f7a9a9cc1dc036b46d28b16bee2f3e2301238c1b1cc
-updated: 2017-08-18T14:44:19.243796453+01:00
+hash: c090cf39c725222667100156d17a60b27375e8b63b31bba59990e9fea0325f2e
+updated: 2017-08-31T10:25:03.126941534+01:00
 imports:
 - name: code.cloudfoundry.org/lager
   version: 0bfa98e49e7a976af91e918d47978f07c00b081f
@@ -68,7 +68,7 @@ imports:
 - name: github.com/go-ini/ini
   version: c787282c39ac1fc618827141a1f762240def08a3
 - name: github.com/golang/protobuf
-  version: 748d386b5c1ea99658fd69fe9f03991ce86a90c1
+  version: 83cd65fc365ace80eb6b6ecfc45203e43edfbc70
   subpackages:
   - proto
   - ptypes
@@ -139,7 +139,7 @@ imports:
 - name: github.com/pivotal-golang/lager
   version: 95b2ada4cdf781bdcf07e5207879e034ac8c5314
 - name: github.com/pivotalservices/cfbackup
-  version: d3b60df434d41fcd3eaab2ce918aa625161f1184
+  version: db53f4188a97a8c7436ee5e98f31dd32d6d05458
   subpackages:
   - tileregistry
   - tileregistry/fake
