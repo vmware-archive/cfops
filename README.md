@@ -13,7 +13,7 @@ Supports PivotalCF on:
       - elastic-runtime
          - postgres datastore (backup/restore `verified`)
          - mysql datastore (backup/restore `verified`)
-         - external datastore (backup/restore `no yet supported`)
+         - external datastore (backup/restore `not yet supported`)
    - **AWS**
       - ops-manager (backup `verified`)
       - elastic-runtime (`not yet supported`)
